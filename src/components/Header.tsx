@@ -2,8 +2,8 @@ import React from 'react';
 import { TestSettings } from '../types';
 
 interface HeaderProps {
-  currentTab: 'tests' | 'learn';
-  onSelectTab: (tab: 'tests' | 'learn') => void;
+  currentTab: 'tests' | 'learn' | 'book';
+  onSelectTab: (tab: 'tests' | 'learn' | 'book') => void;
   onOpenRules: () => void;
   onOpenHistory: () => void;
   settings: TestSettings;
@@ -38,6 +38,18 @@ export const Header: React.FC<HeaderProps> = ({
               <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
             </svg>
             Mock Tests
+          </button>
+
+          <button
+            className={`nav-btn ${currentTab === 'book' ? 'active' : ''}`}
+            onClick={() => onSelectTab('book')}
+          >
+            <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M4 19.5A2.5 2.5 0 016.5 17H20" />
+              <path strokeLinecap="round" strokeLinejoin="round" d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z" />
+              <path strokeLinecap="round" strokeLinejoin="round" d="M8 7h6M8 11h6" />
+            </svg>
+            Book (MS Word)
           </button>
 
           <button
