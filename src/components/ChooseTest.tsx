@@ -277,7 +277,7 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
                 checked={settings.highlightEnabled}
                 onChange={(e) => onUpdateSettings({ highlightEnabled: e.target.checked })}
               />
-              Highlight Current Word
+              Highlight Words (Disabled in Official Exam)
             </label>
 
             <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '0.9rem' }}>

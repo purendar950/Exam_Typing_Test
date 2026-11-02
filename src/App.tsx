@@ -11,7 +11,7 @@ import { HistoryModal } from './components/HistoryModal';
 import { audioEngine } from './utils/audioEngine';
 
 const DEFAULT_SETTINGS: TestSettings = {
-  highlightEnabled: true,
+  highlightEnabled: false,
   autoScroll: true,
   soundEnabled: true,
   backspaceEnabled: true,
@@ -31,7 +31,11 @@ export const App: React.FC = () => {
   const [settings, setSettings] = useState<TestSettings>(() => {
     try {
       const saved = localStorage.getItem('up_typing_settings');
-      return saved ? { ...DEFAULT_SETTINGS, ...JSON.parse(saved) } : DEFAULT_SETTINGS;
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        return { ...DEFAULT_SETTINGS, ...parsed, highlightEnabled: parsed.highlightEnabled ?? false };
+      }
+      return DEFAULT_SETTINGS;
     } catch {
       return DEFAULT_SETTINGS;
     }
@@ -163,6 +167,7 @@ export const App: React.FC = () => {
             passage={selectedPassage}
             durationMinutes={selectedDurationMinutes}
             settings={settings}
+            onUpdateSettings={handleUpdateSettings}
             onFinishTest={handleFinishTest}
             onCancelTest={() => setCurrentView('choose')}
           />

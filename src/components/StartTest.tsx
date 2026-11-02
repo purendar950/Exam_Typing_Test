@@ -8,6 +8,7 @@ interface StartTestProps {
   passage: Passage;
   durationMinutes: number;
   settings: TestSettings;
+  onUpdateSettings?: (newSettings: Partial<TestSettings>) => void;
   onFinishTest: (result: EvaluationResult) => void;
   onCancelTest: () => void;
 }
@@ -16,6 +17,7 @@ export const StartTest: React.FC<StartTestProps> = ({
   passage,
   durationMinutes,
   settings,
+  onUpdateSettings,
   onFinishTest,
   onCancelTest
 }) => {
@@ -250,6 +252,13 @@ export const StartTest: React.FC<StartTestProps> = ({
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
           <button
+            onClick={() => onUpdateSettings?.({ highlightEnabled: !settings.highlightEnabled })}
+            className={`btn btn-sm ${settings.highlightEnabled ? 'btn-primary' : 'btn-secondary'}`}
+            title="Toggle word highlights (Disabled by default in UP Police exam)"
+          >
+            {settings.highlightEnabled ? '✨ Highlights: ON' : 'Highlights: OFF'}
+          </button>
+          <button
             onClick={() => setShowVirtualKeyboard(!showVirtualKeyboard)}
             className="btn btn-secondary btn-sm"
             title="Toggle On-Screen Keyboard"
@@ -314,12 +323,14 @@ export const StartTest: React.FC<StartTestProps> = ({
               key={idx}
               ref={isCurrent ? activeWordRef : null}
               className={`passage-word ${
-                isCurrent && settings.highlightEnabled
-                  ? 'active'
-                  : isCorrect
-                  ? 'completed-correct'
-                  : isWrong
-                  ? 'completed-wrong'
+                settings.highlightEnabled
+                  ? isCurrent
+                    ? 'active'
+                    : isCorrect
+                    ? 'completed-correct'
+                    : isWrong
+                    ? 'completed-wrong'
+                    : ''
                   : ''
               }`}
             >
