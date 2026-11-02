@@ -10,6 +10,7 @@ import { WordDocumentScreen } from './components/WordDocumentScreen';
 import { RulesModal } from './components/RulesModal';
 import { HistoryModal } from './components/HistoryModal';
 import { HindiHelperModal } from './components/HindiHelperModal';
+import { PwaInstallPrompt } from './components/PwaInstallPrompt';
 import { audioEngine } from './utils/audioEngine';
 
 const DEFAULT_SETTINGS: TestSettings = {
@@ -118,23 +119,25 @@ export const App: React.FC = () => {
     }
   };
 
-  // Practice mistyped words drill
+  // Practice mistyped words 2-minute booster drill
   const handlePracticeWrongWords = (words: string[]) => {
     if (words.length === 0) return;
-    const drillText = Array(4).fill(words.join(' ')).join(' ');
+    // Repeat words naturally to create ~80-100 word 2-minute booster drill
+    const repeats = Math.max(3, Math.ceil(80 / words.length));
+    const drillText = Array(repeats).fill(words.join(' ')).join(' ');
     const drillPassage: Passage = {
       id: `drill-${Date.now()}`,
-      title: `Focused Drill: ${words.slice(0, 3).join(', ')}...`,
+      title: `🎯 2-Min Weak Keys & Mistakes Drill (${words.slice(0, 3).join(', ')}...)`,
       language: selectedPassage.language,
       category: selectedPassage.category,
-      duration: 5,
+      duration: 2,
       wordCount: drillText.split(/\s+/).length,
-      difficulty: 'medium',
+      difficulty: 'hard',
       date: new Date().toISOString().split('T')[0],
       text: drillText
     };
     setSelectedPassage(drillPassage);
-    setSelectedDurationMinutes(5);
+    setSelectedDurationMinutes(2);
     setCurrentView('test');
   };
 
@@ -248,6 +251,8 @@ export const App: React.FC = () => {
         onClose={() => setIsHindiHelperOpen(false)}
         defaultLayout={selectedPassage?.language === 'hindi_kruti' ? 'kruti' : 'mangal'}
       />
+
+      <PwaInstallPrompt />
     </div>
   );
 };

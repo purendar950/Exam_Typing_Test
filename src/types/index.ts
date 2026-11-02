@@ -53,10 +53,18 @@ export interface EvaluationResult {
     achievedAccuracy: number;
   };
   wrongWordsList: string[];
+  weakKeys?: WeakKeyStat[];
   diffHtml: string;
   originalText: string;
   typedText: string;
   timestamp: string;
+}
+
+export interface WeakKeyStat {
+  character: string;
+  mistakeCount: number;
+  fingerHint?: string;
+  keyCombo?: string;
 }
 
 export interface DiffToken {

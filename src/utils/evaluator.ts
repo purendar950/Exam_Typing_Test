@@ -1,5 +1,5 @@
-import { EvaluationResult, Language, ExamCategory } from '../types';
-import { normalizeHindiText } from './hindiEngine';
+import { EvaluationResult, Language, ExamCategory, WeakKeyStat } from '../types';
+import { normalizeHindiText, MANGAL_INSCRIPT_KEYS, KRUTI_DEV_KEYS } from './hindiEngine';
 
 export interface EvaluateInput {
   testId: string;
@@ -11,6 +11,80 @@ export interface EvaluateInput {
   timeAllowedMinutes: number;
   timeTakenSeconds: number;
   backspaceCount: number;
+}
+
+function extractWeakKeys(wrongWords: string[], language: Language): WeakKeyStat[] {
+  const charErrorCounts: Record<string, number> = {};
+
+  wrongWords.forEach((word) => {
+    // Check known special conjuncts first
+    const knownConjuncts = ['क्ष', 'त्र', 'ज्ञ', 'श्र', 'द्व', 'द्य', 'द्ध', 'त्त', 'क्त', 'ष्ट', 'ह्न', 'हृ'];
+    let remaining = word;
+    for (const conj of knownConjuncts) {
+      if (remaining.includes(conj)) {
+        charErrorCounts[conj] = (charErrorCounts[conj] || 0) + 1;
+        remaining = remaining.split(conj).join('');
+      }
+    }
+
+    // Process remaining characters
+    for (const ch of remaining) {
+      if (ch === ' ' || ch === '\t' || ch === '\n') continue;
+      charErrorCounts[ch] = (charErrorCounts[ch] || 0) + 1;
+    }
+  });
+
+  const sortedChars = Object.entries(charErrorCounts)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 8);
+
+  const keyMap = language === 'hindi_kruti' ? KRUTI_DEV_KEYS : MANGAL_INSCRIPT_KEYS;
+
+  return sortedChars.map(([ch, count]) => {
+    let keyCombo = '';
+    let fingerHint = '';
+
+    if (language.startsWith('hindi')) {
+      for (const item of Object.values(keyMap)) {
+        if (item.shift === ch) {
+          keyCombo = `Shift + ${item.enShift}`;
+          fingerHint = item.finger.replace('-', ' ').replace(/\b\w/g, (l) => l.toUpperCase());
+          break;
+        } else if (item.normal === ch) {
+          keyCombo = item.enNormal;
+          fingerHint = item.finger.replace('-', ' ').replace(/\b\w/g, (l) => l.toUpperCase());
+          break;
+        }
+      }
+
+      if (ch === 'क्ष') {
+        keyCombo = language === 'hindi_kruti' ? 'Shift + K' : 'Shift + 7';
+        fingerHint = 'Right Index';
+      } else if (ch === 'त्र') {
+        keyCombo = language === 'hindi_kruti' ? 'Shift + 1' : 'Shift + 6';
+        fingerHint = 'Right Index';
+      } else if (ch === 'ज्ञ') {
+        keyCombo = language === 'hindi_kruti' ? 'Shift + K' : 'Shift + 5';
+        fingerHint = 'Left Index';
+      } else if (ch === 'श्र') {
+        keyCombo = language === 'hindi_kruti' ? 'Shift + Z' : 'Shift + 8';
+        fingerHint = 'Right Middle';
+      } else if (ch === '।') {
+        keyCombo = 'Shift + .';
+        fingerHint = 'Right Ring';
+      }
+    } else {
+      keyCombo = ch;
+      fingerHint = 'Touch Typing';
+    }
+
+    return {
+      character: ch,
+      mistakeCount: count,
+      keyCombo,
+      fingerHint
+    };
+  });
 }
 
 export function evaluateTypingTest(input: EvaluateInput): EvaluationResult {
@@ -119,6 +193,7 @@ export function evaluateTypingTest(input: EvaluateInput): EvaluationResult {
       achievedAccuracy: accuracy
     },
     wrongWordsList: Array.from(new Set(wrongWordsList)),
+    weakKeys: extractWeakKeys(wrongWordsList, input.language),
     diffHtml: diffParts.join(' '),
     originalText: input.originalText,
     typedText: input.typedText,

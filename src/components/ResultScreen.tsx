@@ -217,35 +217,128 @@ export const ResultScreen: React.FC<ResultScreenProps> = ({
         </div>
       </div>
 
-      {/* Mistyped Words Practice CTA */}
-      {result.wrongWordsList.length > 0 && (
+      {/* Weak Keys & Error Diagnostic Section */}
+      {result.weakKeys && result.weakKeys.length > 0 && (
         <div
           className="card"
           style={{
             marginBottom: '28px',
-            background: '#eff6ff',
-            borderColor: '#bfdbfe',
-            display: 'flex',
-            flexWrap: 'wrap',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            gap: '16px'
+            background: 'linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%)',
+            borderColor: '#fde68a',
+            borderWidth: '2px'
           }}
         >
-          <div>
-            <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: 'var(--primary-dark)', marginBottom: '4px' }}>
-              Practice Your {result.wrongWordsList.length} Mistyped Words
-            </h3>
-            <p style={{ color: '#1e40af', fontSize: '0.875rem' }}>
-              Focus on the exact words where errors occurred to rapidly eliminate mistakes before your official exam.
-            </p>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px', marginBottom: '14px' }}>
+            <div>
+              <h3 style={{ fontSize: '1.2rem', fontWeight: 800, color: '#92400e', margin: 0 }}>
+                🔍 Weak Keys & Error Heatmap (कमजोर बटन विश्लेषण)
+              </h3>
+              <p style={{ margin: '4px 0 0', fontSize: '0.85rem', color: '#b45309' }}>
+                You made the most errors on these specific characters. Review their finger placements and key combinations:
+              </p>
+            </div>
+            <span style={{ background: '#f59e0b', color: '#ffffff', padding: '4px 10px', borderRadius: '12px', fontSize: '0.78rem', fontWeight: 700 }}>
+              {result.weakKeys.length} Weak Keys Identified
+            </span>
           </div>
-          <button
-            onClick={() => onPracticeWrongWords(result.wrongWordsList)}
-            className="btn btn-primary"
+
+          {/* Weak Key Chips */}
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fill, minmax(170px, 1fr))',
+              gap: '10px',
+              marginBottom: '16px'
+            }}
           >
-            Launch Targeted Drill
-          </button>
+            {result.weakKeys.map((item, idx) => (
+              <div
+                key={idx}
+                style={{
+                  background: '#ffffff',
+                  border: '1.5px solid #fcd34d',
+                  borderRadius: '8px',
+                  padding: '10px 12px',
+                  boxShadow: '0 2px 4px rgba(0,0,0,0.04)',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '4px'
+                }}
+              >
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span style={{ fontSize: '1.5rem', fontWeight: 800, color: '#b45309' }}>
+                    {item.character}
+                  </span>
+                  <span
+                    style={{
+                      background: '#fee2e2',
+                      color: '#dc2626',
+                      padding: '2px 8px',
+                      borderRadius: '10px',
+                      fontSize: '0.75rem',
+                      fontWeight: 700
+                    }}
+                  >
+                    {item.mistakeCount} {item.mistakeCount === 1 ? 'error' : 'errors'}
+                  </span>
+                </div>
+                {item.keyCombo && (
+                  <div style={{ fontSize: '0.8rem', fontWeight: 700, color: '#0369a1' }}>
+                    Keys: <code>{item.keyCombo}</code>
+                  </div>
+                )}
+                {item.fingerHint && (
+                  <div style={{ fontSize: '0.75rem', color: '#64748b' }}>
+                    Finger: <strong>{item.fingerHint}</strong>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+
+          {/* Launch 2-Minute Booster Drill */}
+          <div
+            style={{
+              background: '#ffffff',
+              borderRadius: '8px',
+              padding: '14px 18px',
+              border: '1px solid #fef08a',
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              flexWrap: 'wrap',
+              gap: '12px'
+            }}
+          >
+            <div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <span style={{ fontSize: '1.2rem' }}>⚡</span>
+                <strong style={{ fontSize: '0.98rem', color: '#1e3a8a' }}>
+                  Re-Test My Mistakes (2-Minute Booster Drill)
+                </strong>
+                <span style={{ background: '#dbeafe', color: '#1e40af', padding: '2px 8px', borderRadius: '4px', fontSize: '0.75rem', fontWeight: 700 }}>
+                  ⏱️ 2 Mins
+                </span>
+              </div>
+              <p style={{ margin: '4px 0 0', fontSize: '0.82rem', color: '#64748b' }}>
+                Practice only your {result.wrongWordsList.length} mistyped words and weak characters to rapidly achieve 85%+ accuracy.
+              </p>
+            </div>
+
+            <button
+              onClick={() => onPracticeWrongWords(result.wrongWordsList)}
+              className="btn btn-primary"
+              style={{
+                background: 'linear-gradient(135deg, #0284c7 0%, #0369a1 100%)',
+                fontWeight: 800,
+                padding: '10px 22px',
+                fontSize: '0.95rem',
+                boxShadow: '0 4px 12px rgba(2, 132, 199, 0.3)'
+              }}
+            >
+              🎯 Start 2-Minute Mistakes Drill
+            </button>
+          </div>
         </div>
       )}
 
