@@ -6,6 +6,7 @@ import { ChooseTest } from './components/ChooseTest';
 import { StartTest } from './components/StartTest';
 import { ResultScreen } from './components/ResultScreen';
 import { LearnScreen } from './components/LearnScreen';
+import { WordDocumentScreen } from './components/WordDocumentScreen';
 import { RulesModal } from './components/RulesModal';
 import { HistoryModal } from './components/HistoryModal';
 import { audioEngine } from './utils/audioEngine';
@@ -22,8 +23,8 @@ const DEFAULT_SETTINGS: TestSettings = {
 };
 
 export const App: React.FC = () => {
-  const [currentView, setCurrentView] = useState<'choose' | 'test' | 'result' | 'learn'>('choose');
-  const [activeTab, setActiveTab] = useState<'tests' | 'learn'>('tests');
+  const [currentView, setCurrentView] = useState<'choose' | 'test' | 'result' | 'learn' | 'book'>('choose');
+  const [activeTab, setActiveTab] = useState<'tests' | 'learn' | 'book'>('tests');
   const [selectedPassage, setSelectedPassage] = useState<Passage>(PASSAGES[0]);
   const [selectedDurationMinutes, setSelectedDurationMinutes] = useState<number>(15);
   const [currentResult, setCurrentResult] = useState<EvaluationResult | null>(null);
@@ -144,6 +145,8 @@ export const App: React.FC = () => {
           setActiveTab(tab);
           if (tab === 'learn') {
             setCurrentView('learn');
+          } else if (tab === 'book') {
+            setCurrentView('book');
           } else {
             setCurrentView('choose');
           }
@@ -154,7 +157,7 @@ export const App: React.FC = () => {
         onToggleSound={toggleSound}
       />
 
-      <main style={{ flex: 1 }}>
+      <main style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
         {currentView === 'choose' && (
           <ChooseTest
             passages={PASSAGES}
@@ -187,24 +190,35 @@ export const App: React.FC = () => {
         {currentView === 'learn' && (
           <LearnScreen onBackToTests={() => setCurrentView('choose')} />
         )}
+
+        {currentView === 'book' && (
+          <WordDocumentScreen
+            onBackToTests={() => {
+              setActiveTab('tests');
+              setCurrentView('choose');
+            }}
+          />
+        )}
       </main>
 
-      <footer
-        style={{
-          background: '#ffffff',
-          borderTop: '1px solid var(--border-color)',
-          padding: '20px 0',
-          textAlign: 'center',
-          color: 'var(--text-muted)',
-          fontSize: '0.85rem'
-        }}
-      >
-        <div className="container">
-          <p>
-            <strong>Uttar Pradesh Police & UPSSSC Computer Operator Typing Mentor</strong> &bull; Based on UPPRPB Official Standards (Hindi 25 WPM Mangal/Kruti, English 30 WPM, 85% Accuracy).
-          </p>
-        </div>
-      </footer>
+      {currentView !== 'book' && (
+        <footer
+          style={{
+            background: '#ffffff',
+            borderTop: '1px solid var(--border-color)',
+            padding: '20px 0',
+            textAlign: 'center',
+            color: 'var(--text-muted)',
+            fontSize: '0.85rem'
+          }}
+        >
+          <div className="container">
+            <p>
+              <strong>Uttar Pradesh Police & UPSSSC Computer Operator Typing Mentor</strong> &bull; Based on UPPRPB Official Standards (Hindi 25 WPM Mangal/Kruti, English 30 WPM, 85% Accuracy).
+            </p>
+          </div>
+        </footer>
+      )}
 
       <RulesModal isOpen={isRulesOpen} onClose={() => setIsRulesOpen(false)} />
 
