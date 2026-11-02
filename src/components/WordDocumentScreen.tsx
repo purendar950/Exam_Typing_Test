@@ -5,6 +5,7 @@ import { audioEngine } from '../utils/audioEngine';
 import { translateToMangalInscript, translateToKrutiDev } from '../utils/hindiEngine';
 import { BookLibraryModal } from './BookLibraryModal';
 import { HindiHelperModal } from './HindiHelperModal';
+import { HindiKeyboardLayout } from './HindiKeyboardLayout';
 import { Book, BookChapter } from '../data/bookLibrary';
 
 interface WordDocumentScreenProps {
@@ -50,6 +51,7 @@ export const WordDocumentScreen: React.FC<WordDocumentScreenProps> = ({ onBackTo
   // Modals & Type-Along states
   const [isBookLibraryOpen, setIsBookLibraryOpen] = useState<boolean>(false);
   const [isHindiHelperOpen, setIsHindiHelperOpen] = useState<boolean>(false);
+  const [isKeyboardMapOpen, setIsKeyboardMapOpen] = useState<boolean>(false);
   const [activeTypeAlong, setActiveTypeAlong] = useState<{
     bookTitle: string;
     chapterTitle: string;
@@ -152,19 +154,15 @@ export const WordDocumentScreen: React.FC<WordDocumentScreenProps> = ({ onBackTo
     // Hindi translation if typing in Hindi mode
     if (language === 'hindi_mangal') {
       if (e.key.length === 1 && !e.ctrlKey && !e.metaKey && !e.altKey) {
-        const translated = translateToMangalInscript(e.key, e.shiftKey);
-        if (translated !== e.key) {
-          e.preventDefault();
-          insertTextAtCursor(translated);
-        }
+        const translated = translateToMangalInscript(e.key, e.shiftKey, e.code);
+        e.preventDefault();
+        insertTextAtCursor(translated);
       }
     } else if (language === 'hindi_kruti') {
       if (e.key.length === 1 && !e.ctrlKey && !e.metaKey && !e.altKey) {
-        const translated = translateToKrutiDev(e.key);
-        if (translated !== e.key) {
-          e.preventDefault();
-          insertTextAtCursor(translated);
-        }
+        const translated = translateToKrutiDev(e.key, e.shiftKey, e.code);
+        e.preventDefault();
+        insertTextAtCursor(translated);
       }
     }
   };
@@ -628,6 +626,20 @@ export const WordDocumentScreen: React.FC<WordDocumentScreenProps> = ({ onBackTo
             >
               ⌨️ Hindi Helper
             </button>
+            <button
+              onClick={() => setIsKeyboardMapOpen(true)}
+              className="ms-word-btn"
+              style={{
+                background: '#fef3c7',
+                color: '#b45309',
+                fontWeight: 800,
+                border: '1px solid #fde68a',
+                borderRadius: '4px'
+              }}
+              title="Interactive Hindi Keyboard Layout Map (Inscript & Kruti Dev)"
+            >
+              ⌨️ Layout Map
+            </button>
           </div>
 
         </div>
@@ -960,6 +972,35 @@ export const WordDocumentScreen: React.FC<WordDocumentScreenProps> = ({ onBackTo
         onClose={() => setIsHindiHelperOpen(false)}
         defaultLayout={language === 'hindi_kruti' ? 'kruti' : 'mangal'}
       />
+
+      {/* On-Screen Mapped Hindi Virtual Keyboard Modal */}
+      {isKeyboardMapOpen && (
+        <div
+          className="modal-overlay"
+          onClick={() => {
+            setIsKeyboardMapOpen(false);
+            textareaRef.current?.focus();
+          }}
+          style={{ zIndex: 9999, padding: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            style={{ width: '100%', maxWidth: '1020px', maxHeight: '92vh', overflowY: 'auto' }}
+          >
+            <HindiKeyboardLayout
+              layout={language === 'hindi_kruti' ? 'kruti' : 'mangal'}
+              onInsertChar={(char) => {
+                insertTextAtCursor(char);
+                textareaRef.current?.focus();
+              }}
+              onClose={() => {
+                setIsKeyboardMapOpen(false);
+                textareaRef.current?.focus();
+              }}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 };
