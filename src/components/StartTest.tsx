@@ -238,25 +238,52 @@ export const StartTest: React.FC<StartTestProps> = ({
       {/* 1. TOP BLACK EXAM BAR (Screenshot 1) */}
       <div className="ar-exam-topbar">
         <span>UP Police SI/ASI/Computer Operator {getExamLanguageTitle()} Typing</span>
-        <button
-          onClick={toggleFullScreen}
-          style={{
-            background: isFullscreen ? '#0284c7' : 'rgba(255, 255, 255, 0.15)',
-            border: '1px solid rgba(255, 255, 255, 0.3)',
-            color: '#ffffff',
-            borderRadius: '4px',
-            padding: '4px 12px',
-            cursor: 'pointer',
-            fontSize: '0.82rem',
-            fontWeight: 700,
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '6px'
-          }}
-          title={isFullscreen ? 'Exit Fullscreen' : 'Enter Fullscreen (Edge-to-Edge)'}
-        >
-          {isFullscreen ? '⛶ Exit Fullscreen' : '⛶ Fullscreen'}
-        </button>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          {/* Quick Auto Scroll Toggle in Topbar */}
+          <button
+            type="button"
+            onClick={() => onUpdateSettings?.({ autoScroll: !settings.autoScroll })}
+            style={{
+              background: settings.autoScroll ? '#16a34a' : 'rgba(255, 255, 255, 0.15)',
+              border: '1px solid rgba(255, 255, 255, 0.3)',
+              color: '#ffffff',
+              borderRadius: '4px',
+              padding: '4px 10px',
+              cursor: 'pointer',
+              fontSize: '0.8rem',
+              fontWeight: 700,
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px'
+            }}
+            title="Toggle Auto Scroll On/Off (Default: OFF)"
+          >
+            <span>📜 Auto Scroll:</span>
+            <span style={{ color: settings.autoScroll ? '#bbf7d0' : '#cbd5e1' }}>
+              {settings.autoScroll ? 'ON' : 'OFF'}
+            </span>
+          </button>
+
+          <button
+            onClick={toggleFullScreen}
+            style={{
+              background: isFullscreen ? '#0284c7' : 'rgba(255, 255, 255, 0.15)',
+              border: '1px solid rgba(255, 255, 255, 0.3)',
+              color: '#ffffff',
+              borderRadius: '4px',
+              padding: '4px 12px',
+              cursor: 'pointer',
+              fontSize: '0.82rem',
+              fontWeight: 700,
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px'
+            }}
+            title={isFullscreen ? 'Exit Fullscreen' : 'Enter Fullscreen (Edge-to-Edge)'}
+          >
+            {isFullscreen ? '⛶ Exit Fullscreen' : '⛶ Fullscreen'}
+          </button>
+        </div>
       </div>
 
       <div className="ar-test-container">
@@ -267,12 +294,14 @@ export const StartTest: React.FC<StartTestProps> = ({
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
-            padding: '8px 0',
-            position: 'relative'
+            padding: '6px 0',
+            position: 'relative',
+            flexWrap: 'wrap',
+            gap: '8px'
           }}
         >
           {/* Left: Quick status / title */}
-          <div style={{ width: '120px', fontSize: '0.85rem', color: '#64748b' }}>
+          <div style={{ minWidth: '110px', fontSize: '0.85rem', color: '#64748b' }}>
             <span style={{ fontWeight: 600 }}>Words:</span> {typedWords.length} / {originalWords.length}
           </div>
 
@@ -281,8 +310,8 @@ export const StartTest: React.FC<StartTestProps> = ({
             Time left:- {formatTime(secondsRemaining)}
           </div>
 
-          {/* Right: Candidate Avatar Card & Highlight Switch (Screenshot 1) */}
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px' }}>
+          {/* Right: Candidate Avatar Card & Switches (Screenshot 1) */}
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px' }}>
             {/* Candidate Frame */}
             <div
               style={{
@@ -292,22 +321,22 @@ export const StartTest: React.FC<StartTestProps> = ({
                 background: '#ffffff',
                 border: '1.5px solid #cbd5e1',
                 borderRadius: '8px',
-                padding: '4px 10px',
+                padding: '3px 10px',
                 boxShadow: '0 2px 4px rgba(0,0,0,0.05)'
               }}
             >
               {/* Silhouette Avatar */}
               <div
                 style={{
-                  width: '46px',
-                  height: '46px',
+                  width: '40px',
+                  height: '40px',
                   borderRadius: '6px',
                   background: 'linear-gradient(135deg, #334155 0%, #0f172a 100%)',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                   color: '#ffffff',
-                  fontSize: '1.4rem'
+                  fontSize: '1.3rem'
                 }}
               >
                 👤
@@ -317,16 +346,38 @@ export const StartTest: React.FC<StartTestProps> = ({
               </div>
             </div>
 
-            {/* Highlight Toggle Switch right below photo (Screenshot 1) */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }} title="Toggle Word Highlights (Disabled by default)">
-              <label className="ar-toggle-switch">
-                <input
-                  type="checkbox"
-                  checked={settings.highlightEnabled}
-                  onChange={(e) => onUpdateSettings?.({ highlightEnabled: e.target.checked })}
-                />
-                <span className="ar-toggle-slider" />
-              </label>
+            {/* Toggle Switches right below photo */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              {/* Highlight Toggle Switch */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }} title="Toggle Word Highlights (Disabled by default)">
+                <span style={{ fontSize: '0.72rem', color: '#64748b', fontWeight: 600 }}>Highlight:</span>
+                <label className="ar-toggle-switch">
+                  <input
+                    type="checkbox"
+                    checked={settings.highlightEnabled}
+                    onChange={(e) => onUpdateSettings?.({ highlightEnabled: e.target.checked })}
+                  />
+                  <span className="ar-toggle-slider" />
+                </label>
+              </div>
+
+              {/* Auto Scroll Toggle Switch (Default OFF) */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }} title="Toggle Auto Scroll (Default: OFF)">
+                <span style={{ fontSize: '0.72rem', color: settings.autoScroll ? '#16a34a' : '#64748b', fontWeight: 700 }}>
+                  Auto Scroll:
+                </span>
+                <label className="ar-toggle-switch">
+                  <input
+                    type="checkbox"
+                    checked={settings.autoScroll}
+                    onChange={(e) => onUpdateSettings?.({ autoScroll: e.target.checked })}
+                  />
+                  <span className="ar-toggle-slider" />
+                </label>
+                <span style={{ fontSize: '0.7rem', fontWeight: 800, color: settings.autoScroll ? '#16a34a' : '#94a3b8' }}>
+                  {settings.autoScroll ? 'ON' : 'OFF'}
+                </span>
+              </div>
             </div>
           </div>
         </div>

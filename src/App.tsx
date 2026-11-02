@@ -14,7 +14,7 @@ import { audioEngine } from './utils/audioEngine';
 
 const DEFAULT_SETTINGS: TestSettings = {
   highlightEnabled: false,
-  autoScroll: true,
+  autoScroll: false, // Default OFF
   soundEnabled: true,
   backspaceEnabled: true,
   fullScreenEnabled: false,
@@ -30,13 +30,19 @@ export const App: React.FC = () => {
   const [selectedDurationMinutes, setSelectedDurationMinutes] = useState<number>(15);
   const [currentResult, setCurrentResult] = useState<EvaluationResult | null>(null);
 
-  // Settings
+  // Settings (Default autoScroll is OFF)
   const [settings, setSettings] = useState<TestSettings>(() => {
     try {
       const saved = localStorage.getItem('up_typing_settings');
       if (saved) {
         const parsed = JSON.parse(saved);
-        return { ...DEFAULT_SETTINGS, ...parsed, highlightEnabled: parsed.highlightEnabled ?? false };
+        const hasExplicit = localStorage.getItem('up_autoscroll_explicit') === 'true';
+        return {
+          ...DEFAULT_SETTINGS,
+          ...parsed,
+          highlightEnabled: parsed.highlightEnabled ?? false,
+          autoScroll: hasExplicit ? !!parsed.autoScroll : false
+        };
       }
       return DEFAULT_SETTINGS;
     } catch {
@@ -65,6 +71,9 @@ export const App: React.FC = () => {
       const updated = { ...prev, ...newSettings };
       try {
         localStorage.setItem('up_typing_settings', JSON.stringify(updated));
+        if (typeof newSettings.autoScroll === 'boolean') {
+          localStorage.setItem('up_autoscroll_explicit', 'true');
+        }
       } catch {
         // Ignore storage errors
       }
