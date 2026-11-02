@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
 """
-Automated Free Typing Passage Ingestion Pipeline
-Syncs authentic UP Police, UPSSSC, and Government Exam typing passages
-from open, free-tier platforms (TypeMangal, CGLTyping, AR Typing Demo).
-No login credentials or paid subscription required.
+Automated UP Police Computer Operator & ASI Typing Passage Ingestion Pipeline
+Syncs authentic exam typing passages strictly for:
+- UP Police Computer Operator Grade-A (up_police_co)
+- UP Police Assistant Sub-Inspector - Clerk / Accounts (up_police_asi)
+In Hindi (Mangal Inscript & Kruti Dev) and English only.
+Fetches and categorizes date-wise (YYYY-MM-DD).
 """
 
 import os
@@ -12,6 +14,7 @@ import re
 import json
 import urllib.request
 import urllib.error
+from datetime import datetime
 
 PASSAGES_FILE = os.path.abspath(os.path.join(os.path.dirname(__file__), "../src/data/passages.ts"))
 
@@ -35,8 +38,8 @@ def clean_text(text):
     text = re.sub(r'\s+', ' ', text).strip()
     return text
 
-def scrape_typemangal():
-    print("[*] Fetching authentic UP Police & State exam passages from TypeMangal...")
+def scrape_typemangal(target_date):
+    print(f"[*] Fetching authentic UP Police CO & ASI exam passages from TypeMangal for {target_date}...")
     html = fetch_url("https://typemangal.online/")
     script_m = re.search(r'<script type="module" crossorigin src="(/assets/index-[a-zA-Z0-9_-]+\.js)"', html)
     if not script_m:
@@ -47,7 +50,6 @@ def scrape_typemangal():
     js_code = fetch_url(js_url)
     
     passages = []
-    # Pattern matching {id:"...", title:"...", difficulty:"...", category:"...", content:"..."}
     pattern = re.compile(
         r'\{id:\s*"([^"]+)",\s*title:\s*"([^"]+)",\s*difficulty:\s*"([^"]+)",\s*category:\s*"([^"]+)",\s*content:\s*"([^"]+)"\}'
     )
@@ -57,27 +59,30 @@ def scrape_typemangal():
         if len(text.split()) < 30:
             continue
         
-        category = "up_police_co"
-        if "asi" in title.lower() or "asi" in cat.lower():
-            category = "up_police_asi"
-        elif "bssc" in title.lower() or "court" in title.lower():
-            category = "upsssc_ja"
-            
+        # Clean title from third-party exam prefixes
+        clean_title = re.sub(r'^(SSC\s*(CHSL|CGL)|MP\s*CPCT|BSSC\s*(Inter Level|Clerk)?|High\s*Court\s*(RO|ARO)?):\s*', '', title)
+        
+        # Determine UP Police category: ASI for clerk/accounts/admin/legal, CO for technical/cyber/general police
+        is_asi = any(k in title.lower() or k in cat.lower() for k in ["asi", "clerk", "न्याय", "प्रशासन", "संवैधानिक", "लेखा", "विधि"])
+        category = "up_police_asi" if is_asi else "up_police_co"
+        prefix = "UP Police ASI" if is_asi else "UP Police CO"
+        
         passages.append({
             "id": f"tm-{pid}",
-            "title": title,
+            "title": f"{prefix}: {clean_title}",
             "language": "hindi_mangal",
             "category": category,
             "duration": 15,
             "wordCount": len(text.split()),
             "difficulty": diff.lower() if diff.lower() in ['easy', 'medium', 'hard'] else 'medium',
+            "date": target_date,
             "text": text
         })
     print(f"[+] Retrieved {len(passages)} passages from TypeMangal")
     return passages
 
-def scrape_cgltyping():
-    print("[*] Fetching authentic exam passages from CGLTyping...")
+def scrape_cgltyping(target_date):
+    print(f"[*] Fetching authentic UP Police CO & ASI exam passages from CGLTyping for {target_date}...")
     passages = []
     
     # 1. Hindi Mangal Passages
@@ -86,15 +91,21 @@ def scrape_cgltyping():
     for m in hi_pattern.finditer(hi_code):
         pid, title, cat, text_raw = m.groups()
         text = clean_text(text_raw)
-        category = "upsssc_ja" if any(k in title for k in ["पंचायती", "डिजिटल", "ई-गवर्नेंस"]) else "up_police_co"
+        clean_title = re.sub(r'^UPSSSC:\s*', '', title)
+        
+        is_asi = any(k in clean_title for k in ["पंचायती", "प्रशासन", "न्याय", "स्वास्थ्य", "शिक्षा", "राज"])
+        category = "up_police_asi" if is_asi else "up_police_co"
+        prefix = "UP Police ASI" if is_asi else "UP Police CO"
+        
         passages.append({
             "id": f"cgl-hi-{pid}",
-            "title": f"UPSSSC: {title} (Mangal Inscript)",
+            "title": f"{prefix}: {clean_title} (Mangal Inscript)",
             "language": "hindi_mangal",
             "category": category,
             "duration": 15,
             "wordCount": len(text.split()),
             "difficulty": "medium",
+            "date": target_date,
             "text": text
         })
         
@@ -104,22 +115,29 @@ def scrape_cgltyping():
     for m in en_pattern.finditer(en_code):
         pid, title, cat, text_raw = m.groups()
         text = clean_text(text_raw)
+        clean_title = re.sub(r'^UP\s*Police\s*(CO|ASI):\s*', '', title)
+        
+        is_asi = any(k in clean_title.lower() for k in ["governance", "administration", "judicial", "disaster", "banking", "education", "health"])
+        category = "up_police_asi" if is_asi else "up_police_co"
+        prefix = "UP Police ASI" if is_asi else "UP Police CO"
+        
         passages.append({
             "id": f"cgl-en-{pid}",
-            "title": f"UP Police CO: {title}",
+            "title": f"{prefix}: {clean_title}",
             "language": "english",
-            "category": "up_police_co",
+            "category": category,
             "duration": 15,
             "wordCount": len(text.split()),
             "difficulty": "medium",
+            "date": target_date,
             "text": text
         })
         
     print(f"[+] Retrieved {len(passages)} passages from CGLTyping (Hindi & English)")
     return passages
 
-def scrape_artyping_demo():
-    print("[*] Checking AR Typing Platform free demo passages...")
+def scrape_artyping_demo(target_date):
+    print(f"[*] Checking AR Typing Platform free passages for {target_date}...")
     passages = []
     try:
         manifest = fetch_url("https://www.artypingplatform.com/_next/static/cZIQtJZQuQClk2W1U1YHl/_buildManifest.js")
@@ -134,14 +152,20 @@ def scrape_artyping_demo():
                     for m in re.finditer(r'id:\s*(\d+)\s*,\s*title:\s*"([^"]+)"\s*,\s*language:\s*(\d+)\s*,\s*passage_text:\s*([\'"])(.*?)\4(?:\s*\}|\s*,\s*\{)', raw, re.DOTALL):
                         pid, title, lang_id, q, raw_t = m.groups()
                         text = clean_text(raw_t)
+                        clean_title = re.sub(r'^(\[AR Typing\]|\[Daily.*?\])\s*', '', title)
+                        is_asi = int(lang_id) == 2 or "asi" in title.lower()
+                        category = "up_police_asi" if is_asi else "up_police_co"
+                        prefix = "UP Police ASI" if is_asi else "UP Police CO"
+                        
                         passages.append({
                             "id": f"ar-free-{pid}",
-                            "title": f"[AR Typing] {title}",
+                            "title": f"{prefix}: {clean_title}",
                             "language": "hindi_kruti" if int(lang_id) == 2 else "english",
-                            "category": "up_police_co",
+                            "category": category,
                             "duration": 15,
                             "wordCount": len(text.split()),
                             "difficulty": "medium",
+                            "date": target_date,
                             "text": text
                         })
     except Exception as e:
@@ -164,7 +188,7 @@ def update_passages_file(new_passages):
         print("[*] All fetched passages already exist in passages.ts.")
         return 0
 
-    print(f"[+] Appending {len(unique_passages)} new unique passages to passages.ts...")
+    print(f"[+] Appending {len(unique_passages)} new unique UP Police passages to passages.ts...")
 
     ts_entries = []
     for p in unique_passages:
@@ -178,6 +202,7 @@ def update_passages_file(new_passages):
     duration: {p["duration"]},
     wordCount: {p["wordCount"]},
     difficulty: '{p["difficulty"]}',
+    date: '{p["date"]}',
     text: `{safe_text}`
   }}""")
 
@@ -196,14 +221,24 @@ def update_passages_file(new_passages):
     return len(unique_passages)
 
 def main():
-    all_passages = []
-    all_passages.extend(scrape_typemangal())
-    all_passages.extend(scrape_cgltyping())
-    all_passages.extend(scrape_artyping_demo())
+    target_date = sys.argv[1] if len(sys.argv) > 1 else datetime.now().strftime("%Y-%m-%d")
+    print(f"[*] Starting UP Police CO & ASI date-wise sync for: {target_date}")
     
-    print(f"[*] Total unique passages harvested from free sources: {len(all_passages)}")
-    added = update_passages_file(all_passages)
-    print(f"[*] Sync completed. {added} newly integrated passages ready.")
+    all_passages = []
+    all_passages.extend(scrape_typemangal(target_date))
+    all_passages.extend(scrape_cgltyping(target_date))
+    all_passages.extend(scrape_artyping_demo(target_date))
+    
+    # Filter strictly to Hindi and English, and UP Police CO / ASI
+    filtered = [
+        p for p in all_passages
+        if p["language"] in ["hindi_mangal", "hindi_kruti", "english"]
+        and p["category"] in ["up_police_co", "up_police_asi"]
+    ]
+    
+    print(f"[*] Total valid UP Police CO & ASI passages harvested: {len(filtered)}")
+    added = update_passages_file(filtered)
+    print(f"[*] Sync completed for date {target_date}. {added} newly integrated passages ready.")
 
 if __name__ == "__main__":
     main()

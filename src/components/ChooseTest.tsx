@@ -18,15 +18,60 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
   const [selectedDuration, setSelectedDuration] = useState<number>(15);
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [selectedDifficulty, setSelectedDifficulty] = useState<string>('all');
+  const [selectedDate, setSelectedDate] = useState<string>('all');
+  const [sortBy, setSortBy] = useState<'date_desc' | 'date_asc' | 'words_desc'>('date_desc');
   const [showSettingsDrawer, setShowSettingsDrawer] = useState<boolean>(false);
 
+  // Today's date string
+  const todayStr = '2026-11-02';
+
+  // Distinct dates in the database sorted newest first
+  const availableDates = Array.from(
+    new Set(passages.map((p) => p.date).filter(Boolean))
+  ).sort().reverse();
+
+  // Helper date formatter
+  const formatDateLabel = (dStr: string) => {
+    if (!dStr) return '';
+    try {
+      const [year, month, day] = dStr.split('-');
+      const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+      const mIdx = parseInt(month, 10) - 1;
+      return `${day} ${monthNames[mIdx]} ${year}`;
+    } catch {
+      return dStr;
+    }
+  };
+
   // Filter passages
-  const filteredPassages = passages.filter((p) => {
-    if (p.language !== selectedLanguage) return false;
-    if (selectedCategory !== 'all' && p.category !== selectedCategory) return false;
-    if (selectedDifficulty !== 'all' && p.difficulty !== selectedDifficulty) return false;
-    return true;
-  });
+  const filteredPassages = passages
+    .filter((p) => {
+      if (p.language !== selectedLanguage) return false;
+      if (selectedCategory !== 'all' && p.category !== selectedCategory) return false;
+      if (selectedDifficulty !== 'all' && p.difficulty !== selectedDifficulty) return false;
+      if (selectedDate !== 'all') {
+        if (selectedDate === 'today' && p.date !== todayStr) return false;
+        if (selectedDate !== 'today' && p.date !== selectedDate) return false;
+      }
+      return true;
+    })
+    .sort((a, b) => {
+      if (sortBy === 'date_desc') {
+        return (b.date || '').localeCompare(a.date || '') || b.id.localeCompare(a.id);
+      }
+      if (sortBy === 'date_asc') {
+        return (a.date || '').localeCompare(b.date || '') || a.id.localeCompare(b.id);
+      }
+      if (sortBy === 'words_desc') {
+        return b.wordCount - a.wordCount;
+      }
+      return 0;
+    });
+
+  // Check how many tests match today for this language
+  const todayCountForLang = passages.filter(
+    (p) => p.language === selectedLanguage && p.date === todayStr
+  ).length;
 
   return (
     <div className="container" style={{ padding: '28px 16px' }}>
@@ -55,7 +100,7 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
                 letterSpacing: '0.5px'
               }}
             >
-              UPPRPB & UPSSSC Exam Standard
+              UPPRPB Official Exam Standard
             </span>
             <span
               style={{
@@ -69,13 +114,24 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
             >
               Official 85% Accuracy Standard
             </span>
+            <span
+              style={{
+                background: 'rgba(255, 255, 255, 0.25)',
+                padding: '4px 10px',
+                borderRadius: '9999px',
+                fontSize: '0.75rem',
+                fontWeight: 700
+              }}
+            >
+              📅 Date-Wise Daily Tests
+            </span>
           </div>
 
           <h1 style={{ fontSize: '1.75rem', fontWeight: 800, marginBottom: '8px' }}>
-            Uttar Pradesh Computer Operator Typing Test Portal
+            UP Police Computer Operator & ASI Typing Test Portal
           </h1>
           <p style={{ opacity: 0.9, fontSize: '0.95rem', maxWidth: '850px', marginBottom: '16px' }}>
-            Simulate the exact environment and criteria of UP Police Computer Operator Grade-A, Assistant Sub-Inspector (Clerk/Accounts), and UPSSSC Junior Assistant typing examinations.
+            Exclusively tailored for Uttar Pradesh Police Computer Operator Grade-A and Assistant Sub-Inspector (Clerk/Accounts) recruitment. Daily date-wise official mock passages in Hindi (Mangal & Kruti Dev) and English.
           </p>
 
           <div
@@ -94,7 +150,7 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
               <strong>English Speed:</strong> Min 30 Net WPM
             </div>
             <div style={{ background: 'rgba(255, 255, 255, 0.15)', padding: '6px 14px', borderRadius: '8px', fontSize: '0.85rem' }}>
-              <strong>Official Font:</strong> Mangal (Inscript) / Kruti Dev 010
+              <strong>Official Fonts:</strong> Mangal (Inscript) / Kruti Dev 010
             </div>
             <div style={{ background: 'rgba(255, 255, 255, 0.15)', padding: '6px 14px', borderRadius: '8px', fontSize: '0.85rem' }}>
               <strong>Duration:</strong> 15 Minutes (Practice 5/10m)
@@ -109,12 +165,15 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
           display: 'flex',
           gap: '8px',
           borderBottom: '2px solid var(--border-color)',
-          marginBottom: '24px',
+          marginBottom: '20px',
           overflowX: 'auto'
         }}
       >
         <button
-          onClick={() => setSelectedLanguage('hindi_mangal')}
+          onClick={() => {
+            setSelectedLanguage('hindi_mangal');
+            setSelectedDate('all');
+          }}
           style={{
             background: 'none',
             border: 'none',
@@ -131,7 +190,10 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
           हिंदी - मंगल (Mangal Inscript)
         </button>
         <button
-          onClick={() => setSelectedLanguage('hindi_kruti')}
+          onClick={() => {
+            setSelectedLanguage('hindi_kruti');
+            setSelectedDate('all');
+          }}
           style={{
             background: 'none',
             border: 'none',
@@ -148,7 +210,10 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
           हिंदी - कुर्ती देव (Kruti Dev 010)
         </button>
         <button
-          onClick={() => setSelectedLanguage('english')}
+          onClick={() => {
+            setSelectedLanguage('english');
+            setSelectedDate('all');
+          }}
           style={{
             background: 'none',
             border: 'none',
@@ -165,6 +230,48 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
           English Typing Test
         </button>
       </div>
+
+      {/* Date-wise Quick Banner if today's tests exist */}
+      {todayCountForLang > 0 && selectedDate !== 'today' && (
+        <div
+          style={{
+            background: '#ecfdf5',
+            border: '1px solid #a7f3d0',
+            borderRadius: 'var(--radius-md)',
+            padding: '12px 18px',
+            marginBottom: '20px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            flexWrap: 'wrap',
+            gap: '12px'
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <span style={{ fontSize: '1.25rem' }}>⚡</span>
+            <div>
+              <strong style={{ color: '#065f46', fontSize: '0.95rem' }}>
+                Today's Daily Mock Tests ({formatDateLabel(todayStr)}) are available!
+              </strong>
+              <div style={{ color: '#047857', fontSize: '0.825rem' }}>
+                {todayCountForLang} new UP Police exam passage(s) added for today.
+              </div>
+            </div>
+          </div>
+          <button
+            onClick={() => setSelectedDate('today')}
+            className="btn btn-sm"
+            style={{
+              background: '#059669',
+              color: '#ffffff',
+              fontWeight: 600,
+              border: 'none'
+            }}
+          >
+            View Today's Tests ({todayCountForLang})
+          </button>
+        </div>
+      )}
 
       {/* Filter and Settings Bar */}
       <div
@@ -193,10 +300,40 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
           ))}
         </div>
 
-        {/* Category & Difficulty */}
+        {/* Date, Exam Category & Difficulty */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
+          {/* Date Selector */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <span style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-muted)' }}>Exam:</span>
+            <span style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-muted)' }}>Date:</span>
+            <select
+              value={selectedDate}
+              onChange={(e) => setSelectedDate(e.target.value)}
+              style={{
+                padding: '6px 12px',
+                borderRadius: 'var(--radius-sm)',
+                border: '1px solid var(--border-color)',
+                fontSize: '0.875rem',
+                fontFamily: 'inherit',
+                outline: 'none',
+                background: selectedDate !== 'all' ? '#e0f2fe' : '#ffffff',
+                fontWeight: selectedDate !== 'all' ? 600 : 400
+              }}
+            >
+              <option value="all">All Dates ({availableDates.length} Days)</option>
+              {availableDates.includes(todayStr) && (
+                <option value="today">⭐ Today ({formatDateLabel(todayStr)})</option>
+              )}
+              {availableDates.map((d) => (
+                <option key={d} value={d}>
+                  {formatDateLabel(d)} {d === todayStr ? '(Today)' : ''}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Exam Post Selector */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <span style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-muted)' }}>Post:</span>
             <select
               value={selectedCategory}
               onChange={(e) => setSelectedCategory(e.target.value)}
@@ -209,18 +346,18 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
                 outline: 'none'
               }}
             >
-              <option value="all">All Exams</option>
+              <option value="all">All (UP Police CO & ASI)</option>
               <option value="up_police_co">UP Police Computer Operator</option>
-              <option value="upsssc_ja">UPSSSC Junior Assistant</option>
               <option value="up_police_asi">UP Police ASI (Clerk/Acct)</option>
             </select>
           </div>
 
+          {/* Sort By */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <span style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-muted)' }}>Difficulty:</span>
+            <span style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-muted)' }}>Sort:</span>
             <select
-              value={selectedDifficulty}
-              onChange={(e) => setSelectedDifficulty(e.target.value)}
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value as any)}
               style={{
                 padding: '6px 12px',
                 borderRadius: 'var(--radius-sm)',
@@ -230,10 +367,9 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
                 outline: 'none'
               }}
             >
-              <option value="all">All Levels</option>
-              <option value="easy">Easy</option>
-              <option value="medium">Medium</option>
-              <option value="hard">Hard (Official)</option>
+              <option value="date_desc">📅 Newest Date First</option>
+              <option value="date_asc">📅 Oldest Date First</option>
+              <option value="words_desc">📝 Word Count (High to Low)</option>
             </select>
           </div>
 
@@ -324,6 +460,42 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
         </div>
       )}
 
+      {/* Active Filter Summary Bar */}
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          marginBottom: '16px',
+          fontSize: '0.875rem',
+          color: 'var(--text-muted)'
+        }}
+      >
+        <div>
+          Showing <strong>{filteredPassages.length}</strong> official tests{' '}
+          {selectedDate !== 'all' && (
+            <span>
+              for date <strong>{selectedDate === 'today' ? formatDateLabel(todayStr) : formatDateLabel(selectedDate)}</strong>
+            </span>
+          )}
+        </div>
+        {selectedDate !== 'all' && (
+          <button
+            onClick={() => setSelectedDate('all')}
+            style={{
+              background: 'none',
+              border: 'none',
+              color: 'var(--primary)',
+              cursor: 'pointer',
+              fontWeight: 600,
+              textDecoration: 'underline'
+            }}
+          >
+            Clear Date Filter
+          </button>
+        )}
+      </div>
+
       {/* Passage Cards Grid */}
       <div
         style={{
@@ -334,7 +506,12 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
       >
         {filteredPassages.length === 0 ? (
           <div className="card" style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '48px' }}>
-            <p style={{ color: 'var(--text-muted)', fontSize: '1.1rem' }}>No passages found for the selected filters.</p>
+            <p style={{ color: 'var(--text-muted)', fontSize: '1.1rem', marginBottom: '12px' }}>
+              No passages found for the selected date and filters.
+            </p>
+            <button onClick={() => setSelectedDate('all')} className="btn btn-secondary btn-sm">
+              View All Dates
+            </button>
           </div>
         ) : (
           filteredPassages.map((passage) => (
@@ -345,26 +522,46 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
                 display: 'flex',
                 flexDirection: 'column',
                 justifyContent: 'space-between',
-                height: '100%'
+                height: '100%',
+                border: passage.date === todayStr ? '1px solid #38bdf8' : undefined
               }}
             >
               <div>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px' }}>
-                  <span
-                    className={`badge ${
-                      passage.category === 'up_police_co'
-                        ? 'badge-blue'
-                        : passage.category === 'upsssc_ja'
-                        ? 'badge-green'
-                        : 'badge-amber'
-                    }`}
-                  >
-                    {passage.category === 'up_police_co'
-                      ? 'UP Police CO'
-                      : passage.category === 'upsssc_ja'
-                      ? 'UPSSSC JA'
-                      : 'UP Police ASI'}
-                  </span>
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    marginBottom: '10px',
+                    gap: '6px',
+                    flexWrap: 'wrap'
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <span
+                      className={`badge ${
+                        passage.category === 'up_police_co' ? 'badge-blue' : 'badge-amber'
+                      }`}
+                    >
+                      {passage.category === 'up_police_co' ? 'UP Police CO' : 'UP Police ASI'}
+                    </span>
+                    {passage.date && (
+                      <span
+                        style={{
+                          background: passage.date === todayStr ? '#ecfdf5' : '#f1f5f9',
+                          color: passage.date === todayStr ? '#059669' : '#475569',
+                          border: passage.date === todayStr ? '1px solid #a7f3d0' : '1px solid #e2e8f0',
+                          padding: '2px 8px',
+                          borderRadius: '9999px',
+                          fontSize: '0.75rem',
+                          fontWeight: 700
+                        }}
+                      >
+                        📅 {formatDateLabel(passage.date)}
+                        {passage.date === todayStr ? ' (TODAY)' : ''}
+                      </span>
+                    )}
+                  </div>
                   <span
                     className={`badge ${
                       passage.difficulty === 'easy'

@@ -25,7 +25,7 @@ export const Header: React.FC<HeaderProps> = ({
           <div className="logo-icon">UP</div>
           <div>
             <div className="logo-title">UP Typing Mentor</div>
-            <div className="logo-subtitle">Computer Operator & UPSSSC Portal</div>
+            <div className="logo-subtitle">UP Police Computer Operator & ASI Portal</div>
           </div>
         </div>
 

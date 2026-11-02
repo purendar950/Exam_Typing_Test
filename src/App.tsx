@@ -117,6 +117,7 @@ export const App: React.FC = () => {
       duration: 5,
       wordCount: drillText.split(/\s+/).length,
       difficulty: 'medium',
+      date: new Date().toISOString().split('T')[0],
       text: drillText
     };
     setSelectedPassage(drillPassage);

@@ -147,7 +147,7 @@ def update_passages_file(new_passages):
     for p in unique_passages:
         safe_title = p["title"].replace('"', '\\"')
         safe_text = p["text"].replace('`', '\\`').replace('${', '\\${')
-        ts_entries.append(f"""  {{
+      ts_entries.append(f"""  {{
     id: '{p["id"]}',
     title: '{safe_title}',
     language: '{p["language"]}',
@@ -155,6 +155,7 @@ def update_passages_file(new_passages):
     duration: {p["duration"]},
     wordCount: {p["wordCount"]},
     difficulty: '{p["difficulty"]}',
+    date: '{p.get("date", datetime.now().strftime("%Y-%m-%d"))}',
     text: `{safe_text}`
   }}""")
 
@@ -206,11 +207,10 @@ def main():
                 lang_key = "hindi_mangal"
 
             title = passage.get("title") or s.get("title") or f"Daily Live Session {s_id}"
-            category = "up_police_co"
-            for candidate_cat, pattern in [("up_police_co", "police"), ("upsssc_ja", "upsssc"), ("up_police_asi", "asi")]:
-                if pattern in title.lower():
-                    category = candidate_cat
-                    break
+            is_asi = any(k in title.lower() for k in ["asi", "clerk", "account", "lekh"])
+            category = "up_police_asi" if is_asi else "up_police_co"
+            prefix = "UP Police ASI" if is_asi else "UP Police CO"
+            clean_title = re.sub(r'^(UP\s*Police\s*(CO|ASI):|\[Daily.*?\])\s*', '', title)
 
             cleaned_text = re.sub(r'\s+', ' ', p_text).strip()
             all_fetched.append({

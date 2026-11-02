@@ -1,16 +1,17 @@
 export type Language = 'hindi_mangal' | 'hindi_kruti' | 'english';
 
-export type ExamCategory = 'up_police_co' | 'upsssc_ja' | 'up_police_asi' | 'general';
+export type ExamCategory = 'up_police_co' | 'up_police_asi';
 
 export interface Passage {
   id: string;
   title: string;
   language: Language;
   category: ExamCategory;
-  duration: number; // in minutes (default 15 for UP CO)
+  duration: number; // in minutes (default 15 for UP Police CO / ASI)
   wordCount: number;
   text: string;
   difficulty: 'easy' | 'medium' | 'hard';
+  date?: string; // YYYY-MM-DD format for date-wise tests
 }
 
 export interface TestSettings {
