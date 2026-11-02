@@ -22,6 +22,7 @@ export interface TestSettings {
   fullScreenEnabled: boolean;
   fontSize: number; // 14 to 28
   autoStartTimer: boolean;
+  candidateName?: string;
 }
 
 export interface EvaluationResult {

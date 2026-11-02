@@ -28,7 +28,8 @@ export const StartTest: React.FC<StartTestProps> = ({
   const [backspaceCount, setBackspaceCount] = useState<number>(0);
   const [showSubmitModal, setShowSubmitModal] = useState<boolean>(false);
   const [showVirtualKeyboard, setShowVirtualKeyboard] = useState<boolean>(false);
-  const [activeKeyPressed, setActiveKeyPressed] = useState<string>('');
+  const [showSettingsModal, setShowSettingsModal] = useState<boolean>(false);
+  const [candidateName, setCandidateName] = useState<string>(settings.candidateName || 'PURENDAR');
 
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const passagePaneRef = useRef<HTMLDivElement>(null);
@@ -95,6 +96,13 @@ export const StartTest: React.FC<StartTestProps> = ({
     audioEngine.setSoundEnabled(settings.soundEnabled);
   }, [settings.soundEnabled]);
 
+  // Format seconds into MM:SS
+  const formatTime = (secs: number) => {
+    const mins = Math.floor(secs / 60);
+    const remainingSecs = secs % 60;
+    return `${mins.toString().padStart(2, '0')}:${remainingSecs.toString().padStart(2, '0')}`;
+  };
+
   // Fullscreen support
   const toggleFullScreen = () => {
     if (!document.fullscreenElement) {
@@ -104,354 +112,386 @@ export const StartTest: React.FC<StartTestProps> = ({
     }
   };
 
-  // Submission handler
+  // Handle key down in typing box
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (!isTestStarted && e.key.length === 1 && !e.ctrlKey && !e.altKey && !e.metaKey) {
+      setIsTestStarted(true);
+    }
+
+    if (e.key === 'Backspace') {
+      if (!settings.backspaceEnabled) {
+        e.preventDefault();
+        return;
+      }
+      setBackspaceCount((prev) => prev + 1);
+      audioEngine.playKeyClick();
+      return;
+    }
+
+    if (e.key === 'Enter') {
+      audioEngine.playKeyClick();
+      return;
+    }
+
+    if (e.key.length === 1 && !e.ctrlKey && !e.altKey && !e.metaKey) {
+      audioEngine.playKeyClick();
+
+      // Transliteration for Hindi
+      if (passage.language === 'hindi_mangal') {
+        e.preventDefault();
+        const hindiChar = translateToMangalInscript(e.key, e.shiftKey);
+        insertCharacter(hindiChar);
+      } else if (passage.language === 'hindi_kruti') {
+        e.preventDefault();
+        const krutiChar = translateToKrutiDev(e.key);
+        insertCharacter(krutiChar);
+      }
+    }
+  };
+
+  // Helper to insert character at cursor position
+  const insertCharacter = (char: string) => {
+    if (!textareaRef.current) return;
+    const start = textareaRef.current.selectionStart;
+    const end = textareaRef.current.selectionEnd;
+    const current = typedText;
+    const next = current.substring(0, start) + char + current.substring(end);
+    setTypedText(next);
+
+    setTimeout(() => {
+      if (textareaRef.current) {
+        textareaRef.current.selectionStart = start + char.length;
+        textareaRef.current.selectionEnd = start + char.length;
+      }
+    }, 0);
+  };
+
+  // Prevent paste, cut, copy
+  const handlePrevent = (e: React.ClipboardEvent) => {
+    e.preventDefault();
+  };
+
+  // Complete submission
   const handleCompleteSubmission = () => {
-    audioEngine.playCompletionBell();
-    const timeTakenSeconds = totalSeconds - secondsRemaining;
+    const timeTaken = totalSeconds - secondsRemaining;
     const result = evaluateTypingTest({
       testId: passage.id,
       testTitle: passage.title,
       language: passage.language,
       category: passage.category,
       originalText: passage.text,
-      typedText,
+      typedText: typedText,
       timeAllowedMinutes: durationMinutes,
-      timeTakenSeconds: Math.max(1, timeTakenSeconds),
-      backspaceCount
+      timeTakenSeconds: timeTaken,
+      backspaceCount: backspaceCount
     });
     onFinishTest(result);
   };
 
-  // Keystroke handler with Hindi transliteration & anti-cheat
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if (!isTestStarted) {
-      setIsTestStarted(true);
-    }
-
-    setActiveKeyPressed(e.key);
-    setTimeout(() => setActiveKeyPressed(''), 120);
-
-    // Play typewriter click
-    audioEngine.playKeyClick();
-
-    // Check Backspace restriction
-    if (e.key === 'Backspace') {
-      if (!settings.backspaceEnabled) {
-        e.preventDefault();
-        return;
-      }
-      setBackspaceCount((b) => b + 1);
-      return;
-    }
-
-    // Ignore special control keys
-    if (
-      e.ctrlKey ||
-      e.altKey ||
-      e.metaKey ||
-      e.key === 'Shift' ||
-      e.key === 'Tab' ||
-      e.key === 'Enter' ||
-      e.key === 'ArrowLeft' ||
-      e.key === 'ArrowRight' ||
-      e.key === 'ArrowUp' ||
-      e.key === 'ArrowDown'
-    ) {
-      return;
-    }
-
-    // Handle spacebar
-    if (e.key === ' ') {
-      return;
-    }
-
-    // Virtual transliteration for Hindi layouts if physical key pressed is ASCII
-    if (e.key.length === 1 && !e.ctrlKey && !e.metaKey) {
-      if (passage.language === 'hindi_mangal') {
-        const translatedChar = translateToMangalInscript(e.key, e.shiftKey);
-        if (translatedChar !== e.key) {
-          e.preventDefault();
-          const target = e.currentTarget;
-          const start = target.selectionStart;
-          const end = target.selectionEnd;
-          const newText = typedText.substring(0, start) + translatedChar + typedText.substring(end);
-          setTypedText(newText);
-          setTimeout(() => {
-            target.selectionStart = target.selectionEnd = start + translatedChar.length;
-          }, 0);
-        }
-      } else if (passage.language === 'hindi_kruti') {
-        const translatedChar = translateToKrutiDev(e.key);
-        if (translatedChar !== e.key) {
-          e.preventDefault();
-          const target = e.currentTarget;
-          const start = target.selectionStart;
-          const end = target.selectionEnd;
-          const newText = typedText.substring(0, start) + translatedChar + typedText.substring(end);
-          setTypedText(newText);
-          setTimeout(() => {
-            target.selectionStart = target.selectionEnd = start + translatedChar.length;
-          }, 0);
-        }
-      }
-    }
+  // Language display title for top black bar (Screenshot 1)
+  const getExamLanguageTitle = () => {
+    if (passage.language === 'english') return 'English';
+    if (passage.language === 'hindi_mangal') return 'Hindi Mangal (Inscript)';
+    return 'Hindi Kruti Dev';
   };
-
-  // Anti-cheat handlers
-  const handlePrevent = (e: React.SyntheticEvent) => {
-    e.preventDefault();
-  };
-
-  // Format MM:SS
-  const formatTime = (secs: number) => {
-    const m = Math.floor(secs / 60);
-    const s = secs % 60;
-    return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
-  };
-
-  // Live Gross WPM & Accuracy calculation
-  const elapsedMinutes = Math.max(0.01, (totalSeconds - secondsRemaining) / 60);
-  const liveGrossWpm = Math.round(((typedText.length / 5) / elapsedMinutes) * 10) / 10;
-
-  let liveMatches = 0;
-  for (let i = 0; i < typedWords.length; i++) {
-    if (originalWords[i] === typedWords[i]) {
-      liveMatches++;
-    }
-  }
-  const liveAccuracy =
-    typedWords.length > 0 ? Math.round((liveMatches / typedWords.length) * 100) : 100;
 
   return (
-    <div className="container test-container">
-      {/* Top Bar with Title, Timer & Controls */}
-      <div
-        className="card"
-        style={{
-          padding: '16px 20px',
-          display: 'flex',
-          flexWrap: 'wrap',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          gap: '16px'
-        }}
-      >
-        <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
-            <span className="badge badge-blue">
-              {passage.language === 'hindi_mangal'
-                ? 'Hindi Mangal Inscript'
-                : passage.language === 'hindi_kruti'
-                ? 'Hindi Kruti Dev'
-                : 'English'}
-            </span>
-            <span className="badge badge-amber">Official {durationMinutes} Mins</span>
+    <div style={{ backgroundColor: '#ffffff', minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+      
+      {/* 1. TOP BLACK EXAM BAR (Screenshot 1) */}
+      <div className="ar-exam-topbar">
+        <span>UP Police SI/ASI/Computer Operator {getExamLanguageTitle()} Typing</span>
+        <button
+          onClick={toggleFullScreen}
+          style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer', fontSize: '0.85rem' }}
+          title="Toggle Fullscreen"
+        >
+          ⛶ Fullscreen
+        </button>
+      </div>
+
+      <div className="container" style={{ maxWidth: '1020px', flex: 1, padding: '12px 16px', display: 'flex', flexDirection: 'column', gap: '14px' }}>
+        
+        {/* 2. SUB-HEADER / STATUS BAR (Screenshot 1) */}
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            padding: '8px 0',
+            position: 'relative'
+          }}
+        >
+          {/* Left: Quick status / title */}
+          <div style={{ width: '120px', fontSize: '0.85rem', color: '#64748b' }}>
+            <span style={{ fontWeight: 600 }}>Words:</span> {typedWords.length} / {originalWords.length}
           </div>
-          <h2 style={{ fontSize: '1.25rem', fontWeight: 700 }}>{passage.title}</h2>
-        </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <button
-            onClick={() => onUpdateSettings?.({ highlightEnabled: !settings.highlightEnabled })}
-            className={`btn btn-sm ${settings.highlightEnabled ? 'btn-primary' : 'btn-secondary'}`}
-            title="Toggle word highlights (Disabled by default in UP Police exam)"
-          >
-            {settings.highlightEnabled ? '✨ Highlights: ON' : 'Highlights: OFF'}
-          </button>
-          <button
-            onClick={() => setShowVirtualKeyboard(!showVirtualKeyboard)}
-            className="btn btn-secondary btn-sm"
-            title="Toggle On-Screen Keyboard"
-          >
-            ⌨️ {showVirtualKeyboard ? 'Hide Keyboard' : 'Show Keyboard'}
-          </button>
-          <button onClick={toggleFullScreen} className="btn btn-secondary btn-sm" title="Toggle Fullscreen">
-            ⛶ Fullscreen
-          </button>
-          <button onClick={() => setShowSubmitModal(true)} className="btn btn-danger btn-sm">
-            Submit Test
-          </button>
-        </div>
-      </div>
+          {/* Center: Large bold countdown timer (Screenshot 1: "Time left:- 14:55") */}
+          <div className="ar-timer-center">
+            Time left:- {formatTime(secondsRemaining)}
+          </div>
 
-      {/* Real-time KPI Stats Ribbon */}
-      <div className="test-top-stats">
-        <div className="stat-chip">
-          <span className="stat-chip-label">Time Remaining</span>
-          <span className={`stat-chip-val time ${secondsRemaining < 60 ? 'warning' : ''}`}>
-            {formatTime(secondsRemaining)}
-          </span>
-        </div>
-
-        <div className="stat-chip">
-          <span className="stat-chip-label">Gross Speed</span>
-          <span className="stat-chip-val">{liveGrossWpm} <small style={{ fontSize: '0.75rem' }}>WPM</small></span>
-        </div>
-
-        <div className="stat-chip">
-          <span className="stat-chip-label">Accuracy</span>
-          <span className="stat-chip-val" style={{ color: liveAccuracy >= 85 ? '#16a34a' : '#dc2626' }}>
-            {liveAccuracy}%
-          </span>
-        </div>
-
-        <div className="stat-chip">
-          <span className="stat-chip-label">Keystrokes</span>
-          <span className="stat-chip-val">{typedText.length}</span>
-        </div>
-
-        <div className="stat-chip">
-          <span className="stat-chip-label">Backspaces</span>
-          <span className="stat-chip-val">{backspaceCount}</span>
-        </div>
-      </div>
-
-      {/* Test Passage Viewer */}
-      <div
-        ref={passagePaneRef}
-        className="passage-pane"
-        style={{ fontSize: `${settings.fontSize}px` }}
-      >
-        {originalWords.map((word, idx) => {
-          const isCurrent = idx === currentWordIndex;
-          const isCompleted = idx < currentWordIndex;
-          const isCorrect = isCompleted && typedWords[idx] === word;
-          const isWrong = isCompleted && typedWords[idx] !== word;
-
-          return (
-            <span
-              key={idx}
-              ref={isCurrent ? activeWordRef : null}
-              className={`passage-word ${
-                settings.highlightEnabled
-                  ? isCurrent
-                    ? 'active'
-                    : isCorrect
-                    ? 'completed-correct'
-                    : isWrong
-                    ? 'completed-wrong'
-                    : ''
-                  : ''
-              }`}
+          {/* Right: Candidate Avatar Card & Highlight Switch (Screenshot 1) */}
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px' }}>
+            {/* Candidate Frame */}
+            <div
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                background: '#ffffff',
+                border: '1.5px solid #cbd5e1',
+                borderRadius: '8px',
+                padding: '4px 10px',
+                boxShadow: '0 2px 4px rgba(0,0,0,0.05)'
+              }}
             >
-              {word}
-            </span>
-          );
-        })}
-      </div>
+              {/* Silhouette Avatar */}
+              <div
+                style={{
+                  width: '46px',
+                  height: '46px',
+                  borderRadius: '6px',
+                  background: 'linear-gradient(135deg, #334155 0%, #0f172a 100%)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  color: '#ffffff',
+                  fontSize: '1.4rem'
+                }}
+              >
+                👤
+              </div>
+              <div className="ar-candidate-name">
+                {candidateName}
+              </div>
+            </div>
 
-      {/* Candidate Typing Input Textarea */}
-      <div>
-        <textarea
-          ref={textareaRef}
-          value={typedText}
-          onChange={(e) => setTypedText(e.target.value)}
-          onKeyDown={handleKeyDown}
-          onCopy={handlePrevent}
-          onPaste={handlePrevent}
-          onCut={handlePrevent}
-          onContextMenu={handlePrevent}
-          onDrop={handlePrevent}
-          placeholder="Start typing the passage above... (Timer begins automatically upon typing)"
-          className="typing-textarea"
-          style={{ fontSize: `${settings.fontSize}px` }}
-          autoComplete="off"
-          autoCorrect="off"
-          autoCapitalize="off"
-          spellCheck="false"
-        />
-        <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '6px', fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-          <span>🔒 Anti-Cheat Active: Copy, Paste & Context-Menu disabled</span>
-          <span>{passage.language.startsWith('hindi') ? '✨ Inscript / Kruti Transliteration Active' : 'English QWERTY'}</span>
+            {/* Highlight Toggle Switch right below photo (Screenshot 1) */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }} title="Toggle Word Highlights (Disabled by default)">
+              <label className="ar-toggle-switch">
+                <input
+                  type="checkbox"
+                  checked={settings.highlightEnabled}
+                  onChange={(e) => onUpdateSettings?.({ highlightEnabled: e.target.checked })}
+                />
+                <span className="ar-toggle-slider" />
+              </label>
+            </div>
+          </div>
         </div>
+
+        {/* 3. TOP BOX: SOURCE PASSAGE DISPLAY (Screenshot 1) */}
+        <div ref={passagePaneRef} className="ar-source-box">
+          {originalWords.map((word, idx) => {
+            const isCurrent = idx === currentWordIndex;
+            const isCompleted = idx < currentWordIndex;
+            const isCorrect = isCompleted && typedWords[idx] === word;
+            const isWrong = isCompleted && typedWords[idx] !== word;
+
+            return (
+              <span
+                key={idx}
+                ref={isCurrent ? activeWordRef : null}
+                style={{
+                  marginRight: '0.35em',
+                  display: 'inline-block',
+                  backgroundColor: settings.highlightEnabled
+                    ? isCurrent
+                      ? '#fef08a'
+                      : isCorrect
+                      ? '#dcfce7'
+                      : isWrong
+                      ? '#fee2e2'
+                      : 'transparent'
+                    : 'transparent',
+                  color: settings.highlightEnabled
+                    ? isWrong
+                      ? '#dc2626'
+                      : '#000000'
+                    : '#000000',
+                  fontWeight: isCurrent && settings.highlightEnabled ? 700 : 400
+                }}
+              >
+                {word}
+              </span>
+            );
+          })}
+        </div>
+
+        {/* 4. BOTTOM BOX: LIME-GREEN TYPING INPUT BOX (Screenshot 1) */}
+        <div className="ar-typing-box">
+          <textarea
+            ref={textareaRef}
+            value={typedText}
+            onChange={(e) => setTypedText(e.target.value)}
+            onKeyDown={handleKeyDown}
+            onCopy={handlePrevent}
+            onPaste={handlePrevent}
+            onCut={handlePrevent}
+            autoFocus
+            spellCheck={false}
+            autoComplete="off"
+            autoCorrect="off"
+            autoCapitalize="off"
+            className="ar-typing-textarea"
+            placeholder={isTestStarted ? '' : 'Click here and start typing...'}
+          />
+
+          {/* Floating Purple Settings Button (Screenshot 1: bottom-right purple gear) */}
+          <button
+            type="button"
+            className="ar-floating-gear"
+            onClick={() => setShowSettingsModal(true)}
+            title="Typing Settings"
+          >
+            <svg width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+              <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            </svg>
+          </button>
+        </div>
+
+        {/* 5. BOTTOM ACTION BUTTONS BAR */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '6px' }}>
+          <button
+            onClick={onCancelTest}
+            className="btn btn-danger"
+            style={{ fontWeight: 700, padding: '10px 24px', backgroundColor: '#dc2626' }}
+          >
+            Cancel / Exit Test
+          </button>
+
+          <div style={{ display: 'flex', gap: '12px' }}>
+            <button
+              onClick={() => setShowVirtualKeyboard(!showVirtualKeyboard)}
+              className="btn btn-secondary btn-sm"
+            >
+              ⌨️ {showVirtualKeyboard ? 'Hide Keymap' : 'On-Screen Keys'}
+            </button>
+            <button
+              onClick={() => setShowSubmitModal(true)}
+              className="btn btn-primary"
+              style={{ fontWeight: 700, padding: '10px 32px', backgroundColor: '#0284c7' }}
+            >
+              Submit Test
+            </button>
+          </div>
+        </div>
+
       </div>
 
-      {/* On-Screen Keyboard */}
-      {showVirtualKeyboard && (
-        <div className="keyboard-layout">
-          <div style={{ fontSize: '0.8rem', fontWeight: 700, color: '#475569', textAlign: 'center', marginBottom: '4px' }}>
-            {passage.language === 'hindi_mangal'
-              ? 'Mangal Inscript Layout (Shift layer indicated in upper-left)'
-              : 'Standard QWERTY Layout'}
-          </div>
+      {/* Floating Settings Modal (triggered by purple gear icon) */}
+      {showSettingsModal && (
+        <div className="modal-overlay" onClick={() => setShowSettingsModal(false)}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '520px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '18px' }}>
+              <h3 style={{ fontSize: '1.2rem', fontWeight: 800, color: '#0f172a' }}>
+                Test Preferences & Settings
+              </h3>
+              <button
+                onClick={() => setShowSettingsModal(false)}
+                style={{ background: 'none', border: 'none', fontSize: '1.4rem', cursor: 'pointer', color: '#64748b' }}
+              >
+                &times;
+              </button>
+            </div>
 
-          <div className="keyboard-row">
-            {['1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '-', '='].map((k) => (
-              <div key={k} className={`key-cap ${activeKeyPressed === k ? 'active' : ''}`}>
-                <span className="key-sub-char">{k}</span>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              {/* Candidate Name Input */}
+              <div>
+                <label style={{ fontSize: '0.85rem', fontWeight: 700, color: '#334155', display: 'block', marginBottom: '6px' }}>
+                  Candidate Name (Appears on Screen):
+                </label>
+                <input
+                  type="text"
+                  value={candidateName}
+                  onChange={(e) => {
+                    const name = e.target.value.toUpperCase();
+                    setCandidateName(name);
+                    onUpdateSettings?.({ candidateName: name });
+                  }}
+                  style={{
+                    width: '100%',
+                    padding: '8px 12px',
+                    borderRadius: '6px',
+                    border: '1px solid #cbd5e1',
+                    fontWeight: 700,
+                    textTransform: 'uppercase'
+                  }}
+                />
               </div>
-            ))}
-          </div>
 
-          <div className="keyboard-row">
-            {['q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p', '[', ']'].map((k) => (
-              <div key={k} className={`key-cap ${activeKeyPressed.toLowerCase() === k ? 'active' : ''}`}>
-                <span className="key-hindi-char">
-                  {passage.language === 'hindi_mangal' ? translateToMangalInscript(k, false) : k.toUpperCase()}
-                </span>
-                <span className="key-sub-char">{k}</span>
-              </div>
-            ))}
-          </div>
+              {/* Toggles */}
+              <label style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', fontSize: '0.9rem' }}>
+                <input
+                  type="checkbox"
+                  checked={settings.highlightEnabled}
+                  onChange={(e) => onUpdateSettings?.({ highlightEnabled: e.target.checked })}
+                />
+                <span>Word Highlights (Disabled by default in UP Police exam)</span>
+              </label>
 
-          <div className="keyboard-row">
-            {['a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l', ';', "'"].map((k) => (
-              <div key={k} className={`key-cap ${activeKeyPressed.toLowerCase() === k ? 'active' : ''}`}>
-                <span className="key-hindi-char">
-                  {passage.language === 'hindi_mangal' ? translateToMangalInscript(k, false) : k.toUpperCase()}
-                </span>
-                <span className="key-sub-char">{k}</span>
-              </div>
-            ))}
-          </div>
+              <label style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', fontSize: '0.9rem' }}>
+                <input
+                  type="checkbox"
+                  checked={settings.autoScroll}
+                  onChange={(e) => onUpdateSettings?.({ autoScroll: e.target.checked })}
+                />
+                <span>Auto-Scroll Source Passage</span>
+              </label>
 
-          <div className="keyboard-row">
-            {['z', 'x', 'c', 'v', 'b', 'n', 'm', ',', '.'].map((k) => (
-              <div key={k} className={`key-cap ${activeKeyPressed.toLowerCase() === k ? 'active' : ''}`}>
-                <span className="key-hindi-char">
-                  {passage.language === 'hindi_mangal' ? translateToMangalInscript(k, false) : k.toUpperCase()}
-                </span>
-                <span className="key-sub-char">{k}</span>
-              </div>
-            ))}
-          </div>
+              <label style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', fontSize: '0.9rem' }}>
+                <input
+                  type="checkbox"
+                  checked={settings.backspaceEnabled}
+                  onChange={(e) => onUpdateSettings?.({ backspaceEnabled: e.target.checked })}
+                />
+                <span>Allow Backspace Editing</span>
+              </label>
 
-          <div className="keyboard-row">
-            <div className={`key-cap space ${activeKeyPressed === ' ' ? 'active' : ''}`}>
-              Space
+              <label style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', fontSize: '0.9rem' }}>
+                <input
+                  type="checkbox"
+                  checked={settings.soundEnabled}
+                  onChange={(e) => onUpdateSettings?.({ soundEnabled: e.target.checked })}
+                />
+                <span>Mechanical Typewriter Key Sounds</span>
+              </label>
+            </div>
+
+            <div style={{ marginTop: '24px', textAlign: 'right' }}>
+              <button onClick={() => setShowSettingsModal(false)} className="btn btn-primary" style={{ fontWeight: 700 }}>
+                Save & Close
+              </button>
             </div>
           </div>
         </div>
       )}
 
-      {/* Submit Confirmation Modal */}
+      {/* Confirmation Submit Modal */}
       {showSubmitModal && (
-        <div className="modal-overlay">
-          <div className="modal-content" style={{ maxWidth: '480px', textAlign: 'center' }}>
-            <h3 style={{ fontSize: '1.35rem', fontWeight: 800, marginBottom: '12px' }}>
-              Confirm Test Submission
+        <div className="modal-overlay" onClick={() => setShowSubmitModal(false)}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '440px', textAlign: 'center' }}>
+            <h3 style={{ fontSize: '1.25rem', fontWeight: 800, marginBottom: '12px', color: '#0f172a' }}>
+              Submit Official Test?
             </h3>
-            <p style={{ color: 'var(--text-muted)', marginBottom: '20px', lineHeight: 1.6 }}>
-              You still have <strong>{formatTime(secondsRemaining)}</strong> remaining. Are you sure you want to finalize your typing test and view the diagnostic evaluation?
+            <p style={{ color: '#64748b', fontSize: '0.95rem', marginBottom: '20px', lineHeight: 1.5 }}>
+              Are you sure you want to end your test now? Your Net WPM, accuracy, and mistake breakdown will be calculated according to official UPPRPB guidelines.
             </p>
-
             <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
-              <button
-                onClick={() => setShowSubmitModal(false)}
-                className="btn btn-secondary"
-              >
+              <button onClick={() => setShowSubmitModal(false)} className="btn btn-secondary">
                 Continue Typing
               </button>
-              <button
-                onClick={handleCompleteSubmission}
-                className="btn btn-danger"
-              >
-                Submit Test Now
+              <button onClick={handleCompleteSubmission} className="btn btn-primary" style={{ backgroundColor: '#0284c7', fontWeight: 700 }}>
+                Yes, Submit Now
               </button>
             </div>
           </div>
         </div>
       )}
+
     </div>
   );
 };

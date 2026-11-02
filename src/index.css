@@ -525,3 +525,215 @@ body {
     box-shadow: none !important;
   }
 }
+
+/* ==========================================================================
+   AR Typing Platform Replicated Exam Theme (Screenshots 1-4)
+   ========================================================================== */
+
+/* Top Black Exam Bar */
+.ar-exam-topbar {
+  background-color: #000000;
+  color: #ffffff;
+  padding: 10px 18px;
+  font-weight: 700;
+  font-size: 1rem;
+  letter-spacing: 0.3px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* Candidate Status & Timer Area */
+.ar-exam-status-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  background: #ffffff;
+  border-bottom: 1px solid #e2e8f0;
+  position: relative;
+}
+
+.ar-timer-center {
+  font-size: 1.65rem;
+  font-weight: 800;
+  color: #0f172a;
+  letter-spacing: 0.5px;
+  text-align: center;
+  flex: 1;
+}
+
+.ar-candidate-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.ar-avatar-frame {
+  width: 58px;
+  height: 58px;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #1e293b, #0f172a);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid #cbd5e1;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.ar-candidate-name {
+  font-size: 0.825rem;
+  font-weight: 800;
+  color: #0f172a;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+/* iOS-style Highlight Toggle Switch */
+.ar-toggle-switch {
+  position: relative;
+  display: inline-block;
+  width: 44px;
+  height: 24px;
+}
+
+.ar-toggle-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.ar-toggle-slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #cbd5e1;
+  transition: .3s;
+  border-radius: 24px;
+}
+
+.ar-toggle-slider:before {
+  position: absolute;
+  content: "";
+  height: 18px;
+  width: 18px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  transition: .3s;
+  border-radius: 50%;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.ar-toggle-switch input:checked + .ar-toggle-slider {
+  background-color: #10b981;
+}
+
+.ar-toggle-switch input:checked + .ar-toggle-slider:before {
+  transform: translateX(20px);
+}
+
+/* Source Passage Display Pane */
+.ar-source-box {
+  border: 2px solid #1e293b;
+  border-radius: 8px;
+  background: #ffffff;
+  padding: 18px 20px;
+  font-family: 'Georgia', 'Cambria', 'Times New Roman', serif;
+  font-size: 1.25rem;
+  line-height: 1.8;
+  color: #000000;
+  text-align: justify;
+  height: 300px;
+  overflow-y: auto;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+/* Candidate Lime-Green Typing Input Pane */
+.ar-typing-box {
+  border: 2px solid #84cc16;
+  border-radius: 8px;
+  background-color: #bef264;
+  position: relative;
+  height: 280px;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
+  overflow: hidden;
+}
+
+.ar-typing-textarea {
+  width: 100%;
+  height: 100%;
+  background-color: transparent;
+  border: none;
+  outline: none;
+  resize: none;
+  padding: 18px 20px;
+  font-family: inherit;
+  font-size: 1.15rem;
+  line-height: 1.7;
+  color: #0f172a;
+}
+
+/* Floating Purple Settings Button */
+.ar-floating-gear {
+  position: absolute;
+  bottom: 14px;
+  right: 14px;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: #7c3aed;
+  color: #ffffff;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(124, 58, 237, 0.4);
+  transition: all 0.2s ease;
+  z-index: 10;
+}
+
+.ar-floating-gear:hover {
+  background: #6d28d9;
+  transform: scale(1.08);
+}
+
+/* Special Passages Cards (Screenshot 4) */
+.ar-special-card {
+  background: #ffffff;
+  border: 1.5px solid #1e293b;
+  border-radius: 12px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.06);
+}
+
+.ar-special-card:hover {
+  border-color: #0284c7;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 14px rgba(2, 132, 199, 0.15);
+}
+
+.ar-badge-difficulty {
+  display: inline-block;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  border: 1px solid currentColor;
+}
+.ar-badge-b { color: #2563eb; border-color: #2563eb; }
+.ar-badge-e { color: #16a34a; border-color: #16a34a; }
+.ar-badge-m { color: #ea580c; border-color: #ea580c; }
+.ar-badge-h { color: #dc2626; border-color: #dc2626; }

@@ -17,7 +17,8 @@ const DEFAULT_SETTINGS: TestSettings = {
   backspaceEnabled: true,
   fullScreenEnabled: false,
   fontSize: 18,
-  autoStartTimer: true
+  autoStartTimer: true,
+  candidateName: 'PURENDAR'
 };
 
 export const App: React.FC = () => {
