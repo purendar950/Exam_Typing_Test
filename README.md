@@ -36,8 +36,8 @@ Designed with the exact layout and user interface patterns of [TestMentor](https
 
 ```bash
 # Clone the repository
-git clone https://github.com/<your-username>/<your-repo-name>.git
-cd <your-repo-name>
+git clone https://github.com/purendar950/Typing-computer-operator-.git
+cd Typing-computer-operator-
 
 # Install dependencies using pnpm
 pnpm install
@@ -50,18 +50,16 @@ pnpm dev
 
 ## 🌐 Deploying to GitHub Pages (Free)
 
-1. Create a new repository on GitHub (e.g. `up-computer-operator-typing`).
-2. Push this project to GitHub:
+1. Repository is already connected to `https://github.com/purendar950/Typing-computer-operator-.git`
+2. Push to GitHub:
    ```bash
-   git remote add origin https://github.com/<your-username>/up-computer-operator-typing.git
-   git branch -M main
    git push -u origin main
    ```
 3. In your GitHub repository:
    - Go to **Settings** → **Pages**.
    - Under **Build and deployment** → **Source**, select **GitHub Actions**.
 4. The site will automatically build and publish to:
-   `https://<your-username>.github.io/up-computer-operator-typing/`
+   `https://purendar950.github.io/Typing-computer-operator-/`
 
 ---
 
