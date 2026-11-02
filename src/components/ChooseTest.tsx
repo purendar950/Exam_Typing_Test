@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { Passage, Language, ExamCategory, TestSettings } from '../types';
 
 interface ChooseTestProps {
@@ -45,29 +45,52 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
     return displayDate;
   };
 
-  // Available unique dates
+  // Passages matching selected language
+  const languagePassages = useMemo(() => {
+    return passages.filter((p) => p.language === selectedLanguage);
+  }, [passages, selectedLanguage]);
+
+  // Available unique dates for the current language
   const availableIsoDates = useMemo(() => {
-    return Array.from(new Set(passages.map((p) => p.date).filter(Boolean))).sort().reverse();
-  }, [passages]);
+    return Array.from(new Set(languagePassages.map((p) => p.date).filter(Boolean))).sort().reverse();
+  }, [languagePassages]);
 
-  // Passages matching current language and date
-  const passagesForDateAndLang = useMemo(() => {
-    return passages.filter((p) => {
-      if (p.language !== selectedLanguage) return false;
-      if (selectedDate && p.date !== selectedDate) return false;
-      return true;
-    });
-  }, [passages, selectedLanguage, selectedDate]);
+  // Passages matching current language and date (guarantees different passages per date)
+  const activePassageList = useMemo(() => {
+    const exactMatches = languagePassages.filter((p) => p.date === selectedDate);
+    if (exactMatches.length > 0) {
+      return exactMatches;
+    }
 
-  // Fallback if no passages for date, get all for language
-  const activePassageList = passagesForDateAndLang.length > 0
-    ? passagesForDateAndLang
-    : passages.filter((p) => p.language === selectedLanguage);
+    // If an arbitrary date is chosen that doesn't have explicit entries,
+    // deterministically partition/rotate languagePassages so ANY date picked returns a unique set!
+    if (!selectedDate || languagePassages.length === 0) {
+      return languagePassages.slice(0, 4);
+    }
+
+    const hash = selectedDate.split('-').reduce((acc, part) => (acc * 37 + parseInt(part, 10)) >>> 0, 0);
+    const chunkSize = Math.min(4, languagePassages.length);
+    const offset = hash % languagePassages.length;
+    const rotated = [];
+    for (let i = 0; i < chunkSize; i++) {
+      rotated.push(languagePassages[(offset + i) % languagePassages.length]);
+    }
+    return rotated;
+  }, [languagePassages, selectedDate]);
+
+  // When selectedDate or selectedLanguage changes, immediately auto-select the first passage of that date!
+  useEffect(() => {
+    if (activePassageList.length > 0) {
+      setSelectedPassageId(activePassageList[0].id);
+    } else {
+      setSelectedPassageId('');
+    }
+  }, [selectedDate, selectedLanguage, activePassageList]);
 
   // Currently selected passage object
   const currentSelectedPassage = useMemo(() => {
-    return passages.find((p) => p.id === selectedPassageId) || activePassageList[0];
-  }, [passages, selectedPassageId, activePassageList]);
+    return activePassageList.find((p) => p.id === selectedPassageId) || activePassageList[0];
+  }, [selectedPassageId, activePassageList]);
 
   // Difficulty badge letter
   const getDifficultyBadge = (diff: string) => {
