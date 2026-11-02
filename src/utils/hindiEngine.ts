@@ -217,6 +217,47 @@ export function translateToKrutiDev(key: string, isShift: boolean, code?: string
 }
 
 /**
+ * Translates an entire string of English characters (or single character) to Hindi.
+ * Converts each ASCII character using Mangal Inscript or Kruti Dev mapping,
+ * while leaving Devanagari characters, numbers, and whitespace intact.
+ * Used for mobile Android keyboards, Gboard, paste, and IME input.
+ */
+export function translateEnglishStringToHindi(text: string, layout: 'mangal' | 'kruti'): string {
+  if (!text) return '';
+
+  let result = '';
+  for (let i = 0; i < text.length; i++) {
+    const char = text[i];
+
+    // Already Devanagari Unicode (\u0900-\u097F), keep it
+    if (/^[\u0900-\u097F]$/.test(char)) {
+      result += char;
+      continue;
+    }
+
+    // Whitespace
+    if (char === ' ' || char === '\n' || char === '\t') {
+      result += char;
+      continue;
+    }
+
+    // Determine if shifted:
+    // Uppercase A-Z or shifted symbols: ~ ! @ # $ % ^ & * ( ) _ + { } | : " < > ?
+    const isShift =
+      (char >= 'A' && char <= 'Z') ||
+      '~!@#$%^&*()_+{}|:"<>?'.includes(char);
+
+    if (layout === 'mangal') {
+      result += translateToMangalInscript(char, isShift);
+    } else {
+      result += translateToKrutiDev(char, isShift);
+    }
+  }
+
+  return result;
+}
+
+/**
  * Alt Codes table for UP Police Typing Exams
  * Directly extracted from the official candidate reference guide.
  */

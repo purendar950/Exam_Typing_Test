@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { MANGAL_LESSONS, ENGLISH_LESSONS } from '../data/passages';
-import { translateToMangalInscript } from '../utils/hindiEngine';
+import { translateToMangalInscript, translateEnglishStringToHindi } from '../utils/hindiEngine';
 import { audioEngine } from '../utils/audioEngine';
 import { HindiHelperModal } from './HindiHelperModal';
 import { HindiKeyboardLayout } from './HindiKeyboardLayout';
@@ -38,6 +38,49 @@ export const LearnScreen: React.FC<LearnScreenProps> = ({ onBackToTests }) => {
 
   const handleReset = () => {
     setTypedInput('');
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const nextVal = e.target.value;
+    const prevVal = typedInput;
+
+    if (activeTab === 'english') {
+      setTypedInput(nextVal);
+      return;
+    }
+
+    let prefixLen = 0;
+    while (
+      prefixLen < prevVal.length &&
+      prefixLen < nextVal.length &&
+      prevVal[prefixLen] === nextVal[prefixLen]
+    ) {
+      prefixLen++;
+    }
+
+    let suffixLen = 0;
+    while (
+      suffixLen < (prevVal.length - prefixLen) &&
+      suffixLen < (nextVal.length - prefixLen) &&
+      prevVal[prevVal.length - 1 - suffixLen] === nextVal[nextVal.length - 1 - suffixLen]
+    ) {
+      suffixLen++;
+    }
+
+    const inserted = nextVal.slice(prefixLen, nextVal.length - suffixLen);
+
+    if (!inserted) {
+      setTypedInput(nextVal);
+      return;
+    }
+
+    const translatedInserted = translateEnglishStringToHindi(inserted, 'mangal');
+    const finalVal =
+      prevVal.slice(0, prefixLen) +
+      translatedInserted +
+      prevVal.slice(prevVal.length - suffixLen);
+
+    setTypedInput(finalVal);
   };
 
   // Calculate live progress and accuracy
@@ -185,8 +228,12 @@ export const LearnScreen: React.FC<LearnScreenProps> = ({ onBackToTests }) => {
             <input
               type="text"
               value={typedInput}
-              onChange={(e) => setTypedInput(e.target.value)}
+              onChange={handleInputChange}
               onKeyDown={handleKeyDown}
+              autoCapitalize="off"
+              autoComplete="off"
+              autoCorrect="off"
+              spellCheck={false}
               disabled={isLessonComplete}
               placeholder={isLessonComplete ? "Lesson Completed! Click Reset or choose the next drill." : "Type the text above here..."}
               style={{

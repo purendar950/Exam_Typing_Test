@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { Language } from '../types';
 import { isWordCorrect, getSpellingSuggestions, addUserWord } from '../utils/spellingEngine';
 import { audioEngine } from '../utils/audioEngine';
-import { translateToMangalInscript, translateToKrutiDev } from '../utils/hindiEngine';
+import { translateToMangalInscript, translateToKrutiDev, translateEnglishStringToHindi } from '../utils/hindiEngine';
 import { BookLibraryModal } from './BookLibraryModal';
 import { HindiHelperModal } from './HindiHelperModal';
 import { HindiKeyboardLayout } from './HindiKeyboardLayout';
@@ -178,6 +178,84 @@ export const WordDocumentScreen: React.FC<WordDocumentScreenProps> = ({ onBackTo
     setContent(newContent);
     setTimeout(() => {
       el.selectionStart = el.selectionEnd = start + textToInsert.length;
+    }, 0);
+  };
+
+  const handleBeforeInput = (e: React.FormEvent<HTMLTextAreaElement>) => {
+    const nativeEvent = e.nativeEvent as InputEvent;
+    if (!nativeEvent || !nativeEvent.data) return;
+
+    if (!startTime) {
+      setStartTime(Date.now());
+    }
+    setKeystrokes((prev) => prev + 1);
+
+    if (language === 'hindi_mangal' || language === 'hindi_kruti') {
+      const layout = language === 'hindi_kruti' ? 'kruti' : 'mangal';
+      const translated = translateEnglishStringToHindi(nativeEvent.data, layout);
+      if (translated !== nativeEvent.data) {
+        e.preventDefault();
+        insertTextAtCursor(translated);
+        if (soundEnabled) audioEngine.playKeyClick();
+      }
+    }
+  };
+
+  const handleContentChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const nextVal = e.target.value;
+    const prevVal = content;
+
+    if (!startTime && nextVal.length > 0) {
+      setStartTime(Date.now());
+    }
+
+    if (language === 'english') {
+      setContent(nextVal);
+      return;
+    }
+
+    const layout = language === 'hindi_kruti' ? 'kruti' : 'mangal';
+
+    let prefixLen = 0;
+    while (
+      prefixLen < prevVal.length &&
+      prefixLen < nextVal.length &&
+      prevVal[prefixLen] === nextVal[prefixLen]
+    ) {
+      prefixLen++;
+    }
+
+    let suffixLen = 0;
+    while (
+      suffixLen < (prevVal.length - prefixLen) &&
+      suffixLen < (nextVal.length - prefixLen) &&
+      prevVal[prevVal.length - 1 - suffixLen] === nextVal[nextVal.length - 1 - suffixLen]
+    ) {
+      suffixLen++;
+    }
+
+    const inserted = nextVal.slice(prefixLen, nextVal.length - suffixLen);
+
+    if (!inserted) {
+      setContent(nextVal);
+      return;
+    }
+
+    const translatedInserted = translateEnglishStringToHindi(inserted, layout);
+
+    const finalVal =
+      prevVal.slice(0, prefixLen) +
+      translatedInserted +
+      prevVal.slice(prevVal.length - suffixLen);
+
+    setContent(finalVal);
+
+    const newCursor = prefixLen + translatedInserted.length;
+    setTimeout(() => {
+      if (textareaRef.current) {
+        textareaRef.current.selectionStart = newCursor;
+        textareaRef.current.selectionEnd = newCursor;
+      }
     }, 0);
   };
 
@@ -804,9 +882,14 @@ export const WordDocumentScreen: React.FC<WordDocumentScreenProps> = ({ onBackTo
           <textarea
             ref={textareaRef}
             value={content}
-            onChange={(e) => setContent(e.target.value)}
+            onChange={handleContentChange}
+            onBeforeInput={handleBeforeInput}
             onKeyDown={handleKeyDown}
             onScroll={handleScroll}
+            autoCapitalize="off"
+            autoCorrect="off"
+            autoComplete="off"
+            spellCheck={false}
             placeholder="Type your book here... (Words with typos will have a red wavy underline, exactly like MS Word)"
             style={{
               width: '100%',
