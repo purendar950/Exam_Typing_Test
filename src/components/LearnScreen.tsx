@@ -3,6 +3,7 @@ import { MANGAL_LESSONS, ENGLISH_LESSONS } from '../data/passages';
 import { translateToMangalInscript } from '../utils/hindiEngine';
 import { audioEngine } from '../utils/audioEngine';
 import { HindiHelperModal } from './HindiHelperModal';
+import { HindiKeyboardLayout } from './HindiKeyboardLayout';
 
 interface LearnScreenProps {
   onBackToTests: () => void;
@@ -29,11 +30,9 @@ export const LearnScreen: React.FC<LearnScreenProps> = ({ onBackToTests }) => {
     }
 
     if (activeTab === 'hindi' && e.key.length === 1 && !e.ctrlKey && !e.metaKey && e.key !== ' ') {
-      const translated = translateToMangalInscript(e.key, e.shiftKey);
-      if (translated !== e.key) {
-        e.preventDefault();
-        setTypedInput((prev) => prev + translated);
-      }
+      const translated = translateToMangalInscript(e.key, e.shiftKey, e.code);
+      e.preventDefault();
+      setTypedInput((prev) => prev + translated);
     }
   };
 
@@ -252,6 +251,15 @@ export const LearnScreen: React.FC<LearnScreenProps> = ({ onBackToTests }) => {
           </div>
         </div>
       </div>
+
+      {activeTab === 'hindi' && (
+        <div style={{ marginTop: '24px' }}>
+          <HindiKeyboardLayout
+            layout="mangal"
+            onInsertChar={(char) => setTypedInput((prev) => prev + char)}
+          />
+        </div>
+      )}
 
       <HindiHelperModal
         isOpen={isHindiHelperOpen}

@@ -4,6 +4,7 @@ import { translateToMangalInscript, translateToKrutiDev } from '../utils/hindiEn
 import { audioEngine } from '../utils/audioEngine';
 import { evaluateTypingTest } from '../utils/evaluator';
 import { HindiHelperModal } from './HindiHelperModal';
+import { HindiKeyboardLayout } from './HindiKeyboardLayout';
 
 interface StartTestProps {
   passage: Passage;
@@ -176,11 +177,11 @@ export const StartTest: React.FC<StartTestProps> = ({
       // Transliteration for Hindi
       if (passage.language === 'hindi_mangal') {
         e.preventDefault();
-        const hindiChar = translateToMangalInscript(e.key, e.shiftKey);
+        const hindiChar = translateToMangalInscript(e.key, e.shiftKey, e.code);
         insertCharacter(hindiChar);
       } else if (passage.language === 'hindi_kruti') {
         e.preventDefault();
-        const krutiChar = translateToKrutiDev(e.key);
+        const krutiChar = translateToKrutiDev(e.key, e.shiftKey, e.code);
         insertCharacter(krutiChar);
       }
     }
@@ -261,6 +262,31 @@ export const StartTest: React.FC<StartTestProps> = ({
             <span>📜 Auto Scroll:</span>
             <span style={{ color: settings.autoScroll ? '#bbf7d0' : '#cbd5e1' }}>
               {settings.autoScroll ? 'ON' : 'OFF'}
+            </span>
+          </button>
+
+          {/* Quick Hindi Keyboard Map Toggle in Topbar */}
+          <button
+            type="button"
+            onClick={() => setShowVirtualKeyboard(!showVirtualKeyboard)}
+            style={{
+              background: showVirtualKeyboard ? '#f59e0b' : 'rgba(255, 255, 255, 0.15)',
+              border: '1px solid rgba(255, 255, 255, 0.3)',
+              color: '#ffffff',
+              borderRadius: '4px',
+              padding: '4px 10px',
+              cursor: 'pointer',
+              fontSize: '0.8rem',
+              fontWeight: 700,
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px'
+            }}
+            title="Toggle Visual Hindi Keyboard Layout Map (Inscript / Kruti Dev)"
+          >
+            <span>⌨️ Layout Map:</span>
+            <span style={{ color: showVirtualKeyboard ? '#fef08a' : '#cbd5e1' }}>
+              {showVirtualKeyboard ? 'HIDE' : 'SHOW'}
             </span>
           </button>
 
@@ -612,6 +638,35 @@ export const StartTest: React.FC<StartTestProps> = ({
         }}
         defaultLayout={passage.language === 'hindi_kruti' ? 'kruti' : 'mangal'}
       />
+
+      {/* On-Screen Mapped Hindi Virtual Keyboard Modal */}
+      {showVirtualKeyboard && (
+        <div
+          className="modal-overlay"
+          onClick={() => {
+            setShowVirtualKeyboard(false);
+            textareaRef.current?.focus();
+          }}
+          style={{ zIndex: 9999, padding: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            style={{ width: '100%', maxWidth: '1020px', maxHeight: '92vh', overflowY: 'auto' }}
+          >
+            <HindiKeyboardLayout
+              layout={passage.language === 'hindi_kruti' ? 'kruti' : 'mangal'}
+              onInsertChar={(char) => {
+                insertCharacter(char);
+                textareaRef.current?.focus();
+              }}
+              onClose={() => {
+                setShowVirtualKeyboard(false);
+                textareaRef.current?.focus();
+              }}
+            />
+          </div>
+        </div>
+      )}
 
     </div>
   );
