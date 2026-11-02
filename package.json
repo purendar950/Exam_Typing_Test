@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "sync-passages": "python3 scripts/sync_artyping_daily.py"
   },
   "dependencies": {
     "canvas-confetti": "^1.9.4",
