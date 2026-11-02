@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { MANGAL_LESSONS, ENGLISH_LESSONS } from '../data/passages';
 import { translateToMangalInscript } from '../utils/hindiEngine';
 import { audioEngine } from '../utils/audioEngine';
+import { HindiHelperModal } from './HindiHelperModal';
 
 interface LearnScreenProps {
   onBackToTests: () => void;
@@ -12,6 +13,7 @@ export const LearnScreen: React.FC<LearnScreenProps> = ({ onBackToTests }) => {
   const [selectedLessonIndex, setSelectedLessonIndex] = useState<number>(0);
   const [typedInput, setTypedInput] = useState<string>('');
   const [activeKey, setActiveKey] = useState<string>('');
+  const [isHindiHelperOpen, setIsHindiHelperOpen] = useState<boolean>(false);
 
   const currentLessons = activeTab === 'hindi' ? MANGAL_LESSONS : ENGLISH_LESSONS;
   const currentLesson = currentLessons[selectedLessonIndex];
@@ -97,6 +99,14 @@ export const LearnScreen: React.FC<LearnScreenProps> = ({ onBackToTests }) => {
           className={`btn ${activeTab === 'english' ? 'btn-primary' : 'btn-secondary'}`}
         >
           English Touch Typing Lessons
+        </button>
+        <button
+          onClick={() => setIsHindiHelperOpen(true)}
+          className="btn"
+          style={{ background: '#fef3c7', color: '#b45309', border: '1px solid #fde68a', fontWeight: 700 }}
+          title="Open Hindi Character & Conjuncts Helper"
+        >
+          ⌨️ संयुक्ताक्षर गाइड (Hindi Conjuncts)
         </button>
       </div>
 
@@ -242,6 +252,12 @@ export const LearnScreen: React.FC<LearnScreenProps> = ({ onBackToTests }) => {
           </div>
         </div>
       </div>
+
+      <HindiHelperModal
+        isOpen={isHindiHelperOpen}
+        onClose={() => setIsHindiHelperOpen(false)}
+        defaultLayout="mangal"
+      />
     </div>
   );
 };

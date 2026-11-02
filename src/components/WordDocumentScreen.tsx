@@ -3,6 +3,9 @@ import { Language } from '../types';
 import { isWordCorrect, getSpellingSuggestions, addUserWord } from '../utils/spellingEngine';
 import { audioEngine } from '../utils/audioEngine';
 import { translateToMangalInscript, translateToKrutiDev } from '../utils/hindiEngine';
+import { BookLibraryModal } from './BookLibraryModal';
+import { HindiHelperModal } from './HindiHelperModal';
+import { Book, BookChapter } from '../data/bookLibrary';
 
 interface WordDocumentScreenProps {
   onBackToTests: () => void;
@@ -43,6 +46,15 @@ export const WordDocumentScreen: React.FC<WordDocumentScreenProps> = ({ onBackTo
   const [zoomLevel, setZoomLevel] = useState<number>(100);
   const [activeRibbonTab, setActiveRibbonTab] = useState<'home' | 'layout' | 'review'>('home');
   const [saveToast, setSaveToast] = useState<string>('');
+
+  // Modals & Type-Along states
+  const [isBookLibraryOpen, setIsBookLibraryOpen] = useState<boolean>(false);
+  const [isHindiHelperOpen, setIsHindiHelperOpen] = useState<boolean>(false);
+  const [activeTypeAlong, setActiveTypeAlong] = useState<{
+    bookTitle: string;
+    chapterTitle: string;
+    content: string;
+  } | null>(null);
 
   // Context menu for spelling suggestions
   const [contextMenu, setContextMenu] = useState<MisspelledContext | null>(null);
@@ -244,6 +256,34 @@ export const WordDocumentScreen: React.FC<WordDocumentScreenProps> = ({ onBackTo
   const showToast = (msg: string) => {
     setSaveToast(msg);
     setTimeout(() => setSaveToast(''), 3000);
+  };
+
+  // Handle Type-Along selection
+  const handleSelectChapterForTypeAlong = (book: Book, chapter: BookChapter) => {
+    const lang: Language = book.language === 'hindi' ? 'hindi_mangal' : 'english';
+    setLanguage(lang);
+    if (book.language === 'hindi') {
+      setFontFamily('Mangal');
+    }
+    setActiveTypeAlong({
+      bookTitle: book.title,
+      chapterTitle: chapter.title,
+      content: chapter.content
+    });
+    setDocTitle(`${book.title} - ${chapter.title}`);
+    setContent('');
+    setStartTime(null);
+    setKeystrokes(0);
+    showToast(`Type-Along started: ${chapter.title}`);
+    setTimeout(() => textareaRef.current?.focus(), 100);
+  };
+
+  // Handle inserting book chapter into document
+  const handleInsertChapterContent = (text: string, title: string) => {
+    setDocTitle(title);
+    setContent(text);
+    showToast('Book chapter loaded into document');
+    setTimeout(() => textareaRef.current?.focus(), 100);
   };
 
   // Font family mapping
@@ -558,11 +598,130 @@ export const WordDocumentScreen: React.FC<WordDocumentScreenProps> = ({ onBackTo
             </button>
           </div>
 
+          {/* Book Library & Hindi Helper buttons */}
+          <div className="ms-word-toolgroup">
+            <button
+              onClick={() => setIsBookLibraryOpen(true)}
+              className="ms-word-btn"
+              style={{
+                background: '#e0f2fe',
+                color: '#0369a1',
+                fontWeight: 800,
+                border: '1px solid #7dd3fc',
+                borderRadius: '4px'
+              }}
+              title="Classic Hindi & English Books Library (गोदान, कफ़न, Sherlock Holmes) to type along"
+            >
+              📚 Books Library
+            </button>
+            <button
+              onClick={() => setIsHindiHelperOpen(true)}
+              className="ms-word-btn"
+              style={{
+                background: '#fef3c7',
+                color: '#b45309',
+                fontWeight: 800,
+                border: '1px solid #fde68a',
+                borderRadius: '4px'
+              }}
+              title="Hindi Character & Conjuncts Helper (संयुक्ताक्षर गाइड)"
+            >
+              ⌨️ Hindi Helper
+            </button>
+          </div>
+
         </div>
       </div>
 
       {/* 3. A4 PAPER SHEET WORKSPACE (THE DESK) */}
       <div className="ms-word-desk" onClick={() => textareaRef.current?.focus()}>
+        {/* Type-Along Reference Reading Pane (Split View) */}
+        {activeTypeAlong && (
+          <div
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              maxWidth: '850px',
+              width: '100%',
+              margin: '0 auto 16px auto',
+              background: '#ffffff',
+              borderRadius: '8px',
+              border: '1px solid #bae6fd',
+              boxShadow: '0 4px 12px rgba(2, 132, 199, 0.12)',
+              overflow: 'hidden'
+            }}
+          >
+            {/* Split view header */}
+            <div
+              style={{
+                background: 'linear-gradient(135deg, #0284c7, #0369a1)',
+                color: '#ffffff',
+                padding: '8px 16px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                fontSize: '0.88rem'
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <span style={{ fontSize: '1.1rem' }}>📖</span>
+                <strong>{activeTypeAlong.bookTitle}</strong> &bull; <span>{activeTypeAlong.chapterTitle}</span>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <span style={{ fontSize: '0.78rem', background: 'rgba(255,255,255,0.2)', padding: '2px 8px', borderRadius: '4px' }}>
+                  Words: {wordCount} typed
+                </span>
+                <button
+                  onClick={() => setIsBookLibraryOpen(true)}
+                  style={{
+                    background: 'rgba(255,255,255,0.2)',
+                    border: 'none',
+                    color: '#ffffff',
+                    borderRadius: '4px',
+                    padding: '2px 8px',
+                    cursor: 'pointer',
+                    fontSize: '0.75rem',
+                    fontWeight: 700
+                  }}
+                >
+                  Change Chapter
+                </button>
+                <button
+                  onClick={() => setActiveTypeAlong(null)}
+                  style={{
+                    background: 'rgba(239, 68, 68, 0.85)',
+                    border: 'none',
+                    color: '#ffffff',
+                    borderRadius: '4px',
+                    padding: '2px 8px',
+                    cursor: 'pointer',
+                    fontSize: '0.75rem',
+                    fontWeight: 700
+                  }}
+                >
+                  ✕ Close Split View
+                </button>
+              </div>
+            </div>
+
+            {/* Split view content */}
+            <div
+              style={{
+                padding: '14px 20px',
+                maxHeight: '160px',
+                overflowY: 'auto',
+                fontSize: '0.98rem',
+                lineHeight: 1.7,
+                color: '#0f172a',
+                fontFamily: language.includes('hindi') ? "'Noto Sans Devanagari', Mangal, sans-serif" : 'Georgia, serif',
+                background: '#f8fafc',
+                borderBottom: '1px solid #e2e8f0'
+              }}
+            >
+              {activeTypeAlong.content}
+            </div>
+          </div>
+        )}
+
         {/* Top Inch Ruler */}
         <div className="ms-word-ruler">
           <span>0"</span>
@@ -786,6 +945,21 @@ export const WordDocumentScreen: React.FC<WordDocumentScreenProps> = ({ onBackTo
           </div>
         </div>
       </div>
+
+      {/* Book Library Modal */}
+      <BookLibraryModal
+        isOpen={isBookLibraryOpen}
+        onClose={() => setIsBookLibraryOpen(false)}
+        onSelectChapterForTypeAlong={handleSelectChapterForTypeAlong}
+        onInsertChapterContent={handleInsertChapterContent}
+      />
+
+      {/* Hindi Character & Conjuncts Helper Modal */}
+      <HindiHelperModal
+        isOpen={isHindiHelperOpen}
+        onClose={() => setIsHindiHelperOpen(false)}
+        defaultLayout={language === 'hindi_kruti' ? 'kruti' : 'mangal'}
+      />
     </div>
   );
 };
