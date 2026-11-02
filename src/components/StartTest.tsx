@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { Passage, TestSettings, EvaluationResult } from '../types';
-import { translateToMangalInscript, translateToKrutiDev } from '../utils/hindiEngine';
+import { translateToMangalInscript, translateToKrutiDev, translateEnglishStringToHindi } from '../utils/hindiEngine';
 import { audioEngine } from '../utils/audioEngine';
 import { evaluateTypingTest } from '../utils/evaluator';
 import { HindiHelperModal } from './HindiHelperModal';
@@ -200,6 +200,92 @@ export const StartTest: React.FC<StartTestProps> = ({
       if (textareaRef.current) {
         textareaRef.current.selectionStart = start + char.length;
         textareaRef.current.selectionEnd = start + char.length;
+      }
+    }, 0);
+  };
+
+  // Intercept beforeinput (Fires on Android Gboard / Chrome mobile before text changes)
+  const handleBeforeInput = (e: React.FormEvent<HTMLTextAreaElement>) => {
+    const nativeEvent = e.nativeEvent as InputEvent;
+    if (!nativeEvent || !nativeEvent.data) return;
+
+    if (!isTestStarted) {
+      setIsTestStarted(true);
+    }
+
+    if (passage.language === 'hindi_mangal' || passage.language === 'hindi_kruti') {
+      const layout = passage.language === 'hindi_kruti' ? 'kruti' : 'mangal';
+      const translated = translateEnglishStringToHindi(nativeEvent.data, layout);
+      if (translated !== nativeEvent.data) {
+        e.preventDefault();
+        insertCharacter(translated);
+        audioEngine.playKeyClick();
+      }
+    }
+  };
+
+  // Comprehensive Change Handler (Handles any text changes, mobile composition, and diffs)
+  const handleTextChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const nextVal = e.target.value;
+    const prevVal = typedText;
+
+    if (!isTestStarted && nextVal.length > 0) {
+      setIsTestStarted(true);
+    }
+
+    // For English test, accept directly
+    if (passage.language === 'english') {
+      setTypedText(nextVal);
+      return;
+    }
+
+    // For Hindi test, translate any newly inserted English characters
+    const layout = passage.language === 'hindi_kruti' ? 'kruti' : 'mangal';
+
+    // Find common prefix
+    let prefixLen = 0;
+    while (
+      prefixLen < prevVal.length &&
+      prefixLen < nextVal.length &&
+      prevVal[prefixLen] === nextVal[prefixLen]
+    ) {
+      prefixLen++;
+    }
+
+    // Find common suffix
+    let suffixLen = 0;
+    while (
+      suffixLen < (prevVal.length - prefixLen) &&
+      suffixLen < (nextVal.length - prefixLen) &&
+      prevVal[prevVal.length - 1 - suffixLen] === nextVal[nextVal.length - 1 - suffixLen]
+    ) {
+      suffixLen++;
+    }
+
+    const inserted = nextVal.slice(prefixLen, nextVal.length - suffixLen);
+
+    // If text was only deleted (backspace), update directly
+    if (!inserted) {
+      setTypedText(nextVal);
+      return;
+    }
+
+    // Translate any English characters in the inserted text to Hindi
+    const translatedInserted = translateEnglishStringToHindi(inserted, layout);
+
+    const finalVal =
+      prevVal.slice(0, prefixLen) +
+      translatedInserted +
+      prevVal.slice(prevVal.length - suffixLen);
+
+    setTypedText(finalVal);
+
+    // Reposition cursor right after translated inserted text
+    const newCursor = prefixLen + translatedInserted.length;
+    setTimeout(() => {
+      if (textareaRef.current) {
+        textareaRef.current.selectionStart = newCursor;
+        textareaRef.current.selectionEnd = newCursor;
       }
     }, 0);
   };
@@ -451,7 +537,8 @@ export const StartTest: React.FC<StartTestProps> = ({
           <textarea
             ref={textareaRef}
             value={typedText}
-            onChange={(e) => setTypedText(e.target.value)}
+            onChange={handleTextChange}
+            onBeforeInput={handleBeforeInput}
             onKeyDown={handleKeyDown}
             onCopy={handlePrevent}
             onPaste={handlePrevent}
