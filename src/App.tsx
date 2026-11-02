@@ -9,6 +9,7 @@ import { LearnScreen } from './components/LearnScreen';
 import { WordDocumentScreen } from './components/WordDocumentScreen';
 import { RulesModal } from './components/RulesModal';
 import { HistoryModal } from './components/HistoryModal';
+import { HindiHelperModal } from './components/HindiHelperModal';
 import { audioEngine } from './utils/audioEngine';
 
 const DEFAULT_SETTINGS: TestSettings = {
@@ -56,6 +57,7 @@ export const App: React.FC = () => {
   // Modals
   const [isRulesOpen, setIsRulesOpen] = useState<boolean>(false);
   const [isHistoryOpen, setIsHistoryOpen] = useState<boolean>(false);
+  const [isHindiHelperOpen, setIsHindiHelperOpen] = useState<boolean>(false);
 
   // Save settings
   const handleUpdateSettings = (newSettings: Partial<TestSettings>) => {
@@ -153,6 +155,7 @@ export const App: React.FC = () => {
         }}
         onOpenRules={() => setIsRulesOpen(true)}
         onOpenHistory={() => setIsHistoryOpen(true)}
+        onOpenHindiHelper={() => setIsHindiHelperOpen(true)}
         settings={settings}
         onToggleSound={toggleSound}
       />
@@ -227,6 +230,12 @@ export const App: React.FC = () => {
         onClose={() => setIsHistoryOpen(false)}
         history={history}
         onClearHistory={handleClearHistory}
+      />
+
+      <HindiHelperModal
+        isOpen={isHindiHelperOpen}
+        onClose={() => setIsHindiHelperOpen(false)}
+        defaultLayout={selectedPassage?.language === 'hindi_kruti' ? 'kruti' : 'mangal'}
       />
     </div>
   );

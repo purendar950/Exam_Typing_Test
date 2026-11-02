@@ -3,6 +3,7 @@ import { Passage, TestSettings, EvaluationResult } from '../types';
 import { translateToMangalInscript, translateToKrutiDev } from '../utils/hindiEngine';
 import { audioEngine } from '../utils/audioEngine';
 import { evaluateTypingTest } from '../utils/evaluator';
+import { HindiHelperModal } from './HindiHelperModal';
 
 interface StartTestProps {
   passage: Passage;
@@ -29,6 +30,7 @@ export const StartTest: React.FC<StartTestProps> = ({
   const [showSubmitModal, setShowSubmitModal] = useState<boolean>(false);
   const [showVirtualKeyboard, setShowVirtualKeyboard] = useState<boolean>(false);
   const [showSettingsModal, setShowSettingsModal] = useState<boolean>(false);
+  const [showHindiHelper, setShowHindiHelper] = useState<boolean>(false);
   const [candidateName, setCandidateName] = useState<string>(settings.candidateName || 'PURENDAR');
 
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -370,6 +372,17 @@ export const StartTest: React.FC<StartTestProps> = ({
             >
               ⌨️ {showVirtualKeyboard ? 'Hide Keymap' : 'On-Screen Keys'}
             </button>
+            {passage.language.includes('hindi') && (
+              <button
+                type="button"
+                onClick={() => setShowHindiHelper(true)}
+                className="btn btn-sm"
+                style={{ background: '#fef3c7', color: '#b45309', border: '1px solid #fde68a', fontWeight: 700 }}
+                title="Look up keystrokes for Hindi Conjuncts (संयुक्ताक्षर) & special characters"
+              >
+                ⌨️ Hindi Keys
+              </button>
+            )}
             <button
               onClick={() => setShowSubmitModal(true)}
               className="btn btn-primary"
@@ -491,6 +504,16 @@ export const StartTest: React.FC<StartTestProps> = ({
           </div>
         </div>
       )}
+
+      {/* Hindi Character & Conjuncts Helper Modal */}
+      <HindiHelperModal
+        isOpen={showHindiHelper}
+        onClose={() => {
+          setShowHindiHelper(false);
+          textareaRef.current?.focus();
+        }}
+        defaultLayout={passage.language === 'hindi_kruti' ? 'kruti' : 'mangal'}
+      />
 
     </div>
   );
