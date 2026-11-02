@@ -141,24 +141,26 @@ export const App: React.FC = () => {
 
   return (
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
-      <Header
-        currentTab={activeTab}
-        onSelectTab={(tab) => {
-          setActiveTab(tab);
-          if (tab === 'learn') {
-            setCurrentView('learn');
-          } else if (tab === 'book') {
-            setCurrentView('book');
-          } else {
-            setCurrentView('choose');
-          }
-        }}
-        onOpenRules={() => setIsRulesOpen(true)}
-        onOpenHistory={() => setIsHistoryOpen(true)}
-        onOpenHindiHelper={() => setIsHindiHelperOpen(true)}
-        settings={settings}
-        onToggleSound={toggleSound}
-      />
+      {currentView !== 'test' && (
+        <Header
+          currentTab={activeTab}
+          onSelectTab={(tab) => {
+            setActiveTab(tab);
+            if (tab === 'learn') {
+              setCurrentView('learn');
+            } else if (tab === 'book') {
+              setCurrentView('book');
+            } else {
+              setCurrentView('choose');
+            }
+          }}
+          onOpenRules={() => setIsRulesOpen(true)}
+          onOpenHistory={() => setIsHistoryOpen(true)}
+          onOpenHindiHelper={() => setIsHindiHelperOpen(true)}
+          settings={settings}
+          onToggleSound={toggleSound}
+        />
+      )}
 
       <main style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
         {currentView === 'choose' && (
@@ -204,7 +206,7 @@ export const App: React.FC = () => {
         )}
       </main>
 
-      {currentView !== 'book' && (
+      {currentView !== 'book' && currentView !== 'test' && (
         <footer
           style={{
             background: '#ffffff',

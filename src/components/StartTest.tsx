@@ -32,10 +32,20 @@ export const StartTest: React.FC<StartTestProps> = ({
   const [showSettingsModal, setShowSettingsModal] = useState<boolean>(false);
   const [showHindiHelper, setShowHindiHelper] = useState<boolean>(false);
   const [candidateName, setCandidateName] = useState<string>(settings.candidateName || 'PURENDAR');
+  const [isFullscreen, setIsFullscreen] = useState<boolean>(() => !!document.fullscreenElement);
 
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const passagePaneRef = useRef<HTMLDivElement>(null);
   const activeWordRef = useRef<HTMLSpanElement>(null);
+
+  // Sync fullscreen state
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      setIsFullscreen(!!document.fullscreenElement);
+    };
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
+  }, []);
 
   // Split original passage into words
   const originalWords = useMemo(() => {
@@ -54,19 +64,44 @@ export const StartTest: React.FC<StartTestProps> = ({
     return Math.max(0, typedWords.length - 1);
   }, [typedText, typedWords]);
 
-  // Auto-scroll passage view to keep active word in view
+  // Auto-scroll passage view ONLY when typing reaches the bottom visible lines
   useEffect(() => {
-    if (settings.autoScroll && activeWordRef.current && passagePaneRef.current) {
-      const pane = passagePaneRef.current;
-      const word = activeWordRef.current;
-      const wordTop = word.offsetTop;
-      const paneHeight = pane.clientHeight;
-      if (wordTop > pane.scrollTop + paneHeight - 60 || wordTop < pane.scrollTop + 30) {
-        pane.scrollTo({
-          top: Math.max(0, wordTop - paneHeight / 2),
-          behavior: 'smooth'
-        });
+    if (!settings.autoScroll || !passagePaneRef.current) return;
+    const pane = passagePaneRef.current;
+
+    // At the beginning, keep top aligned
+    if (currentWordIndex <= 1) {
+      if (pane.scrollTop !== 0) {
+        pane.scrollTop = 0;
       }
+      return;
+    }
+
+    if (!activeWordRef.current) return;
+    const word = activeWordRef.current;
+
+    const paneRect = pane.getBoundingClientRect();
+    const wordRect = word.getBoundingClientRect();
+
+    // Word position relative to visible viewport of pane
+    const wordTopRel = wordRect.top - paneRect.top;
+    const wordBottomRel = wordRect.bottom - paneRect.top;
+
+    // Only scroll if active word has actually reached near the bottom of visible viewport (within 40px of bottom)
+    if (wordBottomRel > pane.clientHeight - 40) {
+      // Gently bring the active word to the middle of the viewport so upcoming text is visible
+      const targetScroll = pane.scrollTop + (wordBottomRel - (pane.clientHeight * 0.45));
+      pane.scrollTo({
+        top: targetScroll,
+        behavior: 'smooth'
+      });
+    } else if (wordTopRel < 15 && pane.scrollTop > 0) {
+      // If user backspaced above the top visible line
+      const targetScroll = Math.max(0, pane.scrollTop + wordTopRel - 30);
+      pane.scrollTo({
+        top: targetScroll,
+        behavior: 'smooth'
+      });
     }
   }, [currentWordIndex, settings.autoScroll]);
 
@@ -198,21 +233,33 @@ export const StartTest: React.FC<StartTestProps> = ({
   };
 
   return (
-    <div style={{ backgroundColor: '#ffffff', minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+    <div className="ar-test-wrapper">
       
       {/* 1. TOP BLACK EXAM BAR (Screenshot 1) */}
       <div className="ar-exam-topbar">
         <span>UP Police SI/ASI/Computer Operator {getExamLanguageTitle()} Typing</span>
         <button
           onClick={toggleFullScreen}
-          style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer', fontSize: '0.85rem' }}
-          title="Toggle Fullscreen"
+          style={{
+            background: isFullscreen ? '#0284c7' : 'rgba(255, 255, 255, 0.15)',
+            border: '1px solid rgba(255, 255, 255, 0.3)',
+            color: '#ffffff',
+            borderRadius: '4px',
+            padding: '4px 12px',
+            cursor: 'pointer',
+            fontSize: '0.82rem',
+            fontWeight: 700,
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '6px'
+          }}
+          title={isFullscreen ? 'Exit Fullscreen' : 'Enter Fullscreen (Edge-to-Edge)'}
         >
-          ⛶ Fullscreen
+          {isFullscreen ? '⛶ Exit Fullscreen' : '⛶ Fullscreen'}
         </button>
       </div>
 
-      <div className="container" style={{ maxWidth: '1020px', flex: 1, padding: '12px 16px', display: 'flex', flexDirection: 'column', gap: '14px' }}>
+      <div className="ar-test-container">
         
         {/* 2. SUB-HEADER / STATUS BAR (Screenshot 1) */}
         <div
