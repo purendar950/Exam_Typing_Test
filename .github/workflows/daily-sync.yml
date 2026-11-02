@@ -28,20 +28,16 @@ jobs:
           ARTYPING_EMAIL: ${{ secrets.ARTYPING_EMAIL }}
           ARTYPING_PASSWORD: ${{ secrets.ARTYPING_PASSWORD }}
         run: |
-          echo "[*] Syncing open-tier exam passages (TypeMangal, CGLTyping, open exam repositories)..."
-          python3 scripts/sync_free_passages.py
-          if [ -n "$ARTYPING_EMAIL" ] && [ -n "$ARTYPING_PASSWORD" ]; then
-            echo "[*] Attempting AR Typing sync with credentials..."
-            python3 scripts/sync_artyping_daily.py || echo "[!] AR Typing sync skipped or failed (unsubscribed account); open sources succeeded."
-          fi
+          echo "[*] Syncing daily passages from AR Typing Platform..."
+          python3 scripts/sync_artyping_daily.py
 
       - name: Check for changes and commit
         run: |
           git config user.name "GitHub Actions [Daily Sync]"
           git config user.email "actions@github.com"
-          if ! git diff --quiet src/data/passages.ts; then
+          if ! git diff --quiet src/data/passages.ts public/passages-by-date.json; then
             echo "[+] New daily passages detected! Committing and pushing..."
-            git add src/data/passages.ts
+            git add src/data/passages.ts public/passages-by-date.json
             git commit -m "Auto-sync daily typing paragraphs [$(date +'%Y-%m-%d')]"
             git push origin main
           else

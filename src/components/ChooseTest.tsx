@@ -19,12 +19,13 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
 
   // Form states matching Screenshots 2 & 3
   const [selectedLanguage, setSelectedLanguage] = useState<Language>('english');
-  const [selectedDate, setSelectedDate] = useState<string>('2026-10-25');
+  const [selectedDate, setSelectedDate] = useState<string>('2026-10-26');
   const [selectedPassageId, setSelectedPassageId] = useState<string>('');
   const [selectedDuration, setSelectedDuration] = useState<number>(15);
   const [inputLimit, setInputLimit] = useState<string>('Words');
   const [isPassageDropdownOpen, setIsPassageDropdownOpen] = useState<boolean>(false);
   const [selectedCategoryTab, setSelectedCategoryTab] = useState<string>('all');
+  const [isLoadingPassages, setIsLoadingPassages] = useState<boolean>(false);
 
   // Convert date format YYYY-MM-DD to DD/MM/YYYY for AR Typing display
   const toDisplayDate = (isoDate: string) => {
@@ -52,44 +53,52 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
 
   // Available unique dates for the current language
   const availableIsoDates = useMemo(() => {
-    return Array.from(new Set(languagePassages.map((p) => p.date).filter(Boolean))).sort().reverse();
+    return Array.from(new Set(languagePassages.map((p) => p.date).filter(Boolean)))
+      .sort()
+      .reverse();
   }, [languagePassages]);
 
-  // Passages matching current language and date (guarantees different passages per date)
+  // Auto-initialize selectedDate if current selectedDate is not among available dates
+  useEffect(() => {
+    if (availableIsoDates.length > 0 && !availableIsoDates.includes(selectedDate)) {
+      setSelectedDate(availableIsoDates[0]);
+    }
+  }, [availableIsoDates, selectedDate]);
+
+  // Passages matching current language and date
   const activePassageList = useMemo(() => {
     const exactMatches = languagePassages.filter((p) => p.date === selectedDate);
     if (exactMatches.length > 0) {
       return exactMatches;
     }
-
-    // If an arbitrary date is chosen that doesn't have explicit entries,
-    // deterministically partition/rotate languagePassages so ANY date picked returns a unique set!
-    if (!selectedDate || languagePassages.length === 0) {
-      return languagePassages.slice(0, 4);
-    }
-
-    const hash = selectedDate.split('-').reduce((acc, part) => (acc * 37 + parseInt(part, 10)) >>> 0, 0);
-    const chunkSize = Math.min(4, languagePassages.length);
-    const offset = hash % languagePassages.length;
-    const rotated = [];
-    for (let i = 0; i < chunkSize; i++) {
-      rotated.push(languagePassages[(offset + i) % languagePassages.length]);
-    }
-    return rotated;
+    // If no exact match, return empty array so user is prompted to pick an available date
+    return [];
   }, [languagePassages, selectedDate]);
 
-  // When selectedDate or selectedLanguage changes, immediately auto-select the first passage of that date!
-  useEffect(() => {
-    if (activePassageList.length > 0) {
-      setSelectedPassageId(activePassageList[0].id);
-    } else {
-      setSelectedPassageId('');
-    }
-  }, [selectedDate, selectedLanguage, activePassageList]);
+  // Handle date change with simulated AR Typing loading feedback
+  const handleDateChange = (newDate: string) => {
+    setIsLoadingPassages(true);
+    setSelectedDate(newDate);
+    setSelectedPassageId('');
+    setTimeout(() => {
+      setIsLoadingPassages(false);
+    }, 180);
+  };
+
+  // Handle language change
+  const handleLanguageChange = (newLang: Language) => {
+    setIsLoadingPassages(true);
+    setSelectedLanguage(newLang);
+    setSelectedPassageId('');
+    setTimeout(() => {
+      setIsLoadingPassages(false);
+    }, 180);
+  };
 
   // Currently selected passage object
   const currentSelectedPassage = useMemo(() => {
-    return activePassageList.find((p) => p.id === selectedPassageId) || activePassageList[0];
+    if (!selectedPassageId) return null;
+    return activePassageList.find((p) => p.id === selectedPassageId) || null;
   }, [selectedPassageId, activePassageList]);
 
   // Difficulty badge letter
@@ -158,39 +167,45 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
                 display: 'flex',
                 alignItems: 'center',
                 textAlign: 'center',
-                margin: '18px 0 28px',
+                margin: '20px 0',
                 color: '#64748b',
-                fontWeight: 600,
+                fontWeight: 700,
                 fontSize: '0.9rem'
               }}
             >
-              <div style={{ flex: 1, height: '1px', background: '#e2e8f0' }} />
-              <span style={{ padding: '0 16px', letterSpacing: '1px' }}>OR</span>
-              <div style={{ flex: 1, height: '1px', background: '#e2e8f0' }} />
+              <div style={{ flex: 1, height: '1px', backgroundColor: '#e2e8f0' }} />
+              <span style={{ padding: '0 16px' }}>OR</span>
+              <div style={{ flex: 1, height: '1px', backgroundColor: '#e2e8f0' }} />
             </div>
 
-            {/* Difficulty Legend */}
+            {/* Difficulty Legend (Screenshot 2) */}
             <div
               style={{
                 display: 'flex',
-                alignItems: 'center',
                 justifyContent: 'center',
                 gap: '16px',
-                fontSize: '0.85rem',
-                fontWeight: 600,
-                color: '#334155',
                 marginBottom: '24px',
+                fontSize: '0.85rem',
+                color: '#475569',
                 flexWrap: 'wrap'
               }}
             >
-              <span><span className="ar-badge-difficulty ar-badge-b" style={{ marginRight: '4px' }}>B</span> - Basic</span>
-              <span><span className="ar-badge-difficulty ar-badge-e" style={{ marginRight: '4px' }}>E</span> - Easy</span>
-              <span><span className="ar-badge-difficulty ar-badge-m" style={{ marginRight: '4px' }}>M</span> - Moderate</span>
-              <span><span className="ar-badge-difficulty ar-badge-h" style={{ marginRight: '4px' }}>H</span> - Hard</span>
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                <span className="ar-badge-difficulty ar-badge-b">B</span> - Basic
+              </span>
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                <span className="ar-badge-difficulty ar-badge-e">E</span> - Easy
+              </span>
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                <span className="ar-badge-difficulty ar-badge-m">M</span> - Moderate
+              </span>
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                <span className="ar-badge-difficulty ar-badge-h">H</span> - Hard
+              </span>
             </div>
 
-            {/* Form Fields Grid */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', maxWidth: '640px', margin: '0 auto' }}>
+            {/* AR Typing Platform Selection Form */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
               
               {/* 1. Select Language */}
               <div style={{ display: 'grid', gridTemplateColumns: '160px 1fr', alignItems: 'center', gap: '16px' }}>
@@ -199,10 +214,7 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
                 </label>
                 <select
                   value={selectedLanguage}
-                  onChange={(e) => {
-                    setSelectedLanguage(e.target.value as Language);
-                    setSelectedPassageId('');
-                  }}
+                  onChange={(e) => handleLanguageChange(e.target.value as Language)}
                   style={{
                     padding: '10px 14px',
                     borderRadius: '6px',
@@ -215,9 +227,9 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
                     color: '#0f172a'
                   }}
                 >
-                  <option value="english">English</option>
-                  <option value="hindi_mangal">हिंदी - मंगल (Mangal Inscript)</option>
-                  <option value="hindi_kruti">हिंदी - कुर्ती देव (Kruti Dev 010)</option>
+                  <option value="english">English (UP Police CO & ASI - 30+ WPM)</option>
+                  <option value="hindi_mangal">हिंदी - मंगल इनस्क्रिप्ट (Mangal Inscript - 25+ WPM)</option>
+                  <option value="hindi_kruti">हिंदी - कुर्ती देव (Kruti Dev 010 - 25+ WPM)</option>
                 </select>
               </div>
 
@@ -226,14 +238,12 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
                 <label style={{ fontWeight: 700, color: '#1e293b', fontSize: '0.95rem' }}>
                   Select Date:
                 </label>
-                <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
+                  {/* Calendar Input */}
                   <input
                     type="date"
                     value={selectedDate}
-                    onChange={(e) => {
-                      setSelectedDate(e.target.value);
-                      setSelectedPassageId('');
-                    }}
+                    onChange={(e) => handleDateChange(e.target.value)}
                     style={{
                       padding: '10px 14px',
                       borderRadius: '6px',
@@ -244,33 +254,94 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
                       outline: 'none',
                       fontWeight: 600,
                       color: '#0f172a',
-                      flex: 1
+                      flex: '1 1 180px'
                     }}
                   />
+                  {/* AR Typing Official Date Selector Dropdown */}
                   <select
                     value={selectedDate}
-                    onChange={(e) => {
-                      setSelectedDate(e.target.value);
-                      setSelectedPassageId('');
-                    }}
+                    onChange={(e) => handleDateChange(e.target.value)}
                     style={{
-                      padding: '10px 12px',
+                      padding: '10px 14px',
                       borderRadius: '6px',
                       border: '1px solid #cbd5e1',
-                      fontSize: '0.85rem',
+                      fontSize: '0.9rem',
                       fontFamily: 'inherit',
                       backgroundColor: '#f8fafc',
                       outline: 'none',
-                      color: '#475569'
+                      fontWeight: 600,
+                      color: '#1e293b',
+                      flex: '1 1 200px'
                     }}
                   >
-                    {availableIsoDates.map((d) => (
+                    {availableIsoDates.map((d, idx) => (
                       <option key={d} value={d}>
-                        {toDisplayDate(d)} {d === '2026-10-25' ? '(AR Screenshot)' : ''}
+                        {toDisplayDate(d)} {idx === 0 ? '(Latest AR Typing)' : ''}
                       </option>
                     ))}
                   </select>
                 </div>
+              </div>
+
+              {/* Date Status & Feedback Banner (AR Typing Platform Toast Notification) */}
+              <div style={{ paddingLeft: '176px' }}>
+                {activePassageList.length > 0 ? (
+                  <div
+                    style={{
+                      background: '#f0fdf4',
+                      border: '1px solid #bbf7d0',
+                      color: '#166534',
+                      padding: '8px 14px',
+                      borderRadius: '6px',
+                      fontSize: '0.85rem',
+                      fontWeight: 600,
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '6px'
+                    }}
+                  >
+                    <span>✓</span> Total {activePassageList.length} passage(s) found for {toDisplayDate(selectedDate)}
+                  </div>
+                ) : (
+                  <div
+                    style={{
+                      background: '#fffbeb',
+                      border: '1px solid #fde68a',
+                      color: '#92400e',
+                      padding: '10px 14px',
+                      borderRadius: '6px',
+                      fontSize: '0.85rem'
+                    }}
+                  >
+                    <div style={{ fontWeight: 700, marginBottom: '6px' }}>
+                      ⚠️ No passages uploaded for {toDisplayDate(selectedDate)} yet.
+                    </div>
+                    <div style={{ fontSize: '0.8rem', color: '#b45309', marginBottom: '8px' }}>
+                      Please select an available test date from AR Typing:
+                    </div>
+                    <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+                      {availableIsoDates.slice(0, 6).map((d) => (
+                        <button
+                          key={d}
+                          type="button"
+                          onClick={() => handleDateChange(d)}
+                          style={{
+                            padding: '4px 10px',
+                            borderRadius: '4px',
+                            border: '1px solid #f59e0b',
+                            background: '#ffffff',
+                            color: '#b45309',
+                            fontWeight: 700,
+                            fontSize: '0.75rem',
+                            cursor: 'pointer'
+                          }}
+                        >
+                          {toDisplayDate(d)}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* 3. Select Passage (Custom Dropdown matching Screenshot 2) */}
@@ -280,107 +351,130 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
                 </label>
                 
                 <div style={{ position: 'relative', width: '100%' }}>
-                  <button
-                    type="button"
-                    onClick={() => setIsPassageDropdownOpen(!isPassageDropdownOpen)}
-                    style={{
-                      width: '100%',
-                      padding: '10px 14px',
-                      borderRadius: '6px',
-                      border: isPassageDropdownOpen ? '2px solid #000000' : '1px solid #cbd5e1',
-                      fontSize: '0.95rem',
-                      fontFamily: 'inherit',
-                      backgroundColor: selectedPassageId ? '#f0fdf4' : '#000000',
-                      color: selectedPassageId ? '#0f172a' : '#ffffff',
-                      fontWeight: 700,
-                      textAlign: 'left',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'space-between',
-                      cursor: 'pointer'
-                    }}
-                  >
-                    <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', paddingRight: '8px' }}>
-                      {selectedPassageId ? currentSelectedPassage?.title : 'Select passage for typing'}
-                    </span>
-                    <span style={{ fontSize: '0.8rem' }}>▼</span>
-                  </button>
-
-                  {/* Dropdown Menu Popup (Screenshot 2) */}
-                  {isPassageDropdownOpen && (
+                  {isLoadingPassages ? (
                     <div
                       style={{
-                        position: 'absolute',
-                        top: '100%',
-                        left: 0,
-                        right: 0,
-                        marginTop: '4px',
-                        background: '#ffffff',
-                        border: '1px solid #cbd5e1',
-                        borderRadius: '8px',
-                        boxShadow: '0 10px 25px rgba(0, 0, 0, 0.15)',
-                        zIndex: 50,
-                        maxHeight: '280px',
-                        overflowY: 'auto'
+                        padding: '10px 14px',
+                        color: '#0284c7',
+                        fontWeight: 700,
+                        fontSize: '0.95rem'
                       }}
                     >
-                      {activePassageList.map((p) => {
-                        const badge = getDifficultyBadge(p.difficulty);
-                        const isSelected = p.id === selectedPassageId;
-                        return (
-                          <div
-                            key={p.id}
-                            onClick={() => {
-                              setSelectedPassageId(p.id);
-                              setIsPassageDropdownOpen(false);
-                            }}
-                            style={{
-                              padding: '12px 14px',
-                              borderBottom: '1px solid #f1f5f9',
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'space-between',
-                              cursor: 'pointer',
-                              backgroundColor: isSelected ? '#f0fdf4' : 'transparent',
-                              transition: 'background 0.15s ease'
-                            }}
-                            onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#f8fafc')}
-                            onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = isSelected ? '#f0fdf4' : 'transparent')}
-                          >
-                            <div style={{ flex: 1, paddingRight: '12px' }}>
-                              <div style={{ fontWeight: 600, fontSize: '0.9rem', color: '#0f172a' }}>
-                                {p.title}
-                              </div>
-                              <div style={{ fontSize: '0.75rem', color: '#64748b', marginTop: '2px' }}>
-                                {p.wordCount} words • {p.category === 'up_police_co' ? 'UP Police CO' : 'UP Police ASI'}
-                              </div>
-                            </div>
-                            <span className={`ar-badge-difficulty ${badge.cls}`}>
-                              {badge.label}
-                            </span>
-                          </div>
-                        );
-                      })}
-
-                      {/* Clear Selection */}
-                      <div
-                        onClick={() => {
-                          setSelectedPassageId('');
-                          setIsPassageDropdownOpen(false);
-                        }}
+                      Loading passages for {toDisplayDate(selectedDate)}...
+                    </div>
+                  ) : (
+                    <>
+                      <button
+                        type="button"
+                        onClick={() => setIsPassageDropdownOpen(!isPassageDropdownOpen)}
                         style={{
-                          padding: '12px 14px',
-                          color: '#dc2626',
+                          width: '100%',
+                          padding: '10px 14px',
+                          borderRadius: '6px',
+                          border: isPassageDropdownOpen ? '2px solid #000000' : '1px solid #cbd5e1',
+                          fontSize: '0.95rem',
+                          fontFamily: 'inherit',
+                          backgroundColor: selectedPassageId ? '#f0fdf4' : '#000000',
+                          color: selectedPassageId ? '#0f172a' : '#ffffff',
                           fontWeight: 700,
-                          fontSize: '0.85rem',
                           textAlign: 'left',
-                          cursor: 'pointer',
-                          background: '#fff5f5'
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'space-between',
+                          cursor: 'pointer'
                         }}
                       >
-                        Clear Selection
-                      </div>
-                    </div>
+                        <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', paddingRight: '8px' }}>
+                          {currentSelectedPassage ? currentSelectedPassage.title : 'Select passage for typing'}
+                        </span>
+                        <span style={{ fontSize: '0.8rem' }}>▼</span>
+                      </button>
+
+                      {/* Dropdown Menu Popup (Screenshot 2) */}
+                      {isPassageDropdownOpen && (
+                        <div
+                          style={{
+                            position: 'absolute',
+                            top: '100%',
+                            left: 0,
+                            right: 0,
+                            marginTop: '4px',
+                            background: '#ffffff',
+                            border: '1px solid #cbd5e1',
+                            borderRadius: '8px',
+                            boxShadow: '0 10px 25px rgba(0, 0, 0, 0.15)',
+                            zIndex: 50,
+                            maxHeight: '320px',
+                            overflowY: 'auto'
+                          }}
+                        >
+                          {activePassageList.length === 0 ? (
+                            <div style={{ padding: '16px', color: '#64748b', textAlign: 'center', fontSize: '0.9rem' }}>
+                              No passages found for this date.
+                            </div>
+                          ) : (
+                            activePassageList.map((p) => {
+                              const badge = getDifficultyBadge(p.difficulty);
+                              const isSelected = p.id === selectedPassageId;
+                              return (
+                                <div
+                                  key={p.id}
+                                  onClick={() => {
+                                    setSelectedPassageId(p.id);
+                                    setIsPassageDropdownOpen(false);
+                                  }}
+                                  style={{
+                                    padding: '12px 14px',
+                                    borderBottom: '1px solid #f1f5f9',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'space-between',
+                                    cursor: 'pointer',
+                                    backgroundColor: isSelected ? '#f0fdf4' : 'transparent',
+                                    transition: 'background 0.15s ease'
+                                  }}
+                                  onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#f8fafc')}
+                                  onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = isSelected ? '#f0fdf4' : 'transparent')}
+                                >
+                                  <div style={{ flex: 1, paddingRight: '12px' }}>
+                                    <div style={{ fontWeight: 600, fontSize: '0.9rem', color: '#0f172a' }}>
+                                      {p.title}
+                                    </div>
+                                    <div style={{ fontSize: '0.75rem', color: '#64748b', marginTop: '2px' }}>
+                                      {p.wordCount} words • {p.category === 'up_police_co' ? 'UP Police CO' : 'UP Police ASI'}
+                                    </div>
+                                  </div>
+                                  <span className={`ar-badge-difficulty ${badge.cls}`}>
+                                    {badge.label}
+                                  </span>
+                                </div>
+                              );
+                            })
+                          )}
+
+                          {/* Clear Selection */}
+                          {selectedPassageId && (
+                            <div
+                              onClick={() => {
+                                setSelectedPassageId('');
+                                setIsPassageDropdownOpen(false);
+                              }}
+                              style={{
+                                padding: '12px 14px',
+                                color: '#dc2626',
+                                fontWeight: 700,
+                                fontSize: '0.85rem',
+                                textAlign: 'left',
+                                cursor: 'pointer',
+                                background: '#fff5f5'
+                              }}
+                            >
+                              Clear Selection
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </>
                   )}
                 </div>
               </div>
@@ -405,9 +499,9 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
                     color: '#0f172a'
                   }}
                 >
-                  <option value={15}>15:00 min (Official UP Police)</option>
+                  <option value={15}>15:00 min (Official UP Police Benchmark)</option>
                   <option value={10}>10:00 min</option>
-                  <option value={5}>05:00 min</option>
+                  <option value={5}>05:00 min (Quick Drill)</option>
                 </select>
               </div>
 
@@ -446,16 +540,17 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
                       onStartTest(passToStart, selectedDuration);
                     }
                   }}
+                  disabled={activePassageList.length === 0}
                   className="btn"
                   style={{
-                    backgroundColor: selectedPassageId ? '#0d9488' : '#94a3b8',
+                    backgroundColor: activePassageList.length > 0 ? (selectedPassageId ? '#0d9488' : '#0f172a') : '#94a3b8',
                     color: '#ffffff',
                     fontWeight: 700,
                     fontSize: '1rem',
                     padding: '12px 36px',
                     borderRadius: '6px',
                     border: 'none',
-                    cursor: 'pointer',
+                    cursor: activePassageList.length > 0 ? 'pointer' : 'not-allowed',
                     boxShadow: selectedPassageId ? '0 2px 6px rgba(13, 148, 136, 0.3)' : 'none',
                     transition: 'all 0.2s ease'
                   }}

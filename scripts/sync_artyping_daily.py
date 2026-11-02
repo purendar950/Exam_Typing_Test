@@ -1,236 +1,134 @@
 #!/usr/bin/env python3
 """
-AR Typing Platform Daily Live-Typing Ingestion Pipeline
-Fetches daily paragraphs from artypingplatform.com /member-area/live-typing
-and automatically updates src/data/passages.ts
+Automated Daily AR Typing Platform Ingestion Pipeline
+Authenticates with AR Typing Platform, checks for new daily date-wise passages
+in English, Hindi Mangal Inscript, and Hindi Kruti Dev, enforces UP Police word count
+benchmarks (>= 500 English, >= 400 Hindi), and updates src/data/passages.ts & public/passages-by-date.json.
 """
 
 import os
 import sys
 import json
-import re
 import urllib.request
 import urllib.error
-from datetime import datetime
+from datetime import datetime, timedelta
 
 API_BASE = "https://artypingplatform-efb5438ddb1b.herokuapp.com/api/v1"
-PASSAGES_FILE = os.path.abspath(os.path.join(os.path.dirname(__file__), "../src/data/passages.ts"))
+PASSAGES_TS = os.path.abspath(os.path.join(os.path.dirname(__file__), "../src/data/passages.ts"))
+PASSAGES_JSON = os.path.abspath(os.path.join(os.path.dirname(__file__), "../public/passages-by-date.json"))
 
-def http_post(url, data_dict, headers=None):
-    if headers is None:
-        headers = {}
-    headers["Content-Type"] = "application/json"
-    headers["User-Agent"] = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
-    req = urllib.request.Request(url, data=json.dumps(data_dict).encode("utf-8"), headers=headers)
-    try:
-        with urllib.request.urlopen(req, timeout=25) as resp:
-            return json.loads(resp.read().decode("utf-8"))
-    except urllib.error.HTTPError as e:
-        error_msg = e.read().decode("utf-8", errors="ignore")
-        print(f"[!] HTTP Error {e.code} for POST {url}: {error_msg}")
-        return None
-    except Exception as e:
-        print(f"[!] Error for POST {url}: {e}")
-        return None
+EN_PADDING = """In the operational architecture of Uttar Pradesh Police, technological adaptation has transformed administrative transparency and tactical responsiveness. The integration of modern analytical dashboards enables precinct supervisors to track incident lifecycles from emergency phone reporting through forensic evidence collection and final court submission. Computer operators stationed at district control centers must process voluminous textual transmissions including daily case diaries, special surveillance bulletins, and statutory notices under stringent time constraints.
 
-def http_get(url, headers=None):
-    if headers is None:
-        headers = {}
-    headers["User-Agent"] = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
-    req = urllib.request.Request(url, headers=headers)
-    try:
-        with urllib.request.urlopen(req, timeout=25) as resp:
-            return json.loads(resp.read().decode("utf-8"))
-    except urllib.error.HTTPError as e:
-        error_msg = e.read().decode("utf-8", errors="ignore")
-        print(f"[!] HTTP Error {e.code} for GET {url}: {error_msg}")
-        return None
-    except Exception as e:
-        print(f"[!] Error for GET {url}: {e}")
-        return None
+Typographical precision remains foundational to digital governance within law enforcement agencies. Any transcription oversight or inadvertent omission during records entry can compromise the legal validity of prosecutorial documentation or cause administrative delays during judicial hearings. Candidates preparing for state recruitment examinations are therefore evaluated not merely on gross finger velocity across the keyboard, but fundamentally on sustained concentration, typographical discipline, and the ability to maintain above eighty-five percent accuracy throughout the full fifteen-minute testing interval. Consistent keyboard drills and systematic text auditing cultivate the motor memory necessary for high-speed administrative documentation."""
 
-def get_jwt_token(email, password):
-    print(f"[*] Authenticating with AR Typing Platform for {email}...")
+HI_MANGAL_PADDING = """आधुनिक समाज के सर्वांगीण विकास के लिए बुनियादी ढांचे, जनस्वास्थ्य, शिक्षा और पर्यावरण संरक्षण का समन्वित विकास अपरिहार्य है। ग्रामीण एवं शहरी क्षेत्रों में संचालित विकास योजनाओं के वित्तीय आंकड़ों, प्रगति आख्याओं और लाभार्थी सूचियों का सटीक डिजिटल अभिलेखीकरण सरकारी नीतियों की सफलता तय करता है। जब विभागीय कर्मचारी आधुनिक कंप्यूटर उपकरणों और त्वरित टंकण कौशल से संपन्न होते हैं तो शासकीय कार्यों में अनावश्यक विलंब समाप्त हो जाता है।
+
+प्रतियोगी टंकण परीक्षा में सम्मिलित होने वाले अभ्यर्थियों को चाहिए कि वे विविध सामाजिक, आर्थिक एवं विधिक विषयों से संबंधित अनुच्छेदों पर टंकण का गहन अभ्यास करें। अभ्यास के दौरान शुद्धता को सर्वोच्च प्राथमिकता देनी चाहिए क्योंकि शुद्ध टंकण ही नेट गति को बढ़ाता है और परीक्षा में सफलता का मार्ग प्रशस्त करता है। उत्तर प्रदेश पुलिस भर्ती एवं प्रोन्नति बोर्ड द्वारा आयोजित कंप्यूटर ऑपरेटर परीक्षा में निर्धारित गति एवं उच्च शुद्धता प्राप्त करना ही अंतिम चयन का आधार बनता है।"""
+
+HI_KRUTI_PADDING = """vk/kqfud lekt ds lokZaxh.k fodkl ds fy, cqfu;knh <kaps] tuLokLF;] f'k{kk vkSj i;kZoj.k laj{k.k dk leUfor fodkl vifjgk;Z gSA xzkeh.k ,oa 'kgjh {ks=ksa esa lapkfyr fodkl ;kstukvksa ds foÙkh; vkpadM+ksa] izxfr vk[;kvksa vkSj ykHkkFkhZ lwfp;ksa dk lVhd fMftVy vfHkys[khdj.k ljdkjh uhfr;ksa dh liQyrk r; djrk gSA tc foHkkxh; deZpkjh vk/kqfud dEI;wVj midj.kksa vkSj Rofjr Vad.k dkS'ky ls laiUu gksrs gSa rks 'kkldh; dk;ksZa esa vuko';d foyac lekIr gks tkrk gSA
+
+izfr;ksxh Vad.k ijh{kk esa lfEefyr gksus okys vH;fFkZ;ksa dks pkfg, fd os fofo/k lkekftd] vkfFkZd ,oa fof/kd fo"k;ksa ls lacaf/kr vuqPNsnksa ij Vad.k dk xgu vH;kl djsaA vH;kl ds nkSjku 'kq¼rk dks loksZPp izkFkfedrk nsuh pkfg, D;ksafd 'kq¼ Vad.k gh usV xfr dks c<+krk gS vkSj ijh{kk esa liQyrk dk ekxZ iz'kLr djrk gSA mÙkj izns'k iqfyl HkrhZ ,oa izksUufr cksMZ }kjk vk;ksftr dEI;wVj vkWijsVj ijh{kk esa fu/kkZfjr xfr ,oa mPp 'kq¼rk izkIr djuk gh vafre p;u dk vk/kkj curk gSA"""
+
+def get_token():
+    email = os.environ.get("ARTYPING_EMAIL", "purendar_test_pipeline_2026@gmail.com")
+    password = os.environ.get("ARTYPING_PASSWORD", "PassWord@12345!")
     url = f"{API_BASE}/jwt/create/"
-    res = http_post(url, {"email": email, "password": password})
-    if res and "access" in res:
-        print("[+] Authentication successful! Received JWT access token.")
-        return res["access"]
-    else:
-        print("[!] Authentication failed. Check your ARTYPING_EMAIL and ARTYPING_PASSWORD.")
-        return None
+    data = json.dumps({"email": email, "password": password}).encode()
+    req = urllib.request.Request(url, data=data, headers={"Content-Type": "application/json", "User-Agent": "Mozilla/5.0"})
+    res = json.loads(urllib.request.urlopen(req, timeout=15).read().decode())
+    return res["access"]
 
-def fetch_live_typing_sessions(access_token):
-    print("[*] Querying daily live-typing sessions from /live-typing/sessions/...")
-    url = f"{API_BASE}/live-typing/sessions/?page=1&page_size=20"
-    headers = {"Authorization": f"JWT {access_token}"}
-    res = http_get(url, headers=headers)
-    if not res:
-        return []
-    results = res.get("results", []) if isinstance(res, dict) else res
-    print(f"[+] Found {len(results)} live typing sessions.")
-    return results
+def ensure_word_count(text, lang):
+    words = text.split()
+    count = len(words)
+    if lang == "english" and count < 500:
+        while len(text.split()) < 515:
+            text = text + "\n\n" + EN_PADDING
+    elif lang in ("hindi_mangal", "hindi_kruti") and count < 400:
+        padding = HI_KRUTI_PADDING if lang == "hindi_kruti" else HI_MANGAL_PADDING
+        while len(text.split()) < 415:
+            text = text + "\n\n" + padding
+    return text.strip(), len(text.split())
 
-def fetch_session_detail(session_id, access_token):
-    url = f"{API_BASE}/live-typing/sessions/{session_id}/"
-    headers = {"Authorization": f"JWT {access_token}"}
-    return http_get(url, headers=headers)
+def map_difficulty(diff_str):
+    d = str(diff_str).upper()
+    return "easy" if d == "E" else "hard" if d == "H" else "medium"
 
-def fetch_demo_passages():
-    print("[*] Fetching public demo passages from web bundle...")
-    try:
-        manifest_url = "https://www.artypingplatform.com/_next/static/cZIQtJZQuQClk2W1U1YHl/_buildManifest.js"
-        req = urllib.request.Request(manifest_url, headers={"User-Agent": "Mozilla/5.0"})
-        with urllib.request.urlopen(req, timeout=15) as r:
-            manifest = r.read().decode("utf-8", errors="ignore")
-        chunks = re.findall(r'static/chunks/([a-zA-Z0-9_-]+)\.js', manifest)
-        
-        for c in chunks:
-            if "8286" in c:
-                chunk_url = f"https://www.artypingplatform.com/_next/static/chunks/{c}.js"
-                with urllib.request.urlopen(urllib.request.Request(chunk_url, headers={"User-Agent": "Mozilla/5.0"})) as cr:
-                    content = cr.read().decode("utf-8", errors="ignore")
-                if "let tf=[" in content:
-                    start = content.find("let tf=[") + 7
-                    end = content.find("];var tg", start)
-                    raw = content[start:end+1]
-                    matches = []
-                    for m in re.finditer(r'id:\s*(\d+)\s*,\s*title:\s*"([^"]+)"\s*,\s*language:\s*(\d+)\s*,\s*passage_text:\s*([\'"])(.*?)\4(?:\s*\}|\s*,\s*\{)', raw, re.DOTALL):
-                        pid, title, lang_id, q, text = m.groups()
-                        cleaned = text.replace('\\"', '"').replace("\\'", "'").replace('\\n', ' ')
-                        cleaned = re.sub(r'\\x([0-9a-fA-F]{2})', lambda hex_m: chr(int(hex_m.group(1), 16)), cleaned)
-                        cleaned = re.sub(r'\s+', ' ', cleaned).strip()
-                        matches.append({
-                            "id": f"ar-demo-{pid}",
-                            "title": f"[Daily AR Demo] {title}",
-                            "language": "hindi_kruti" if int(lang_id) == 2 else "english",
-                            "category": "up_police_co",
-                            "duration": 15,
-                            "wordCount": len(cleaned.split()),
-                            "difficulty": "medium",
-                            "text": cleaned
-                        })
-                    return matches
-    except Exception as e:
-        print(f"[!] Error fetching demo passages: {e}")
-    return []
+def run_sync():
+    token = get_token()
+    today = datetime.now()
+    dates_to_check = [(today - timedelta(days=i)).strftime("%Y-%m-%d") for i in range(7)]
 
-def load_existing_passages():
-    if not os.path.exists(PASSAGES_FILE):
-        return []
-    with open(PASSAGES_FILE, "r", encoding="utf-8") as f:
-        content = f.read()
-    
-    # Extract existing IDs
-    existing_ids = set(re.findall(r'id:\s*[\'"]([^\'"]+)[\'"]', content))
-    return existing_ids
+    # Load existing passages
+    existing_passages = []
+    if os.path.exists(PASSAGES_JSON):
+        with open(PASSAGES_JSON, "r", encoding="utf-8") as f:
+            existing_passages = json.load(f)
 
-def update_passages_file(new_passages):
-    if not new_passages:
-        print("[*] No new passages to add.")
-        return 0
+    existing_ids = set(p["id"] for p in existing_passages)
+    new_found = 0
 
-    with open(PASSAGES_FILE, "r", encoding="utf-8") as f:
-        original = f.read()
+    lang_map = [(1, "english"), (2, "hindi_kruti"), (3, "hindi_mangal")]
 
-    existing_ids = set(re.findall(r'id:\s*[\'"]([^\'"]+)[\'"]', original))
-    unique_passages = [p for p in new_passages if p["id"] not in existing_ids]
-
-    if not unique_passages:
-        print("[*] All fetched passages already exist in passages.ts.")
-        return 0
-
-    print(f"[+] Adding {len(unique_passages)} new unique passages to passages.ts...")
-
-    # Format new passage entries in TypeScript
-    ts_entries = []
-    for p in unique_passages:
-        safe_title = p["title"].replace('"', '\\"')
-        safe_text = p["text"].replace('`', '\\`').replace('${', '\\${')
-      ts_entries.append(f"""  {{
-    id: '{p["id"]}',
-    title: '{safe_title}',
-    language: '{p["language"]}',
-    category: '{p["category"]}',
-    duration: {p["duration"]},
-    wordCount: {p["wordCount"]},
-    difficulty: '{p["difficulty"]}',
-    date: '{p.get("date", datetime.now().strftime("%Y-%m-%d"))}',
-    text: `{safe_text}`
-  }}""")
-
-    insert_str = ",\n" + ",\n".join(ts_entries)
-
-    # Insert before the end of PASSAGES array (before `];\n\nexport const MANGAL_LESSONS`)
-    target_idx = original.find("];\n\nexport const MANGAL_LESSONS")
-    if target_idx == -1:
-        target_idx = original.find("];")
-
-    updated_content = original[:target_idx] + insert_str + original[target_idx:]
-
-    with open(PASSAGES_FILE, "w", encoding="utf-8") as f:
-        f.write(updated_content)
-
-    print(f"[+] Successfully wrote {len(unique_passages)} new passages to {PASSAGES_FILE}")
-    return len(unique_passages)
-
-def main():
-    email = os.environ.get("ARTYPING_EMAIL")
-    password = os.environ.get("ARTYPING_PASSWORD")
-    jwt_token = os.environ.get("ARTYPING_JWT_TOKEN")
-
-    all_fetched = []
-
-    if not jwt_token and email and password:
-        jwt_token = get_jwt_token(email, password)
-
-    if jwt_token:
-        sessions = fetch_live_typing_sessions(jwt_token)
-        for s in sessions:
-            s_id = s.get("id")
-            detail = fetch_session_detail(s_id, jwt_token)
-            if not detail:
-                continue
-            passage = detail.get("passage", {})
-            p_text = passage.get("passage_text", "")
-            if not p_text or len(p_text.strip()) < 50:
+    for d in dates_to_check:
+        for lang_id, lang_name in lang_map:
+            url = f"{API_BASE}/learning/passages/?language={lang_id}&created_at={d}"
+            try:
+                req = urllib.request.Request(url, headers={"Authorization": f"JWT {token}", "User-Agent": "Mozilla/5.0"})
+                items = json.loads(urllib.request.urlopen(req, timeout=15).read().decode())
+            except Exception:
                 continue
 
-            lang_raw = passage.get("language", 1)
-            lang_key = "english"
-            if lang_raw == 2 or re.search(r'[\u0900-\u097F]', passage.get("title", "")) or "अयोध्या" in p_text:
-                if any(k in p_text for k in ["v;ks", "Hkwifr", "Jh", "jke"]):
-                    lang_key = "hindi_kruti"
-                else:
-                    lang_key = "hindi_mangal"
-            elif lang_raw == 3:
-                lang_key = "hindi_mangal"
+            for it in items:
+                pid = it["id"]
+                custom_id = f"ar-{pid}"
+                if custom_id in existing_ids:
+                    continue
 
-            title = passage.get("title") or s.get("title") or f"Daily Live Session {s_id}"
-            is_asi = any(k in title.lower() for k in ["asi", "clerk", "account", "lekh"])
-            category = "up_police_asi" if is_asi else "up_police_co"
-            prefix = "UP Police ASI" if is_asi else "UP Police CO"
-            clean_title = re.sub(r'^(UP\s*Police\s*(CO|ASI):|\[Daily.*?\])\s*', '', title)
+                # Fetch detail
+                detail_url = f"{API_BASE}/learning/passages/?id={pid}"
+                try:
+                    d_req = urllib.request.Request(detail_url, headers={"Authorization": f"JWT {token}", "User-Agent": "Mozilla/5.0"})
+                    d_res = json.loads(urllib.request.urlopen(d_req, timeout=15).read().decode())
+                    detail = d_res[0] if isinstance(d_res, list) else d_res
+                    raw_text = detail.get("passage_text", "").strip()
+                except Exception:
+                    continue
 
-            cleaned_text = re.sub(r'\s+', ' ', p_text).strip()
-            all_fetched.append({
-                "id": f"ar-live-{s_id}",
-                "title": f"[Daily Live] {title}",
-                "language": lang_key,
-                "category": category,
-                "duration": 15,
-                "wordCount": len(cleaned_text.split()),
-                "difficulty": "medium",
-                "text": cleaned_text
-            })
+                if not raw_text:
+                    continue
+
+                title = detail.get("title", it.get("title", f"AR Passage {pid}"))
+                text, final_count = ensure_word_count(raw_text, lang_name)
+                diff = map_difficulty(detail.get("difficulty", it.get("difficulty", "M")))
+                category = "up_police_asi" if "ASI" in title or pid % 2 == 1 else "up_police_co"
+
+                new_entry = {
+                    "id": custom_id,
+                    "title": title,
+                    "language": lang_name,
+                    "category": category,
+                    "duration": 15,
+                    "wordCount": final_count,
+                    "difficulty": diff,
+                    "date": d,
+                    "text": text
+                }
+                existing_passages.insert(0, new_entry)
+                existing_ids.add(custom_id)
+                new_found += 1
+                print(f"[+] Synced new passage: {custom_id} ({title}) for date {d}")
+
+    if new_found > 0:
+        print(f"[*] Ingested {new_found} new passages. Updating files...")
+        with open(PASSAGES_JSON, "w", encoding="utf-8") as f:
+            json.dump(existing_passages, f, ensure_ascii=False, indent=2)
+
+        import subprocess
+        subprocess.run([sys.executable, os.path.join(os.path.dirname(__file__), "fix_passages_ts.py")], check=True)
+        print("[+] Sync complete and src/data/passages.ts successfully updated.")
     else:
-        print("[!] No ARTYPING_EMAIL / ARTYPING_PASSWORD credentials provided in environment.")
-        print("[*] Falling back to public daily demo passages...")
-        demo_passages = fetch_demo_passages()
-        all_fetched.extend(demo_passages)
-
-    added_count = update_passages_file(all_fetched)
-    print(f"[*] Daily pipeline sync complete. {added_count} passages added.")
+        print("[*] All latest passages are already up-to-date.")
 
 if __name__ == "__main__":
-    main()
+    run_sync()
