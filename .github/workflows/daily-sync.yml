@@ -1,4 +1,4 @@
-name: Daily Sync AR Typing Passages
+name: Daily Sync Exam Typing Passages
 
 on:
   schedule:
@@ -23,12 +23,17 @@ jobs:
         with:
           python-version: '3.11'
 
-      - name: Run AR Typing sync script
+      - name: Run passage sync pipeline
         env:
           ARTYPING_EMAIL: ${{ secrets.ARTYPING_EMAIL }}
           ARTYPING_PASSWORD: ${{ secrets.ARTYPING_PASSWORD }}
         run: |
-          python3 scripts/sync_artyping_daily.py
+          echo "[*] Syncing open-tier exam passages (TypeMangal, CGLTyping, open exam repositories)..."
+          python3 scripts/sync_free_passages.py
+          if [ -n "$ARTYPING_EMAIL" ] && [ -n "$ARTYPING_PASSWORD" ]; then
+            echo "[*] Attempting AR Typing sync with credentials..."
+            python3 scripts/sync_artyping_daily.py || echo "[!] AR Typing sync skipped or failed (unsubscribed account); open sources succeeded."
+          fi
 
       - name: Check for changes and commit
         run: |
@@ -37,7 +42,7 @@ jobs:
           if ! git diff --quiet src/data/passages.ts; then
             echo "[+] New daily passages detected! Committing and pushing..."
             git add src/data/passages.ts
-            git commit -m "Auto-sync daily typing paragraphs from AR Typing Platform [$(date +'%Y-%m-%d')]"
+            git commit -m "Auto-sync daily typing paragraphs [$(date +'%Y-%m-%d')]"
             git push origin main
           else
             echo "[*] No new passages to update today."
