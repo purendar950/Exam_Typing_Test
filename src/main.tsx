@@ -8,3 +8,14 @@ ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
     <App />
   </React.StrictMode>
 );
+
+// Register PWA Service Worker for offline exam practice
+if ('serviceWorker' in navigator && import.meta.env.PROD) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker
+      .register('./sw.js')
+      .then((reg) => console.log('PWA Service Worker registered:', reg.scope))
+      .catch((err) => console.warn('PWA Service Worker failed:', err));
+  });
+}
+
