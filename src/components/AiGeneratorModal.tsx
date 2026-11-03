@@ -391,7 +391,7 @@ export const AiGeneratorModal: React.FC<AiGeneratorModalProps> = ({
                               color: isHard ? '#991b1b' : '#1e40af'
                             }}
                           >
-                            {isHard ? 'HARD' : 'MED'}
+                            {isHard ? 'HARD • Long Words' : 'MED'}
                           </span>
                         </div>
                         <div style={{ color: '#475569', fontWeight: 500, lineHeight: 1.2 }}>{slot.subType}</div>
@@ -614,7 +614,7 @@ export const AiGeneratorModal: React.FC<AiGeneratorModalProps> = ({
                     }}
                   >
                     <option value="medium">🟡 MEDIUM (500–540w • Balanced Editorial)</option>
-                    <option value="hard">🔴 HARD (520–580w • Legal/Forensic/Conjuncts)</option>
+                    <option value="hard">🔴 HARD (520–580w • Longer Words 8–16+ letters, AWL ≥ 7.0)</option>
                   </select>
                 </div>
 
@@ -790,7 +790,7 @@ export const AiGeneratorModal: React.FC<AiGeneratorModalProps> = ({
                           color: singleResult.difficulty === 'hard' ? '#b91c1c' : '#15803d'
                         }}
                       >
-                        {singleResult.difficulty.toUpperCase()}
+                        {singleResult.difficulty === 'hard' ? 'HARD • LONG WORDS' : 'MEDIUM'}
                       </span>
                       <span style={{ fontSize: '0.72rem', fontWeight: 700, padding: '3px 8px', borderRadius: '6px', background: '#e0f2fe', color: '#0369a1' }}>
                         {singleResult.wordCount} words
