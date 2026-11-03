@@ -4,7 +4,7 @@
  */
 
 export const FIREBASE_CONFIG = {
-  apiKey: "AIzaSyCuh2DBikWE5_WNkVRQ0whPUOGCGiunPRU",
+  apiKey: "AIzaSyCuh2DBIkWE5_WNkVRQ0whPUOGCGiunPRU",
   authDomain: "upp-typing.firebaseapp.com",
   projectId: "upp-typing",
   storageBucket: "upp-typing.firebasestorage.app",
