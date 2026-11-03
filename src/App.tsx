@@ -73,21 +73,48 @@ export const App: React.FC = () => {
   const [isRulesOpen, setIsRulesOpen] = useState<boolean>(false);
   const [isHistoryOpen, setIsHistoryOpen] = useState<boolean>(false);
   const [isHindiHelperOpen, setIsHindiHelperOpen] = useState<boolean>(false);
-  const [isAuthOpen, setIsAuthOpen] = useState<boolean>(false);
-  const [isDashboardOpen, setIsDashboardOpen] = useState<boolean>(false);
+  // Active Authenticated / Candidate User
+  const [currentUser, setCurrentUser] = useState<UserProfile | null>(() => {
+    try {
+      const raw = localStorage.getItem('up_typing_active_user');
+      return raw ? JSON.parse(raw) : null;
+    } catch {
+      return null;
+    }
+  });
 
-  // Active Authenticated / Local Candidate User
-  const [currentUser, setCurrentUser] = useState<UserProfile | null>(null);
+  // Automatically open login modal if user is not logged in on site visit
+  const [isAuthOpen, setIsAuthOpen] = useState<boolean>(() => {
+    try {
+      const savedUser = localStorage.getItem('up_typing_active_user');
+      const dismissed = sessionStorage.getItem('up_auth_dismissed') === 'true';
+      return !savedUser && !dismissed;
+    } catch {
+      return false;
+    }
+  });
+  const [isDashboardOpen, setIsDashboardOpen] = useState<boolean>(false);
 
   // Subscribe to Firebase Auth and Local User session
   useEffect(() => {
     const unsubscribe = subscribeToAuth((user) => {
       setCurrentUser(user);
-      if (user && user.displayName) {
-        setSettings((prev) => ({
-          ...prev,
-          candidateName: user.displayName
-        }));
+      if (user) {
+        // If already logged in, open directly to main page!
+        setIsAuthOpen(false);
+        sessionStorage.removeItem('up_auth_dismissed');
+        if (user.displayName) {
+          setSettings((prev) => ({
+            ...prev,
+            candidateName: user.displayName
+          }));
+        }
+      } else {
+        // If not logged in and not dismissed in this session, auto-open login modal
+        const dismissed = sessionStorage.getItem('up_auth_dismissed') === 'true';
+        if (!dismissed) {
+          setIsAuthOpen(true);
+        }
       }
     });
     return () => {
@@ -303,9 +330,14 @@ export const App: React.FC = () => {
 
       <AuthModal
         isOpen={isAuthOpen}
-        onClose={() => setIsAuthOpen(false)}
+        onClose={() => {
+          setIsAuthOpen(false);
+          sessionStorage.setItem('up_auth_dismissed', 'true');
+        }}
         onLoginSuccess={(user) => {
           setCurrentUser(user);
+          setIsAuthOpen(false);
+          sessionStorage.removeItem('up_auth_dismissed');
           setSettings((prev) => ({
             ...prev,
             candidateName: user.displayName
@@ -322,6 +354,8 @@ export const App: React.FC = () => {
             await logoutUser();
             setCurrentUser(null);
             setIsDashboardOpen(false);
+            sessionStorage.removeItem('up_auth_dismissed');
+            setIsAuthOpen(true);
           }}
           onViewScorecard={(res) => {
             setCurrentResult(res);
