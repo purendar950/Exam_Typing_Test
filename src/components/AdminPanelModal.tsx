@@ -14,6 +14,7 @@ import {
   AiProviderPreset,
   DetectedModel,
   fetchProviderModels,
+  verifyModelReplying,
   cleanBaseUrl,
   getAiConfig,
   saveAiConfig,
@@ -87,7 +88,9 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
   const [detectedModels, setDetectedModels] = useState<DetectedModel[]>([]);
   const [isDetectingModels, setIsDetectingModels] = useState<boolean>(false);
   const [detectStatus, setDetectStatus] = useState<string>('');
-  const [modelFilterType, setModelFilterType] = useState<'all' | 'free'>('all');
+  const [modelFilterType, setModelFilterType] = useState<'all' | 'free' | 'replying'>('all');
+  const [isVerifyingModels, setIsVerifyingModels] = useState<boolean>(false);
+  const [activeModelVerified, setActiveModelVerified] = useState<{ replying?: boolean; message?: string } | null>(null);
   const [previewPassage, setPreviewPassage] = useState<Passage | null>(null);
 
   // Daily Live Generator in Admin
@@ -297,6 +300,56 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
     }
   };
 
+  const handleVerifyReplyingModels = async () => {
+    if (!aiConfig.baseUrl.trim()) {
+      setDetectStatus('Please enter a Base URL first.');
+      return;
+    }
+    if (!aiConfig.apiKey.trim()) {
+      setDetectStatus('⚠️ Please enter an API Key to verify replying models.');
+      return;
+    }
+
+    setIsVerifyingModels(true);
+    setDetectStatus('⚡ Testing models with your API key to find replying models...');
+
+    const baseList: DetectedModel[] = detectedModels.length > 0
+      ? [...detectedModels]
+      : (AI_PRESETS.find((p) => cleanBaseUrl(p.baseUrl) === cleanBaseUrl(aiConfig.baseUrl))?.popularModels.map((m) => ({
+          id: m.id,
+          name: m.name,
+          isFree: !!m.isFree
+        })) || []);
+
+    const updated = [...baseList];
+    let replyingCount = 0;
+
+    // Verify first 8 models to avoid rate limiting
+    for (let i = 0; i < Math.min(updated.length, 8); i++) {
+      const item = { ...updated[i] };
+      const pingRes = await verifyModelReplying(aiConfig.baseUrl, aiConfig.apiKey, item.id);
+      item.isReplying = pingRes.replying;
+      item.replyStatus = pingRes.replying ? 'replying' : 'failed';
+      if (pingRes.replying) replyingCount++;
+      updated[i] = item;
+    }
+
+    setDetectedModels(updated);
+    setIsVerifyingModels(false);
+
+    if (replyingCount > 0) {
+      setDetectStatus(`✅ Found ${replyingCount} replying model(s) with green tick mark!`);
+      setModelFilterType('replying');
+      const firstReplying = updated.find((m) => m.isReplying);
+      if (firstReplying) {
+        setAiConfig((prev) => ({ ...prev, model: firstReplying.id }));
+        setActiveModelVerified({ replying: true, message: `Model '${firstReplying.id}' is verified and replying!` });
+      }
+    } else {
+      setDetectStatus('⚠️ None of the tested models replied. Check API key permissions or try another provider.');
+    }
+  };
+
   const displayedModels = useMemo(() => {
     let list: DetectedModel[] = [];
     if (detectedModels.length > 0) {
@@ -313,13 +366,23 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
         }));
       }
     }
-    return modelFilterType === 'free' ? list.filter((m) => m.isFree) : list;
+    if (modelFilterType === 'free') return list.filter((m) => m.isFree);
+    if (modelFilterType === 'replying') return list.filter((m) => m.isReplying);
+    return list;
   }, [detectedModels, modelFilterType, aiConfig.baseUrl]);
 
   const handleTestConnection = async () => {
     setAiTestStatus({ loading: true });
     const res = await testAiConnection(aiConfig);
     setAiTestStatus({ loading: false, success: res.success, message: res.message });
+    if (res.success) {
+      setActiveModelVerified({ replying: true, message: `Active model '${aiConfig.model}' is verified & replying!` });
+      setDetectedModels((prev) =>
+        prev.map((m) => (m.id === aiConfig.model ? { ...m, isReplying: true, replyStatus: 'replying' } : m))
+      );
+    } else {
+      setActiveModelVerified({ replying: false, message: res.message });
+    }
   };
 
   const handleSaveAiConfig = async () => {
@@ -1170,7 +1233,7 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                           </label>
 
                           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-                            {/* 2-Option All vs. Free Toggle */}
+                            {/* 3-Option Filter Toggle: All vs. Free vs. Replying */}
                             <div style={{ display: 'inline-flex', background: '#e2e8f0', padding: '2px', borderRadius: '6px' }}>
                               <button
                                 type="button"
@@ -1206,6 +1269,23 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                               >
                                 🎁 Free Only
                               </button>
+                              <button
+                                type="button"
+                                onClick={() => setModelFilterType('replying')}
+                                style={{
+                                  padding: '4px 10px',
+                                  fontSize: '0.74rem',
+                                  fontWeight: 700,
+                                  borderRadius: '5px',
+                                  border: 'none',
+                                  cursor: 'pointer',
+                                  background: modelFilterType === 'replying' ? '#0284c7' : 'transparent',
+                                  color: modelFilterType === 'replying' ? '#ffffff' : '#64748b',
+                                  transition: 'all 0.15s ease'
+                                }}
+                              >
+                                ✅ Replying Only
+                              </button>
                             </div>
 
                             {/* Auto-Detect Button */}
@@ -1228,7 +1308,31 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                               }}
                             >
                               <span>{isDetectingModels ? '⏳' : '🔍'}</span>
-                              <span>{isDetectingModels ? 'Detecting...' : 'Auto-Detect Models'}</span>
+                              <span>{isDetectingModels ? 'Detecting...' : 'Auto-Detect'}</span>
+                            </button>
+
+                            {/* Verify Replying Models Button */}
+                            <button
+                              type="button"
+                              onClick={handleVerifyReplyingModels}
+                              disabled={isVerifyingModels || !aiConfig.apiKey.trim()}
+                              title={!aiConfig.apiKey.trim() ? 'Enter API Key first' : 'Test which models actively reply'}
+                              style={{
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '5px',
+                                padding: '5px 12px',
+                                background: isVerifyingModels ? '#94a3b8' : (!aiConfig.apiKey.trim() ? '#cbd5e1' : '#059669'),
+                                color: '#ffffff',
+                                border: 'none',
+                                borderRadius: '6px',
+                                fontSize: '0.76rem',
+                                fontWeight: 700,
+                                cursor: isVerifyingModels || !aiConfig.apiKey.trim() ? 'not-allowed' : 'pointer'
+                              }}
+                            >
+                              <span>{isVerifyingModels ? '⏳' : '⚡'}</span>
+                              <span>{isVerifyingModels ? 'Pinging...' : 'Verify Replying'}</span>
                             </button>
                           </div>
                         </div>
@@ -1255,13 +1359,19 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                         {displayedModels.length > 0 && (
                           <div style={{ marginBottom: '8px' }}>
                             <label style={{ display: 'block', fontSize: '0.72rem', color: '#64748b', fontWeight: 600, marginBottom: '3px' }}>
-                              Choose from {modelFilterType === 'free' ? 'Free-Tier' : 'Available'} Models ({displayedModels.length} available):
+                              Choose from {modelFilterType === 'replying' ? '✅ Verified Replying' : (modelFilterType === 'free' ? '🎁 Free-Tier' : 'Available')} Models ({displayedModels.length} available):
                             </label>
                             <select
                               value={displayedModels.some((m) => m.id === aiConfig.model) ? aiConfig.model : ''}
                               onChange={(e) => {
                                 if (e.target.value) {
                                   setAiConfig({ ...aiConfig, model: e.target.value });
+                                  const sel = displayedModels.find((m) => m.id === e.target.value);
+                                  if (sel?.isReplying) {
+                                    setActiveModelVerified({ replying: true, message: `Model '${e.target.value}' is verified and replying!` });
+                                  } else {
+                                    setActiveModelVerified(null);
+                                  }
                                 }
                               }}
                               style={{
@@ -1275,14 +1385,44 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                                 color: '#0f172a'
                               }}
                             >
-                              <option value="">-- Select from {displayedModels.length} {modelFilterType === 'free' ? 'Free' : 'Available'} Models --</option>
-                              {displayedModels.map((m) => (
-                                <option key={m.id} value={m.id}>
-                                  {m.isFree ? '🎁 [FREE] ' : '⭐ [PRO] '}
-                                  {m.name || m.id} ({m.id})
-                                </option>
-                              ))}
+                              <option value="">-- Select from {displayedModels.length} {modelFilterType === 'replying' ? 'Replying' : (modelFilterType === 'free' ? 'Free' : 'Detected')} Models --</option>
+                              {displayedModels.map((m) => {
+                                const statusPrefix = m.isReplying
+                                  ? '✅ [REPLYING] '
+                                  : m.replyStatus === 'failed'
+                                  ? '❌ [404/ERR] '
+                                  : m.isFree
+                                  ? '🎁 [FREE] '
+                                  : '⭐ [PRO] ';
+                                return (
+                                  <option key={m.id} value={m.id}>
+                                    {statusPrefix}{m.name || m.id} ({m.id})
+                                  </option>
+                                );
+                              })}
                             </select>
+                          </div>
+                        )}
+
+                        {/* Active Model Verified Tick Mark Banner */}
+                        {activeModelVerified && (
+                          <div
+                            style={{
+                              padding: '6px 12px',
+                              borderRadius: '6px',
+                              fontSize: '0.75rem',
+                              fontWeight: 700,
+                              marginBottom: '8px',
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '6px',
+                              background: activeModelVerified.replying ? '#ecfdf5' : '#fef2f2',
+                              color: activeModelVerified.replying ? '#047857' : '#b91c1c',
+                              border: activeModelVerified.replying ? '1px solid #a7f3d0' : '1px solid #fecaca'
+                            }}
+                          >
+                            <span>{activeModelVerified.replying ? '✅' : '⚠️'}</span>
+                            <span>{activeModelVerified.message}</span>
                           </div>
                         )}
 
@@ -1294,8 +1434,11 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                           <input
                             type="text"
                             value={aiConfig.model}
-                            onChange={(e) => setAiConfig({ ...aiConfig, model: e.target.value })}
-                            placeholder="e.g. llama-3.3-70b-versatile, gemini-2.0-flash, or gpt-4o-mini"
+                            onChange={(e) => {
+                              setAiConfig({ ...aiConfig, model: e.target.value });
+                              setActiveModelVerified(null);
+                            }}
+                            placeholder="e.g. llama-3.1-8b-instant, gemini-2.0-flash, or gpt-4o-mini"
                             style={{
                               width: '100%',
                               padding: '9px 12px',
@@ -1307,7 +1450,7 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                           />
                         </div>
                         <div style={{ fontSize: '0.7rem', color: '#64748b', marginTop: '4px' }}>
-                          💡 Tip: Ensure model matches your provider. Groq accepts Llama/Mixtral/Gemma models; OpenRouter supports `:free` models; Gemini uses `gemini-2.0-flash`.
+                          💡 Tip: Click <b>⚡ Verify Replying</b> to ping models with your API key. Working models get a green tick mark (✅) so you can safely generate tests without 404 errors!
                         </div>
                       </div>
 
