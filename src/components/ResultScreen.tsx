@@ -360,18 +360,18 @@ export const ResultScreen: React.FC<ResultScreenProps> = ({
       <div className="card">
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px', flexWrap: 'wrap', gap: '8px' }}>
           <h2 style={{ fontSize: '1.2rem', fontWeight: 700 }}>Diagnostic Word-by-Word Analysis</h2>
-          <div style={{ display: 'flex', gap: '12px', fontSize: '0.8rem' }}>
-            <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-              <span style={{ width: 10, height: 10, borderRadius: 2, background: '#16a34a' }}></span> Correct
+          <div style={{ display: 'flex', gap: '16px', fontSize: '0.85rem', fontWeight: 600 }}>
+            <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <span style={{ width: 12, height: 12, borderRadius: 2, background: '#16a34a' }}></span> Correct
             </span>
-            <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-              <span style={{ width: 10, height: 10, borderRadius: 2, background: '#dc2626' }}></span> Full Mistake
+            <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <span style={{ width: 12, height: 12, borderRadius: 2, background: '#dc2626' }}></span> Full Mistake
             </span>
-            <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-              <span style={{ width: 10, height: 10, borderRadius: 2, background: '#d97706' }}></span> Half Mistake
+            <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <span style={{ width: 12, height: 12, borderRadius: 2, background: '#ea580c' }}></span> Half Mistake
             </span>
-            <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-              <span style={{ width: 10, height: 10, borderRadius: 2, background: '#64748b' }}></span> Skipped
+            <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <span style={{ width: 12, height: 12, borderRadius: 2, background: '#94a3b8' }}></span> Skipped
             </span>
           </div>
         </div>

@@ -707,66 +707,63 @@ body {
   color: #64748b;
 }
 
-/* Diff Styling */
+/* Diff Styling (TestMentor Standard) */
 .diff-box {
   background: #ffffff;
   border: 1px solid var(--border-color);
   border-radius: var(--radius-md);
-  padding: 20px;
-  line-height: 2.2;
-  font-size: 1.05rem;
-  max-height: 300px;
+  padding: 24px;
+  line-height: 2.3;
+  font-size: 1.15rem;
+  max-height: 380px;
   overflow-y: auto;
+  word-spacing: 2px;
 }
 
 .diff-correct {
   color: #16a34a;
-  background-color: #f0fdf4;
-  padding: 2px 4px;
-  border-radius: 3px;
+  font-weight: 500;
+  display: inline;
 }
 
 .diff-wrong {
-  color: #b91c1c;
-  background-color: #fef2f2;
-  padding: 2px 4px;
-  border-radius: 3px;
-  font-weight: 600;
-}
-
-.diff-wrong del {
-  color: #991b1b;
-  text-decoration: line-through;
-  margin-right: 4px;
-}
-
-.diff-wrong ins {
   color: #dc2626;
-  text-decoration: none;
   font-weight: 700;
+  display: inline;
+}
+
+.diff-orig-hint {
+  color: #ea580c;
+  font-weight: 600;
+  font-size: 0.95em;
+  display: inline;
+  margin-left: 2px;
 }
 
 .diff-half {
-  color: #b45309;
-  background-color: #fffbeb;
-  padding: 2px 4px;
-  border-radius: 3px;
+  color: #ea580c;
+  font-weight: 700;
+  display: inline;
 }
 
 .diff-missing {
-  color: #64748b;
-  background-color: #f1f5f9;
-  padding: 2px 4px;
-  border-radius: 3px;
-  font-style: italic;
+  color: #dc2626;
   text-decoration: line-through;
+  opacity: 0.85;
+  display: inline;
 }
 
 .diff-extra {
-  color: #9333ea;
-  background-color: #faf5ff;
-  padding: 2px 4px;
-  border-radius: 3px;
+  color: #dc2626;
+  font-weight: 700;
+  text-decoration: underline wavy;
+  display: inline;
+}
+
+.diff-skipped {
+  color: #94a3b8;
+  text-decoration: line-through;
+  display: inline;
 }
 
 /* Modal */
