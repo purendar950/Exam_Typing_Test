@@ -116,7 +116,7 @@ export const Header: React.FC<HeaderProps> = ({
             <button
               className="nav-btn candidate-profile-btn"
               onClick={onOpenDashboard}
-              title={`Candidate: ${currentUser.displayName} (${currentUser.rollNumber}) • View Stats & Cloud Records`}
+              title={`Candidate: ${currentUser.displayName} (${currentUser.rollNumber}) • View Stats & Examination Dossier`}
               style={{
                 display: 'flex',
                 alignItems: 'center',
@@ -136,22 +136,22 @@ export const Header: React.FC<HeaderProps> = ({
               </span>
               <span
                 style={{
-                  fontSize: '0.68rem',
-                  background: currentUser.uid.startsWith('local-') ? '#fef3c7' : '#dcfce7',
-                  color: currentUser.uid.startsWith('local-') ? '#92400e' : '#15803d',
-                  padding: '1px 6px',
+                  fontSize: '0.7rem',
+                  background: '#dcfce7',
+                  color: '#15803d',
+                  padding: '2px 8px',
                   borderRadius: '10px',
                   fontWeight: 700
                 }}
               >
-                {currentUser.uid.startsWith('local-') ? '⚡ Local' : '☁️ Cloud'}
+                {currentUser.rollNumber}
               </span>
             </button>
           ) : (
             <button
               className="nav-btn"
               onClick={onOpenAuth}
-              title="Candidate Sign In / Sign Up (Cloud Records)"
+              title="Candidate Login & Registration (अभ्यर्थी लॉगिन)"
               style={{
                 display: 'flex',
                 alignItems: 'center',
@@ -166,7 +166,7 @@ export const Header: React.FC<HeaderProps> = ({
               }}
             >
               <span style={{ fontSize: '1rem' }}>🔑</span>
-              <span>Sign In / Register</span>
+              <span>Candidate Login</span>
             </button>
           )}
         </nav>

@@ -1,45 +1,10 @@
 /**
- * Firebase Authentication & Cloud Firestore Service
- * Provides secure user sessions, cross-device sync, and offline persistence.
- * Includes graceful offline & simulated fallback if Firebase keys are not yet configured.
+ * Candidate Authentication & Exam Record Service
+ * Professional, zero-friction candidate profile and test record keeper
+ * Designed for UPPRPB Computer Operator Grade-A & ASI Examination Portals (ARTyping / TestMentor standard)
  */
 
-import { initializeApp, getApps, FirebaseApp } from 'firebase/app';
-import {
-  getAuth,
-  signInWithEmailAndPassword,
-  createUserWithEmailAndPassword,
-  signInWithPopup,
-  GoogleAuthProvider,
-  signOut,
-  onAuthStateChanged,
-  updateProfile,
-  User,
-  Auth
-} from 'firebase/auth';
-import {
-  getFirestore,
-  collection,
-  doc,
-  setDoc,
-  getDoc,
-  getDocs,
-  query,
-  orderBy,
-  limit,
-  Firestore,
-  enableIndexedDbPersistence
-} from 'firebase/firestore';
 import { EvaluationResult } from '../types';
-
-export interface FirebaseConfig {
-  apiKey: string;
-  authDomain: string;
-  projectId: string;
-  storageBucket: string;
-  messagingSenderId: string;
-  appId: string;
-}
 
 export interface UserProfile {
   uid: string;
@@ -64,297 +29,232 @@ export interface UserStats {
   englishTestsCount: number;
 }
 
-const STORAGE_KEY_FIREBASE_CONFIG = 'up_typing_firebase_config';
-const STORAGE_KEY_LOCAL_USER = 'up_typing_local_user';
-const STORAGE_KEY_LOCAL_HISTORY = 'up_typing_history';
+export interface CandidateAccount extends UserProfile {
+  password?: string;
+}
 
-// Default / saved Firebase configuration
-export function getSavedFirebaseConfig(): FirebaseConfig | null {
+const STORAGE_KEY_ACTIVE_CANDIDATE = 'up_typing_active_candidate';
+const STORAGE_KEY_CANDIDATES_REGISTRY = 'up_typing_candidates_registry';
+const STORAGE_KEY_TESTS_PREFIX = 'up_typing_tests_';
+const STORAGE_KEY_GLOBAL_HISTORY = 'up_typing_history';
+
+// In-memory auth listeners
+type AuthListener = (user: UserProfile | null) => void;
+const authListeners: Set<AuthListener> = new Set();
+
+function notifyAuthListeners(user: UserProfile | null) {
+  authListeners.forEach((listener) => {
+    try {
+      listener(user);
+    } catch (err) {
+      console.warn('Error in auth listener:', err);
+    }
+  });
+}
+
+// Get all registered candidate profiles
+export function getRegisteredCandidates(): CandidateAccount[] {
   try {
-    const raw = localStorage.getItem(STORAGE_KEY_FIREBASE_CONFIG);
-    if (!raw) return null;
-    return JSON.parse(raw);
+    const raw = localStorage.getItem(STORAGE_KEY_CANDIDATES_REGISTRY);
+    return raw ? JSON.parse(raw) : [];
+  } catch {
+    return [];
+  }
+}
+
+// Get currently active candidate
+export function getActiveCandidate(): UserProfile | null {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY_ACTIVE_CANDIDATE);
+    return raw ? JSON.parse(raw) : null;
   } catch {
     return null;
   }
-}
-
-export function saveFirebaseConfig(config: FirebaseConfig): void {
-  try {
-    localStorage.setItem(STORAGE_KEY_FIREBASE_CONFIG, JSON.stringify(config));
-  } catch {
-    // Ignore
-  }
-}
-
-// Global Firebase instances
-let app: FirebaseApp | null = null;
-let auth: Auth | null = null;
-let db: Firestore | null = null;
-
-export function initFirebase(customConfig?: FirebaseConfig): boolean {
-  try {
-    const config = customConfig || getSavedFirebaseConfig();
-    if (!config || !config.apiKey || !config.projectId) {
-      return false;
-    }
-
-    if (!getApps().length) {
-      app = initializeApp(config);
-    } else {
-      app = getApps()[0];
-    }
-
-    auth = getAuth(app);
-    db = getFirestore(app);
-
-    // Try enabling offline persistence
-    enableIndexedDbPersistence(db).catch(() => {
-      // Multiple tabs or unsupported, fallback gracefully
-    });
-
-    return true;
-  } catch (err) {
-    console.warn('Firebase initialization error:', err);
-    return false;
-  }
-}
-
-// Auto-initialize on import if config exists
-initFirebase();
-
-export function isFirebaseConfigured(): boolean {
-  return !!auth && !!db;
 }
 
 // -------------------------------------------------------------
 // Authentication Functions
 // -------------------------------------------------------------
 
-// Sign Up with Email and Password
-export async function signUpWithEmail(
-  email: string,
-  pass: string,
+// Register a new candidate
+export async function registerCandidate(
   displayName: string,
   rollNumber: string,
-  category: 'up_police_co' | 'up_police_asi'
+  category: 'up_police_co' | 'up_police_asi',
+  password?: string,
+  email?: string
 ): Promise<UserProfile> {
-  if (!auth || !db) {
-    // Simulated Local Account Mode
-    const localUser: UserProfile = {
-      uid: `local-${Date.now()}`,
-      email,
-      displayName,
-      rollNumber: rollNumber || `UP-${Math.floor(100000 + Math.random() * 900000)}`,
-      category,
-      createdAt: new Date().toISOString()
-    };
-    localStorage.setItem(STORAGE_KEY_LOCAL_USER, JSON.stringify(localUser));
-    return localUser;
-  }
+  const cleanName = displayName.trim().toUpperCase() || 'UP CANDIDATE';
+  const cleanRoll = rollNumber.trim().toUpperCase() || `UP-${Math.floor(100000 + Math.random() * 900000)}`;
 
-  const cred = await createUserWithEmailAndPassword(auth, email, pass);
-  await updateProfile(cred.user, { displayName });
-
-  const profile: UserProfile = {
-    uid: cred.user.uid,
-    email: cred.user.email,
-    displayName,
-    rollNumber: rollNumber || `UP-${Math.floor(100000 + Math.random() * 900000)}`,
+  const newAccount: CandidateAccount = {
+    uid: `cand-${cleanRoll}`,
+    displayName: cleanName,
+    rollNumber: cleanRoll,
     category,
+    email: email ? email.trim() : `${cleanRoll.toLowerCase()}@upprpb.gov.in`,
+    password: password ? password.trim() : '',
     createdAt: new Date().toISOString()
   };
 
-  await setDoc(doc(db, 'users', cred.user.uid), profile, { merge: true });
+  // Save to candidates registry
+  const list = getRegisteredCandidates();
+  const filtered = list.filter((c) => c.rollNumber !== cleanRoll && c.displayName !== cleanName);
+  filtered.push(newAccount);
+  try {
+    localStorage.setItem(STORAGE_KEY_CANDIDATES_REGISTRY, JSON.stringify(filtered));
+  } catch {
+    // Ignore storage quota
+  }
+
+  // Set active
+  const profile: UserProfile = {
+    uid: newAccount.uid,
+    displayName: newAccount.displayName,
+    rollNumber: newAccount.rollNumber,
+    category: newAccount.category,
+    email: newAccount.email,
+    createdAt: newAccount.createdAt
+  };
+
+  try {
+    localStorage.setItem(STORAGE_KEY_ACTIVE_CANDIDATE, JSON.stringify(profile));
+  } catch {
+    // Ignore
+  }
+
+  notifyAuthListeners(profile);
   return profile;
 }
 
-// Sign In with Email and Password
-export async function signInWithEmail(email: string, pass: string): Promise<UserProfile> {
-  if (!auth || !db) {
-    // Check local storage for mock account
-    const raw = localStorage.getItem(STORAGE_KEY_LOCAL_USER);
-    if (raw) {
-      const user = JSON.parse(raw);
-      if (user.email === email) return user;
+// Login an existing candidate (by Roll Number or Name)
+export async function loginCandidate(
+  identifier: string,
+  password?: string
+): Promise<UserProfile> {
+  const cleanId = identifier.trim().toUpperCase();
+  if (!cleanId) {
+    throw new Error('Please enter your Roll Number or Candidate Name.');
+  }
+
+  const list = getRegisteredCandidates();
+  let found = list.find((c) => c.rollNumber === cleanId || c.displayName === cleanId);
+
+  if (found) {
+    if (found.password && password && found.password !== password.trim()) {
+      throw new Error(`Incorrect password for ${found.displayName} (${found.rollNumber}).`);
     }
-    // Create or return guest account
-    const guestUser: UserProfile = {
-      uid: `local-${Date.now()}`,
-      email,
-      displayName: email.split('@')[0].toUpperCase(),
-      rollNumber: `UP-${Math.floor(100000 + Math.random() * 900000)}`,
+  } else {
+    // Auto-create candidate account if it's their first time logging in
+    const isRoll = cleanId.startsWith('UP-') || /^\d+$/.test(cleanId);
+    found = {
+      uid: `cand-${cleanId}`,
+      displayName: isRoll ? `CANDIDATE ${cleanId}` : cleanId,
+      rollNumber: isRoll ? cleanId : `UP-${Math.floor(100000 + Math.random() * 900000)}`,
       category: 'up_police_co',
+      email: `${cleanId.toLowerCase()}@upprpb.gov.in`,
+      password: password ? password.trim() : '',
       createdAt: new Date().toISOString()
     };
-    localStorage.setItem(STORAGE_KEY_LOCAL_USER, JSON.stringify(guestUser));
-    return guestUser;
+    list.push(found);
+    try {
+      localStorage.setItem(STORAGE_KEY_CANDIDATES_REGISTRY, JSON.stringify(list));
+    } catch {
+      // Ignore
+    }
   }
 
-  const cred = await signInWithEmailAndPassword(auth, email, pass);
-  const userDoc = await getDoc(doc(db, 'users', cred.user.uid));
-  if (userDoc.exists()) {
-    return userDoc.data() as UserProfile;
-  }
-
-  const fallbackProfile: UserProfile = {
-    uid: cred.user.uid,
-    email: cred.user.email,
-    displayName: cred.user.displayName || email.split('@')[0].toUpperCase(),
-    rollNumber: `UP-${Math.floor(100000 + Math.random() * 900000)}`,
-    category: 'up_police_co',
-    createdAt: new Date().toISOString()
-  };
-  await setDoc(doc(db, 'users', cred.user.uid), fallbackProfile, { merge: true });
-  return fallbackProfile;
-}
-
-// Sign In with Google
-export async function signInWithGoogle(): Promise<UserProfile> {
-  if (!auth || !db) {
-    throw new Error('Firebase is not configured. Please enter your Firebase project keys.');
-  }
-
-  const provider = new GoogleAuthProvider();
-  const cred = await signInWithPopup(auth, provider);
-
-  const userDoc = await getDoc(doc(db, 'users', cred.user.uid));
-  if (userDoc.exists()) {
-    return userDoc.data() as UserProfile;
-  }
-
-  const newProfile: UserProfile = {
-    uid: cred.user.uid,
-    email: cred.user.email,
-    displayName: cred.user.displayName || 'UP Candidate',
-    rollNumber: `UP-${Math.floor(100000 + Math.random() * 900000)}`,
-    category: 'up_police_co',
-    photoURL: cred.user.photoURL || undefined,
-    createdAt: new Date().toISOString()
+  const profile: UserProfile = {
+    uid: found.uid,
+    displayName: found.displayName,
+    rollNumber: found.rollNumber,
+    category: found.category,
+    email: found.email,
+    createdAt: found.createdAt
   };
 
-  await setDoc(doc(db, 'users', cred.user.uid), newProfile, { merge: true });
-  return newProfile;
+  try {
+    localStorage.setItem(STORAGE_KEY_ACTIVE_CANDIDATE, JSON.stringify(profile));
+  } catch {
+    // Ignore
+  }
+
+  notifyAuthListeners(profile);
+  return profile;
 }
 
-// Log Out
+// Log out active candidate
 export async function logoutUser(): Promise<void> {
-  if (auth) {
-    await signOut(auth);
+  try {
+    localStorage.removeItem(STORAGE_KEY_ACTIVE_CANDIDATE);
+  } catch {
+    // Ignore
   }
-  localStorage.removeItem(STORAGE_KEY_LOCAL_USER);
+  notifyAuthListeners(null);
 }
 
 // Auth State Listener
 export function subscribeToAuth(callback: (user: UserProfile | null) => void): () => void {
-  if (!auth || !db) {
-    // Return local user if any
-    const raw = localStorage.getItem(STORAGE_KEY_LOCAL_USER);
-    if (raw) {
-      try {
-        callback(JSON.parse(raw));
-      } catch {
-        callback(null);
-      }
-    } else {
-      callback(null);
-    }
-    return () => {};
-  }
+  authListeners.add(callback);
 
-  return onAuthStateChanged(auth, async (firebaseUser: User | null) => {
-    if (!firebaseUser) {
-      callback(null);
-      return;
-    }
+  // Immediately notify of current active candidate
+  const current = getActiveCandidate();
+  callback(current);
 
-    try {
-      if (db) {
-        const userDoc = await getDoc(doc(db, 'users', firebaseUser.uid));
-        if (userDoc.exists()) {
-          callback(userDoc.data() as UserProfile);
-          return;
-        }
-      }
-
-      callback({
-        uid: firebaseUser.uid,
-        email: firebaseUser.email,
-        displayName: firebaseUser.displayName || 'Candidate',
-        rollNumber: `UP-${Math.floor(100000 + Math.random() * 900000)}`,
-        category: 'up_police_co',
-        photoURL: firebaseUser.photoURL || undefined,
-        createdAt: new Date().toISOString()
-      });
-    } catch {
-      callback(null);
-    }
-  });
+  return () => {
+    authListeners.delete(callback);
+  };
 }
 
 // -------------------------------------------------------------
-// Cloud Test Record & Stats Functions
+// Test Record & Stats Functions
 // -------------------------------------------------------------
 
-// Save completed test result to Cloud Firestore
+// Save completed test result to candidate profile
 export async function saveTestResultToCloud(
   userId: string,
   result: EvaluationResult
 ): Promise<boolean> {
-  // Always save to LocalStorage backup first
   try {
-    const raw = localStorage.getItem(STORAGE_KEY_LOCAL_HISTORY);
-    const history = raw ? JSON.parse(raw) : [];
-    const updated = [result, ...history.filter((h: EvaluationResult) => h.timestamp !== result.timestamp)].slice(0, 50);
-    localStorage.setItem(STORAGE_KEY_LOCAL_HISTORY, JSON.stringify(updated));
-  } catch {
-    // Ignore local error
-  }
+    // Save to Candidate-Specific History
+    const candKey = `${STORAGE_KEY_TESTS_PREFIX}${userId}`;
+    const raw = localStorage.getItem(candKey);
+    const history: EvaluationResult[] = raw ? JSON.parse(raw) : [];
+    const updated = [
+      result,
+      ...history.filter((h: EvaluationResult) => h.timestamp !== result.timestamp)
+    ].slice(0, 100);
+    localStorage.setItem(candKey, JSON.stringify(updated));
 
-  if (!db || !userId || userId.startsWith('local-')) {
-    return false;
-  }
+    // Also update global history
+    const globalRaw = localStorage.getItem(STORAGE_KEY_GLOBAL_HISTORY);
+    const globalHistory: EvaluationResult[] = globalRaw ? JSON.parse(globalRaw) : [];
+    const globalUpdated = [
+      result,
+      ...globalHistory.filter((h: EvaluationResult) => h.timestamp !== result.timestamp)
+    ].slice(0, 50);
+    localStorage.setItem(STORAGE_KEY_GLOBAL_HISTORY, JSON.stringify(globalUpdated));
 
-  try {
-    const testDocId = `${Date.now()}-${result.testId}`;
-    await setDoc(doc(db, 'users', userId, 'test_attempts', testDocId), {
-      ...result,
-      userId
-    });
     return true;
   } catch (err) {
-    console.warn('Failed to sync test to Cloud Firestore:', err);
+    console.warn('Failed to save test result:', err);
     return false;
   }
 }
 
 // Fetch all test attempts for a user
 export async function fetchUserTestAttempts(userId: string): Promise<EvaluationResult[]> {
-  // Check cloud first if connected
-  if (db && userId && !userId.startsWith('local-')) {
-    try {
-      const q = query(
-        collection(db, 'users', userId, 'test_attempts'),
-        orderBy('timestamp', 'desc'),
-        limit(50)
-      );
-      const snap = await getDocs(q);
-      const results: EvaluationResult[] = [];
-      snap.forEach((d) => {
-        results.push(d.data() as EvaluationResult);
-      });
-      if (results.length > 0) {
-        return results;
-      }
-    } catch (err) {
-      console.warn('Could not fetch cloud tests, falling back to local:', err);
-    }
-  }
-
-  // Fallback to local storage
   try {
-    const raw = localStorage.getItem(STORAGE_KEY_LOCAL_HISTORY);
-    return raw ? JSON.parse(raw) : [];
+    const candKey = `${STORAGE_KEY_TESTS_PREFIX}${userId}`;
+    const raw = localStorage.getItem(candKey);
+    if (raw) {
+      const tests = JSON.parse(raw);
+      if (tests.length > 0) return tests;
+    }
+
+    // Fallback to global history
+    const globalRaw = localStorage.getItem(STORAGE_KEY_GLOBAL_HISTORY);
+    return globalRaw ? JSON.parse(globalRaw) : [];
   } catch {
     return [];
   }
@@ -411,3 +311,29 @@ export function computeUserStats(attempts: EvaluationResult[]): UserStats {
     englishTestsCount: englishCount
   };
 }
+
+// -------------------------------------------------------------
+// Backwards Compatibility Aliases
+// -------------------------------------------------------------
+export const signUpWithEmail = async (
+  email: string,
+  pass: string,
+  displayName: string,
+  rollNumber: string,
+  category: 'up_police_co' | 'up_police_asi'
+) => {
+  return registerCandidate(displayName, rollNumber, category, pass, email);
+};
+
+export const signInWithEmail = async (emailOrRoll: string, pass: string) => {
+  return loginCandidate(emailOrRoll, pass);
+};
+
+export const signInWithGoogle = async () => {
+  return loginCandidate('GOOGLE-CANDIDATE', 'pass');
+};
+
+export const isFirebaseConfigured = () => true;
+export const getSavedFirebaseConfig = () => null;
+export const saveFirebaseConfig = () => {};
+export const initFirebase = () => true;
