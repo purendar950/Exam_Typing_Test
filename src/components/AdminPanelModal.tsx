@@ -1534,8 +1534,8 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                           onChange={(e) => setCustomDifficulty(e.target.value as 'medium' | 'hard')}
                           style={{ width: '100%', padding: '8px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '0.85rem' }}
                         >
-                          <option value="medium">Medium (Standard)</option>
-                          <option value="hard">Hard (Technical / Legal)</option>
+                          <option value="medium">Medium (Standard 500–540w)</option>
+                          <option value="hard">Hard (Longer Words 8–16+ letters, AWL ≥ 7.0)</option>
                         </select>
                       </div>
 
@@ -1704,7 +1704,7 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                             style={{ width: '100%', padding: '7px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '0.82rem' }}
                           >
                             <option value="medium">Medium</option>
-                            <option value="hard">Hard</option>
+                            <option value="hard">Hard (Long Words)</option>
                           </select>
                         </div>
                         <div>

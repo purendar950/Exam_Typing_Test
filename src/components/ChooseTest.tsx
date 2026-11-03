@@ -503,8 +503,9 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
                   background: isHard ? '#fee2e2' : '#f0fdf4',
                   color: isHard ? '#b91c1c' : '#15803d'
                 }}
+                title={isHard ? 'Hard: Predominance of longer words (8–16+ letters, AWL ≥ 7.0)' : 'Medium: Balanced editorial prose'}
               >
-                {isHard ? 'HARD' : 'MEDIUM'}
+                {isHard ? 'HARD • Long Words' : 'MEDIUM'}
               </span>
             </div>
 
@@ -1915,7 +1916,7 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
                   <span className="ar-badge-difficulty ar-badge-m">M</span> - Moderate
                 </span>
                 <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                  <span className="ar-badge-difficulty ar-badge-h">H</span> - Hard
+                  <span className="ar-badge-difficulty ar-badge-h">H</span> - Hard (Long Words)
                 </span>
               </div>
 

@@ -209,16 +209,16 @@ export const DAILY_8_SLOTS: DailySlotPlan[] = [
     language: 'english',
     difficulty: 'hard',
     category: 'up_police_co',
-    subType: 'English Hard #1',
-    topic: 'Cyber Security Operations, Ransomware Threat Intelligence & Police Digital Forensics'
+    subType: 'English Hard #1 (Long Words)',
+    topic: 'Cyber Security Operations, Ransomware Threat Intelligence, Infrastructure Vulnerabilities & Police Digital Forensics'
   },
   {
     slot: 4,
     language: 'english',
     difficulty: 'hard',
     category: 'up_police_asi',
-    subType: 'English Hard #2',
-    topic: 'Indian Judicial Administration, High Court Procedural Jurisprudence & Official Evidence Laws'
+    subType: 'English Hard #2 (Long Words)',
+    topic: 'Indian Judicial Administration, High Court Procedural Jurisprudence, Constitutionalism & Official Evidence Laws'
   },
   {
     slot: 5,
@@ -241,16 +241,16 @@ export const DAILY_8_SLOTS: DailySlotPlan[] = [
     language: 'hindi_mangal',
     difficulty: 'hard',
     category: 'up_police_co',
-    subType: 'Hindi Mangal Hard #1',
-    topic: 'साइबर अपराध जांच, डिजिटल साक्ष्य अधिनियम एवं पुलिस प्रशासनिक चुनौतियाँ'
+    subType: 'Hindi Mangal Hard #1 (दीर्घ शब्द)',
+    topic: 'साइबर अपराध जांच, डिजिटल साक्ष्य प्रमाणीकरण, उत्तरदायित्व एवं पुलिस प्रशासनिक चुनौतियाँ'
   },
   {
     slot: 8,
     language: 'hindi_mangal',
     difficulty: 'hard',
     category: 'up_police_asi',
-    subType: 'Hindi Mangal Hard #2',
-    topic: 'शासकीय राजभाषा परिपत्र, विभागीय अधिसूचनाएं एवं संवैधानिक विधिक व्यवस्था'
+    subType: 'Hindi Mangal Hard #2 (दीर्घ शब्द)',
+    topic: 'शासकीय राजभाषा परिपत्र, अंतर-विभागीय अधिसूचनाएं एवं संवैधानिक विधिक व्यवस्था'
   }
 ];
 
@@ -639,22 +639,34 @@ async function generateSinglePassage(
     if (isHard) {
       userPrompt = `Generate an official competitive examination typing passage in standard English strictly conforming to the AR Typing HARD level standard for UP Police Computer Operator Grade-A and ASI examinations.
 Topic: ${slot.topic}
-Difficulty: HARD (Official UP Police Examination Standard)
-Requirements:
+Difficulty: HARD (Official UP Police Examination Standard - LONGER WORDS MANDATE)
+
+CRUCIAL REQUIREMENT — "HARD" IN TYPING EXAMS MEANS MUCH LONGER WORDS:
+The defining characteristic of HARD difficulty is a high concentration of LONGER, MULTI-SYLLABIC WORDS (8 to 16+ letters each) and a high Average Word Length (AWL >= 7.0 characters per word). Long words require far more finger travel, sustained memory, shift key usage, and dramatically increase typing difficulty.
+
+Detailed Requirements:
 1. Target Word Count: Exactly 520 to 580 words (CRUCIAL: Must be between 510 and 590 words for the 15-minute examination hall test).
-2. Content & Vocabulary:
+2. Longer Words & Vocabulary Architecture (MANDATORY):
+   - At least 45% to 55% of all words across the passage MUST be long words of 8 to 16+ letters each.
+   - Use high-syllable, polysyllabic words frequently throughout every paragraph. Examples of mandatory word styles:
+     * Institutional & Administrative: institutionalization, telecommunications, counter-intelligence, misappropriation, constitutionalism, superintendence, decentralization, implementation, comprehensive, multidisciplinary, democratization, representations, administration, accountability.
+     * Legal & Judicial: jurisprudence, proportionality, responsiveness, interoperability, extraterritoriality, circumstantial, corroboration, confidentiality, admissibility, unenforceable, indemnification.
+     * Technical & Security: infrastructure, vulnerabilities, authentication, surveillance, microcontroller, interoperability, microprocessors, electronically, forensic.
+   - Strictly minimize short 2-to-4 letter monosyllabic words (limit them only to unavoidable prepositions like in, of, to, for).
+   - Average Word Length (AWL) across the entire passage MUST be between 7.0 and 8.5 characters per word.
+3. Content & Punctuation Complexity:
    - High vocabulary density, official judicial, administrative, legislative and forensic terminology.
    - Include official departmental abbreviations and legal acronyms (e.g. "IPC", "CrPC", "UPPRPB", "CCTNS", "FIR", "IT Act", "CCTV", "AI", "DNA").
    - Include historical dates (e.g. "26 November 2008", "15.08.1947"), statistics, percentages (e.g. "45.8%"), and serial numbers.
-   - Include hyphenated compound terms (e.g. "state-of-the-art", "real-time", "multi-agency"), paired quotation marks ("..."), and complex compound-complex sentence clauses.
-3. Formatting:
+   - Include hyphenated compound terms (e.g. "state-of-the-art", "real-time", "multi-agency", "capacity-building", "inter-departmental"), paired quotation marks ("..."), and complex compound-complex sentence clauses.
+4. Formatting:
    - Exactly 3 to 4 continuous paragraphs of formal prose.
    - Absolutely NO bullet points, NO numbered lists, NO asterisks, and NO markdown headers/bolding.
-4. Output Format:
+5. Output Format:
 Return ONLY valid JSON (no surrounding markdown code fences):
 {
   "title": "Short descriptive official title (max 7-9 words)",
-  "text": "The complete 520-580 word continuous passage text here..."
+  "text": "The complete 520-580 word continuous passage text with high concentration of long words here..."
 }`;
     } else {
       userPrompt = `Generate an official competitive examination typing passage in standard English strictly conforming to the AR Typing MEDIUM level standard for UP Police Computer Operator Grade-A and ASI examinations.
@@ -683,13 +695,21 @@ Return ONLY valid JSON (no surrounding markdown code fences):
     if (isHard) {
       userPrompt = `दिए गए विषय पर उत्तर प्रदेश पुलिस कंप्यूटर ऑपरेटर (ग्रेड-ए) एवं एएसआई टंकण परीक्षा के 'कठिन स्तर' (HARD LEVEL) के अनुसार आधिकारिक 15-मिनट की टंकण सामग्री तैयार करें।
 विषय: ${slot.topic}
-कठिनाई स्तर: कठिन (HARD LEVEL • आधिकारिक परीक्षा मानक)
+कठिनाई स्तर: कठिन (HARD LEVEL • आधिकारिक परीक्षा मानक - दीर्घ एवं लंबे शब्द)
+
+अनिवार्य मानक — टंकण परीक्षा में 'कठिन' का अर्थ है: "अधिक से अधिक दीर्घ एवं लंबे शब्द" (LONGER WORDS):
+टंकण परीक्षा में कठिन स्तर का मुख्य उद्देश्य परीक्षार्थी की उंगलियों की सहनशीलता, एकाग्रता और कीस्ट्रोक्स की कठिन परीक्षा लेना है। इसके लिए गद्यांश में छोटे शब्दों की तुलना में 'दीर्घ, बहु-अक्षरीय एवं सामासिक शब्दों' (8 से 16 अक्षर/मात्राओं वाले लंबे शब्द) की प्रचुरता अनिवार्य है।
+
 अनिवार्य आवश्यकताएं:
 1. लक्षित शब्द संख्या: ठीक 520 से 580 शब्द (15 मिनट की परीक्षा के लिए 510 से 590 शब्दों के बीच अनिवार्य)।
-2. शब्दावली एवं व्याकरण मानक:
-   - उच्च स्तरीय विधिक, प्रशासनिक, संवैधानिक, तकनीकी एवं न्यायिक शब्दावली।
-   - कठिन एवं जटिल संयुक्त व्यंजन प्रचुरता में शामिल करें, जैसे: 'द्ध' (जैसे बुद्धि, शुद्ध), 'द्व' (जैसे द्वार, विद्वान), 'द्य' (जैसे विद्या, उद्योग), 'ष्ट' (जैसे दृष्टिकोण, विशिष्ट), 'क्त' (जैसे शक्ति, संयुक्त), 'ह्न' (जैसे चिह्न), 'हृ' (जैसे हृदय), 'त्त' (जैसे उत्तर, संपत्ति), 'ट्र' (जैसे ट्रैफिक, राष्ट्रीय), 'क्र' (जैसे क्रम, प्रक्रिया), 'द्द' (जैसे उद्देश्य, मुद्दा), 'ह्म' (जैसे ब्रह्म)।
-   - शुद्ध नुक्ता युक्त शब्द (जैसे फ़ैसला, ज़िला, ख़ास), अल्पविराम (,), पूर्णविराम (।), उद्धरण चिह्न ('...') और सांख्यिकीय आंकड़े।
+2. दीर्घ शब्द (Long Words) एवं शब्दावली संरचना (अत्यंत अनिवार्य):
+   - गद्यांश के प्रत्येक वाक्य में कम से कम 45% से 55% शब्द 8 से 16 अक्षर/मात्रा वाले 'दीर्घ, सामासिक एवं संधि-युक्त शब्द' होने चाहिए।
+   - उदाहरण स्वरूप इस प्रकार के लंबे शब्दों का निरंतर प्रयोग करें:
+     * प्रशासनिक एवं संवैधानिक: 'संवैधानिकता', 'उत्तरदायित्व', 'कार्यप्रणाली', 'प्रशासनिक', 'दूरसंचार', 'न्यायाधिकरण', 'पुनर्गठन', 'विभागाध्यक्ष', 'अंतर-विभागीय', 'विशेषज्ञता', 'प्रतिबद्धता', 'आत्मनिर्भरता', 'प्रमाणीकरण', 'कार्यकुशलता', 'सार्वभौमिकता', 'परिस्थितिजन्य', 'सुदृढ़ीकरण', 'क्षेत्राधिकार', 'जवाबदेही', 'दूरदर्शितापूर्ण', 'अंतरराज्यीय'।
+     * विधिक एवं तकनीकी: 'सूचना-प्रौद्योगिकी', 'अभियोजनपक्ष', 'विशेषाधिकार', 'पुनर्वास', 'सहानुभूतिपूर्वक', 'अधिसूचनाएं', 'कार्यान्वयन', 'गैर-सरकारी', 'विधि-सम्मत', 'अधिनियमित', 'दंडात्मकता'।
+   - छोटे सरल शब्दों (था, थे, हैं, से, को, पर, का, की, और, या) का केवल आवश्यक न्यूनतम व्याकरणिक उपयोग करें; गद्यांश को दीर्घ, भारी-भरकम सामासिक शब्दों से समृद्ध रखें ताकि औसत शब्द लंबाई (AWL) अत्यधिक हो।
+   - कठिन एवं जटिल संयुक्त व्यंजन प्रचुरता में शामिल करें, जैसे: 'द्ध' (बुद्धि, शुद्ध, प्रतिबद्ध), 'द्व' (द्वार, विद्वान, द्विपक्षीय), 'द्य' (विद्या, उद्योग, औद्योगिकीकरण), 'ष्ट' (दृष्टिकोण, विशिष्ट, स्पष्टीकरण), 'क्त' (शक्ति, संयुक्त, अनासक्त), 'ह्न' (चिह्न), 'हृ' (हृदय), 'त्त' (उत्तरदायित्व, संपत्ति), 'ट्र' (ट्रैफिक, इलेक्ट्रॉनिक, राष्ट्रीय), 'क्र' (क्रम, प्रक्रिया, तकनीकी), 'द्द' (उद्देश्य, मुद्दा), 'ह्म' (ब्रह्म)।
+   - शुद्ध नुक्ता युक्त शब्द (जैसे फ़ैसला, ज़िला, ख़ास), अल्पविराम (,), पूर्णविराम (।), उद्धरण चिह्न ('...') और सांख्यिकीय आंकड़े व तिथियां।
 3. प्रारूप:
    - 3 से 4 निरंतर पैराग्राफ।
    - कोई बुलेट पॉइंट नहीं, कोई नंबरिंग नहीं, कोई स्टार (*) चिह्न या मार्कडाउन बोल्डिंग नहीं।
@@ -697,7 +717,7 @@ Return ONLY valid JSON (no surrounding markdown code fences):
 4. उत्तर केवल वैध JSON प्रारूप में दें:
 {
   "title": "परीक्षण का आधिकारिक शीर्षक (अधिकतम 7-9 शब्द)",
-  "text": "पूर्ण 520 से 580 शब्दों का गद्यांश..."
+  "text": "पूर्ण 520 से 580 शब्दों का गद्यांश (दीर्घ एवं लंबे शब्दों से भरपूर)..."
 }`;
     } else {
       userPrompt = `दिए गए विषय पर उत्तर प्रदेश पुलिस कंप्यूटर ऑपरेटर एवं एएसआई टंकण परीक्षा के 'मध्यम स्तर' (MEDIUM LEVEL) के अनुसार आधिकारिक 15-मिनट की टंकण सामग्री तैयार करें।
@@ -801,11 +821,14 @@ export async function generateCustomTest(options: {
     if (isHard) {
       userPrompt = `Generate an official AR Typing HARD level competitive examination typing passage in standard English on '${topic}'.
 Target Word Count: Exactly ${wordCountTarget} words (between 520 and 580 words).
-Requirements: High vocabulary complexity, official legal/administrative/police terminology, departmental acronyms, quotes, hyphens, and statistical dates. Continuous 3-4 paragraphs, no bullet points, no markdown.
+CRUCIAL HARD CRITERIA — MORE LONGER WORDS (MANDATORY):
+- High concentration of long, polysyllabic words (8 to 16+ letters each, Average Word Length >= 7.0 to 8.5 characters per word). At least 45% to 55% of all words must be long words such as: telecommunications, institutionalization, counter-intelligence, misappropriation, constitutionalism, superintendence, jurisprudence, proportionality, responsiveness, interoperability, infrastructure, vulnerabilities, democratization, multidisciplinary, administration, accountability, parliamentary, implementation, comprehensive, extraterritoriality, confidentiality.
+- Strictly minimize short 2-to-4 letter monosyllabic words.
+- High vocabulary complexity, official legal/administrative/police terminology, departmental acronyms (IPC, CrPC, UPPRPB, CCTNS, FIR), quotes, hyphens, and statistical dates. Continuous 3-4 paragraphs, no bullet points, no markdown.
 Return ONLY valid JSON:
 {
   "title": "Official Title (${topic})",
-  "text": "Full continuous passage text here..."
+  "text": "Full continuous passage text with high concentration of long words here..."
 }`;
     } else {
       userPrompt = `Generate an official AR Typing MEDIUM level competitive examination typing passage in standard English on '${topic}'.
@@ -823,11 +846,14 @@ Return ONLY valid JSON:
     if (isHard) {
       userPrompt = `दिए गए विषय '${topic}' पर आधिकारिक एआर टाइपिंग 'कठिन स्तर' (HARD) मानक के अनुसार 15-मिनट की टंकण सामग्री तैयार करें।
 लक्षित शब्द संख्या: ठीक ${wordCountTarget} शब्द (520 से 580 शब्दों के बीच)।
-अनिवार्यता: उच्च विधिक एवं प्रशासनिक शब्दावली, कठिन संयुक्त व्यंजन (द्ध, द्व, द्य, ष्ट, क्त, ह्न, हृ, त्त, ट्र, क्र, द्द), नुक्ता शब्द (फ़, ज़), उद्धरण चिह्न, 3-4 निरंतर पैराग्राफ, कोई बुलेट नहीं।
+अनिवार्य कठिन मानक — अधिक से अधिक दीर्घ एवं लंबे शब्द (LONGER WORDS MANDATE):
+- गद्यांश में 8 से 16 अक्षर/मात्रा वाले 'दीर्घ, बहु-अक्षरीय एवं सामासिक शब्दों' का अनुपात कम से कम 50% होना अनिवार्य है (जैसे: संवैधानिकता, उत्तरदायित्व, कार्यप्रणाली, प्रशासनिक, दूरसंचार, न्यायाधिकरण, पुनर्गठन, विभागाध्यक्ष, अंतर-विभागीय, विशेषज्ञता, प्रतिबद्धता, आत्मनिर्भरता, प्रमाणीकरण, कार्यकुशलता, सार्वभौमिकता, परिस्थितिजन्य, सुदृढ़ीकरण, क्षेत्राधिकार, सूचना-प्रौद्योगिकी, अभियोजनपक्ष, विशेषाधिकार)।
+- छोटे सरल शब्दों का न्यूनतम प्रयोग करें ताकि औसत शब्द लंबाई (AWL) अत्यधिक रहे और टंकण की वास्तविक कठिन परीक्षा हो।
+- उच्च विधिक एवं प्रशासनिक शब्दावली, कठिन संयुक्त व्यंजन (द्ध, द्व, द्य, ष्ट, क्त, ह्न, हृ, त्त, ट्र, क्र, द्द), नुक्ता शब्द (फ़, ज़), उद्धरण चिह्न, 3-4 निरंतर पैराग्राफ, कोई बुलेट नहीं।
 केवल शुद्ध JSON दें:
 {
   "title": "आधिकारिक शीर्षक (${topic})",
-  "text": "पूर्ण गद्यांश..."
+  "text": "पूर्ण गद्यांश (दीर्घ एवं लंबे शब्दों से युक्त)..."
 }`;
     } else {
       userPrompt = `दिए गए विषय '${topic}' पर आधिकारिक एआर टाइपिंग 'मध्यम स्तर' (MEDIUM) मानक के अनुसार 15-मिनट की टंकण सामग्री तैयार करें।
