@@ -113,15 +113,15 @@ export const UserDashboardModal: React.FC<UserDashboardModalProps> = ({
                 </h2>
                 <span
                   style={{
-                    background: isLocalOnly ? '#fef3c7' : '#dcfce7',
-                    color: isLocalOnly ? '#b45309' : '#15803d',
+                    background: '#dcfce7',
+                    color: '#15803d',
                     padding: '2px 8px',
                     borderRadius: '10px',
                     fontSize: '0.72rem',
                     fontWeight: 700
                   }}
                 >
-                  {isLocalOnly ? '⚡ Local Profile' : '☁️ Cloud Synced'}
+                  ✓ Registered Candidate
                 </span>
               </div>
               <div style={{ display: 'flex', gap: '12px', fontSize: '0.8rem', opacity: 0.9, marginTop: '2px' }}>
