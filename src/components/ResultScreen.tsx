@@ -61,7 +61,9 @@ export const ResultScreen: React.FC<ResultScreenProps> = ({
             marginBottom: '8px'
           }}
         >
-          {result.isQualified ? 'QUALIFIED FOR UP POLICE EXAM' : 'DID NOT MEET QUALIFYING CUTOFF'}
+          {result.isQualified
+            ? `QUALIFIED FOR ${result.qualificationCriteria.examTitle ? result.qualificationCriteria.examTitle.toUpperCase() : 'EXAMINATION'}`
+            : 'DID NOT MEET QUALIFYING CUTOFF'}
         </h1>
 
         <p
@@ -73,8 +75,8 @@ export const ResultScreen: React.FC<ResultScreenProps> = ({
           }}
         >
           {result.isQualified
-            ? `Congratulations! You successfully fulfilled the official UPPRPB / UPSSSC standards with ${result.netWpm} Net WPM and ${result.accuracy}% accuracy.`
-            : `To qualify for UP Police Computer Operator, candidates require minimum ${result.qualificationCriteria.requiredSpeed} Net WPM with at least ${result.qualificationCriteria.requiredAccuracy}% accuracy.`}
+            ? `Congratulations! You successfully fulfilled the official standards for ${result.qualificationCriteria.examTitle || 'this examination'} with ${result.netWpm} Net WPM and ${result.accuracy}% accuracy.`
+            : `To qualify for ${result.qualificationCriteria.examTitle || 'this examination'}, candidates require minimum ${result.qualificationCriteria.requiredSpeed} Net WPM with at least ${result.qualificationCriteria.requiredAccuracy}% accuracy.`}
         </p>
 
         <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', flexWrap: 'wrap' }}>
@@ -102,7 +104,7 @@ export const ResultScreen: React.FC<ResultScreenProps> = ({
       {/* Official Cutoff Verification Table */}
       <div className="card" style={{ marginBottom: '28px' }}>
         <h2 style={{ fontSize: '1.15rem', fontWeight: 700, marginBottom: '16px' }}>
-          Official UP Police Recruitment Cutoff Verification
+          Official {result.qualificationCriteria.examTitle || 'Recruitment'} Cutoff Verification
         </h2>
         <div style={{ overflowX: 'auto' }}>
           <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.95rem' }}>
