@@ -17,6 +17,21 @@ export interface ExamProfile {
   minAccuracy: number;
 }
 
+export interface UnifiedExamPost {
+  id: string;
+  postTitle: string;
+  categoryGroup: 'up_govt' | 'judiciary' | 'ssc' | 'delhi_govt' | 'defense' | 'bihar' | 'central_nta' | 'railways' | 'state_exams';
+  examType: string;
+  examTypeLabel: string;
+  organization: string;
+  variants: ExamProfile[];
+}
+
+export interface SubCategoryFilter {
+  id: string;
+  label: string;
+}
+
 export interface Passage {
   id: string;
   title: string;
