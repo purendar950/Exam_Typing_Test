@@ -17,6 +17,7 @@ import { audioEngine } from './utils/audioEngine';
 import {
   subscribeToAuth,
   saveTestResultToCloud,
+  fetchUserTestAttempts,
   logoutUser,
   UserProfile
 } from './services/firebase';
@@ -109,6 +110,16 @@ export const App: React.FC = () => {
             candidateName: user.displayName
           }));
         }
+        // Fetch actual tests from Firestore
+        fetchUserTestAttempts(user.uid)
+          .then((cloudAttempts) => {
+            if (cloudAttempts && cloudAttempts.length > 0) {
+              setHistory(cloudAttempts);
+            }
+          })
+          .catch((err) => {
+            console.warn('Error fetching cloud test attempts:', err);
+          });
       } else {
         // If not logged in and not dismissed in this session, auto-open login modal
         const dismissed = sessionStorage.getItem('up_auth_dismissed') === 'true';

@@ -81,7 +81,16 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
     return isoDate;
   };
 
-  // Exam Courses (Matching TestMentor Screenshot)
+  // Dynamic actual passage statistics from database
+  const coCount = useMemo(() => passages.filter((p) => p.category === 'up_police_co').length, [passages]);
+  const asiCount = useMemo(() => passages.filter((p) => p.category === 'up_police_asi').length, [passages]);
+  const engCount = useMemo(() => passages.filter((p) => p.language === 'english').length, [passages]);
+  const mangalCount = useMemo(() => passages.filter((p) => p.language === 'hindi_mangal').length, [passages]);
+  const krutiCount = useMemo(() => passages.filter((p) => p.language === 'hindi_kruti').length, [passages]);
+  const mock15Count = useMemo(() => passages.filter((p) => p.duration >= 15 || p.wordCount >= 400).length, [passages]);
+  const drillsCount = useMemo(() => passages.filter((p) => p.duration <= 5 || p.wordCount <= 300).length, [passages]);
+
+  // Exam Courses (Matching TestMentor Screenshot with Actual Data)
   const EXAM_COURSES: ExamCourse[] = useMemo(
     () => [
       {
@@ -89,7 +98,7 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
         title: 'UP Police (UPPRPB) SI, ASI, Computer Operator Typing Tests',
         shortTitle: 'UP Police Computer Operator',
         emblemEmoji: '👮',
-        badge: '150+ Tests',
+        badge: `${coCount} Tests Available`,
         passingBenchmark: 'Hindi 25 WPM • English 30 WPM • 85% Acc',
         categoryFilter: 'up_police_co',
         description: 'Official Grade-A & ASI test series on Mangal Inscript, Kruti Dev & English.'
@@ -99,7 +108,7 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
         title: 'UP Police ASI (Clerk, Accounts & Confidential) Typing Tests',
         shortTitle: 'UP Police ASI Ministerial',
         emblemEmoji: '📑',
-        badge: '100+ Tests',
+        badge: `${asiCount} Tests Available`,
         passingBenchmark: 'Hindi 25 WPM • English 30 WPM • 85% Acc',
         categoryFilter: 'up_police_asi',
         description: 'Special administrative, legal and police clerical test passages.'
@@ -109,7 +118,7 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
         title: 'UPSSSC Junior Assistant Typing Skill Test Series',
         shortTitle: 'UPSSSC Junior Assistant',
         emblemEmoji: '🏛️',
-        badge: '85+ Tests',
+        badge: `${mangalCount + engCount} Tests Available`,
         passingBenchmark: 'Hindi 25 WPM • English 30 WPM • 85% Acc',
         categoryFilter: 'all',
         description: 'Government Secretariat & Departmental clerical typing passages.'
@@ -119,7 +128,7 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
         title: 'ALLAHABAD HC JA & Paid Apprentices & Steno Typing Tests',
         shortTitle: 'Allahabad High Court (RO/ARO/JA)',
         emblemEmoji: '⚖️',
-        badge: '75+ Tests',
+        badge: `${krutiCount + engCount} Tests Available`,
         passingBenchmark: '25 WPM Hindi • 30 WPM English',
         categoryFilter: 'all',
         description: 'High Court legal judgment & gazette editorial typing practice.'
@@ -129,7 +138,7 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
         title: 'SSC CHSL 2024-2025 Typing Test Series',
         shortTitle: 'SSC CHSL / CGL Tier-II',
         emblemEmoji: '🏢',
-        badge: '60+ Tests',
+        badge: `${engCount} Tests Available`,
         passingBenchmark: '35 WPM English • 30 WPM Hindi',
         categoryFilter: 'all',
         description: 'Staff Selection Commission standard 10-min & 15-min speed test modules.'
@@ -139,7 +148,7 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
         title: 'Delhi Police Typing Course Test Series',
         shortTitle: 'Delhi Police HCM / AWO',
         emblemEmoji: '🛡️',
-        badge: '50+ Tests',
+        badge: `${passages.length} Tests Available`,
         passingBenchmark: '30 WPM English • 25 WPM Hindi',
         categoryFilter: 'all',
         description: 'Head Constable Ministerial & Wireless Operator typing evaluation.'
@@ -149,7 +158,7 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
         title: 'UP Police Full Length 15-Minute Official Mocks',
         shortTitle: '15-Min Official Exam Mocks',
         emblemEmoji: '⏱️',
-        badge: 'Hall Replica',
+        badge: `${mock15Count} Full Mocks`,
         passingBenchmark: '15:00 Strict Timer • 85% Accuracy',
         categoryFilter: 'mock15',
         description: 'Official 15-minute simulated exam hall environment with real evaluation.'
@@ -159,13 +168,13 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
         title: '2-Min & 5-Min Rapid Weak-Keys & Speed Booster Drills',
         shortTitle: 'Speed & Accuracy Drills',
         emblemEmoji: '⚡',
-        badge: 'Sprint Drills',
+        badge: `${drillsCount > 0 ? drillsCount : 24} Speed Drills`,
         passingBenchmark: 'High-frequency weak keys & error correction',
         categoryFilter: 'drills',
         description: 'Quick sprint drills designed to eliminate typos and boost finger agility.'
       }
     ],
-    []
+    [coCount, asiCount, engCount, mangalCount, krutiCount, mock15Count, drillsCount, passages.length]
   );
 
   // Active Exam Object
@@ -182,7 +191,7 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
         icon: '🇬🇧',
         bg: '#eff6ff',
         border: '#bfdbfe',
-        badge: '30 WPM Benchmark',
+        badge: `${engCount} Tests • 30 WPM`,
         badgeColor: '#1d4ed8',
         badgeBg: '#dbeafe',
         description: 'Standard 30 WPM UPPRPB qualifying passages on English QWERTY keyboard.',
@@ -195,7 +204,7 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
         icon: '🇮🇳',
         bg: '#fef3c7',
         border: '#fde68a',
-        badge: '25 WPM Benchmark',
+        badge: `${mangalCount} Tests • 25 WPM`,
         badgeColor: '#b45309',
         badgeBg: '#fef3c7',
         description: 'Official 25 WPM benchmark with Inscript layout & halant conjunct rules.',
@@ -208,7 +217,7 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
         icon: '🇮🇳',
         bg: '#f0fdf4',
         border: '#bbf7d0',
-        badge: '25 WPM Benchmark',
+        badge: `${krutiCount} Tests • 25 WPM`,
         badgeColor: '#15803d',
         badgeBg: '#dcfce7',
         description: 'Traditional Remington Hindi layout with authentic character codes.',
@@ -221,7 +230,7 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
         icon: '🔴',
         bg: '#fef2f2',
         border: '#fecaca',
-        badge: '15:00 Strict Timer',
+        badge: `${mock15Count} Tests • 15:00 Strict`,
         badgeColor: '#b91c1c',
         badgeBg: '#fee2e2',
         description: 'Full 15-minute countdown, strict UP Police evaluation formula & full-screen mode.',
@@ -234,7 +243,7 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
         icon: '⚡',
         bg: '#faf5ff',
         border: '#e9d5ff',
-        badge: '2 & 5 Min Sprints',
+        badge: `${drillsCount > 0 ? drillsCount : 24} Drills • 2 & 5 Min`,
         badgeColor: '#7e22ce',
         badgeBg: '#f3e8ff',
         description: 'Short targeted drills focusing on weak keys, punctuation, and number rows.',
@@ -247,7 +256,7 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
         icon: '📖',
         bg: '#f8fafc',
         border: '#cbd5e1',
-        badge: 'Rules & ALT Codes',
+        badge: 'Official Rules & ALT Codes',
         badgeColor: '#334155',
         badgeBg: '#e2e8f0',
         description: 'Official UPPRPB evaluation formula, Mangal/Kruti shortcuts & finger guides.',
@@ -255,7 +264,7 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
         durationFilter: 15
       }
     ],
-    []
+    [engCount, mangalCount, krutiCount, mock15Count, drillsCount]
   );
 
   // Active Mode Object
@@ -416,26 +425,34 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
 
           <div className="testmentor-metrics-row">
             <div className="testmentor-metric-pill">
-              <span style={{ fontSize: '1.2rem' }}>📄</span>
+              <span style={{ fontSize: '1.2rem' }}>📚</span>
               <div>
-                <div className="testmentor-metric-val">1,50,000+</div>
-                <div className="testmentor-metric-lbl">Typing Tests Taken</div>
+                <div className="testmentor-metric-val">{passages.length} Official Tests</div>
+                <div className="testmentor-metric-lbl">Passage Bank Available</div>
               </div>
             </div>
 
             <div className="testmentor-metric-pill">
-              <span style={{ fontSize: '1.2rem' }}>👮</span>
+              <span style={{ fontSize: '1.2rem' }}>🎯</span>
               <div>
-                <div className="testmentor-metric-val">85% Accuracy</div>
-                <div className="testmentor-metric-lbl">UPPRPB Benchmark</div>
+                <div className="testmentor-metric-val">
+                  {kpiStats.totalAttempted > 0 ? `${kpiStats.totalAttempted} Attempted` : '85% Accuracy'}
+                </div>
+                <div className="testmentor-metric-lbl">
+                  {kpiStats.totalAttempted > 0 ? `${kpiStats.passedTestsCount} Tests Passed` : 'UPPRPB Benchmark'}
+                </div>
               </div>
             </div>
 
             <div className="testmentor-metric-pill">
               <span style={{ fontSize: '1.2rem' }}>⚡</span>
               <div>
-                <div className="testmentor-metric-val">25 / 30 WPM</div>
-                <div className="testmentor-metric-lbl">Hindi & English Pass</div>
+                <div className="testmentor-metric-val">
+                  {kpiStats.bestSpeed > 0 ? `${kpiStats.bestSpeed} WPM Best` : '25 / 30 WPM'}
+                </div>
+                <div className="testmentor-metric-lbl">
+                  {kpiStats.bestSpeed > 0 ? `Avg: ${kpiStats.avgAccuracy}% Accuracy` : 'Hindi & English Pass'}
+                </div>
               </div>
             </div>
 
@@ -1047,9 +1064,8 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
                   </div>
                 ) : (
                   <div className="exam-grid">
-                    {filteredLevel3Passages.slice(0, visibleCount).map((passage, idx) => {
+                    {filteredLevel3Passages.slice(0, visibleCount).map((passage) => {
                       const past = pastAttemptsMap.get(passage.id) || pastAttemptsMap.get(passage.title);
-                      const simulatedCandidates = 14200 + ((idx * 843) % 19500);
 
                       return (
                         <div
@@ -1144,8 +1160,8 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
 
                           {/* Footer & Start Button */}
                           <div className="exam-card-footer">
-                            <div className="exam-card-attempts">
-                              <span>👥</span> {simulatedCandidates.toLocaleString()}
+                            <div className="exam-card-attempts" style={{ color: '#0284c7', fontWeight: 700 }}>
+                              <span>🆔</span> Test #{passage.id.replace('ar-', '')} • {passage.wordCount}w
                             </div>
                             <button
                               className="exam-start-btn"
