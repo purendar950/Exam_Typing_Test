@@ -158,11 +158,6 @@ export const StartTest: React.FC<StartTestProps> = ({
       setIsTestStarted(true);
     }
 
-    // 1. If IME is composing (Windows Indic IME, Google Input Tools, Gboard, etc.), NEVER intercept!
-    if (isComposingRef.current || e.nativeEvent.isComposing || e.key === 'Process' || e.keyCode === 229) {
-      return;
-    }
-
     if (e.key === 'Backspace') {
       if (!settings.backspaceEnabled) {
         e.preventDefault();
@@ -229,6 +224,8 @@ export const StartTest: React.FC<StartTestProps> = ({
       el.value = next;
       el.selectionStart = el.selectionEnd = start + char.length;
       setTypedText(next);
+    } else {
+      setTypedText(el.value);
     }
   };
 
@@ -241,13 +238,8 @@ export const StartTest: React.FC<StartTestProps> = ({
       setIsTestStarted(true);
     }
 
-    // Never intercept during active IME composition
-    if (isComposingRef.current || nativeEvent.isComposing || nativeEvent.inputType === 'insertCompositionText') {
-      return;
-    }
-
     // Never intercept if data is already Devanagari (native Hindi IME / Indic keyboard)
-    if (nativeEvent.data && /^[\u0900-\u097F]+$/.test(nativeEvent.data)) {
+    if (nativeEvent.data && /[\u0900-\u097F]/.test(nativeEvent.data)) {
       return;
     }
 
@@ -256,8 +248,8 @@ export const StartTest: React.FC<StartTestProps> = ({
       return;
     }
 
-    // For Android mobile QWERTY keyboards typing English in Mangal Inscript mode:
-    if (passage.language === 'hindi_mangal' && inscriptMappingEnabled && nativeEvent.data && nativeEvent.inputType === 'insertText') {
+    // For Android/tablet QWERTY keyboards typing English in Mangal Inscript mode:
+    if (passage.language === 'hindi_mangal' && inscriptMappingEnabled && nativeEvent.data) {
       const translated = translateEnglishStringToHindi(nativeEvent.data, 'mangal');
       if (translated !== nativeEvent.data) {
         e.preventDefault();
@@ -269,10 +261,24 @@ export const StartTest: React.FC<StartTestProps> = ({
 
   // Robust Text Change Handler - strictly updates state with current DOM value without destroying IME buffers
   const handleTextChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    const nextVal = e.target.value;
+    let nextVal = e.target.value;
 
     if (!isTestStarted && nextVal.length > 0) {
       setIsTestStarted(true);
+    }
+
+    // Safeguard for Hindi Mangal with Inscript mapping enabled:
+    // If any English ASCII letters exist in the value (e.g. from Android keyboards, Gboard autocomplete,
+    // physical keyboards on mobile, or unintercepted keystrokes), automatically convert them to Inscript!
+    if (passage.language === 'hindi_mangal' && inscriptMappingEnabled && /[a-zA-Z]/.test(nextVal)) {
+      const el = e.target;
+      const start = el.selectionStart;
+      const end = el.selectionEnd;
+      nextVal = translateEnglishStringToHindi(nextVal, 'mangal');
+      el.value = nextVal;
+      if (start !== null && end !== null) {
+        el.setSelectionRange(start, end);
+      }
     }
 
     setTypedText(nextVal);
