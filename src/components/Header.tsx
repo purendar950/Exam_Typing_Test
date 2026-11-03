@@ -62,7 +62,6 @@ export const Header: React.FC<HeaderProps> = ({
               className="nav-btn sound-btn"
               onClick={onToggleSound}
               title={settings.soundEnabled ? 'Key sound enabled' : 'Key sound muted'}
-              style={{ padding: '6px 8px' }}
             >
               {settings.soundEnabled ? (
                 <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
@@ -81,91 +80,39 @@ export const Header: React.FC<HeaderProps> = ({
                 className="nav-btn admin-portal-btn"
                 onClick={onOpenAdmin}
                 title="Administrative Control Suite"
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '5px',
-                  background: '#0f172a',
-                  color: '#38bdf8',
-                  fontWeight: 700,
-                  borderRadius: '20px',
-                  padding: '5px 12px',
-                  fontSize: '0.78rem',
-                  border: '1.5px solid #38bdf8',
-                  boxShadow: '0 2px 6px rgba(56, 189, 248, 0.25)',
-                  cursor: 'pointer',
-                  whiteSpace: 'nowrap'
-                }}
               >
                 <span>🛡️</span>
-                <span>Admin Suite</span>
+                <span className="admin-portal-text">Admin Suite</span>
               </button>
             )}
 
             {currentUser ? (
               <button
-                className="nav-btn candidate-profile-btn"
+                className={`nav-btn candidate-profile-btn ${isUserAdmin(currentUser) ? 'is-admin' : ''}`}
                 onClick={onOpenDashboard}
                 title={`User: ${currentUser.displayName} (${currentUser.rollNumber}) • View Stats & Examination Dossier`}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '6px',
-                  background: isUserAdmin(currentUser) ? '#f0fdfa' : '#f0fdf4',
-                  border: isUserAdmin(currentUser) ? '1px solid #5eead4' : '1px solid #86efac',
-                  color: isUserAdmin(currentUser) ? '#0f766e' : '#166534',
-                  fontWeight: 600,
-                  borderRadius: '20px',
-                  padding: '4px 10px',
-                  fontSize: '0.8rem',
-                  whiteSpace: 'nowrap'
-                }}
               >
                 {currentUser.photoURL ? (
                   <img
                     src={currentUser.photoURL}
                     alt=""
-                    style={{ width: '22px', height: '22px', borderRadius: '50%', objectFit: 'cover' }}
+                    className="candidate-avatar"
                   />
                 ) : (
-                  <span style={{ fontSize: '0.95rem' }}>{isUserAdmin(currentUser) ? '🛡️' : '👤'}</span>
+                  <span className="candidate-avatar-placeholder">{isUserAdmin(currentUser) ? '🛡️' : '👤'}</span>
                 )}
-                <span style={{ maxWidth: '85px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                <span className="candidate-name">
                   {currentUser.displayName}
                 </span>
-                <span
-                  style={{
-                    fontSize: '0.68rem',
-                    background: isUserAdmin(currentUser) ? '#ccfbf1' : '#dcfce7',
-                    color: isUserAdmin(currentUser) ? '#115e59' : '#15803d',
-                    padding: '1px 6px',
-                    borderRadius: '8px',
-                    fontWeight: 700
-                  }}
-                >
+                <span className={`candidate-badge ${isUserAdmin(currentUser) ? 'admin-badge' : 'candidate-roll-badge'}`}>
                   {isUserAdmin(currentUser) ? 'ADMIN' : currentUser.rollNumber}
                 </span>
               </button>
             ) : (
               <button
-                className="nav-btn"
+                className="nav-btn login-header-btn"
                 onClick={onOpenAuth}
                 title="Login / Sign In (लॉगिन)"
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '6px',
-                  background: '#0284c7',
-                  border: 'none',
-                  color: '#ffffff',
-                  fontWeight: 700,
-                  borderRadius: '8px',
-                  padding: '6px 14px',
-                  fontSize: '0.82rem',
-                  boxShadow: '0 2px 6px rgba(2, 132, 199, 0.35)',
-                  cursor: 'pointer',
-                  whiteSpace: 'nowrap'
-                }}
               >
                 <span style={{ fontSize: '0.95rem' }}>🔑</span>
                 <span>Login</span>
