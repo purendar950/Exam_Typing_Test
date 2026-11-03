@@ -10,6 +10,7 @@ interface HeaderProps {
   onOpenHistory: () => void;
   onOpenHindiHelper: () => void;
   onOpenAiGenerator?: () => void;
+  onOpenAdmin?: () => void;
   settings: TestSettings;
   onToggleSound: () => void;
   currentUser: UserProfile | null;
@@ -24,6 +25,7 @@ export const Header: React.FC<HeaderProps> = ({
   onOpenHistory,
   onOpenHindiHelper,
   onOpenAiGenerator,
+  onOpenAdmin,
   settings,
   onToggleSound,
   currentUser,
@@ -97,6 +99,31 @@ export const Header: React.FC<HeaderProps> = ({
               >
                 <span>⚡</span>
                 <span>AI Live Tests</span>
+              </button>
+            )}
+
+            {onOpenAdmin && (
+              <button
+                className="nav-btn admin-portal-btn"
+                onClick={onOpenAdmin}
+                title="Fintech Administrative Control Suite (AI & System Management)"
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '5px',
+                  background: '#0f172a',
+                  color: '#38bdf8',
+                  fontWeight: 700,
+                  borderRadius: '20px',
+                  padding: '5px 12px',
+                  fontSize: '0.78rem',
+                  border: '1px solid #334155',
+                  cursor: 'pointer',
+                  whiteSpace: 'nowrap'
+                }}
+              >
+                <span>🛡️</span>
+                <span>Admin</span>
               </button>
             )}
 
@@ -239,6 +266,18 @@ export const Header: React.FC<HeaderProps> = ({
             </svg>
             History
           </button>
+
+          {onOpenAdmin && (
+            <button
+              className="nav-btn"
+              onClick={onOpenAdmin}
+              title="Enterprise Admin Management Suite"
+              style={{ color: '#0284c7', fontWeight: 700 }}
+            >
+              <span style={{ fontSize: '0.95rem', marginRight: '4px' }}>🛡️</span>
+              Admin
+            </button>
+          )}
         </nav>
       </div>
     </header>

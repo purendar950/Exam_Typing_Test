@@ -14,6 +14,7 @@ interface ChooseTestProps {
   onOpenAuth?: () => void;
   onOpenDashboard?: () => void;
   onOpenAiGenerator?: () => void;
+  onOpenAdmin?: () => void;
   dailyLivePassages?: Passage[];
 }
 
@@ -54,6 +55,7 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
   onOpenAuth,
   onOpenDashboard,
   onOpenAiGenerator,
+  onOpenAdmin,
   dailyLivePassages = []
 }) => {
   // Navigation: 1 (All Exams), 2 (Medium / Mode Selection), 3 (Test Material Grid), or 'classic_form'
@@ -725,7 +727,30 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
                       title="Configure AI Base URL, API Key & Generate Tests"
                     >
                       <span>⚡</span>
-                      <span>AI Generator & Settings</span>
+                      <span>AI Generator</span>
+                    </button>
+                  )}
+
+                  {onOpenAdmin && (
+                    <button
+                      onClick={onOpenAdmin}
+                      style={{
+                        background: '#0f172a',
+                        color: '#38bdf8',
+                        border: '1px solid #334155',
+                        padding: '7px 14px',
+                        borderRadius: '8px',
+                        fontSize: '0.8rem',
+                        fontWeight: 700,
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '6px'
+                      }}
+                      title="Enterprise Admin Control Panel (AI, Question Bank & Candidate Management)"
+                    >
+                      <span>🛡️</span>
+                      <span>Admin Panel</span>
                     </button>
                   )}
                 </div>
