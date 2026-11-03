@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Passage, TestSettings, EvaluationResult } from './types';
+import { Passage, TestSettings, EvaluationResult, ExamProfile } from './types';
 import { PASSAGES } from './data/passages';
 import { Header } from './components/Header';
 import { ChooseTest } from './components/ChooseTest';
@@ -43,6 +43,7 @@ export const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'tests' | 'learn' | 'book'>('tests');
   const [selectedPassage, setSelectedPassage] = useState<Passage>(PASSAGES[0]);
   const [selectedDurationMinutes, setSelectedDurationMinutes] = useState<number>(15);
+  const [selectedExamProfile, setSelectedExamProfile] = useState<ExamProfile | null>(null);
   const [currentResult, setCurrentResult] = useState<EvaluationResult | null>(null);
 
   // Settings (Default autoScroll is OFF)
@@ -200,9 +201,13 @@ export const App: React.FC = () => {
   };
 
   // Start test
-  const handleStartTest = (passage: Passage, customDurationMinutes: number = 15) => {
+  const handleStartTest = (passage: Passage, customDurationMinutes?: number, examProfile?: ExamProfile | null) => {
     setSelectedPassage(passage);
-    setSelectedDurationMinutes(customDurationMinutes);
+    if (examProfile !== undefined) {
+      setSelectedExamProfile(examProfile);
+    }
+    const finalDuration = customDurationMinutes || examProfile?.durationMinutes || passage.duration || 15;
+    setSelectedDurationMinutes(finalDuration);
     setCurrentView('test');
   };
 
@@ -324,6 +329,7 @@ export const App: React.FC = () => {
             onUpdateSettings={handleUpdateSettings}
             onFinishTest={handleFinishTest}
             onCancelTest={() => setCurrentView('choose')}
+            activeExamProfile={selectedExamProfile}
           />
         )}
 

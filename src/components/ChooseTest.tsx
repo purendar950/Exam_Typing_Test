@@ -1,12 +1,13 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { Passage, Language, ExamCategory, TestSettings, EvaluationResult } from '../types';
+import { ALL_EXAMS, CATEGORY_GROUPS, ExamProfile } from '../data/allExams';
 import { UserProfile } from '../services/firebase';
 import { getFallbackDailyPassages } from '../services/aiGenerator';
 import appLogo from '../assets/logo.png';
 
 interface ChooseTestProps {
   passages: Passage[];
-  onStartTest: (passage: Passage, customDurationMinutes?: number) => void;
+  onStartTest: (passage: Passage, customDurationMinutes?: number, examProfile?: ExamProfile | null) => void;
   settings: TestSettings;
   onUpdateSettings: (newSettings: Partial<TestSettings>) => void;
   currentUser?: UserProfile | null;
@@ -77,6 +78,79 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
   const [classicInputLimit, setClassicInputLimit] = useState<string>('Words');
   const [isClassicDropdownOpen, setIsClassicDropdownOpen] = useState<boolean>(false);
   const [isLoadingPassages, setIsLoadingPassages] = useState<boolean>(false);
+
+  // 129 All Exams Explorer State
+  const [selectedExamCategory, setSelectedExamCategory] = useState<string>('all');
+  const [examSearchQuery, setExamSearchQuery] = useState<string>('');
+  const [selectedExamLanguageFilter, setSelectedExamLanguageFilter] = useState<'all' | 'english' | 'hindi'>('all');
+  const [selectedExamProfile, setSelectedExamProfile] = useState<ExamProfile | null>(null);
+  const [visibleExamsCount, setVisibleExamsCount] = useState<number>(24);
+
+  const getEmblemForGroup = (group: string) => {
+    switch (group) {
+      case 'up_govt': return '👮';
+      case 'judiciary': return '⚖️';
+      case 'ssc': return '🏢';
+      case 'delhi_govt': return '🛡️';
+      case 'defense': return '🎖️';
+      case 'bihar': return '🏛️';
+      case 'central_nta': return '🎓';
+      case 'railways': return '🚆';
+      case 'state_exams': return '📋';
+      default: return '📝';
+    }
+  };
+
+  const filteredAllExams = useMemo(() => {
+    return ALL_EXAMS.filter((exam) => {
+      if (selectedExamCategory !== 'all' && exam.categoryGroup !== selectedExamCategory) {
+        return false;
+      }
+      if (selectedExamLanguageFilter === 'english' && exam.language !== 'english') {
+        return false;
+      }
+      if (selectedExamLanguageFilter === 'hindi' && !exam.language.startsWith('hindi')) {
+        return false;
+      }
+      if (examSearchQuery.trim()) {
+        const q = examSearchQuery.toLowerCase();
+        const matchTitle = exam.title.toLowerCase().includes(q);
+        const matchSlug = exam.slug.toLowerCase().includes(q);
+        const matchGroup = exam.categoryGroup.toLowerCase().includes(q);
+        if (!matchTitle && !matchSlug && !matchGroup) {
+          return false;
+        }
+      }
+      return true;
+    });
+  }, [selectedExamCategory, selectedExamLanguageFilter, examSearchQuery]);
+
+  const handleQuickStartExam = (exam: ExamProfile) => {
+    setSelectedExamProfile(exam);
+    let matchingPassage: Passage | undefined;
+    if (exam.language === 'english') {
+      matchingPassage = passages.find((p) => p.language === 'english') || passages[0];
+    } else if (exam.language === 'hindi_mangal') {
+      matchingPassage = passages.find((p) => p.language === 'hindi_mangal') || passages[0];
+    } else {
+      matchingPassage = passages.find((p) => p.language === 'hindi_kruti') || passages.find((p) => p.language.startsWith('hindi')) || passages[0];
+    }
+    onStartTest(matchingPassage, exam.durationMinutes, exam);
+  };
+
+  const handleBrowseExamPassages = (exam: ExamProfile) => {
+    setSelectedExamProfile(exam);
+    setActiveExamId(exam.slug);
+    if (exam.language === 'english') {
+      setActiveModeId('english');
+    } else if (exam.language === 'hindi_kruti') {
+      setActiveModeId('hindi_kruti');
+    } else {
+      setActiveModeId('hindi_mangal');
+    }
+    setSelectedDuration(exam.durationMinutes);
+    setNavLevel(3);
+  };
 
   // Date converter
   const toDisplayDate = (isoDate: string) => {
@@ -554,7 +628,7 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
           )}
 
           <button
-            onClick={() => onStartTest(t, 15)}
+            onClick={() => onStartTest(t, selectedExamProfile ? selectedExamProfile.durationMinutes : 15, selectedExamProfile)}
             style={{
               background: attempt ? '#f1f5f9' : '#166534',
               color: attempt ? '#334155' : '#ffffff',
@@ -814,40 +888,319 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
               </div>
             </section>
 
-            {/* "All Courses" Header (TestMentor Replica) */}
-            <div className="testmentor-courses-header">
-              <h2 className="testmentor-courses-title">
-                <span>📚</span> All Courses & Typing Test Series
-              </h2>
-              <span style={{ fontSize: '0.85rem', color: '#64748b', fontWeight: 600 }}>
-                Select an exam course to explore Hindi, English, Live Mocks & Drills
-              </span>
+            {/* "All 129 Exams" Header */}
+            <div className="testmentor-courses-header" style={{ marginBottom: '16px' }}>
+              <div>
+                <h2 className="testmentor-courses-title">
+                  <span>🏛️</span> All 129 Government Typing Examinations & Test Series
+                </h2>
+                <span style={{ fontSize: '0.85rem', color: '#64748b', fontWeight: 600 }}>
+                  Practice with exact official benchmarks: target speeds (15–50 WPM), 5–20 min timers, and error cutoffs
+                </span>
+              </div>
             </div>
 
-            {/* TestMentor Multi-column Exam Grid */}
-            <div className="testmentor-grid">
-              {EXAM_COURSES.map((course) => (
+            {/* Category Groups Filter Pills */}
+            <div style={{
+              display: 'flex',
+              gap: '8px',
+              overflowX: 'auto',
+              paddingBottom: '8px',
+              marginBottom: '16px',
+              scrollbarWidth: 'thin'
+            }}>
+              {CATEGORY_GROUPS.map((group) => {
+                const isSelected = selectedExamCategory === group.id;
+                const count = group.id === 'all'
+                  ? ALL_EXAMS.length
+                  : ALL_EXAMS.filter((e) => e.categoryGroup === group.id).length;
+
+                return (
+                  <button
+                    key={group.id}
+                    onClick={() => {
+                      setSelectedExamCategory(group.id);
+                      setVisibleExamsCount(24);
+                    }}
+                    style={{
+                      background: isSelected ? 'var(--primary)' : '#ffffff',
+                      color: isSelected ? '#ffffff' : '#334155',
+                      border: isSelected ? '1px solid var(--primary)' : '1px solid #cbd5e1',
+                      padding: '7px 14px',
+                      borderRadius: '20px',
+                      fontSize: '0.82rem',
+                      fontWeight: isSelected ? 700 : 600,
+                      cursor: 'pointer',
+                      whiteSpace: 'nowrap',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '6px',
+                      boxShadow: isSelected ? '0 2px 5px rgba(2, 132, 199, 0.25)' : 'none',
+                      transition: 'all 0.15s ease'
+                    }}
+                  >
+                    <span>{group.icon}</span>
+                    <span>{group.title}</span>
+                    <span style={{
+                      background: isSelected ? 'rgba(255,255,255,0.25)' : '#f1f5f9',
+                      color: isSelected ? '#ffffff' : '#64748b',
+                      padding: '1px 6px',
+                      borderRadius: '10px',
+                      fontSize: '0.72rem',
+                      fontWeight: 700
+                    }}>
+                      {count}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Search and Language Filter Controls */}
+            <div style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              flexWrap: 'wrap',
+              gap: '12px',
+              marginBottom: '20px'
+            }}>
+              {/* Search Bar */}
+              <div style={{ position: 'relative', flex: '1 1 280px', maxWidth: '520px' }}>
+                <input
+                  type="text"
+                  value={examSearchQuery}
+                  onChange={(e) => {
+                    setExamSearchQuery(e.target.value);
+                    setVisibleExamsCount(24);
+                  }}
+                  placeholder="🔍 Search all 129 exams (e.g. Delhi High Court, SSC, Beltron, RRB...)"
+                  style={{
+                    width: '100%',
+                    padding: '9px 14px',
+                    paddingLeft: '34px',
+                    borderRadius: '8px',
+                    border: '1px solid #cbd5e1',
+                    fontSize: '0.88rem',
+                    boxSizing: 'border-box'
+                  }}
+                />
+                <span style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', opacity: 0.5 }}>
+                  🔍
+                </span>
+                {examSearchQuery && (
+                  <button
+                    onClick={() => setExamSearchQuery('')}
+                    style={{
+                      position: 'absolute',
+                      right: '10px',
+                      top: '50%',
+                      transform: 'translateY(-50%)',
+                      background: 'none',
+                      border: 'none',
+                      cursor: 'pointer',
+                      color: '#94a3b8',
+                      fontSize: '0.85rem'
+                    }}
+                  >
+                    ✕
+                  </button>
+                )}
+              </div>
+
+              {/* Language Medium Filter */}
+              <div style={{ display: 'flex', gap: '6px', alignItems: 'center', flexWrap: 'wrap' }}>
+                <span style={{ fontSize: '0.8rem', color: '#64748b', fontWeight: 600 }}>Medium:</span>
+                {(['all', 'english', 'hindi'] as const).map((lang) => (
+                  <button
+                    key={lang}
+                    onClick={() => setSelectedExamLanguageFilter(lang)}
+                    style={{
+                      background: selectedExamLanguageFilter === lang ? '#0f172a' : '#ffffff',
+                      color: selectedExamLanguageFilter === lang ? '#ffffff' : '#475569',
+                      border: '1px solid #cbd5e1',
+                      padding: '5px 12px',
+                      borderRadius: '6px',
+                      fontSize: '0.78rem',
+                      fontWeight: 600,
+                      cursor: 'pointer'
+                    }}
+                  >
+                    {lang === 'all' ? 'All' : lang === 'english' ? 'English' : 'Hindi'}
+                  </button>
+                ))}
+                <span style={{ fontSize: '0.8rem', color: '#64748b', fontWeight: 600, marginLeft: '6px' }}>
+                  ({filteredAllExams.length} matching)
+                </span>
+              </div>
+            </div>
+
+            {/* 129 Exams Grid */}
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))',
+              gap: '16px',
+              marginBottom: '24px'
+            }}>
+              {filteredAllExams.slice(0, visibleExamsCount).map((exam) => (
                 <div
-                  key={course.id}
-                  className="testmentor-exam-card"
-                  onClick={() => {
-                    setActiveExamId(course.id);
-                    setNavLevel(2);
+                  key={exam.id}
+                  className="exam-card-hover"
+                  style={{
+                    background: '#ffffff',
+                    border: '1.5px solid #e2e8f0',
+                    borderRadius: '12px',
+                    padding: '16px',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    justifyContent: 'space-between',
+                    boxShadow: '0 2px 4px rgba(0,0,0,0.03)',
+                    transition: 'all 0.15s ease'
                   }}
                 >
-                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                    <div className="testmentor-emblem-wrap">
-                      <span>{course.emblemEmoji}</span>
+                  <div>
+                    {/* Header Badges */}
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        <span style={{ fontSize: '1.25rem' }}>{getEmblemForGroup(exam.categoryGroup)}</span>
+                        <span style={{
+                          fontSize: '0.7rem',
+                          fontWeight: 700,
+                          padding: '2px 6px',
+                          borderRadius: '4px',
+                          background: '#f1f5f9',
+                          color: '#475569'
+                        }}>
+                          {CATEGORY_GROUPS.find((g) => g.id === exam.categoryGroup)?.title || 'Exam'}
+                        </span>
+                      </div>
+
+                      <span style={{
+                        fontSize: '0.7rem',
+                        fontWeight: 700,
+                        padding: '2px 6px',
+                        borderRadius: '4px',
+                        background: exam.language === 'english' ? '#eff6ff' : exam.language === 'hindi_mangal' ? '#fef3c7' : '#fae8ff',
+                        color: exam.language === 'english' ? '#1d4ed8' : exam.language === 'hindi_mangal' ? '#b45309' : '#86198f'
+                      }}>
+                        {exam.language === 'english' ? 'English' : exam.language === 'hindi_mangal' ? 'Mangal Inscript' : 'Kruti Dev'}
+                      </span>
                     </div>
-                    <div className="testmentor-exam-title">{course.title}</div>
+
+                    {/* Title */}
+                    <h3 style={{
+                      fontSize: '0.98rem',
+                      fontWeight: 700,
+                      color: '#1e293b',
+                      margin: '0 0 10px 0',
+                      lineHeight: 1.35,
+                      minHeight: '40px'
+                    }}>
+                      {exam.title}
+                    </h3>
+
+                    {/* Benchmark Badges */}
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginBottom: '14px' }}>
+                      <span style={{
+                        fontSize: '0.75rem',
+                        fontWeight: 700,
+                        background: '#f0fdf4',
+                        color: '#16a34a',
+                        padding: '3px 8px',
+                        borderRadius: '6px',
+                        border: '1px solid #bbf7d0'
+                      }}>
+                        🎯 {exam.targetSpeed} WPM Speed
+                      </span>
+                      <span style={{
+                        fontSize: '0.75rem',
+                        fontWeight: 700,
+                        background: '#f8fafc',
+                        color: '#475569',
+                        padding: '3px 8px',
+                        borderRadius: '6px',
+                        border: '1px solid #e2e8f0'
+                      }}>
+                        ⏱️ {exam.durationMinutes} Mins
+                      </span>
+                      <span style={{
+                        fontSize: '0.75rem',
+                        fontWeight: 700,
+                        background: '#fffbeb',
+                        color: '#b45309',
+                        padding: '3px 8px',
+                        borderRadius: '6px',
+                        border: '1px solid #fde68a'
+                      }}>
+                        🎯 &ge; {exam.minAccuracy}% Accuracy
+                      </span>
+                      <span style={{
+                        fontSize: '0.72rem',
+                        color: '#64748b',
+                        padding: '3px 6px',
+                        borderRadius: '4px'
+                      }}>
+                        {exam.inputType === 'character' ? `📏 ${exam.inputLimit} Chars` : `📏 ${exam.inputLimit} Words`}
+                      </span>
+                    </div>
                   </div>
 
-                  <div style={{ width: '100%', marginTop: '8px' }}>
-                    <div className="testmentor-exam-badge">{course.badge}</div>
+                  {/* Actions */}
+                  <div style={{ display: 'flex', gap: '8px', borderTop: '1px solid #f1f5f9', paddingTop: '12px' }}>
+                    <button
+                      onClick={() => handleQuickStartExam(exam)}
+                      className="btn btn-primary"
+                      style={{
+                        flex: 1,
+                        padding: '7px 12px',
+                        fontSize: '0.82rem',
+                        fontWeight: 700,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '4px'
+                      }}
+                      title={`Start official ${exam.durationMinutes}-min test with ${exam.targetSpeed} WPM target`}
+                    >
+                      <span>⚡</span>
+                      <span>Start Mock ({exam.durationMinutes}m)</span>
+                    </button>
+                    <button
+                      onClick={() => handleBrowseExamPassages(exam)}
+                      className="btn btn-secondary"
+                      style={{
+                        padding: '7px 12px',
+                        fontSize: '0.82rem',
+                        fontWeight: 600,
+                        whiteSpace: 'nowrap'
+                      }}
+                      title="Select from library of passages for this exam"
+                    >
+                      <span>Browse</span>
+                      <span>→</span>
+                    </button>
                   </div>
                 </div>
               ))}
             </div>
+
+            {/* Load More Button */}
+            {visibleExamsCount < filteredAllExams.length && (
+              <div style={{ textAlign: 'center', marginBottom: '32px' }}>
+                <button
+                  onClick={() => setVisibleExamsCount((prev) => prev + 24)}
+                  className="btn btn-secondary"
+                  style={{
+                    padding: '10px 24px',
+                    fontSize: '0.9rem',
+                    fontWeight: 700,
+                    borderRadius: '8px'
+                  }}
+                >
+                  Load More Exams ({filteredAllExams.length - visibleExamsCount} remaining) ↓
+                </button>
+              </div>
+            )}
 
             {/* Yearly Pass / Feature Banner (TestMentor Screen Bottom) */}
             <div
@@ -1009,11 +1362,55 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
               </span>
               <span className="level-breadcrumb-sep">/</span>
               <span className="level-breadcrumb-link" onClick={() => setNavLevel(2)}>
-                {currentExam.shortTitle}
+                {selectedExamProfile ? selectedExamProfile.title : currentExam.shortTitle}
               </span>
               <span className="level-breadcrumb-sep">/</span>
               <span className="level-breadcrumb-current">{currentMode.title}</span>
             </div>
+
+            {/* Active Exam Profile Banner */}
+            {selectedExamProfile && (
+              <div
+                style={{
+                  background: 'linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%)',
+                  border: '1.5px solid #93c5fd',
+                  borderRadius: '12px',
+                  padding: '14px 20px',
+                  marginBottom: '16px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  flexWrap: 'wrap',
+                  gap: '12px'
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <span style={{ fontSize: '1.8rem' }}>{getEmblemForGroup(selectedExamProfile.categoryGroup)}</span>
+                  <div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <strong style={{ color: '#1e40af', fontSize: '1.02rem' }}>{selectedExamProfile.title}</strong>
+                      <span style={{ background: '#3b82f6', color: '#ffffff', fontSize: '0.72rem', fontWeight: 800, padding: '2px 8px', borderRadius: '10px' }}>
+                        Active Target Exam
+                      </span>
+                    </div>
+                    <div style={{ fontSize: '0.82rem', color: '#2563eb', marginTop: '2px' }}>
+                      Official Benchmark: <strong>{selectedExamProfile.targetSpeed} WPM Speed</strong> &bull; Timer: <strong>{selectedExamProfile.durationMinutes} Mins</strong> &bull; Min Accuracy: <strong>{selectedExamProfile.minAccuracy}%</strong> &bull; {selectedExamProfile.inputType === 'character' ? `${selectedExamProfile.inputLimit} Chars` : `${selectedExamProfile.inputLimit} Words`}
+                    </div>
+                  </div>
+                </div>
+
+                <button
+                  onClick={() => {
+                    setSelectedExamProfile(null);
+                    setNavLevel(1);
+                  }}
+                  className="btn btn-sm btn-secondary"
+                  style={{ background: '#ffffff', fontWeight: 700, borderColor: '#93c5fd', color: '#1e40af' }}
+                >
+                  Change Exam (129 Available)
+                </button>
+              </div>
+            )}
 
             {/* Mode Banner */}
             <div
@@ -1703,7 +2100,7 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
                         <div
                           key={passage.id}
                           className="exam-test-card"
-                          onClick={() => onStartTest(passage, selectedDuration)}
+                          onClick={() => onStartTest(passage, selectedDuration, selectedExamProfile)}
                           style={{ cursor: 'pointer' }}
                         >
                           <div>
@@ -1799,7 +2196,7 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
                               className="exam-start-btn"
                               onClick={(e) => {
                                 e.stopPropagation();
-                                onStartTest(passage, selectedDuration);
+                                onStartTest(passage, selectedDuration, selectedExamProfile);
                               }}
                             >
                               {past ? 'Retest ↺' : 'Start Test →'}
@@ -2138,7 +2535,7 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
                     onClick={() => {
                       const passToStart = currentClassicSelectedPassage || classicActiveList[0];
                       if (passToStart) {
-                        onStartTest(passToStart, classicDuration);
+                        onStartTest(passToStart, classicDuration, selectedExamProfile);
                       }
                     }}
                     disabled={classicActiveList.length === 0}

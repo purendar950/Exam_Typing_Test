@@ -11,6 +11,9 @@ export interface EvaluateInput {
   timeAllowedMinutes: number;
   timeTakenSeconds: number;
   backspaceCount: number;
+  targetSpeed?: number;
+  requiredAccuracy?: number;
+  examProfileTitle?: string;
 }
 
 /**
@@ -368,19 +371,22 @@ export function evaluateTypingTest(input: EvaluateInput): EvaluationResult {
   // Error Percentage: (Equivalent Errors / Total Evaluated Words) * 100
   const errorPercentage = Math.round((equivalentErrors / totalEvaluatedWords) * 1000) / 10;
 
-  // Official UP Police Computer Operator / ASI Qualifying Cutoffs:
-  // Hindi (Mangal Inscript or Kruti Dev): 25 WPM, 85% accuracy
-  // English: 30 WPM, 85% accuracy
-  const requiredSpeed = input.language.startsWith('hindi') ? 25 : 30;
-  const requiredAccuracy = 85.0;
+  // Official Qualifying Cutoffs:
+  // If exam-specific cutoff provided, use it. Otherwise fallback to UP Police standard (25 Hindi / 30 English, 85%)
+  const defaultRequiredSpeed = input.language.startsWith('hindi') ? 25 : 30;
+  const requiredSpeed = input.targetSpeed && input.targetSpeed > 0 ? input.targetSpeed : defaultRequiredSpeed;
+  const requiredAccuracy = input.requiredAccuracy && input.requiredAccuracy > 0 ? input.requiredAccuracy : 85.0;
 
   const isQualified = netWpm >= requiredSpeed && accuracy >= requiredAccuracy;
+
+  const examTitle = input.examProfileTitle || (input.category === 'up_police_asi' ? 'UP Police ASI' : 'UP Police Computer Operator');
 
   return {
     testId: input.testId,
     testTitle: input.testTitle,
     language: input.language,
     category: input.category,
+    examProfileTitle: examTitle,
     timeAllowedMinutes: input.timeAllowedMinutes,
     timeTakenSeconds: input.timeTakenSeconds,
     totalKeystrokes,
@@ -401,7 +407,8 @@ export function evaluateTypingTest(input: EvaluateInput): EvaluationResult {
       requiredSpeed,
       requiredAccuracy,
       achievedSpeed: netWpm,
-      achievedAccuracy: accuracy
+      achievedAccuracy: accuracy,
+      examTitle
     },
     wrongWordsList: Array.from(new Set(wrongWordsList)),
     weakKeys: extractWeakKeys(wrongWordsList, input.language),

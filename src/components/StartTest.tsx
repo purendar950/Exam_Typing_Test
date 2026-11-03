@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
-import { Passage, TestSettings, EvaluationResult } from '../types';
+import { Passage, TestSettings, EvaluationResult, ExamProfile } from '../types';
 import { translateToMangalInscript, translateToKrutiDev, translateEnglishStringToHindi } from '../utils/hindiEngine';
 import { audioEngine } from '../utils/audioEngine';
 import { evaluateTypingTest } from '../utils/evaluator';
@@ -13,6 +13,7 @@ interface StartTestProps {
   onUpdateSettings?: (newSettings: Partial<TestSettings>) => void;
   onFinishTest: (result: EvaluationResult) => void;
   onCancelTest: () => void;
+  activeExamProfile?: ExamProfile | null;
 }
 
 export const StartTest: React.FC<StartTestProps> = ({
@@ -21,7 +22,8 @@ export const StartTest: React.FC<StartTestProps> = ({
   settings,
   onUpdateSettings,
   onFinishTest,
-  onCancelTest
+  onCancelTest,
+  activeExamProfile
 }) => {
   const totalSeconds = durationMinutes * 60;
   const [secondsRemaining, setSecondsRemaining] = useState<number>(totalSeconds);
@@ -347,7 +349,10 @@ export const StartTest: React.FC<StartTestProps> = ({
       typedText: typedText,
       timeAllowedMinutes: durationMinutes,
       timeTakenSeconds: timeTaken,
-      backspaceCount: backspaceCount
+      backspaceCount: backspaceCount,
+      targetSpeed: activeExamProfile?.targetSpeed,
+      requiredAccuracy: activeExamProfile?.minAccuracy,
+      examProfileTitle: activeExamProfile?.title
     });
     onFinishTest(result);
   };
@@ -364,7 +369,7 @@ export const StartTest: React.FC<StartTestProps> = ({
       
       {/* 1. TOP BLACK EXAM BAR (Screenshot 1) */}
       <div className="ar-exam-topbar">
-        <span>UP Police SI/ASI/Computer Operator {getExamLanguageTitle()} Typing</span>
+        <span>{activeExamProfile ? activeExamProfile.title : `UP Police SI/ASI/Computer Operator ${getExamLanguageTitle()} Typing`}</span>
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
           {/* Quick Auto Scroll Toggle in Topbar */}
           <button

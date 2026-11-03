@@ -1,6 +1,21 @@
 export type Language = 'hindi_mangal' | 'hindi_kruti' | 'english';
 
-export type ExamCategory = 'up_police_co' | 'up_police_asi';
+export type ExamCategory = 'up_police_co' | 'up_police_asi' | string;
+
+export interface ExamProfile {
+  id: string;
+  slug: string;
+  title: string;
+  categoryGroup: 'up_govt' | 'judiciary' | 'ssc' | 'delhi_govt' | 'defense' | 'bihar' | 'central_nta' | 'railways' | 'state_exams';
+  language: Language;
+  targetSpeed: number;
+  durationMinutes: number;
+  inputType: 'word' | 'character';
+  inputLimit: number;
+  isRetyping: boolean;
+  limitErrorPercentage?: number;
+  minAccuracy: number;
+}
 
 export interface Passage {
   id: string;
@@ -30,6 +45,7 @@ export interface EvaluationResult {
   testTitle: string;
   language: Language;
   category: ExamCategory;
+  examProfileTitle?: string;
   timeAllowedMinutes: number;
   timeTakenSeconds: number;
   totalKeystrokes: number;
@@ -51,6 +67,7 @@ export interface EvaluationResult {
     requiredAccuracy: number;
     achievedSpeed: number;
     achievedAccuracy: number;
+    examTitle?: string;
   };
   wrongWordsList: string[];
   weakKeys?: WeakKeyStat[];
