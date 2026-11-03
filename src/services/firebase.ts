@@ -643,6 +643,16 @@ export async function signInAdminWithEmail(email: string, pass: string): Promise
   }
 }
 
+// Send Password Reset / Setup Email for Candidate or Admin
+export async function resetUserPassword(emailOrRoll: string): Promise<void> {
+  const cleanInput = emailOrRoll.trim().toLowerCase();
+  if (!cleanInput) {
+    throw new Error('Please enter your email address to reset password.');
+  }
+  const cleanEmail = cleanInput.includes('@') ? cleanInput : `${cleanInput}@upprpb.gov.in`;
+  await sendPasswordResetEmail(auth, cleanEmail);
+}
+
 // Send Admin Password Reset / Setup Email
 export async function sendAdminPasswordReset(email: string): Promise<void> {
   const cleanEmail = email.trim().toLowerCase();
