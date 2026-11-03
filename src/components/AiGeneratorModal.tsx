@@ -6,10 +6,11 @@ import {
   saveAiConfig,
   testAiConnection,
   generateAll8DailyLiveTests,
+  generateCustomTest,
   fetchDailyLivePassages,
   DAILY_8_SLOTS
 } from '../services/aiGenerator';
-import { Passage } from '../types';
+import { Passage, Language, ExamCategory } from '../types';
 
 interface AiGeneratorModalProps {
   isOpen: boolean;
@@ -48,7 +49,17 @@ export const AiGeneratorModal: React.FC<AiGeneratorModalProps> = ({
     message: string;
   }>({ completed: 0, total: 8, message: '' });
   const [generatedPassages, setGeneratedPassages] = useState<Passage[]>([]);
-  const [activeTab, setActiveTab] = useState<'generate' | 'settings'>('generate');
+  const [activeTab, setActiveTab] = useState<'generate' | 'single' | 'settings'>('generate');
+
+  // Single test generator state
+  const [singleTopic, setSingleTopic] = useState<string>('');
+  const [singleLanguage, setSingleLanguage] = useState<Language>('english');
+  const [singleDifficulty, setSingleDifficulty] = useState<'medium' | 'hard'>('medium');
+  const [singleCategory, setSingleCategory] = useState<ExamCategory>('up_police_co');
+  const [singleWords, setSingleWords] = useState<number>(540);
+  const [isGeneratingSingle, setIsGeneratingSingle] = useState<boolean>(false);
+  const [singleResult, setSingleResult] = useState<Passage | null>(null);
+  const [singleMessage, setSingleMessage] = useState<string>('');
 
   // Load config on open
   useEffect(() => {
@@ -133,6 +144,46 @@ export const AiGeneratorModal: React.FC<AiGeneratorModalProps> = ({
       });
     } finally {
       setIsGenerating(false);
+    }
+  };
+
+  const handleGenerateSingleTest = async () => {
+    if (!config.apiKey.trim()) {
+      setActiveTab('settings');
+      setTestStatus({
+        loading: false,
+        success: false,
+        message: 'Please enter your API Key first in AI Settings.'
+      });
+      return;
+    }
+    if (!singleTopic.trim()) {
+      setSingleMessage('❌ Please enter a passage topic or select one of the suggested topics below.');
+      return;
+    }
+
+    setIsGeneratingSingle(true);
+    setSingleMessage('⏳ Generating AR Typing calibrated test passage with AI...');
+    setSingleResult(null);
+
+    try {
+      await saveAiConfig(config, true);
+      const newPassage = await generateCustomTest({
+        language: singleLanguage,
+        difficulty: singleDifficulty,
+        category: singleCategory,
+        topic: singleTopic,
+        targetWords: singleWords,
+        config
+      });
+
+      setSingleResult(newPassage);
+      onPassagesGenerated([newPassage, ...existingPassages]);
+      setSingleMessage(`🎉 Successfully created test: "${newPassage.title}" (${newPassage.wordCount} words • ${singleDifficulty.toUpperCase()})!`);
+    } catch (err: any) {
+      setSingleMessage(`❌ Error: ${err?.message || 'Failed to generate test'}`);
+    } finally {
+      setIsGeneratingSingle(false);
     }
   };
 
@@ -230,6 +281,21 @@ export const AiGeneratorModal: React.FC<AiGeneratorModalProps> = ({
             }}
           >
             🔥 8 Daily Live Tests Generator
+          </button>
+          <button
+            onClick={() => setActiveTab('single')}
+            style={{
+              padding: '12px 18px',
+              border: 'none',
+              background: 'transparent',
+              fontSize: '0.9rem',
+              fontWeight: 600,
+              cursor: 'pointer',
+              borderBottom: activeTab === 'single' ? '2.5px solid #0284c7' : '2.5px solid transparent',
+              color: activeTab === 'single' ? '#0284c7' : '#64748b'
+            }}
+          >
+            ⚡ Single Test Generator (AR Typing)
           </button>
           <button
             onClick={() => setActiveTab('settings')}
@@ -475,6 +541,287 @@ export const AiGeneratorModal: React.FC<AiGeneratorModalProps> = ({
                   })}
                 </div>
               </div>
+            </div>
+          ) : activeTab === 'single' ? (
+            <div>
+              {/* Header card */}
+              <div
+                style={{
+                  background: 'linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%)',
+                  border: '1.5px solid #86efac',
+                  borderRadius: '12px',
+                  padding: '16px 20px',
+                  marginBottom: '20px'
+                }}
+              >
+                <h3 style={{ margin: 0, fontSize: '1.05rem', fontWeight: 800, color: '#14532d' }}>
+                  ⚡ AR Typing Single Test Generator (Medium & Hard Calibrated)
+                </h3>
+                <p style={{ margin: '4px 0 0 0', fontSize: '0.82rem', color: '#166534', lineHeight: 1.4 }}>
+                  Generate on-demand 15-minute examination tests calibrated strictly to official UP Police CO & ASI standards.
+                  Medium passages provide balanced 500–540 word administrative prose; Hard passages feature 520–580 words of legal, forensic, and high-vocabulary complexity.
+                </p>
+              </div>
+
+              {/* Form Grid */}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '14px', marginBottom: '16px' }}>
+                {/* Language */}
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 700, color: '#334155', marginBottom: '6px' }}>
+                    Language & Keyboard Layout:
+                  </label>
+                  <select
+                    value={singleLanguage}
+                    onChange={(e) => setSingleLanguage(e.target.value as Language)}
+                    style={{
+                      width: '100%',
+                      padding: '9px 12px',
+                      borderRadius: '8px',
+                      border: '1.5px solid #cbd5e1',
+                      fontSize: '0.86rem',
+                      fontWeight: 600,
+                      background: '#ffffff',
+                      color: '#0f172a'
+                    }}
+                  >
+                    <option value="english">🇬🇧 English (30 WPM Benchmark)</option>
+                    <option value="hindi_mangal">🇮🇳 हिंदी मंगल (Inscript • 25 WPM)</option>
+                    <option value="hindi_kruti">🇮🇳 हिंदी कुर्ती देव (Kruti Dev 010 • 25 WPM)</option>
+                  </select>
+                </div>
+
+                {/* Difficulty */}
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 700, color: '#334155', marginBottom: '6px' }}>
+                    Difficulty Standard (AR Typing):
+                  </label>
+                  <select
+                    value={singleDifficulty}
+                    onChange={(e) => {
+                      const diff = e.target.value as 'medium' | 'hard';
+                      setSingleDifficulty(diff);
+                      setSingleWords(diff === 'hard' ? 550 : 520);
+                    }}
+                    style={{
+                      width: '100%',
+                      padding: '9px 12px',
+                      borderRadius: '8px',
+                      border: singleDifficulty === 'hard' ? '1.5px solid #f87171' : '1.5px solid #cbd5e1',
+                      fontSize: '0.86rem',
+                      fontWeight: 700,
+                      background: singleDifficulty === 'hard' ? '#fef2f2' : '#ffffff',
+                      color: singleDifficulty === 'hard' ? '#b91c1c' : '#0f172a'
+                    }}
+                  >
+                    <option value="medium">🟡 MEDIUM (500–540w • Balanced Editorial)</option>
+                    <option value="hard">🔴 HARD (520–580w • Legal/Forensic/Conjuncts)</option>
+                  </select>
+                </div>
+
+                {/* Exam Category */}
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 700, color: '#334155', marginBottom: '6px' }}>
+                    Target Examination Series:
+                  </label>
+                  <select
+                    value={singleCategory}
+                    onChange={(e) => setSingleCategory(e.target.value as ExamCategory)}
+                    style={{
+                      width: '100%',
+                      padding: '9px 12px',
+                      borderRadius: '8px',
+                      border: '1.5px solid #cbd5e1',
+                      fontSize: '0.86rem',
+                      fontWeight: 600,
+                      background: '#ffffff',
+                      color: '#0f172a'
+                    }}
+                  >
+                    <option value="up_police_co">👮 UP Police Computer Operator (Grade-A)</option>
+                    <option value="up_police_asi">📑 UP Police ASI (Clerk & Accounts)</option>
+                    <option value="all">🏛️ General Secretariat & Judiciary</option>
+                  </select>
+                </div>
+
+                {/* Word Count */}
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 700, color: '#334155', marginBottom: '6px' }}>
+                    Target Words: <span style={{ color: '#0284c7' }}>{singleWords} words</span>
+                  </label>
+                  <input
+                    type="range"
+                    min={480}
+                    max={600}
+                    step={10}
+                    value={singleWords}
+                    onChange={(e) => setSingleWords(Number(e.target.value))}
+                    style={{ width: '100%', accentColor: '#0284c7', marginTop: '6px' }}
+                  />
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.72rem', color: '#64748b' }}>
+                    <span>480w</span>
+                    <span>540w (AR Standard)</span>
+                    <span>600w</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Topic Input */}
+              <div style={{ marginBottom: '14px' }}>
+                <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 700, color: '#334155', marginBottom: '6px' }}>
+                  Passage Topic / Theme:
+                </label>
+                <input
+                  type="text"
+                  placeholder="e.g. Cyber Security, Bharatiya Nyaya Sanhita, Emergency Dial 112, Artificial Intelligence..."
+                  value={singleTopic}
+                  onChange={(e) => setSingleTopic(e.target.value)}
+                  style={{
+                    width: '100%',
+                    padding: '10px 14px',
+                    borderRadius: '8px',
+                    border: '1.5px solid #cbd5e1',
+                    fontSize: '0.9rem',
+                    fontWeight: 500,
+                    boxSizing: 'border-box'
+                  }}
+                />
+
+                {/* Topic Suggestion Chips */}
+                <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginTop: '8px' }}>
+                  <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#64748b', alignSelf: 'center' }}>
+                    Suggested:
+                  </span>
+                  {[
+                    'Cyber Crime & Digital Forensics',
+                    'Bharatiya Nyaya Sanhita (BNS)',
+                    'Emergency Response & Dial 112',
+                    'E-Governance & Digital India',
+                    'Women Safety & Special Task Forces',
+                    'National Highway Logistics & Safety'
+                  ].map((sugg) => (
+                    <button
+                      key={sugg}
+                      type="button"
+                      onClick={() => setSingleTopic(sugg)}
+                      style={{
+                        background: '#f1f5f9',
+                        border: '1px solid #cbd5e1',
+                        borderRadius: '16px',
+                        padding: '3px 10px',
+                        fontSize: '0.74rem',
+                        fontWeight: 600,
+                        color: '#334155',
+                        cursor: 'pointer'
+                      }}
+                    >
+                      + {sugg}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Status & Action */}
+              {singleMessage && (
+                <div
+                  style={{
+                    padding: '10px 14px',
+                    borderRadius: '8px',
+                    fontSize: '0.84rem',
+                    fontWeight: 600,
+                    marginBottom: '14px',
+                    background: singleMessage.includes('❌') ? '#fef2f2' : singleMessage.includes('⏳') ? '#fef3c7' : '#f0fdf4',
+                    color: singleMessage.includes('❌') ? '#b91c1c' : singleMessage.includes('⏳') ? '#92400e' : '#15803d',
+                    border: singleMessage.includes('❌') ? '1px solid #fecaca' : singleMessage.includes('⏳') ? '1px solid #fde68a' : '1px solid #bbf7d0'
+                  }}
+                >
+                  {singleMessage}
+                </div>
+              )}
+
+              <button
+                onClick={handleGenerateSingleTest}
+                disabled={isGeneratingSingle}
+                style={{
+                  background: isGeneratingSingle ? '#94a3b8' : 'linear-gradient(135deg, #0284c7 0%, #0369a1 100%)',
+                  color: '#ffffff',
+                  border: 'none',
+                  padding: '12px 24px',
+                  borderRadius: '8px',
+                  fontSize: '0.92rem',
+                  fontWeight: 700,
+                  cursor: isGeneratingSingle ? 'not-allowed' : 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  boxShadow: '0 4px 6px -1px rgba(2, 132, 199, 0.25)',
+                  marginBottom: '20px'
+                }}
+              >
+                <span>{isGeneratingSingle ? '⏳' : '⚡'}</span>
+                <span>{isGeneratingSingle ? 'Generating AR Typing Test with AI...' : `Generate ${singleDifficulty.toUpperCase()} Test (${singleWords}w)`}</span>
+              </button>
+
+              {/* Result Preview Box if generated */}
+              {singleResult && (
+                <div
+                  style={{
+                    background: '#f8fafc',
+                    border: '1.5px solid #cbd5e1',
+                    borderRadius: '12px',
+                    padding: '18px',
+                    marginTop: '16px'
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px', flexWrap: 'wrap', gap: '8px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <span style={{ fontSize: '1.3rem' }}>{singleResult.language.startsWith('hindi') ? '🇮🇳' : '🇬🇧'}</span>
+                      <h4 style={{ margin: 0, fontSize: '1rem', fontWeight: 800, color: '#0f172a' }}>
+                        {singleResult.title}
+                      </h4>
+                    </div>
+                    <div style={{ display: 'flex', gap: '6px' }}>
+                      <span
+                        style={{
+                          fontSize: '0.72rem',
+                          fontWeight: 700,
+                          padding: '3px 8px',
+                          borderRadius: '6px',
+                          background: singleResult.difficulty === 'hard' ? '#fee2e2' : '#f0fdf4',
+                          color: singleResult.difficulty === 'hard' ? '#b91c1c' : '#15803d'
+                        }}
+                      >
+                        {singleResult.difficulty.toUpperCase()}
+                      </span>
+                      <span style={{ fontSize: '0.72rem', fontWeight: 700, padding: '3px 8px', borderRadius: '6px', background: '#e0f2fe', color: '#0369a1' }}>
+                        {singleResult.wordCount} words
+                      </span>
+                      <span style={{ fontSize: '0.72rem', fontWeight: 700, padding: '3px 8px', borderRadius: '6px', background: '#f1f5f9', color: '#475569' }}>
+                        ⏱️ 15:00
+                      </span>
+                    </div>
+                  </div>
+
+                  <div
+                    style={{
+                      maxHeight: '180px',
+                      overflowY: 'auto',
+                      padding: '12px',
+                      background: '#ffffff',
+                      border: '1px solid #e2e8f0',
+                      borderRadius: '8px',
+                      fontSize: '0.88rem',
+                      lineHeight: 1.6,
+                      color: '#334155'
+                    }}
+                  >
+                    {singleResult.text}
+                  </div>
+
+                  <div style={{ marginTop: '12px', fontSize: '0.78rem', color: '#15803d', fontWeight: 600 }}>
+                    ✅ Test has been added to your local library and synced. You can find it in the test list!
+                  </div>
+                </div>
+              )}
             </div>
           ) : (
             <div>

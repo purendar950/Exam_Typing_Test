@@ -16,7 +16,7 @@ import { AiGeneratorModal } from './components/AiGeneratorModal';
 import { AdminPanelModal } from './components/AdminPanelModal';
 import { PwaInstallPrompt } from './components/PwaInstallPrompt';
 import { audioEngine } from './utils/audioEngine';
-import { fetchDailyLivePassages } from './services/aiGenerator';
+import { fetchDailyLivePassages, triggerAutoDailyGenerationIfDue } from './services/aiGenerator';
 import { fetchAllCustomPassages } from './services/adminService';
 import {
   subscribeToAuth,
@@ -117,6 +117,13 @@ export const App: React.FC = () => {
     fetchAllCustomPassages().then((cps) => {
       if (cps && cps.length > 0) {
         setCustomPassages(cps);
+      }
+    });
+
+    // Auto-generate today's 8 Daily Live Tests if due and API key configured
+    triggerAutoDailyGenerationIfDue(todayIso, (newTests) => {
+      if (newTests && newTests.length > 0) {
+        setDailyLivePassages(newTests);
       }
     });
   }, []);
@@ -304,8 +311,8 @@ export const App: React.FC = () => {
             history={history}
             onOpenAuth={() => setIsAuthOpen(true)}
             onOpenDashboard={() => setIsDashboardOpen(true)}
-            onOpenAiGenerator={currentUser && isUserAdmin(currentUser) ? () => setIsAiGeneratorOpen(true) : undefined}
-            onOpenAdmin={currentUser && isUserAdmin(currentUser) ? () => setIsAdminOpen(true) : undefined}
+            onOpenAiGenerator={() => setIsAiGeneratorOpen(true)}
+            onOpenAdmin={() => setIsAdminOpen(true)}
           />
         )}
 
