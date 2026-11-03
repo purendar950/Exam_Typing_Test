@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { Passage, Language, ExamCategory, TestSettings, EvaluationResult } from '../types';
-import { ALL_EXAMS, CATEGORY_GROUPS, ExamProfile } from '../data/allExams';
+import { Passage, Language, ExamCategory, TestSettings, EvaluationResult, UnifiedExamPost } from '../types';
+import { ALL_EXAMS, CATEGORY_GROUPS, CATEGORY_SUB_FILTERS, UNIFIED_EXAM_POSTS, ExamProfile } from '../data/allExams';
 import { UserProfile } from '../services/firebase';
 import { getFallbackDailyPassages } from '../services/aiGenerator';
 import appLogo from '../assets/logo.png';
@@ -46,6 +46,306 @@ interface ExamMode {
   durationFilter?: number;
 }
 
+// Component for a Unified Exam Post Card with interactive Hindi & English tabs
+const UnifiedExamCard: React.FC<{
+  post: UnifiedExamPost;
+  onQuickStart: (exam: ExamProfile) => void;
+  onBrowse: (exam: ExamProfile) => void;
+  languageFilter: 'all' | 'english' | 'hindi';
+  getEmblemForGroup: (group: string) => string;
+}> = ({ post, onQuickStart, onBrowse, languageFilter, getEmblemForGroup }) => {
+  const [selectedVariantIdx, setSelectedVariantIdx] = useState<number>(() => {
+    if (languageFilter === 'english') {
+      const engIdx = post.variants.findIndex((v) => v.language === 'english');
+      return engIdx >= 0 ? engIdx : 0;
+    }
+    if (languageFilter === 'hindi') {
+      const hiIdx = post.variants.findIndex((v) => v.language.startsWith('hindi'));
+      return hiIdx >= 0 ? hiIdx : 0;
+    }
+    const defHiIdx = post.variants.findIndex((v) => v.language.startsWith('hindi'));
+    return defHiIdx >= 0 ? defHiIdx : 0;
+  });
+
+  useEffect(() => {
+    if (languageFilter === 'english') {
+      const engIdx = post.variants.findIndex((v) => v.language === 'english');
+      if (engIdx >= 0) setSelectedVariantIdx(engIdx);
+    } else if (languageFilter === 'hindi') {
+      const hiIdx = post.variants.findIndex((v) => v.language.startsWith('hindi'));
+      if (hiIdx >= 0) setSelectedVariantIdx(hiIdx);
+    }
+  }, [languageFilter, post.variants]);
+
+  const activeVariant = post.variants[selectedVariantIdx] || post.variants[0];
+  const isHindiActive = activeVariant.language.startsWith('hindi');
+
+  const getTypeBadgeStyle = (type: string) => {
+    switch (type) {
+      case 'computer_operator':
+        return { bg: '#e0f2fe', color: '#0369a1', border: '#bae6fd' };
+      case 'asi':
+        return { bg: '#fef3c7', color: '#b45309', border: '#fde68a' };
+      case 'ro_aro':
+        return { bg: '#f3e8ff', color: '#7e22ce', border: '#e9d5ff' };
+      case 'court_jja':
+        return { bg: '#ecfdf5', color: '#047857', border: '#a7f3d0' };
+      case 'deo':
+        return { bg: '#ffedd5', color: '#c2410c', border: '#fed7aa' };
+      case 'steno':
+        return { bg: '#fce7f3', color: '#be185d', border: '#fbcfe8' };
+      default:
+        return { bg: '#f1f5f9', color: '#475569', border: '#e2e8f0' };
+    }
+  };
+
+  const badgeStyle = getTypeBadgeStyle(post.examType);
+
+  return (
+    <div
+      className="exam-card-hover"
+      style={{
+        background: '#ffffff',
+        border: '1.5px solid #e2e8f0',
+        borderRadius: '12px',
+        padding: '16px',
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'space-between',
+        boxShadow: '0 2px 4px rgba(0,0,0,0.03)',
+        transition: 'all 0.15s ease'
+      }}
+    >
+      <div>
+        {/* Top Header: Organization & Exam Type Badge */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px', gap: '8px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', minWidth: 0 }}>
+            <span style={{ fontSize: '1.25rem', flexShrink: 0 }}>{getEmblemForGroup(post.categoryGroup)}</span>
+            <span style={{
+              fontSize: '0.72rem',
+              fontWeight: 700,
+              padding: '2px 7px',
+              borderRadius: '4px',
+              background: '#f8fafc',
+              color: '#334155',
+              border: '1px solid #e2e8f0',
+              whiteSpace: 'nowrap',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis'
+            }}>
+              {post.organization}
+            </span>
+          </div>
+
+          <span style={{
+            fontSize: '0.72rem',
+            fontWeight: 700,
+            padding: '2px 8px',
+            borderRadius: '4px',
+            background: badgeStyle.bg,
+            color: badgeStyle.color,
+            border: `1px solid ${badgeStyle.border}`,
+            whiteSpace: 'nowrap',
+            flexShrink: 0
+          }}>
+            {post.examTypeLabel}
+          </span>
+        </div>
+
+        {/* Post Title */}
+        <h3 style={{
+          fontSize: '1.02rem',
+          fontWeight: 700,
+          color: '#0f172a',
+          margin: '0 0 12px 0',
+          lineHeight: 1.35,
+          minHeight: '38px'
+        }}>
+          {post.postTitle}
+        </h3>
+
+        {/* Language Tabs / Selector */}
+        {post.variants.length > 1 ? (
+          <div style={{
+            display: 'flex',
+            gap: '6px',
+            background: '#f8fafc',
+            padding: '4px',
+            borderRadius: '8px',
+            border: '1px solid #f1f5f9',
+            marginBottom: '12px'
+          }}>
+            {post.variants.map((v, idx) => {
+              const isSelected = idx === selectedVariantIdx;
+              const isHindi = v.language.startsWith('hindi');
+              const langLabel = isHindi
+                ? (v.language === 'hindi_kruti' ? 'Hindi (Kruti)' : 'Hindi (Mangal)')
+                : 'English';
+              return (
+                <button
+                  key={v.id}
+                  onClick={() => setSelectedVariantIdx(idx)}
+                  type="button"
+                  style={{
+                    flex: 1,
+                    padding: '6px 8px',
+                    borderRadius: '6px',
+                    border: isSelected ? '1px solid var(--primary, #0284c7)' : '1px solid transparent',
+                    background: isSelected ? '#ffffff' : 'transparent',
+                    color: isSelected ? 'var(--primary, #0284c7)' : '#64748b',
+                    fontWeight: isSelected ? 700 : 500,
+                    fontSize: '0.78rem',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '4px',
+                    boxShadow: isSelected ? '0 1px 3px rgba(0,0,0,0.08)' : 'none',
+                    transition: 'all 0.15s ease'
+                  }}
+                >
+                  <span>{isHindi ? '🇮🇳' : '🇬🇧'}</span>
+                  <span>{langLabel}</span>
+                  <span style={{
+                    fontSize: '0.68rem',
+                    fontWeight: 700,
+                    background: isSelected ? '#e0f2fe' : '#e2e8f0',
+                    color: isSelected ? '#0369a1' : '#64748b',
+                    padding: '1px 5px',
+                    borderRadius: '8px'
+                  }}>
+                    {v.targetSpeed} WPM
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        ) : (
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            background: '#f8fafc',
+            padding: '6px 10px',
+            borderRadius: '8px',
+            border: '1px solid #f1f5f9',
+            marginBottom: '12px'
+          }}>
+            <span style={{
+              fontSize: '0.76rem',
+              fontWeight: 700,
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+              color: isHindiActive ? '#b45309' : '#1d4ed8'
+            }}>
+              <span>{isHindiActive ? '🇮🇳' : '🇬🇧'}</span>
+              <span>
+                {isHindiActive
+                  ? (activeVariant.language === 'hindi_kruti' ? 'Hindi (Kruti Dev)' : 'Hindi (Mangal Inscript)')
+                  : 'English'}
+              </span>
+            </span>
+            <span style={{
+              fontSize: '0.7rem',
+              fontWeight: 700,
+              background: '#e2e8f0',
+              color: '#475569',
+              padding: '1px 6px',
+              borderRadius: '8px'
+            }}>
+              Official Benchmark
+            </span>
+          </div>
+        )}
+
+        {/* Benchmark Badges for Active Selection */}
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginBottom: '14px' }}>
+          <span style={{
+            fontSize: '0.75rem',
+            fontWeight: 700,
+            background: '#f0fdf4',
+            color: '#16a34a',
+            padding: '3px 8px',
+            borderRadius: '6px',
+            border: '1px solid #bbf7d0'
+          }}>
+            🎯 {activeVariant.targetSpeed} WPM Speed
+          </span>
+          <span style={{
+            fontSize: '0.75rem',
+            fontWeight: 700,
+            background: '#f8fafc',
+            color: '#475569',
+            padding: '3px 8px',
+            borderRadius: '6px',
+            border: '1px solid #e2e8f0'
+          }}>
+            ⏱️ {activeVariant.durationMinutes} Mins
+          </span>
+          <span style={{
+            fontSize: '0.75rem',
+            fontWeight: 700,
+            background: '#fffbeb',
+            color: '#b45309',
+            padding: '3px 8px',
+            borderRadius: '6px',
+            border: '1px solid #fde68a'
+          }}>
+            🎯 &ge; {activeVariant.minAccuracy}% Accuracy
+          </span>
+          <span style={{
+            fontSize: '0.72rem',
+            color: '#64748b',
+            padding: '3px 6px',
+            borderRadius: '4px'
+          }}>
+            {activeVariant.inputType === 'character' ? `📏 ${activeVariant.inputLimit} Chars` : `📏 ${activeVariant.inputLimit} Words`}
+          </span>
+        </div>
+      </div>
+
+      {/* Actions */}
+      <div style={{ display: 'flex', gap: '8px', borderTop: '1px solid #f1f5f9', paddingTop: '12px' }}>
+        <button
+          onClick={() => onQuickStart(activeVariant)}
+          className="btn btn-primary"
+          style={{
+            flex: 1,
+            padding: '7px 12px',
+            fontSize: '0.82rem',
+            fontWeight: 700,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '4px'
+          }}
+          title={`Start official ${activeVariant.durationMinutes}-min test with ${activeVariant.targetSpeed} WPM target`}
+        >
+          <span>⚡</span>
+          <span>
+            Start {isHindiActive ? 'Hindi' : 'English'} Mock ({activeVariant.durationMinutes}m)
+          </span>
+        </button>
+        <button
+          onClick={() => onBrowse(activeVariant)}
+          className="btn btn-secondary"
+          style={{
+            padding: '7px 12px',
+            fontSize: '0.82rem',
+            fontWeight: 600,
+            whiteSpace: 'nowrap'
+          }}
+          title="Select from library of passages for this exam"
+        >
+          <span>Browse</span>
+          <span>→</span>
+        </button>
+      </div>
+    </div>
+  );
+};
+
 export const ChooseTest: React.FC<ChooseTestProps> = ({
   passages,
   onStartTest,
@@ -81,6 +381,7 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
 
   // 129 All Exams Explorer State
   const [selectedExamCategory, setSelectedExamCategory] = useState<string>('all');
+  const [selectedExamSubFilter, setSelectedExamSubFilter] = useState<string>('all');
   const [examSearchQuery, setExamSearchQuery] = useState<string>('');
   const [selectedExamLanguageFilter, setSelectedExamLanguageFilter] = useState<'all' | 'english' | 'hindi'>('all');
   const [selectedExamProfile, setSelectedExamProfile] = useState<ExamProfile | null>(null);
@@ -101,29 +402,137 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
     }
   };
 
-  const filteredAllExams = useMemo(() => {
-    return ALL_EXAMS.filter((exam) => {
-      if (selectedExamCategory !== 'all' && exam.categoryGroup !== selectedExamCategory) {
+  const availableSubFilters = useMemo(() => {
+    return CATEGORY_SUB_FILTERS[selectedExamCategory] || CATEGORY_SUB_FILTERS['all'] || [];
+  }, [selectedExamCategory]);
+
+  const filteredUnifiedPosts = useMemo(() => {
+    return UNIFIED_EXAM_POSTS.filter((post) => {
+      // 1. Category filter
+      if (selectedExamCategory !== 'all' && post.categoryGroup !== selectedExamCategory) {
         return false;
       }
-      if (selectedExamLanguageFilter === 'english' && exam.language !== 'english') {
-        return false;
-      }
-      if (selectedExamLanguageFilter === 'hindi' && !exam.language.startsWith('hindi')) {
-        return false;
-      }
-      if (examSearchQuery.trim()) {
-        const q = examSearchQuery.toLowerCase();
-        const matchTitle = exam.title.toLowerCase().includes(q);
-        const matchSlug = exam.slug.toLowerCase().includes(q);
-        const matchGroup = exam.categoryGroup.toLowerCase().includes(q);
-        if (!matchTitle && !matchSlug && !matchGroup) {
+
+      // 2. Sub-filter / Post Type filter
+      if (selectedExamSubFilter !== 'all') {
+        const matchType = post.examType === selectedExamSubFilter;
+        const matchAsi = selectedExamSubFilter === 'asi' && (
+          post.examType === 'asi' ||
+          post.examTypeLabel.toLowerCase().includes('asi') ||
+          post.postTitle.toLowerCase().includes('asi') ||
+          post.postTitle.toLowerCase().includes('hcm')
+        );
+        const matchCo = selectedExamSubFilter === 'computer_operator' && (
+          post.examType === 'computer_operator' ||
+          post.postTitle.toLowerCase().includes('operator') ||
+          post.postTitle.toLowerCase().includes('informatic')
+        );
+        const matchDeo = selectedExamSubFilter === 'deo' && (
+          post.examType === 'deo' ||
+          post.postTitle.toLowerCase().includes('deo') ||
+          post.postTitle.toLowerCase().includes('dest')
+        );
+        const matchRoAro = selectedExamSubFilter === 'ro_aro' && (
+          post.examType === 'ro_aro' ||
+          post.postTitle.toLowerCase().includes('ro / aro') ||
+          post.postTitle.toLowerCase().includes('ro/ aro')
+        );
+        const matchAssistant = selectedExamSubFilter === 'assistant' && (
+          post.examType === 'assistant' ||
+          post.postTitle.toLowerCase().includes('assistant') ||
+          post.postTitle.toLowerCase().includes('clerk') ||
+          post.postTitle.toLowerCase().includes('ldc') ||
+          post.postTitle.toLowerCase().includes('jsa')
+        );
+        const matchCourt = selectedExamSubFilter === 'court_jja' && (
+          post.examType === 'court_jja' ||
+          post.categoryGroup === 'judiciary'
+        );
+        const matchSteno = selectedExamSubFilter === 'steno' && (
+          post.examType === 'steno' ||
+          post.postTitle.toLowerCase().includes('steno') ||
+          post.postTitle.toLowerCase().includes('pa') ||
+          post.postTitle.toLowerCase().includes('aps')
+        );
+
+        if (!matchType && !matchAsi && !matchCo && !matchDeo && !matchRoAro && !matchAssistant && !matchCourt && !matchSteno) {
           return false;
         }
       }
+
+      // 3. Language filter
+      if (selectedExamLanguageFilter === 'english') {
+        const hasEng = post.variants.some((v) => v.language === 'english');
+        if (!hasEng) return false;
+      } else if (selectedExamLanguageFilter === 'hindi') {
+        const hasHindi = post.variants.some((v) => v.language.startsWith('hindi'));
+        if (!hasHindi) return false;
+      }
+
+      // 4. Search query
+      if (examSearchQuery.trim()) {
+        const q = examSearchQuery.toLowerCase();
+        const matchTitle = post.postTitle.toLowerCase().includes(q);
+        const matchOrg = post.organization.toLowerCase().includes(q);
+        const matchTypeLabel = post.examTypeLabel.toLowerCase().includes(q);
+        const matchVariants = post.variants.some((v) => v.title.toLowerCase().includes(q) || v.slug.toLowerCase().includes(q));
+        if (!matchTitle && !matchOrg && !matchTypeLabel && !matchVariants) {
+          return false;
+        }
+      }
+
       return true;
     });
-  }, [selectedExamCategory, selectedExamLanguageFilter, examSearchQuery]);
+  }, [selectedExamCategory, selectedExamSubFilter, selectedExamLanguageFilter, examSearchQuery]);
+
+  const getPostCountForSubFilter = (subId: string) => {
+    return UNIFIED_EXAM_POSTS.filter((post) => {
+      if (selectedExamCategory !== 'all' && post.categoryGroup !== selectedExamCategory) {
+        return false;
+      }
+      if (subId === 'all') return true;
+      const matchType = post.examType === subId;
+      const matchAsi = subId === 'asi' && (
+        post.examType === 'asi' ||
+        post.examTypeLabel.toLowerCase().includes('asi') ||
+        post.postTitle.toLowerCase().includes('asi') ||
+        post.postTitle.toLowerCase().includes('hcm')
+      );
+      const matchCo = subId === 'computer_operator' && (
+        post.examType === 'computer_operator' ||
+        post.postTitle.toLowerCase().includes('operator') ||
+        post.postTitle.toLowerCase().includes('informatic')
+      );
+      const matchDeo = subId === 'deo' && (
+        post.examType === 'deo' ||
+        post.postTitle.toLowerCase().includes('deo') ||
+        post.postTitle.toLowerCase().includes('dest')
+      );
+      const matchRoAro = subId === 'ro_aro' && (
+        post.examType === 'ro_aro' ||
+        post.postTitle.toLowerCase().includes('ro / aro') ||
+        post.postTitle.toLowerCase().includes('ro/ aro')
+      );
+      const matchAssistant = subId === 'assistant' && (
+        post.examType === 'assistant' ||
+        post.postTitle.toLowerCase().includes('assistant') ||
+        post.postTitle.toLowerCase().includes('clerk') ||
+        post.postTitle.toLowerCase().includes('ldc') ||
+        post.postTitle.toLowerCase().includes('jsa')
+      );
+      const matchCourt = subId === 'court_jja' && (
+        post.examType === 'court_jja' ||
+        post.categoryGroup === 'judiciary'
+      );
+      const matchSteno = subId === 'steno' && (
+        post.examType === 'steno' ||
+        post.postTitle.toLowerCase().includes('steno') ||
+        post.postTitle.toLowerCase().includes('pa') ||
+        post.postTitle.toLowerCase().includes('aps')
+      );
+      return matchType || matchAsi || matchCo || matchDeo || matchRoAro || matchAssistant || matchCourt || matchSteno;
+    }).length;
+  };
 
   const handleQuickStartExam = (exam: ExamProfile) => {
     setSelectedExamProfile(exam);
@@ -912,14 +1321,15 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
               {CATEGORY_GROUPS.map((group) => {
                 const isSelected = selectedExamCategory === group.id;
                 const count = group.id === 'all'
-                  ? ALL_EXAMS.length
-                  : ALL_EXAMS.filter((e) => e.categoryGroup === group.id).length;
+                  ? UNIFIED_EXAM_POSTS.length
+                  : UNIFIED_EXAM_POSTS.filter((p) => p.categoryGroup === group.id).length;
 
                 return (
                   <button
                     key={group.id}
                     onClick={() => {
                       setSelectedExamCategory(group.id);
+                      setSelectedExamSubFilter('all');
                       setVisibleExamsCount(24);
                     }}
                     style={{
@@ -956,6 +1366,73 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
               })}
             </div>
 
+            {/* Post-Type / Sub-Category Filter Pills */}
+            {availableSubFilters.length > 1 && (
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                overflowX: 'auto',
+                paddingBottom: '8px',
+                marginBottom: '16px',
+                scrollbarWidth: 'thin'
+              }}>
+                <span style={{
+                  fontSize: '0.78rem',
+                  color: '#475569',
+                  fontWeight: 700,
+                  whiteSpace: 'nowrap',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '4px'
+                }}>
+                  <span>📌</span>
+                  <span>Exam Type:</span>
+                </span>
+                {availableSubFilters.map((sub) => {
+                  const isSubActive = selectedExamSubFilter === sub.id;
+                  const count = getPostCountForSubFilter(sub.id);
+                  return (
+                    <button
+                      key={sub.id}
+                      onClick={() => {
+                        setSelectedExamSubFilter(sub.id);
+                        setVisibleExamsCount(24);
+                      }}
+                      style={{
+                        background: isSubActive ? '#0f172a' : '#f8fafc',
+                        color: isSubActive ? '#ffffff' : '#334155',
+                        border: isSubActive ? '1px solid #0f172a' : '1px solid #e2e8f0',
+                        padding: '5px 12px',
+                        borderRadius: '16px',
+                        fontSize: '0.78rem',
+                        fontWeight: isSubActive ? 700 : 600,
+                        cursor: 'pointer',
+                        whiteSpace: 'nowrap',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '6px',
+                        boxShadow: isSubActive ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
+                        transition: 'all 0.15s ease'
+                      }}
+                    >
+                      <span>{sub.label}</span>
+                      <span style={{
+                        background: isSubActive ? 'rgba(255,255,255,0.22)' : '#e2e8f0',
+                        color: isSubActive ? '#ffffff' : '#64748b',
+                        padding: '1px 5px',
+                        borderRadius: '10px',
+                        fontSize: '0.68rem',
+                        fontWeight: 700
+                      }}>
+                        {count}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+
             {/* Search and Language Filter Controls */}
             <div style={{
               display: 'flex',
@@ -974,7 +1451,7 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
                     setExamSearchQuery(e.target.value);
                     setVisibleExamsCount(24);
                   }}
-                  placeholder="🔍 Search all 129 exams (e.g. Delhi High Court, SSC, Beltron, RRB...)"
+                  placeholder="🔍 Search exam posts (e.g. Computer Operator, ASI, RO/ARO, Court...)"
                   style={{
                     width: '100%',
                     padding: '9px 14px',
@@ -1030,162 +1507,32 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
                   </button>
                 ))}
                 <span style={{ fontSize: '0.8rem', color: '#64748b', fontWeight: 600, marginLeft: '6px' }}>
-                  ({filteredAllExams.length} matching)
+                  ({filteredUnifiedPosts.length} matching posts)
                 </span>
               </div>
             </div>
 
-            {/* 129 Exams Grid */}
+            {/* Unified Exam Posts Grid */}
             <div style={{
               display: 'grid',
               gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))',
               gap: '16px',
               marginBottom: '24px'
             }}>
-              {filteredAllExams.slice(0, visibleExamsCount).map((exam) => (
-                <div
-                  key={exam.id}
-                  className="exam-card-hover"
-                  style={{
-                    background: '#ffffff',
-                    border: '1.5px solid #e2e8f0',
-                    borderRadius: '12px',
-                    padding: '16px',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    justifyContent: 'space-between',
-                    boxShadow: '0 2px 4px rgba(0,0,0,0.03)',
-                    transition: 'all 0.15s ease'
-                  }}
-                >
-                  <div>
-                    {/* Header Badges */}
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                        <span style={{ fontSize: '1.25rem' }}>{getEmblemForGroup(exam.categoryGroup)}</span>
-                        <span style={{
-                          fontSize: '0.7rem',
-                          fontWeight: 700,
-                          padding: '2px 6px',
-                          borderRadius: '4px',
-                          background: '#f1f5f9',
-                          color: '#475569'
-                        }}>
-                          {CATEGORY_GROUPS.find((g) => g.id === exam.categoryGroup)?.title || 'Exam'}
-                        </span>
-                      </div>
-
-                      <span style={{
-                        fontSize: '0.7rem',
-                        fontWeight: 700,
-                        padding: '2px 6px',
-                        borderRadius: '4px',
-                        background: exam.language === 'english' ? '#eff6ff' : exam.language === 'hindi_mangal' ? '#fef3c7' : '#fae8ff',
-                        color: exam.language === 'english' ? '#1d4ed8' : exam.language === 'hindi_mangal' ? '#b45309' : '#86198f'
-                      }}>
-                        {exam.language === 'english' ? 'English' : exam.language === 'hindi_mangal' ? 'Mangal Inscript' : 'Kruti Dev'}
-                      </span>
-                    </div>
-
-                    {/* Title */}
-                    <h3 style={{
-                      fontSize: '0.98rem',
-                      fontWeight: 700,
-                      color: '#1e293b',
-                      margin: '0 0 10px 0',
-                      lineHeight: 1.35,
-                      minHeight: '40px'
-                    }}>
-                      {exam.title}
-                    </h3>
-
-                    {/* Benchmark Badges */}
-                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginBottom: '14px' }}>
-                      <span style={{
-                        fontSize: '0.75rem',
-                        fontWeight: 700,
-                        background: '#f0fdf4',
-                        color: '#16a34a',
-                        padding: '3px 8px',
-                        borderRadius: '6px',
-                        border: '1px solid #bbf7d0'
-                      }}>
-                        🎯 {exam.targetSpeed} WPM Speed
-                      </span>
-                      <span style={{
-                        fontSize: '0.75rem',
-                        fontWeight: 700,
-                        background: '#f8fafc',
-                        color: '#475569',
-                        padding: '3px 8px',
-                        borderRadius: '6px',
-                        border: '1px solid #e2e8f0'
-                      }}>
-                        ⏱️ {exam.durationMinutes} Mins
-                      </span>
-                      <span style={{
-                        fontSize: '0.75rem',
-                        fontWeight: 700,
-                        background: '#fffbeb',
-                        color: '#b45309',
-                        padding: '3px 8px',
-                        borderRadius: '6px',
-                        border: '1px solid #fde68a'
-                      }}>
-                        🎯 &ge; {exam.minAccuracy}% Accuracy
-                      </span>
-                      <span style={{
-                        fontSize: '0.72rem',
-                        color: '#64748b',
-                        padding: '3px 6px',
-                        borderRadius: '4px'
-                      }}>
-                        {exam.inputType === 'character' ? `📏 ${exam.inputLimit} Chars` : `📏 ${exam.inputLimit} Words`}
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Actions */}
-                  <div style={{ display: 'flex', gap: '8px', borderTop: '1px solid #f1f5f9', paddingTop: '12px' }}>
-                    <button
-                      onClick={() => handleQuickStartExam(exam)}
-                      className="btn btn-primary"
-                      style={{
-                        flex: 1,
-                        padding: '7px 12px',
-                        fontSize: '0.82rem',
-                        fontWeight: 700,
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        gap: '4px'
-                      }}
-                      title={`Start official ${exam.durationMinutes}-min test with ${exam.targetSpeed} WPM target`}
-                    >
-                      <span>⚡</span>
-                      <span>Start Mock ({exam.durationMinutes}m)</span>
-                    </button>
-                    <button
-                      onClick={() => handleBrowseExamPassages(exam)}
-                      className="btn btn-secondary"
-                      style={{
-                        padding: '7px 12px',
-                        fontSize: '0.82rem',
-                        fontWeight: 600,
-                        whiteSpace: 'nowrap'
-                      }}
-                      title="Select from library of passages for this exam"
-                    >
-                      <span>Browse</span>
-                      <span>→</span>
-                    </button>
-                  </div>
-                </div>
+              {filteredUnifiedPosts.slice(0, visibleExamsCount).map((post) => (
+                <UnifiedExamCard
+                  key={post.id}
+                  post={post}
+                  onQuickStart={handleQuickStartExam}
+                  onBrowse={handleBrowseExamPassages}
+                  languageFilter={selectedExamLanguageFilter}
+                  getEmblemForGroup={getEmblemForGroup}
+                />
               ))}
             </div>
 
             {/* Load More Button */}
-            {visibleExamsCount < filteredAllExams.length && (
+            {visibleExamsCount < filteredUnifiedPosts.length && (
               <div style={{ textAlign: 'center', marginBottom: '32px' }}>
                 <button
                   onClick={() => setVisibleExamsCount((prev) => prev + 24)}
@@ -1197,7 +1544,7 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
                     borderRadius: '8px'
                   }}
                 >
-                  Load More Exams ({filteredAllExams.length - visibleExamsCount} remaining) ↓
+                  Load More Exam Posts ({filteredUnifiedPosts.length - visibleExamsCount} remaining) ↓
                 </button>
               </div>
             )}
