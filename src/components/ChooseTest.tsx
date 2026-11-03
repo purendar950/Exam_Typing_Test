@@ -668,6 +668,7 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [selectedDuration, setSelectedDuration] = useState<number>(15);
   const [visibleCount, setVisibleCount] = useState<number>(18);
+  const [level3SortBy, setLevel3SortBy] = useState<'number' | 'date_desc' | 'difficulty'>('number');
 
   // Classic Form states
   const [classicLanguage, setClassicLanguage] = useState<Language>('english');
@@ -1259,7 +1260,7 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
 
   // Filtered passages for Level 3
   const filteredLevel3Passages = useMemo(() => {
-    return passages.filter((p) => {
+    const filtered = passages.filter((p) => {
       // 1. Exam Filter
       if (currentExam.categoryFilter === 'up_police_co' && p.category !== 'up_police_co') return false;
       if (currentExam.categoryFilter === 'up_police_asi' && p.category !== 'up_police_asi') return false;
@@ -1284,20 +1285,50 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
       // 4. Search Filter
       if (searchQuery.trim()) {
         const q = searchQuery.toLowerCase().trim();
+        const numMatch = p.testNumber !== undefined && (
+          String(p.testNumber) === q ||
+          `test #${p.testNumber}`.toLowerCase().includes(q) ||
+          `test ${p.testNumber}`.toLowerCase().includes(q) ||
+          `#${p.testNumber}` === q ||
+          (p.testNumber < 100 && String(p.testNumber).padStart(2, '0') === q)
+        );
         const titleMatch = p.title.toLowerCase().includes(q);
         const textMatch = p.text.toLowerCase().includes(q);
         const dateMatch = p.date ? p.date.includes(q) : false;
-        if (!titleMatch && !textMatch && dateMatch === false) return false;
+        if (!numMatch && !titleMatch && !textMatch && dateMatch === false) return false;
       }
 
       return true;
     });
-  }, [passages, currentExam, currentMode, selectedDifficulty, searchQuery]);
+
+    // 5. Sort passages by level3SortBy
+    return [...filtered].sort((a, b) => {
+      if (level3SortBy === 'number') {
+        const numA = a.testNumber ?? 99999;
+        const numB = b.testNumber ?? 99999;
+        if (numA !== numB) return numA - numB;
+        return (b.date || '').localeCompare(a.date || '');
+      }
+      if (level3SortBy === 'date_desc') {
+        const dateCmp = (b.date || '').localeCompare(a.date || '');
+        if (dateCmp !== 0) return dateCmp;
+        return (a.testNumber ?? 99999) - (b.testNumber ?? 99999);
+      }
+      if (level3SortBy === 'difficulty') {
+        const diffScore: Record<string, number> = { easy: 1, medium: 2, hard: 3 };
+        const diffA = diffScore[a.difficulty] || 2;
+        const diffB = diffScore[b.difficulty] || 2;
+        if (diffA !== diffB) return diffA - diffB;
+        return (a.testNumber ?? 99999) - (b.testNumber ?? 99999);
+      }
+      return 0;
+    });
+  }, [passages, currentExam, currentMode, selectedDifficulty, searchQuery, level3SortBy, todayIso]);
 
   // Reset pagination on filter change
   useEffect(() => {
     setVisibleCount(18);
-  }, [activeExamId, activeModeId, selectedDifficulty, searchQuery]);
+  }, [activeExamId, activeModeId, selectedDifficulty, searchQuery, level3SortBy]);
 
   // Classic Form data helpers
   const classicLanguagePassages = useMemo(() => {
@@ -2734,6 +2765,31 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
                       </button>
                     </div>
 
+                    {/* Sort Order Selector */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <span style={{ fontSize: '0.82rem', fontWeight: 700, color: '#64748b' }}>
+                        Order:
+                      </span>
+                      <select
+                        value={level3SortBy}
+                        onChange={(e) => setLevel3SortBy(e.target.value as 'number' | 'date_desc' | 'difficulty')}
+                        style={{
+                          padding: '6px 12px',
+                          borderRadius: '6px',
+                          border: '1px solid #cbd5e1',
+                          fontSize: '0.85rem',
+                          fontWeight: 600,
+                          color: '#0f172a',
+                          background: '#ffffff',
+                          outline: 'none'
+                        }}
+                      >
+                        <option value="number">🔢 Numbering (Test 1, 2, 3...)</option>
+                        <option value="date_desc">📅 Newest Date First</option>
+                        <option value="difficulty">🎯 Difficulty (Easy → Hard)</option>
+                      </select>
+                    </div>
+
                     {/* Timer Selector */}
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                       <span style={{ fontSize: '0.82rem', fontWeight: 700, color: '#64748b' }}>
@@ -2779,7 +2835,7 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
                       <input
                         type="text"
                         className="exam-search-input"
-                        placeholder="Search test by passage topic, keyword or date..."
+                        placeholder="Search by test number (e.g. 1, 15, 45), topic or keyword..."
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                       />
@@ -2863,6 +2919,10 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
                         : activePost.organization;
                       const cardEmblem = getEmblemForGroup(selectedExamProfile?.categoryGroup || activePost.categoryGroup);
 
+                      const testNumberStr = passage.testNumber
+                        ? `Test #${passage.testNumber < 100 ? String(passage.testNumber).padStart(2, '0') : passage.testNumber}`
+                        : undefined;
+
                       return (
                         <ExamBenchmarkTestCard
                           key={passage.id}
@@ -2875,6 +2935,12 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
                           minAccuracy={cardAcc}
                           limitCount={cardLimit}
                           limitType={cardLimitType}
+                          extraBadge={testNumberStr ? {
+                            text: testNumberStr,
+                            bg: '#e0f2fe',
+                            color: '#0369a1',
+                            border: '#bae6fd'
+                          } : undefined}
                           pastAttempt={past}
                           onStartMock={() => onStartTest(passage, selectedDuration, selectedExamProfile)}
                           onBrowse={() => onStartTest(passage, selectedDuration, selectedExamProfile)}
