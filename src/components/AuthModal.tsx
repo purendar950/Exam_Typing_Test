@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
 import {
+  signInWithGoogle,
   registerCandidate,
   loginCandidate,
+  createGuestCandidate,
   UserProfile
 } from '../services/firebase';
 
@@ -25,10 +27,34 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onLoginSu
 
   if (!isOpen) return null;
 
+  // 1-Click Google Sign-In
+  const handleGoogleSignIn = async () => {
+    setLoading(true);
+    setErrorMsg('');
+    try {
+      const user = await signInWithGoogle();
+      onLoginSuccess(user);
+      onClose();
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Google sign-in failed.';
+      if (msg.includes('popup-closed-by-user')) {
+        setErrorMsg('Sign-in cancelled.');
+      } else if (msg.includes('unauthorized-domain')) {
+        setErrorMsg('Please ensure purendar950.github.io is in Firebase Authorized Domains.');
+      } else if (msg.includes('configuration-not-found') || msg.includes('auth/operation-not-allowed')) {
+        setErrorMsg('Please enable Google provider in your Firebase Console Authentication tab.');
+      } else {
+        setErrorMsg(msg.replace('Firebase:', '').trim());
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!identifier.trim()) {
-      setErrorMsg('Please enter your Roll Number or Candidate Name.');
+      setErrorMsg('Please enter your Roll Number or Email.');
       return;
     }
     setLoading(true);
@@ -39,7 +65,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onLoginSu
       onClose();
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Login failed. Please check credentials.';
-      setErrorMsg(msg);
+      setErrorMsg(msg.replace('Firebase:', '').trim());
     } finally {
       setLoading(false);
     }
@@ -59,7 +85,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onLoginSu
       onClose();
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Registration failed.';
-      setErrorMsg(msg);
+      setErrorMsg(msg.replace('Firebase:', '').trim());
     } finally {
       setLoading(false);
     }
@@ -68,8 +94,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onLoginSu
   const handleGuestLogin = async () => {
     setLoading(true);
     try {
-      const guestRoll = `GUEST-${Math.floor(1000 + Math.random() * 9000)}`;
-      const user = await registerCandidate('GUEST CANDIDATE', guestRoll, 'up_police_co');
+      const user = await createGuestCandidate();
       onLoginSuccess(user);
       onClose();
     } catch {
@@ -151,16 +176,69 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onLoginSu
                 UPPRPB Typing Mentor • AR Standard
               </div>
               <h3 style={{ margin: '2px 0 0', fontSize: '1.25rem', fontWeight: 800 }}>
-                {activeTab === 'login' ? 'Candidate Login' : 'New Registration'}
+                Candidate Portal
               </h3>
               <div style={{ fontSize: '0.78rem', opacity: 0.9 }}>
-                {activeTab === 'login' ? 'अभ्यर्थी लॉगिन पोर्टल' : 'नया अभ्यर्थी पंजीकरण'}
+                1-Click Google Sign-In & Cross-Device Sync
               </div>
             </div>
           </div>
         </div>
 
         <div style={{ padding: '20px 24px' }}>
+          {/* 1-Click Google Sign-In Button */}
+          <button
+            type="button"
+            onClick={handleGoogleSignIn}
+            disabled={loading}
+            style={{
+              width: '100%',
+              padding: '12px 16px',
+              borderRadius: '8px',
+              border: '1.5px solid #cbd5e1',
+              background: '#ffffff',
+              color: '#1e293b',
+              fontWeight: 700,
+              fontSize: '0.94rem',
+              cursor: loading ? 'wait' : 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '12px',
+              boxShadow: '0 2px 4px rgba(0,0,0,0.06)',
+              marginBottom: '16px',
+              transition: 'all 0.15s ease'
+            }}
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24">
+              <path
+                fill="#4285F4"
+                d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+              />
+              <path
+                fill="#34A853"
+                d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+              />
+              <path
+                fill="#FBBC05"
+                d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"
+              />
+              <path
+                fill="#EA4335"
+                d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"
+              />
+            </svg>
+            <span>Continue with Google (1-Click Sync)</span>
+          </button>
+
+          <div style={{ display: 'flex', alignItems: 'center', margin: '14px 0', gap: '10px' }}>
+            <div style={{ flex: 1, height: '1px', background: '#e2e8f0' }} />
+            <span style={{ fontSize: '0.72rem', color: '#94a3b8', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+              Or use Roll Number / Email
+            </span>
+            <div style={{ flex: 1, height: '1px', background: '#e2e8f0' }} />
+          </div>
+
           {/* 2 Clean Tabs */}
           <div
             style={{
@@ -168,7 +246,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onLoginSu
               background: '#f1f5f9',
               borderRadius: '8px',
               padding: '3px',
-              marginBottom: '20px'
+              marginBottom: '16px'
             }}
           >
             <button
@@ -176,15 +254,15 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onLoginSu
               onClick={() => { setActiveTab('login'); setErrorMsg(''); }}
               style={{
                 flex: 1,
-                padding: '10px',
+                padding: '9px',
                 border: 'none',
                 borderRadius: '6px',
                 cursor: 'pointer',
                 fontWeight: 700,
-                fontSize: '0.9rem',
+                fontSize: '0.88rem',
                 background: activeTab === 'login' ? '#ffffff' : 'transparent',
                 color: activeTab === 'login' ? '#1e3a8a' : '#64748b',
-                boxShadow: activeTab === 'login' ? '0 2px 6px rgba(0,0,0,0.08)' : 'none',
+                boxShadow: activeTab === 'login' ? '0 2px 4px rgba(0,0,0,0.08)' : 'none',
                 transition: 'all 0.15s ease'
               }}
             >
@@ -195,15 +273,15 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onLoginSu
               onClick={() => { setActiveTab('signup'); setErrorMsg(''); }}
               style={{
                 flex: 1,
-                padding: '10px',
+                padding: '9px',
                 border: 'none',
                 borderRadius: '6px',
                 cursor: 'pointer',
                 fontWeight: 700,
-                fontSize: '0.9rem',
+                fontSize: '0.88rem',
                 background: activeTab === 'signup' ? '#ffffff' : 'transparent',
                 color: activeTab === 'signup' ? '#1e3a8a' : '#64748b',
-                boxShadow: activeTab === 'signup' ? '0 2px 6px rgba(0,0,0,0.08)' : 'none',
+                boxShadow: activeTab === 'signup' ? '0 2px 4px rgba(0,0,0,0.08)' : 'none',
                 transition: 'all 0.15s ease'
               }}
             >
@@ -220,7 +298,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onLoginSu
                 padding: '10px 14px',
                 borderRadius: '8px',
                 fontSize: '0.85rem',
-                marginBottom: '16px',
+                marginBottom: '14px',
                 fontWeight: 600
               }}
             >
@@ -233,11 +311,11 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onLoginSu
             <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
               <div>
                 <label style={{ fontSize: '0.82rem', fontWeight: 700, color: '#1e293b', display: 'block', marginBottom: '4px' }}>
-                  Roll Number or Candidate Name (अनुक्रमांक या नाम) *
+                  Roll Number or Email *
                 </label>
                 <input
                   type="text"
-                  placeholder="e.g. UP-202601 or PURENDAR"
+                  placeholder="e.g. UP-202601 or name@gmail.com"
                   value={identifier}
                   onChange={(e) => setIdentifier(e.target.value)}
                   style={{
@@ -255,11 +333,11 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onLoginSu
 
               <div>
                 <label style={{ fontSize: '0.82rem', fontWeight: 700, color: '#1e293b', display: 'block', marginBottom: '4px' }}>
-                  Password (पासवर्ड) <span style={{ fontWeight: 400, color: '#64748b' }}>(Optional)</span>
+                  Password *
                 </label>
                 <input
                   type="password"
-                  placeholder="Enter password if set"
+                  placeholder="Enter password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   style={{
@@ -301,7 +379,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onLoginSu
             <form onSubmit={handleSignup} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
               <div>
                 <label style={{ fontSize: '0.82rem', fontWeight: 700, color: '#1e293b', display: 'block', marginBottom: '4px' }}>
-                  Candidate Full Name (अभ्यर्थी का पूरा नाम) *
+                  Candidate Full Name *
                 </label>
                 <input
                   type="text"
@@ -323,7 +401,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onLoginSu
 
               <div>
                 <label style={{ fontSize: '0.82rem', fontWeight: 700, color: '#1e293b', display: 'block', marginBottom: '4px' }}>
-                  Roll Number / Reg No (अनुक्रमांक) *
+                  Roll Number / Reg No *
                 </label>
                 <input
                   type="text"
@@ -344,7 +422,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onLoginSu
 
               <div>
                 <label style={{ fontSize: '0.82rem', fontWeight: 700, color: '#1e293b', display: 'block', marginBottom: '4px' }}>
-                  Target Examination Post (लक्षित पद)
+                  Target Examination Post
                 </label>
                 <select
                   value={category}
@@ -368,11 +446,11 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onLoginSu
 
               <div>
                 <label style={{ fontSize: '0.82rem', fontWeight: 700, color: '#1e293b', display: 'block', marginBottom: '4px' }}>
-                  Password (पासवर्ड) <span style={{ fontWeight: 400, color: '#64748b' }}>(Optional)</span>
+                  Password (min 6 characters) *
                 </label>
                 <input
                   type="password"
-                  placeholder="Set password to protect your profile"
+                  placeholder="Create password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   style={{
@@ -410,7 +488,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onLoginSu
           )}
 
           {/* Guest Practice Footer */}
-          <div style={{ textAlign: 'center', marginTop: '18px', paddingTop: '14px', borderTop: '1px solid #f1f5f9' }}>
+          <div style={{ textAlign: 'center', marginTop: '16px', paddingTop: '12px', borderTop: '1px solid #f1f5f9' }}>
             <button
               onClick={handleGuestLogin}
               style={{

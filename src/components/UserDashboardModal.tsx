@@ -89,23 +89,38 @@ export const UserDashboardModal: React.FC<UserDashboardModalProps> = ({
           }}
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-            <div
-              style={{
-                width: '48px',
-                height: '48px',
-                borderRadius: '50%',
-                background: '#0284c7',
-                color: '#ffffff',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontSize: '1.4rem',
-                fontWeight: 800,
-                boxShadow: '0 2px 6px rgba(0,0,0,0.3)'
-              }}
-            >
-              {user.displayName.charAt(0).toUpperCase()}
-            </div>
+            {user.photoURL ? (
+              <img
+                src={user.photoURL}
+                alt={user.displayName}
+                style={{
+                  width: '48px',
+                  height: '48px',
+                  borderRadius: '50%',
+                  border: '2px solid #38bdf8',
+                  boxShadow: '0 2px 6px rgba(0,0,0,0.3)',
+                  objectFit: 'cover'
+                }}
+              />
+            ) : (
+              <div
+                style={{
+                  width: '48px',
+                  height: '48px',
+                  borderRadius: '50%',
+                  background: '#0284c7',
+                  color: '#ffffff',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: '1.4rem',
+                  fontWeight: 800,
+                  boxShadow: '0 2px 6px rgba(0,0,0,0.3)'
+                }}
+              >
+                {user.displayName.charAt(0).toUpperCase()}
+              </div>
+            )}
             <div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <h2 style={{ margin: 0, fontSize: '1.25rem', fontWeight: 800 }}>
@@ -121,7 +136,7 @@ export const UserDashboardModal: React.FC<UserDashboardModalProps> = ({
                     fontWeight: 700
                   }}
                 >
-                  ✓ Registered Candidate
+                  {user.isAnonymous ? '⚡ Guest Profile' : '☁️ Cloud Synced'}
                 </span>
               </div>
               <div style={{ display: 'flex', gap: '12px', fontSize: '0.8rem', opacity: 0.9, marginTop: '2px' }}>
