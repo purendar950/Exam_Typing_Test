@@ -9,6 +9,7 @@ interface HeaderProps {
   onOpenRules: () => void;
   onOpenHistory: () => void;
   onOpenHindiHelper: () => void;
+  onOpenAiGenerator?: () => void;
   settings: TestSettings;
   onToggleSound: () => void;
   currentUser: UserProfile | null;
@@ -22,6 +23,7 @@ export const Header: React.FC<HeaderProps> = ({
   onOpenRules,
   onOpenHistory,
   onOpenHindiHelper,
+  onOpenAiGenerator,
   settings,
   onToggleSound,
   currentUser,
@@ -71,6 +73,32 @@ export const Header: React.FC<HeaderProps> = ({
                 </svg>
               )}
             </button>
+
+            {onOpenAiGenerator && (
+              <button
+                className="nav-btn ai-generator-btn"
+                onClick={onOpenAiGenerator}
+                title="AI Live Test Generator & Settings (AR Typing Standard)"
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '5px',
+                  background: 'linear-gradient(135deg, #0284c7 0%, #0369a1 100%)',
+                  color: '#ffffff',
+                  fontWeight: 700,
+                  borderRadius: '20px',
+                  padding: '5px 12px',
+                  fontSize: '0.78rem',
+                  border: 'none',
+                  boxShadow: '0 2px 4px rgba(2, 132, 199, 0.3)',
+                  cursor: 'pointer',
+                  whiteSpace: 'nowrap'
+                }}
+              >
+                <span>⚡</span>
+                <span>AI Live Tests</span>
+              </button>
+            )}
 
             {currentUser ? (
               <button
@@ -175,6 +203,18 @@ export const Header: React.FC<HeaderProps> = ({
             </svg>
             Learn & Drills
           </button>
+
+          {onOpenAiGenerator && (
+            <button
+              className="nav-btn"
+              onClick={onOpenAiGenerator}
+              title="Daily Live AI Tests (AR Typing Medium & Hard Benchmark)"
+              style={{ color: '#0284c7', fontWeight: 700 }}
+            >
+              <span style={{ fontSize: '0.95rem', marginRight: '4px' }}>⚡</span>
+              AI Live Tests
+            </button>
+          )}
 
           <button
             className="nav-btn"

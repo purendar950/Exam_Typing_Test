@@ -12,8 +12,10 @@ import { HistoryModal } from './components/HistoryModal';
 import { HindiHelperModal } from './components/HindiHelperModal';
 import { AuthModal } from './components/AuthModal';
 import { UserDashboardModal } from './components/UserDashboardModal';
+import { AiGeneratorModal } from './components/AiGeneratorModal';
 import { PwaInstallPrompt } from './components/PwaInstallPrompt';
 import { audioEngine } from './utils/audioEngine';
+import { fetchDailyLivePassages } from './services/aiGenerator';
 import {
   subscribeToAuth,
   saveTestResultToCloud,
@@ -95,6 +97,28 @@ export const App: React.FC = () => {
     }
   });
   const [isDashboardOpen, setIsDashboardOpen] = useState<boolean>(false);
+  const [isAiGeneratorOpen, setIsAiGeneratorOpen] = useState<boolean>(false);
+  const [dailyLivePassages, setDailyLivePassages] = useState<Passage[]>([]);
+
+  // Automatically fetch today's 8 Daily Live Tests on app load
+  useEffect(() => {
+    const todayIso = new Date().toISOString().split('T')[0];
+    fetchDailyLivePassages(todayIso, PASSAGES).then((tests) => {
+      if (tests && tests.length > 0) {
+        setDailyLivePassages(tests);
+      }
+    });
+  }, []);
+
+  // Combined Passages (Live Tests + Bank)
+  const allPassages = React.useMemo(() => {
+    if (dailyLivePassages.length > 0) {
+      const liveIds = new Set(dailyLivePassages.map((p) => p.id));
+      const remaining = PASSAGES.filter((p) => !liveIds.has(p.id));
+      return [...dailyLivePassages, ...remaining];
+    }
+    return PASSAGES;
+  }, [dailyLivePassages]);
 
   // Subscribe to Firebase Auth and Local User session
   useEffect(() => {
@@ -246,6 +270,7 @@ export const App: React.FC = () => {
           onOpenRules={() => setIsRulesOpen(true)}
           onOpenHistory={() => setIsHistoryOpen(true)}
           onOpenHindiHelper={() => setIsHindiHelperOpen(true)}
+          onOpenAiGenerator={() => setIsAiGeneratorOpen(true)}
           settings={settings}
           onToggleSound={toggleSound}
           currentUser={currentUser}
@@ -257,7 +282,8 @@ export const App: React.FC = () => {
       <main style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
         {currentView === 'choose' && (
           <ChooseTest
-            passages={PASSAGES}
+            passages={allPassages}
+            dailyLivePassages={dailyLivePassages}
             onStartTest={handleStartTest}
             settings={settings}
             onUpdateSettings={handleUpdateSettings}
@@ -265,6 +291,7 @@ export const App: React.FC = () => {
             history={history}
             onOpenAuth={() => setIsAuthOpen(true)}
             onOpenDashboard={() => setIsDashboardOpen(true)}
+            onOpenAiGenerator={() => setIsAiGeneratorOpen(true)}
           />
         )}
 
@@ -383,6 +410,15 @@ export const App: React.FC = () => {
           }}
         />
       )}
+
+      <AiGeneratorModal
+        isOpen={isAiGeneratorOpen}
+        onClose={() => setIsAiGeneratorOpen(false)}
+        onPassagesGenerated={(tests) => {
+          setDailyLivePassages(tests);
+        }}
+        existingPassages={PASSAGES}
+      />
 
       <PwaInstallPrompt />
     </div>
