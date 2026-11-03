@@ -144,7 +144,12 @@ export const HindiKeyboardLayout: React.FC<HindiKeyboardLayoutProps> = ({
   }, []);
 
   const handleKeyClick = (keyData: KeyMapping, code: string) => {
-    const charToInsert = isShiftActive ? keyData.shift : keyData.normal;
+    let charToInsert: string;
+    if (activeLayout === 'kruti') {
+      charToInsert = isShiftActive ? keyData.enShift : keyData.enNormal;
+    } else {
+      charToInsert = isShiftActive ? keyData.shift : keyData.normal;
+    }
     if (onInsertChar) {
       onInsertChar(charToInsert);
     }

@@ -1,5 +1,5 @@
 // UP Police Typing Test Portal - Service Worker
-const CACHE_NAME = 'up-typing-cache-v1';
+const CACHE_NAME = 'up-typing-cache-v2';
 
 const STATIC_ASSETS = [
   './',
@@ -7,7 +7,8 @@ const STATIC_ASSETS = [
   './manifest.json',
   './passages-by-date.json',
   './icon-192.png',
-  './icon-512.png'
+  './icon-512.png',
+  './fonts/KrutiDev010.ttf'
 ];
 
 // Install: pre-cache static shell assets

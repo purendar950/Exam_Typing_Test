@@ -2175,7 +2175,9 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                   lineHeight: '1.8',
                   color: '#1e293b',
                   whiteSpace: 'pre-wrap',
-                  fontFamily: previewPassage.language.includes('hindi')
+                  fontFamily: previewPassage.language === 'hindi_kruti'
+                    ? "'Kruti Dev 010', 'KrutiDev010', sans-serif"
+                    : previewPassage.language.includes('hindi')
                     ? "'Mangal', 'Noto Sans Devanagari', sans-serif"
                     : 'inherit'
                 }}

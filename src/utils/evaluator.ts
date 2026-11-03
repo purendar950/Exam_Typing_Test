@@ -89,10 +89,11 @@ function extractWeakKeys(wrongWords: string[], language: Language): WeakKeyStat[
 
 export function evaluateTypingTest(input: EvaluateInput): EvaluationResult {
   const isHindi = input.language.startsWith('hindi');
+  const isHindiUnicode = input.language === 'hindi_mangal';
 
-  // Normalize texts
-  const normOriginal = isHindi ? normalizeHindiText(input.originalText) : input.originalText.trim();
-  const normTyped = isHindi ? normalizeHindiText(input.typedText) : input.typedText.trim();
+  // Normalize texts (NFKC & Nukta canonicalization only for Unicode Mangal Hindi; Kruti Dev is exact ASCII font encoding)
+  const normOriginal = isHindiUnicode ? normalizeHindiText(input.originalText) : input.originalText.trim();
+  const normTyped = isHindiUnicode ? normalizeHindiText(input.typedText) : input.typedText.trim();
 
   const originalWords = normOriginal.split(/\s+/).filter(Boolean);
   const typedWords = normTyped.split(/\s+/).filter(Boolean);
@@ -126,8 +127,8 @@ export function evaluateTypingTest(input: EvaluateInput): EvaluationResult {
       correctWords++;
       diffParts.push(`<span class="diff-correct">${orig}</span>`);
     } else {
-      // Check for half mistake vs full mistake
-      const isCaseOrPunctMismatch = !isHindi && orig.toLowerCase() === typed.toLowerCase();
+      // Check for half mistake vs full mistake (English case mismatch only)
+      const isCaseOrPunctMismatch = input.language === 'english' && orig.toLowerCase() === typed.toLowerCase();
 
       if (isCaseOrPunctMismatch) {
         halfMistakes++;

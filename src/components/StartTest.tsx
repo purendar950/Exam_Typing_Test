@@ -34,6 +34,8 @@ export const StartTest: React.FC<StartTestProps> = ({
   const [showHindiHelper, setShowHindiHelper] = useState<boolean>(false);
   const [candidateName, setCandidateName] = useState<string>(settings.candidateName || 'PURENDAR');
   const [isFullscreen, setIsFullscreen] = useState<boolean>(() => !!document.fullscreenElement);
+  const [inscriptMappingEnabled, setInscriptMappingEnabled] = useState<boolean>(true);
+  const isComposingRef = useRef<boolean>(false);
 
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const passagePaneRef = useRef<HTMLDivElement>(null);
@@ -156,6 +158,11 @@ export const StartTest: React.FC<StartTestProps> = ({
       setIsTestStarted(true);
     }
 
+    // 1. If IME is composing (Windows Indic IME, Google Input Tools, Gboard, etc.), NEVER intercept!
+    if (isComposingRef.current || e.nativeEvent.isComposing || e.key === 'Process' || e.keyCode === 229) {
+      return;
+    }
+
     if (e.key === 'Backspace') {
       if (!settings.backspaceEnabled) {
         e.preventDefault();
@@ -174,48 +181,84 @@ export const StartTest: React.FC<StartTestProps> = ({
     if (e.key.length === 1 && !e.ctrlKey && !e.altKey && !e.metaKey) {
       audioEngine.playKeyClick();
 
-      // Transliteration for Hindi
-      if (passage.language === 'hindi_mangal') {
+      // If key is ALREADY a Devanagari character (Native Hindi keyboard / Windows Inscript active), let browser type naturally!
+      if (/^[\u0900-\u097F]$/.test(e.key)) {
+        return;
+      }
+
+      // For Kruti Dev test: Candidate types ASCII characters directly (e.g. Hkwe/;).
+      // Kruti Dev 010 font displays them as Hindi glyphs! Do NOT transliterate.
+      if (passage.language === 'hindi_kruti') {
+        return;
+      }
+
+      // For English test: Direct typing.
+      if (passage.language === 'english') {
+        return;
+      }
+
+      // For Hindi Mangal test:
+      // If candidate is typing on a standard English QWERTY keyboard without Hindi software
+      // and Inscript mapping is active, map key to Mangal Inscript character:
+      if (passage.language === 'hindi_mangal' && inscriptMappingEnabled) {
         e.preventDefault();
         const hindiChar = translateToMangalInscript(e.key, e.shiftKey, e.code);
         insertCharacter(hindiChar);
-      } else if (passage.language === 'hindi_kruti') {
-        e.preventDefault();
-        const krutiChar = translateToKrutiDev(e.key, e.shiftKey, e.code);
-        insertCharacter(krutiChar);
       }
     }
   };
 
-  // Helper to insert character at cursor position
+  // Helper to insert character at cursor position cleanly with undo/cursor sync
   const insertCharacter = (char: string) => {
     if (!textareaRef.current) return;
-    const start = textareaRef.current.selectionStart;
-    const end = textareaRef.current.selectionEnd;
-    const current = typedText;
-    const next = current.substring(0, start) + char + current.substring(end);
-    setTypedText(next);
+    const el = textareaRef.current;
 
-    setTimeout(() => {
-      if (textareaRef.current) {
-        textareaRef.current.selectionStart = start + char.length;
-        textareaRef.current.selectionEnd = start + char.length;
-      }
-    }, 0);
+    // Use document.execCommand('insertText') for native browser undo & caret sync
+    let success = false;
+    try {
+      success = document.execCommand('insertText', false, char);
+    } catch {
+      success = false;
+    }
+
+    if (!success) {
+      const start = el.selectionStart ?? 0;
+      const end = el.selectionEnd ?? 0;
+      const current = el.value;
+      const next = current.substring(0, start) + char + current.substring(end);
+      el.value = next;
+      el.selectionStart = el.selectionEnd = start + char.length;
+      setTypedText(next);
+    }
   };
 
-  // Intercept beforeinput (Fires on Android Gboard / Chrome mobile before text changes)
+  // Intercept beforeinput (for mobile virtual keyboards in QWERTY Inscript mode)
   const handleBeforeInput = (e: React.FormEvent<HTMLTextAreaElement>) => {
     const nativeEvent = e.nativeEvent as InputEvent;
-    if (!nativeEvent || !nativeEvent.data) return;
+    if (!nativeEvent) return;
 
-    if (!isTestStarted) {
+    if (!isTestStarted && nativeEvent.data) {
       setIsTestStarted(true);
     }
 
-    if (passage.language === 'hindi_mangal' || passage.language === 'hindi_kruti') {
-      const layout = passage.language === 'hindi_kruti' ? 'kruti' : 'mangal';
-      const translated = translateEnglishStringToHindi(nativeEvent.data, layout);
+    // Never intercept during active IME composition
+    if (isComposingRef.current || nativeEvent.isComposing || nativeEvent.inputType === 'insertCompositionText') {
+      return;
+    }
+
+    // Never intercept if data is already Devanagari (native Hindi IME / Indic keyboard)
+    if (nativeEvent.data && /^[\u0900-\u097F]+$/.test(nativeEvent.data)) {
+      return;
+    }
+
+    // Never intercept for English or Kruti Dev
+    if (passage.language === 'english' || passage.language === 'hindi_kruti') {
+      return;
+    }
+
+    // For Android mobile QWERTY keyboards typing English in Mangal Inscript mode:
+    if (passage.language === 'hindi_mangal' && inscriptMappingEnabled && nativeEvent.data && nativeEvent.inputType === 'insertText') {
+      const translated = translateEnglishStringToHindi(nativeEvent.data, 'mangal');
       if (translated !== nativeEvent.data) {
         e.preventDefault();
         insertCharacter(translated);
@@ -224,70 +267,15 @@ export const StartTest: React.FC<StartTestProps> = ({
     }
   };
 
-  // Comprehensive Change Handler (Handles any text changes, mobile composition, and diffs)
+  // Robust Text Change Handler - strictly updates state with current DOM value without destroying IME buffers
   const handleTextChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const nextVal = e.target.value;
-    const prevVal = typedText;
 
     if (!isTestStarted && nextVal.length > 0) {
       setIsTestStarted(true);
     }
 
-    // For English test, accept directly
-    if (passage.language === 'english') {
-      setTypedText(nextVal);
-      return;
-    }
-
-    // For Hindi test, translate any newly inserted English characters
-    const layout = passage.language === 'hindi_kruti' ? 'kruti' : 'mangal';
-
-    // Find common prefix
-    let prefixLen = 0;
-    while (
-      prefixLen < prevVal.length &&
-      prefixLen < nextVal.length &&
-      prevVal[prefixLen] === nextVal[prefixLen]
-    ) {
-      prefixLen++;
-    }
-
-    // Find common suffix
-    let suffixLen = 0;
-    while (
-      suffixLen < (prevVal.length - prefixLen) &&
-      suffixLen < (nextVal.length - prefixLen) &&
-      prevVal[prevVal.length - 1 - suffixLen] === nextVal[nextVal.length - 1 - suffixLen]
-    ) {
-      suffixLen++;
-    }
-
-    const inserted = nextVal.slice(prefixLen, nextVal.length - suffixLen);
-
-    // If text was only deleted (backspace), update directly
-    if (!inserted) {
-      setTypedText(nextVal);
-      return;
-    }
-
-    // Translate any English characters in the inserted text to Hindi
-    const translatedInserted = translateEnglishStringToHindi(inserted, layout);
-
-    const finalVal =
-      prevVal.slice(0, prefixLen) +
-      translatedInserted +
-      prevVal.slice(prevVal.length - suffixLen);
-
-    setTypedText(finalVal);
-
-    // Reposition cursor right after translated inserted text
-    const newCursor = prefixLen + translatedInserted.length;
-    setTimeout(() => {
-      if (textareaRef.current) {
-        textareaRef.current.selectionStart = newCursor;
-        textareaRef.current.selectionEnd = newCursor;
-      }
-    }, 0);
+    setTypedText(nextVal);
   };
 
   // Prevent paste, cut, copy
@@ -459,7 +447,7 @@ export const StartTest: React.FC<StartTestProps> = ({
             </div>
 
             {/* Toggle Switches right below photo */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
               {/* Highlight Toggle Switch */}
               <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }} title="Toggle Word Highlights (Disabled by default)">
                 <span style={{ fontSize: '0.72rem', color: '#64748b', fontWeight: 600 }}>Highlight:</span>
@@ -490,12 +478,45 @@ export const StartTest: React.FC<StartTestProps> = ({
                   {settings.autoScroll ? 'ON' : 'OFF'}
                 </span>
               </div>
+
+              {/* Inscript QWERTY Key Mapping Toggle Switch (Hindi Mangal only) */}
+              {passage.language === 'hindi_mangal' && (
+                <div
+                  style={{ display: 'flex', alignItems: 'center', gap: '4px' }}
+                  title="Toggle QWERTY-to-Inscript Key Mapping. Keep ON if typing on standard English keyboard. Turn OFF if using Windows Indic IME or Google Input Tools."
+                >
+                  <span style={{ fontSize: '0.72rem', color: inscriptMappingEnabled ? '#0284c7' : '#64748b', fontWeight: 700 }}>
+                    Inscript:
+                  </span>
+                  <label className="ar-toggle-switch">
+                    <input
+                      type="checkbox"
+                      checked={inscriptMappingEnabled}
+                      onChange={(e) => setInscriptMappingEnabled(e.target.checked)}
+                    />
+                    <span className="ar-toggle-slider" />
+                  </label>
+                  <span style={{ fontSize: '0.7rem', fontWeight: 800, color: inscriptMappingEnabled ? '#0284c7' : '#94a3b8' }}>
+                    {inscriptMappingEnabled ? 'ON' : 'OFF'}
+                  </span>
+                </div>
+              )}
             </div>
           </div>
         </div>
 
         {/* 3. TOP BOX: SOURCE PASSAGE DISPLAY (Screenshot 1) */}
-        <div ref={passagePaneRef} className="ar-source-box">
+        <div
+          ref={passagePaneRef}
+          className={`ar-source-box ${passage.language === 'hindi_kruti' ? 'font-kruti' : ''}`}
+          style={{
+            fontFamily: passage.language === 'hindi_kruti'
+              ? "'Kruti Dev 010', 'KrutiDev010', sans-serif"
+              : passage.language === 'hindi_mangal'
+              ? "'Noto Sans Devanagari', 'Mangal', sans-serif"
+              : "'Georgia', 'Cambria', serif"
+          }}
+        >
           {originalWords.map((word, idx) => {
             const isCurrent = idx === currentWordIndex;
             const isCompleted = idx < currentWordIndex;
@@ -509,6 +530,9 @@ export const StartTest: React.FC<StartTestProps> = ({
                 style={{
                   marginRight: '0.35em',
                   display: 'inline-block',
+                  fontFamily: passage.language === 'hindi_kruti'
+                    ? "'Kruti Dev 010', 'KrutiDev010', sans-serif"
+                    : undefined,
                   backgroundColor: settings.highlightEnabled
                     ? isCurrent
                       ? '#fef08a'
@@ -540,6 +564,17 @@ export const StartTest: React.FC<StartTestProps> = ({
             onChange={handleTextChange}
             onBeforeInput={handleBeforeInput}
             onKeyDown={handleKeyDown}
+            onCompositionStart={() => {
+              isComposingRef.current = true;
+            }}
+            onCompositionEnd={(e) => {
+              isComposingRef.current = false;
+              const val = (e.target as HTMLTextAreaElement).value;
+              if (!isTestStarted && val.length > 0) {
+                setIsTestStarted(true);
+              }
+              setTypedText(val);
+            }}
             onCopy={handlePrevent}
             onPaste={handlePrevent}
             onCut={handlePrevent}
@@ -548,7 +583,14 @@ export const StartTest: React.FC<StartTestProps> = ({
             autoComplete="off"
             autoCorrect="off"
             autoCapitalize="off"
-            className="ar-typing-textarea"
+            className={`ar-typing-textarea ${passage.language === 'hindi_kruti' ? 'font-kruti' : ''}`}
+            style={{
+              fontFamily: passage.language === 'hindi_kruti'
+                ? "'Kruti Dev 010', 'KrutiDev010', sans-serif"
+                : passage.language === 'hindi_mangal'
+                ? "'Noto Sans Devanagari', 'Mangal', sans-serif"
+                : 'inherit'
+            }}
             placeholder={isTestStarted ? '' : 'Click here and start typing...'}
           />
 
@@ -683,6 +725,19 @@ export const StartTest: React.FC<StartTestProps> = ({
                 />
                 <span>Mechanical Typewriter Key Sounds</span>
               </label>
+
+              {passage.language === 'hindi_mangal' && (
+                <label style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', fontSize: '0.9rem' }}>
+                  <input
+                    type="checkbox"
+                    checked={inscriptMappingEnabled}
+                    onChange={(e) => setInscriptMappingEnabled(e.target.checked)}
+                  />
+                  <span>
+                    QWERTY Inscript Auto-Mapping (Keep ON for US keyboards, turn OFF if using Google Input Tools / Indic IME)
+                  </span>
+                </label>
+              )}
             </div>
 
             <div style={{ marginTop: '24px', textAlign: 'right' }}>
