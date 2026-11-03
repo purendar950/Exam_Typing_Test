@@ -448,70 +448,167 @@ export async function checkHasAnyAdmin(): Promise<boolean> {
   }
 }
 
-// 1. Sign in Admin with Email & Password via Firebase Auth
+// 1. Sign in Admin with Email & Password (verifies Firestore Admin credentials & Firebase Auth)
 export async function signInAdminWithEmail(email: string, pass: string): Promise<UserProfile> {
   const cleanEmail = email.trim().toLowerCase();
-  const cred = await signInWithEmailAndPassword(auth, cleanEmail, pass);
-  const user = cred.user;
+  const cleanPass = pass.trim();
 
-  // Verify Admin authorization in Firestore
-  const userDocRef = doc(db, 'users', user.uid);
-  const snap = await getDoc(userDocRef);
+  // First, check Firestore `admins` collection directly for matching email and password field!
+  // This allows admins to define/change passwords directly in Firestore console!
+  let matchedAdminDoc: any = null;
+  let matchedUid = '';
 
-  let isAdmin = false;
-  let profile: UserProfile;
-
-  if (snap.exists()) {
-    profile = snap.data() as UserProfile;
-    isAdmin = !!profile.isAdmin || profile.role === 'admin';
-  } else {
-    profile = {
-      uid: user.uid,
-      email: user.email,
-      displayName: user.displayName || 'ADMIN OFFICER',
-      rollNumber: 'ADMIN-01',
-      category: 'up_police_co',
-      createdAt: new Date().toISOString()
-    };
-  }
-
-  // Check admins collection
   try {
-    const adminDoc = await getDoc(doc(db, 'admins', user.uid));
-    if (adminDoc.exists()) isAdmin = true;
-  } catch {
-    // Ignore
+    const adminDocsSnap = await getDocs(collection(db, 'admins'));
+    adminDocsSnap.forEach((d) => {
+      const data = d.data();
+      if (
+        data.email &&
+        data.email.trim().toLowerCase() === cleanEmail &&
+        data.password &&
+        String(data.password).trim() === cleanPass
+      ) {
+        matchedAdminDoc = data;
+        matchedUid = data.uid || d.id;
+      }
+    });
+  } catch (err) {
+    console.warn('Error reading admins collection:', err);
   }
 
-  // If no admin has ever been created in Firestore, auto-bootstrap the first login as Super Admin
-  if (!isAdmin) {
-    const hasAny = await checkHasAnyAdmin();
-    if (!hasAny) {
-      isAdmin = true;
+  // Also check `users` collection for matching password and admin role
+  if (!matchedAdminDoc) {
+    try {
+      const usersSnap = await getDocs(collection(db, 'users'));
+      usersSnap.forEach((d) => {
+        const data = d.data();
+        if (
+          data.email &&
+          data.email.trim().toLowerCase() === cleanEmail &&
+          (data.isAdmin === true || data.role === 'admin') &&
+          data.password &&
+          String(data.password).trim() === cleanPass
+        ) {
+          matchedAdminDoc = data;
+          matchedUid = data.uid || d.id;
+        }
+      });
+    } catch (err) {
+      console.warn('Error reading users collection:', err);
     }
   }
 
-  if (!isAdmin) {
-    throw new Error('Access Denied: This Firebase account does not have Administrator privileges. Please contact system authority.');
+  if (matchedAdminDoc) {
+    // Found in Firestore! Fetch full profile from users collection if exists
+    let profile: UserProfile;
+    try {
+      const userSnap = await getDoc(doc(db, 'users', matchedUid));
+      if (userSnap.exists()) {
+        profile = userSnap.data() as UserProfile;
+      } else {
+        profile = {
+          uid: matchedUid,
+          email: matchedAdminDoc.email || cleanEmail,
+          displayName: matchedAdminDoc.displayName || 'ADMIN OFFICER',
+          rollNumber: matchedAdminDoc.rollNumber || 'ADMIN-01',
+          category: 'up_police_co',
+          createdAt: new Date().toISOString()
+        };
+      }
+    } catch {
+      profile = {
+        uid: matchedUid,
+        email: matchedAdminDoc.email || cleanEmail,
+        displayName: matchedAdminDoc.displayName || 'ADMIN OFFICER',
+        rollNumber: matchedAdminDoc.rollNumber || 'ADMIN-01',
+        category: 'up_police_co',
+        createdAt: new Date().toISOString()
+      };
+    }
+
+    profile.isAdmin = true;
+    profile.role = 'admin';
+
+    try {
+      await setDoc(doc(db, 'users', matchedUid), profile, { merge: true });
+    } catch {
+      // Ignore
+    }
+
+    localStorage.setItem(STORAGE_KEY_ACTIVE_USER, JSON.stringify(profile));
+    return profile;
   }
 
-  profile.isAdmin = true;
-  profile.role = 'admin';
-
-  await setDoc(userDocRef, profile, { merge: true });
+  // Fallback: Authenticate via standard Firebase Authentication server
   try {
-    await setDoc(doc(db, 'admins', user.uid), {
-      uid: user.uid,
-      email: user.email,
-      role: 'super_admin',
-      updatedAt: new Date().toISOString()
-    }, { merge: true });
-  } catch {
-    // Ignore
-  }
+    const cred = await signInWithEmailAndPassword(auth, cleanEmail, pass);
+    const user = cred.user;
 
-  localStorage.setItem(STORAGE_KEY_ACTIVE_USER, JSON.stringify(profile));
-  return profile;
+    // Verify Admin authorization in Firestore
+    const userDocRef = doc(db, 'users', user.uid);
+    const snap = await getDoc(userDocRef);
+
+    let isAdmin = false;
+    let profile: UserProfile;
+
+    if (snap.exists()) {
+      profile = snap.data() as UserProfile;
+      isAdmin = !!profile.isAdmin || profile.role === 'admin';
+    } else {
+      profile = {
+        uid: user.uid,
+        email: user.email,
+        displayName: user.displayName || 'ADMIN OFFICER',
+        rollNumber: 'ADMIN-01',
+        category: 'up_police_co',
+        createdAt: new Date().toISOString()
+      };
+    }
+
+    // Check admins collection
+    try {
+      const adminDoc = await getDoc(doc(db, 'admins', user.uid));
+      if (adminDoc.exists()) isAdmin = true;
+    } catch {
+      // Ignore
+    }
+
+    if (!isAdmin) {
+      const hasAny = await checkHasAnyAdmin();
+      if (!hasAny) {
+        isAdmin = true;
+      }
+    }
+
+    if (!isAdmin) {
+      throw new Error('Access Denied: This Firebase account does not have Administrator privileges. Please contact system authority.');
+    }
+
+    profile.isAdmin = true;
+    profile.role = 'admin';
+
+    await setDoc(userDocRef, profile, { merge: true });
+    try {
+      await setDoc(doc(db, 'admins', user.uid), {
+        uid: user.uid,
+        email: user.email,
+        role: 'super_admin',
+        updatedAt: new Date().toISOString()
+      }, { merge: true });
+    } catch {
+      // Ignore
+    }
+
+    localStorage.setItem(STORAGE_KEY_ACTIVE_USER, JSON.stringify(profile));
+    return profile;
+  } catch (authErr: any) {
+    if (authErr?.message && authErr.message.startsWith('Access Denied:')) {
+      throw authErr;
+    }
+    throw new Error(
+      'Invalid email or password. Please verify the admin password set in Firebase Firestore or sign in with Google Admin.'
+    );
+  }
 }
 
 // Send Admin Password Reset / Setup Email
