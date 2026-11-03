@@ -531,7 +531,7 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
                 className="btn btn-sm btn-primary"
                 style={{ borderRadius: '10px', padding: '8px 16px', fontWeight: 700 }}
               >
-                Candidate Login 👤
+                Login / Sign In 🔑
               </button>
             )}
 

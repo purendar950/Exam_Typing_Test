@@ -23,7 +23,8 @@ import {
   saveTestResultToCloud,
   fetchUserTestAttempts,
   logoutUser,
-  UserProfile
+  UserProfile,
+  isUserAdmin
 } from './services/firebase';
 
 const DEFAULT_SETTINGS: TestSettings = {
@@ -303,8 +304,8 @@ export const App: React.FC = () => {
             history={history}
             onOpenAuth={() => setIsAuthOpen(true)}
             onOpenDashboard={() => setIsDashboardOpen(true)}
-            onOpenAiGenerator={() => setIsAiGeneratorOpen(true)}
-            onOpenAdmin={() => setIsAdminOpen(true)}
+            onOpenAiGenerator={currentUser && isUserAdmin(currentUser) ? () => setIsAiGeneratorOpen(true) : undefined}
+            onOpenAdmin={currentUser && isUserAdmin(currentUser) ? () => setIsAdminOpen(true) : undefined}
           />
         )}
 
@@ -364,25 +365,27 @@ export const App: React.FC = () => {
             <p>
               <strong>Uttar Pradesh Police & UPSSSC Computer Operator Typing Mentor</strong> &bull; Based on UPPRPB Official Standards (Hindi 25 WPM Mangal/Kruti, English 30 WPM, 85% Accuracy).
             </p>
-            <div style={{ marginTop: '8px', display: 'flex', justifyContent: 'center', gap: '16px', alignItems: 'center' }}>
-              <button
-                onClick={() => setIsAdminOpen(true)}
-                style={{
-                  background: 'transparent',
-                  border: 'none',
-                  color: '#0284c7',
-                  fontSize: '0.8rem',
-                  fontWeight: 600,
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '4px'
-                }}
-              >
-                <span>🛡️</span>
-                <span>Examination Authority Admin Portal</span>
-              </button>
-            </div>
+            {currentUser && isUserAdmin(currentUser) && (
+              <div style={{ marginTop: '8px', display: 'flex', justifyContent: 'center', gap: '16px', alignItems: 'center' }}>
+                <button
+                  onClick={() => setIsAdminOpen(true)}
+                  style={{
+                    background: 'transparent',
+                    border: 'none',
+                    color: '#0284c7',
+                    fontSize: '0.8rem',
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '4px'
+                  }}
+                >
+                  <span>🛡️</span>
+                  <span>Examination Authority Admin Portal</span>
+                </button>
+              </div>
+            )}
           </div>
         </footer>
       )}
@@ -416,6 +419,9 @@ export const App: React.FC = () => {
             ...prev,
             candidateName: user.displayName
           }));
+          if (isUserAdmin(user)) {
+            setIsAdminOpen(true);
+          }
         }}
       />
 

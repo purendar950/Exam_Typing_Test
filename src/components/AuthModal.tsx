@@ -262,7 +262,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onLoginSu
                 transition: 'all 0.15s ease'
               }}
             >
-              🔑 Candidate Login
+              🔑 Login (लॉगिन)
             </button>
             <button
               type="button"

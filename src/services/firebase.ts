@@ -101,6 +101,17 @@ export async function signInWithGoogle(): Promise<UserProfile> {
 
   if (snap.exists()) {
     const existing = snap.data() as UserProfile;
+    let isAdmin = !!existing.isAdmin || existing.role === 'admin';
+    if (!isAdmin) {
+      try {
+        const adminDoc = await getDoc(doc(db, 'admins', fbUser.uid));
+        if (adminDoc.exists()) isAdmin = true;
+      } catch {
+        // Ignore
+      }
+    }
+    existing.isAdmin = isAdmin;
+    existing.role = isAdmin ? 'admin' : 'candidate';
     localStorage.setItem(STORAGE_KEY_ACTIVE_USER, JSON.stringify(existing));
     return existing;
   }
@@ -151,16 +162,37 @@ export async function signUpWithEmail(
   return profile;
 }
 
-// 3. Candidate Login with Email or Roll Number
+// 3. Unified Candidate & Admin Login with Email or Roll Number
 export async function signInWithEmail(emailOrRoll: string, pass: string): Promise<UserProfile> {
   const cleanInput = emailOrRoll.trim();
   const cleanEmail = cleanInput.includes('@') ? cleanInput : `${cleanInput.toLowerCase()}@upprpb.gov.in`;
+
+  // First, check if credentials match an Admin in Firestore or Firebase Auth
+  try {
+    const adminProfile = await signInAdminWithEmail(cleanEmail, pass);
+    if (adminProfile && (adminProfile.isAdmin || adminProfile.role === 'admin')) {
+      return adminProfile;
+    }
+  } catch {
+    // Not an admin or admin auth failed, proceed to normal candidate login
+  }
 
   const cred = await signInWithEmailAndPassword(auth, cleanEmail, pass);
   const snap = await getDoc(doc(db, 'users', cred.user.uid));
 
   if (snap.exists()) {
     const profile = snap.data() as UserProfile;
+    let isAdmin = !!profile.isAdmin || profile.role === 'admin';
+    if (!isAdmin) {
+      try {
+        const adminDoc = await getDoc(doc(db, 'admins', cred.user.uid));
+        if (adminDoc.exists()) isAdmin = true;
+      } catch {
+        // Ignore
+      }
+    }
+    profile.isAdmin = isAdmin;
+    profile.role = isAdmin ? 'admin' : 'candidate';
     localStorage.setItem(STORAGE_KEY_ACTIVE_USER, JSON.stringify(profile));
     return profile;
   }
