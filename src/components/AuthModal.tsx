@@ -4,6 +4,7 @@ import {
   registerCandidate,
   loginCandidate,
   createGuestCandidate,
+  resetUserPassword,
   UserProfile
 } from '../services/firebase';
 import appLogo from '../assets/logo.png';
@@ -20,11 +21,14 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onLoginSu
   // Form states
   const [identifier, setIdentifier] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [displayName, setDisplayName] = useState('');
   const [rollNumber, setRollNumber] = useState(`UP-${Math.floor(100000 + Math.random() * 900000)}`);
   const [category, setCategory] = useState<'up_police_co' | 'up_police_asi'>('up_police_co');
   const [loading, setLoading] = useState(false);
+  const [resetLoading, setResetLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
+  const [successMsg, setSuccessMsg] = useState('');
 
   if (!isOpen) return null;
 
@@ -32,6 +36,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onLoginSu
   const handleGoogleSignIn = async () => {
     setLoading(true);
     setErrorMsg('');
+    setSuccessMsg('');
     try {
       const user = await signInWithGoogle();
       onLoginSuccess(user);
@@ -60,15 +65,40 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onLoginSu
     }
     setLoading(true);
     setErrorMsg('');
+    setSuccessMsg('');
     try {
       const user = await loginCandidate(identifier.trim(), password);
       onLoginSuccess(user);
       onClose();
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : 'Login failed. Please check credentials.';
-      setErrorMsg(msg.replace('Firebase:', '').trim());
+      let msg = err instanceof Error ? err.message : 'Login failed. Please check credentials.';
+      msg = msg.replace('Firebase:', '').trim();
+      if (msg.includes('auth/invalid-credential')) {
+        setErrorMsg('Invalid password or credentials. If you haven\'t set your password in Firebase yet, click "Forgot / Set Password" below to receive a setup link in your Gmail.');
+      } else {
+        setErrorMsg(msg);
+      }
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleForgotPassword = async () => {
+    if (!identifier.trim()) {
+      setErrorMsg('Please enter your Email in the "Roll Number or Email" box above first.');
+      return;
+    }
+    setResetLoading(true);
+    setErrorMsg('');
+    setSuccessMsg('');
+    try {
+      await resetUserPassword(identifier.trim());
+      setSuccessMsg(`✅ Password reset/setup link sent to ${identifier.trim()}! Please check your Gmail inbox (and Spam folder) to set your password.`);
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Failed to send password reset email.';
+      setErrorMsg(msg.replace('Firebase:', '').trim());
+    } finally {
+      setResetLoading(false);
     }
   };
 
@@ -247,7 +277,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onLoginSu
           >
             <button
               type="button"
-              onClick={() => { setActiveTab('login'); setErrorMsg(''); }}
+              onClick={() => { setActiveTab('login'); setErrorMsg(''); setSuccessMsg(''); }}
               style={{
                 flex: 1,
                 padding: '9px',
@@ -266,7 +296,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onLoginSu
             </button>
             <button
               type="button"
-              onClick={() => { setActiveTab('signup'); setErrorMsg(''); }}
+              onClick={() => { setActiveTab('signup'); setErrorMsg(''); setSuccessMsg(''); }}
               style={{
                 flex: 1,
                 padding: '9px',
@@ -295,14 +325,33 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onLoginSu
                 borderRadius: '8px',
                 fontSize: '0.85rem',
                 marginBottom: '14px',
-                fontWeight: 600
+                fontWeight: 600,
+                lineHeight: 1.4
               }}
             >
               ⚠️ {errorMsg}
             </div>
           )}
 
-          {/* TAB 1: CANDIDATE LOGIN */}
+          {successMsg && (
+            <div
+              style={{
+                background: '#f0fdf4',
+                border: '1px solid #bbf7d0',
+                color: '#15803d',
+                padding: '10px 14px',
+                borderRadius: '8px',
+                fontSize: '0.85rem',
+                marginBottom: '14px',
+                fontWeight: 600,
+                lineHeight: 1.4
+              }}
+            >
+              {successMsg}
+            </div>
+          )}
+
+          {/* TAB 1: CANDIDATE & ADMIN LOGIN */}
           {activeTab === 'login' && (
             <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
               <div>
@@ -328,24 +377,77 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onLoginSu
               </div>
 
               <div>
-                <label style={{ fontSize: '0.82rem', fontWeight: 700, color: '#1e293b', display: 'block', marginBottom: '4px' }}>
-                  Password *
-                </label>
-                <input
-                  type="password"
-                  placeholder="Enter password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  style={{
-                    width: '100%',
-                    padding: '10px 14px',
-                    borderRadius: '8px',
-                    border: '1px solid #cbd5e1',
-                    fontSize: '0.95rem',
-                    outline: 'none',
-                    boxSizing: 'border-box'
-                  }}
-                />
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '4px' }}>
+                  <label style={{ fontSize: '0.82rem', fontWeight: 700, color: '#1e293b' }}>
+                    Password *
+                  </label>
+                  <button
+                    type="button"
+                    onClick={handleForgotPassword}
+                    disabled={resetLoading}
+                    style={{
+                      background: 'none',
+                      border: 'none',
+                      color: '#0284c7',
+                      fontSize: '0.78rem',
+                      fontWeight: 600,
+                      cursor: resetLoading ? 'wait' : 'pointer',
+                      padding: '0',
+                      textDecoration: 'underline'
+                    }}
+                  >
+                    {resetLoading ? 'Sending link...' : 'Forgot / Set Password? (पासवर्ड रीसेट)'}
+                  </button>
+                </div>
+                <div style={{ position: 'relative' }}>
+                  <input
+                    type={showPassword ? 'text' : 'password'}
+                    placeholder="Enter password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    style={{
+                      width: '100%',
+                      padding: '10px 42px 10px 14px',
+                      borderRadius: '8px',
+                      border: '1px solid #cbd5e1',
+                      fontSize: '0.95rem',
+                      outline: 'none',
+                      boxSizing: 'border-box'
+                    }}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    title={showPassword ? 'Hide password (पासवर्ड छिपाएं)' : 'Show password (पासवर्ड देखें)'}
+                    style={{
+                      position: 'absolute',
+                      right: '10px',
+                      top: '50%',
+                      transform: 'translateY(-50%)',
+                      background: 'none',
+                      border: 'none',
+                      cursor: 'pointer',
+                      padding: '4px',
+                      color: '#64748b',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center'
+                    }}
+                  >
+                    {showPassword ? (
+                      /* Eye Slash / Hide SVG */
+                      <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l18 18" />
+                      </svg>
+                    ) : (
+                      /* Eye Open / Show SVG */
+                      <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                      </svg>
+                    )}
+                  </button>
+                </div>
               </div>
 
               <button
@@ -444,21 +546,53 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onLoginSu
                 <label style={{ fontSize: '0.82rem', fontWeight: 700, color: '#1e293b', display: 'block', marginBottom: '4px' }}>
                   Password (min 6 characters) *
                 </label>
-                <input
-                  type="password"
-                  placeholder="Create password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  style={{
-                    width: '100%',
-                    padding: '10px 14px',
-                    borderRadius: '8px',
-                    border: '1px solid #cbd5e1',
-                    fontSize: '0.95rem',
-                    outline: 'none',
-                    boxSizing: 'border-box'
-                  }}
-                />
+                <div style={{ position: 'relative' }}>
+                  <input
+                    type={showPassword ? 'text' : 'password'}
+                    placeholder="Create password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    style={{
+                      width: '100%',
+                      padding: '10px 42px 10px 14px',
+                      borderRadius: '8px',
+                      border: '1px solid #cbd5e1',
+                      fontSize: '0.95rem',
+                      outline: 'none',
+                      boxSizing: 'border-box'
+                    }}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    title={showPassword ? 'Hide password' : 'Show password'}
+                    style={{
+                      position: 'absolute',
+                      right: '10px',
+                      top: '50%',
+                      transform: 'translateY(-50%)',
+                      background: 'none',
+                      border: 'none',
+                      cursor: 'pointer',
+                      padding: '4px',
+                      color: '#64748b',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center'
+                    }}
+                  >
+                    {showPassword ? (
+                      <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l18 18" />
+                      </svg>
+                    ) : (
+                      <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                      </svg>
+                    )}
+                  </button>
+                </div>
               </div>
 
               <button
