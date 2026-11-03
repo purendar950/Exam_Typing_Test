@@ -71,7 +71,7 @@ export const AiGeneratorModal: React.FC<AiGeneratorModalProps> = ({
     setConfig((prev) => ({
       ...prev,
       baseUrl: preset.baseUrl,
-      model: preset.model
+      model: preset.defaultModel || (preset as any).model || ''
     }));
     setTestStatus({ loading: false, message: `Loaded ${preset.name} preset` });
   };
@@ -501,7 +501,7 @@ export const AiGeneratorModal: React.FC<AiGeneratorModalProps> = ({
                       }}
                     >
                       <div style={{ fontWeight: 700 }}>{preset.name}</div>
-                      <div style={{ fontSize: '0.7rem', color: '#64748b', marginTop: '2px' }}>{preset.model}</div>
+                      <div style={{ fontSize: '0.7rem', color: '#64748b', marginTop: '2px' }}>{preset.defaultModel || (preset as any).model}</div>
                     </button>
                   ))}
                 </div>
