@@ -153,6 +153,11 @@ export const WordDocumentScreen: React.FC<WordDocumentScreenProps> = ({ onBackTo
     }
     setKeystrokes((prev) => prev + 1);
 
+    // 1. If IME is composing (Android Gboard, Windows Indic IME), NEVER intercept!
+    if (isComposingRef.current || e.nativeEvent.isComposing || e.key === 'Process' || e.keyCode === 229) {
+      return;
+    }
+
     // If key is already Devanagari, let browser type naturally
     if (/^[\u0900-\u097F]$/.test(e.key)) {
       return;
@@ -207,6 +212,11 @@ export const WordDocumentScreen: React.FC<WordDocumentScreenProps> = ({ onBackTo
     }
     setKeystrokes((prev) => prev + 1);
 
+    // Never intercept during active IME composition
+    if (isComposingRef.current || nativeEvent.isComposing || nativeEvent.inputType === 'insertCompositionText') {
+      return;
+    }
+
     // Never intercept if data is already Devanagari (native Hindi IME / Indic keyboard)
     if (nativeEvent.data && /[\u0900-\u097F]/.test(nativeEvent.data)) {
       return;
@@ -216,8 +226,8 @@ export const WordDocumentScreen: React.FC<WordDocumentScreenProps> = ({ onBackTo
       return;
     }
 
-    // For Android/tablet QWERTY keyboards typing English in Mangal Inscript mode:
-    if (language === 'hindi_mangal' && inscriptMappingEnabled && nativeEvent.data) {
+    // For physical QWERTY keyboards typing English in Mangal Inscript mode:
+    if (language === 'hindi_mangal' && inscriptMappingEnabled && nativeEvent.data && nativeEvent.inputType === 'insertText') {
       const translated = translateEnglishStringToHindi(nativeEvent.data, 'mangal');
       if (translated !== nativeEvent.data) {
         e.preventDefault();
@@ -228,16 +238,22 @@ export const WordDocumentScreen: React.FC<WordDocumentScreenProps> = ({ onBackTo
   };
 
   const handleContentChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    let nextVal = e.target.value;
+    const el = e.target;
+    let nextVal = el.value;
 
     if (!startTime && nextVal.length > 0) {
       setStartTime(Date.now());
     }
 
-    // Safeguard for Hindi Mangal with Inscript mapping enabled:
-    // If any English ASCII letters exist in the value, automatically convert them to Inscript!
-    if (language === 'hindi_mangal' && inscriptMappingEnabled && /[a-zA-Z]/.test(nextVal)) {
-      const el = e.target;
+    // If actively composing with an IME (Gboard, Samsung Keyboard, Windows Indic IME),
+    // NEVER touch el.value or mutate selection!
+    if (isComposingRef.current) {
+      setContent(nextVal);
+      return;
+    }
+
+    // Safeguard for Hindi Mangal with Inscript mapping enabled (no IME composition):
+    if (language === 'hindi_mangal' && inscriptMappingEnabled && /[a-zA-Z]/.test(nextVal) && !/[\u0900-\u097F]/.test(nextVal)) {
       const start = el.selectionStart;
       const end = el.selectionEnd;
       nextVal = translateEnglishStringToHindi(nextVal, 'mangal');

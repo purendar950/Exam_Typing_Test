@@ -128,13 +128,17 @@ export const StartTest: React.FC<StartTestProps> = ({
     };
   }, [isTestStarted, secondsRemaining]);
 
-  // Focus textarea on mount
+  // Focus textarea on mount and reset on passage change
   useEffect(() => {
     if (textareaRef.current) {
+      textareaRef.current.value = '';
       textareaRef.current.focus();
     }
+    setTypedText('');
+    setIsTestStarted(false);
+    setSecondsRemaining(durationMinutes * 60);
     audioEngine.setSoundEnabled(settings.soundEnabled);
-  }, [settings.soundEnabled]);
+  }, [passage.id, settings.soundEnabled, durationMinutes]);
 
   // Format seconds into MM:SS
   const formatTime = (secs: number) => {
@@ -156,6 +160,12 @@ export const StartTest: React.FC<StartTestProps> = ({
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (!isTestStarted && e.key.length === 1 && !e.ctrlKey && !e.altKey && !e.metaKey) {
       setIsTestStarted(true);
+    }
+
+    // 1. If IME is composing (Android Gboard, Windows Indic IME, Google Input Tools),
+    // NEVER intercept or preventDefault! Doing so breaks the browser's composing span and causes word duplication!
+    if (isComposingRef.current || e.nativeEvent.isComposing || e.key === 'Process' || e.keyCode === 229) {
+      return;
     }
 
     if (e.key === 'Backspace') {
@@ -238,6 +248,11 @@ export const StartTest: React.FC<StartTestProps> = ({
       setIsTestStarted(true);
     }
 
+    // Never intercept during active IME composition (Gboard / Android / Indic IME)
+    if (isComposingRef.current || nativeEvent.isComposing || nativeEvent.inputType === 'insertCompositionText') {
+      return;
+    }
+
     // Never intercept if data is already Devanagari (native Hindi IME / Indic keyboard)
     if (nativeEvent.data && /[\u0900-\u097F]/.test(nativeEvent.data)) {
       return;
@@ -248,8 +263,8 @@ export const StartTest: React.FC<StartTestProps> = ({
       return;
     }
 
-    // For Android/tablet QWERTY keyboards typing English in Mangal Inscript mode:
-    if (passage.language === 'hindi_mangal' && inscriptMappingEnabled && nativeEvent.data) {
+    // For physical QWERTY keyboards typing English in Mangal Inscript mode:
+    if (passage.language === 'hindi_mangal' && inscriptMappingEnabled && nativeEvent.data && nativeEvent.inputType === 'insertText') {
       const translated = translateEnglishStringToHindi(nativeEvent.data, 'mangal');
       if (translated !== nativeEvent.data) {
         e.preventDefault();
@@ -261,17 +276,22 @@ export const StartTest: React.FC<StartTestProps> = ({
 
   // Robust Text Change Handler - strictly updates state with current DOM value without destroying IME buffers
   const handleTextChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    let nextVal = e.target.value;
+    const el = e.target;
+    let nextVal = el.value;
 
     if (!isTestStarted && nextVal.length > 0) {
       setIsTestStarted(true);
     }
 
-    // Safeguard for Hindi Mangal with Inscript mapping enabled:
-    // If any English ASCII letters exist in the value (e.g. from Android keyboards, Gboard autocomplete,
-    // physical keyboards on mobile, or unintercepted keystrokes), automatically convert them to Inscript!
-    if (passage.language === 'hindi_mangal' && inscriptMappingEnabled && /[a-zA-Z]/.test(nextVal)) {
-      const el = e.target;
+    // 1. If actively composing with an IME (Gboard, Samsung Keyboard, Windows Indic IME),
+    // NEVER touch el.value or mutate selection! Doing so breaks Android's composing span and causes word duplication!
+    if (isComposingRef.current) {
+      setTypedText(nextVal);
+      return;
+    }
+
+    // 2. Only for English keyboards with Inscript mapping enabled (no IME composition):
+    if (passage.language === 'hindi_mangal' && inscriptMappingEnabled && /[a-zA-Z]/.test(nextVal) && !/[\u0900-\u097F]/.test(nextVal)) {
       const start = el.selectionStart;
       const end = el.selectionEnd;
       nextVal = translateEnglishStringToHindi(nextVal, 'mangal');
@@ -566,7 +586,7 @@ export const StartTest: React.FC<StartTestProps> = ({
         <div className="ar-typing-box">
           <textarea
             ref={textareaRef}
-            value={typedText}
+            defaultValue=""
             onChange={handleTextChange}
             onBeforeInput={handleBeforeInput}
             onKeyDown={handleKeyDown}
@@ -575,9 +595,15 @@ export const StartTest: React.FC<StartTestProps> = ({
             }}
             onCompositionEnd={(e) => {
               isComposingRef.current = false;
-              const val = (e.target as HTMLTextAreaElement).value;
+              const el = e.target as HTMLTextAreaElement;
+              let val = el.value;
               if (!isTestStarted && val.length > 0) {
                 setIsTestStarted(true);
+              }
+              // Only convert if Inscript mapping is active and string is pure English (not Hindi IME)
+              if (passage.language === 'hindi_mangal' && inscriptMappingEnabled && /[a-zA-Z]/.test(val) && !/[\u0900-\u097F]/.test(val)) {
+                val = translateEnglishStringToHindi(val, 'mangal');
+                el.value = val;
               }
               setTypedText(val);
             }}
