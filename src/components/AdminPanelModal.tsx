@@ -11,6 +11,10 @@ import {
 import {
   AiConfig,
   AI_PRESETS,
+  AiProviderPreset,
+  DetectedModel,
+  fetchProviderModels,
+  cleanBaseUrl,
   getAiConfig,
   saveAiConfig,
   testAiConnection,
@@ -79,6 +83,12 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
     loading: false
   });
   const [aiSaveStatus, setAiSaveStatus] = useState<string>('');
+  const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
+  const [detectedModels, setDetectedModels] = useState<DetectedModel[]>([]);
+  const [isDetectingModels, setIsDetectingModels] = useState<boolean>(false);
+  const [detectStatus, setDetectStatus] = useState<string>('');
+  const [modelFilterType, setModelFilterType] = useState<'all' | 'free'>('all');
+  const [previewPassage, setPreviewPassage] = useState<Passage | null>(null);
 
   // Daily Live Generator in Admin
   const [selectedDate, setSelectedDate] = useState<string>(() => new Date().toISOString().split('T')[0]);
@@ -249,14 +259,62 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
   };
 
   // AI Handlers
-  const handleApplyPreset = (preset: (typeof AI_PRESETS)[0]) => {
+  const handleApplyPreset = (preset: AiProviderPreset) => {
     setAiConfig((prev) => ({
       ...prev,
       baseUrl: preset.baseUrl,
-      model: preset.model
+      model: preset.defaultModel
     }));
-    setAiTestStatus({ loading: false, message: `Loaded preset: ${preset.name}` });
+    if (preset.popularModels && preset.popularModels.length > 0) {
+      setDetectedModels(
+        preset.popularModels.map((m) => ({ id: m.id, name: m.name, isFree: !!m.isFree }))
+      );
+    }
+    setAiTestStatus({ loading: false, message: `Loaded preset: ${preset.name} (Default: ${preset.defaultModel})` });
+    setDetectStatus('');
   };
+
+  const handleAutoDetectModels = async () => {
+    if (!aiConfig.baseUrl.trim()) {
+      setDetectStatus('Please enter a Base URL first.');
+      return;
+    }
+    setIsDetectingModels(true);
+    setDetectStatus('Detecting models from provider endpoint...');
+    const res = await fetchProviderModels(aiConfig.baseUrl, aiConfig.apiKey);
+    setIsDetectingModels(false);
+    if (res.success && res.models.length > 0) {
+      setDetectedModels(res.models);
+      setDetectStatus(`✅ ${res.message}`);
+      const match = res.models.find((m) => m.id === aiConfig.model);
+      if (!match) {
+        const freeOne = res.models.find((m) => m.isFree);
+        const chosen = freeOne ? freeOne.id : res.models[0].id;
+        setAiConfig((prev) => ({ ...prev, model: chosen }));
+      }
+    } else {
+      setDetectStatus(`⚠️ ${res.message || 'No models detected'}`);
+    }
+  };
+
+  const displayedModels = useMemo(() => {
+    let list: DetectedModel[] = [];
+    if (detectedModels.length > 0) {
+      list = detectedModels;
+    } else {
+      const matching = AI_PRESETS.find(
+        (p) => cleanBaseUrl(p.baseUrl) === cleanBaseUrl(aiConfig.baseUrl)
+      );
+      if (matching && matching.popularModels) {
+        list = matching.popularModels.map((m) => ({
+          id: m.id,
+          name: m.name,
+          isFree: !!m.isFree
+        }));
+      }
+    }
+    return modelFilterType === 'free' ? list.filter((m) => m.isFree) : list;
+  }, [detectedModels, modelFilterType, aiConfig.baseUrl]);
 
   const handleTestConnection = async () => {
     setAiTestStatus({ loading: true });
@@ -473,28 +531,29 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
       style={{
         position: 'fixed',
         inset: 0,
-        backgroundColor: 'rgba(15, 23, 42, 0.85)',
-        backdropFilter: 'blur(8px)',
+        backgroundColor: isFullscreen ? '#090d16' : 'rgba(15, 23, 42, 0.85)',
+        backdropFilter: isFullscreen ? 'none' : 'blur(8px)',
         zIndex: 10000,
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        padding: '16px'
+        padding: isFullscreen ? 0 : '16px'
       }}
       onClick={onClose}
     >
       <div
         style={{
           backgroundColor: '#ffffff',
-          borderRadius: '16px',
-          width: '100%',
-          maxWidth: '1080px',
-          height: '92vh',
+          borderRadius: isFullscreen ? 0 : '16px',
+          width: isFullscreen ? '100vw' : '100%',
+          maxWidth: isFullscreen ? '100vw' : '1080px',
+          height: isFullscreen ? '100vh' : '92vh',
+          maxHeight: isFullscreen ? '100vh' : '92vh',
           display: 'flex',
           flexDirection: 'column',
-          boxShadow: '0 25px 60px -15px rgba(0, 0, 0, 0.4)',
+          boxShadow: isFullscreen ? 'none' : '0 25px 60px -15px rgba(0, 0, 0, 0.4)',
           overflow: 'hidden',
-          border: '1px solid #334155'
+          border: isFullscreen ? 'none' : '1px solid #334155'
         }}
         onClick={(e) => e.stopPropagation()}
       >
@@ -596,6 +655,27 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                 </button>
               </>
             )}
+
+            <button
+              onClick={() => setIsFullscreen(!isFullscreen)}
+              title={isFullscreen ? 'Restore Window Size' : 'Expand to Fullscreen'}
+              style={{
+                background: isFullscreen ? 'rgba(56, 189, 248, 0.2)' : 'rgba(255, 255, 255, 0.1)',
+                border: '1px solid ' + (isFullscreen ? '#38bdf8' : 'rgba(255, 255, 255, 0.2)'),
+                borderRadius: '6px',
+                padding: '5px 10px',
+                color: isFullscreen ? '#38bdf8' : '#ffffff',
+                fontSize: '0.78rem',
+                fontWeight: 600,
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '5px'
+              }}
+            >
+              <span>{isFullscreen ? '🗗' : '⛶'}</span>
+              <span>{isFullscreen ? 'Restore' : 'Fullscreen'}</span>
+            </button>
 
             <button
               onClick={onClose}
@@ -1001,27 +1081,49 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
 
                     {/* Presets */}
                     <div style={{ marginBottom: '16px' }}>
-                      <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 700, color: '#475569', marginBottom: '8px' }}>
-                        1-Click Provider Presets:
-                      </label>
-                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '8px' }}>
-                        {AI_PRESETS.map((p) => (
-                          <button
-                            key={p.name}
-                            onClick={() => handleApplyPreset(p)}
-                            style={{
-                              padding: '8px 12px',
-                              textAlign: 'left',
-                              background: aiConfig.baseUrl === p.baseUrl ? '#e0f2fe' : '#f8fafc',
-                              border: aiConfig.baseUrl === p.baseUrl ? '1.5px solid #0284c7' : '1px solid #cbd5e1',
-                              borderRadius: '8px',
-                              cursor: 'pointer'
-                            }}
-                          >
-                            <div style={{ fontSize: '0.8rem', fontWeight: 700, color: '#0f172a' }}>{p.name}</div>
-                            <div style={{ fontSize: '0.7rem', color: '#64748b' }}>{p.model}</div>
-                          </button>
-                        ))}
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                        <label style={{ fontSize: '0.8rem', fontWeight: 700, color: '#334155' }}>
+                          1-Click AI Provider Presets (Auto-configures Base URL & Default Model):
+                        </label>
+                        <span style={{ fontSize: '0.72rem', color: '#64748b' }}>
+                          {AI_PRESETS.length} Providers Available
+                        </span>
+                      </div>
+                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))', gap: '8px' }}>
+                        {AI_PRESETS.map((p) => {
+                          const isSelected = cleanBaseUrl(aiConfig.baseUrl) === cleanBaseUrl(p.baseUrl);
+                          return (
+                            <button
+                              key={p.id}
+                              type="button"
+                              onClick={() => handleApplyPreset(p)}
+                              style={{
+                                padding: '10px 12px',
+                                textAlign: 'left',
+                                background: isSelected ? '#eff6ff' : '#f8fafc',
+                                border: isSelected ? '1.5px solid #0284c7' : '1px solid #cbd5e1',
+                                borderRadius: '8px',
+                                cursor: 'pointer',
+                                transition: 'all 0.15s ease'
+                              }}
+                            >
+                              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '4px', marginBottom: '2px' }}>
+                                <div style={{ fontSize: '0.82rem', fontWeight: 700, color: '#0f172a' }}>{p.name}</div>
+                                {isSelected && (
+                                  <span style={{ fontSize: '0.68rem', color: '#0284c7', background: '#dbeafe', padding: '1px 6px', borderRadius: '4px', fontWeight: 700 }}>
+                                    Active
+                                  </span>
+                                )}
+                              </div>
+                              <div style={{ fontSize: '0.68rem', color: '#0369a1', fontWeight: 600, marginBottom: '3px' }}>
+                                {p.badge}
+                              </div>
+                              <div style={{ fontSize: '0.68rem', color: '#64748b', fontFamily: 'monospace', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                Default: {p.defaultModel}
+                              </div>
+                            </button>
+                          );
+                        })}
                       </div>
                     </div>
 
@@ -1062,16 +1164,151 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                       </div>
 
                       <div>
-                        <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 700, color: '#334155', marginBottom: '4px' }}>
-                          Model Identifier:
-                        </label>
-                        <input
-                          type="text"
-                          value={aiConfig.model}
-                          onChange={(e) => setAiConfig({ ...aiConfig, model: e.target.value })}
-                          placeholder="gemini-2.5-flash or gpt-4o-mini"
-                          style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1.5px solid #cbd5e1', fontSize: '0.85rem' }}
-                        />
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px', marginBottom: '6px' }}>
+                          <label style={{ fontSize: '0.8rem', fontWeight: 700, color: '#334155' }}>
+                            Model Identifier & Auto-Detection:
+                          </label>
+
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                            {/* 2-Option All vs. Free Toggle */}
+                            <div style={{ display: 'inline-flex', background: '#e2e8f0', padding: '2px', borderRadius: '6px' }}>
+                              <button
+                                type="button"
+                                onClick={() => setModelFilterType('all')}
+                                style={{
+                                  padding: '4px 10px',
+                                  fontSize: '0.74rem',
+                                  fontWeight: 700,
+                                  borderRadius: '5px',
+                                  border: 'none',
+                                  cursor: 'pointer',
+                                  background: modelFilterType === 'all' ? '#0f172a' : 'transparent',
+                                  color: modelFilterType === 'all' ? '#ffffff' : '#64748b',
+                                  transition: 'all 0.15s ease'
+                                }}
+                              >
+                                🌐 All Models
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => setModelFilterType('free')}
+                                style={{
+                                  padding: '4px 10px',
+                                  fontSize: '0.74rem',
+                                  fontWeight: 700,
+                                  borderRadius: '5px',
+                                  border: 'none',
+                                  cursor: 'pointer',
+                                  background: modelFilterType === 'free' ? '#16a34a' : 'transparent',
+                                  color: modelFilterType === 'free' ? '#ffffff' : '#64748b',
+                                  transition: 'all 0.15s ease'
+                                }}
+                              >
+                                🎁 Free Only
+                              </button>
+                            </div>
+
+                            {/* Auto-Detect Button */}
+                            <button
+                              type="button"
+                              onClick={handleAutoDetectModels}
+                              disabled={isDetectingModels}
+                              style={{
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '5px',
+                                padding: '5px 12px',
+                                background: isDetectingModels ? '#94a3b8' : '#0284c7',
+                                color: '#ffffff',
+                                border: 'none',
+                                borderRadius: '6px',
+                                fontSize: '0.76rem',
+                                fontWeight: 700,
+                                cursor: isDetectingModels ? 'not-allowed' : 'pointer'
+                              }}
+                            >
+                              <span>{isDetectingModels ? '⏳' : '🔍'}</span>
+                              <span>{isDetectingModels ? 'Detecting...' : 'Auto-Detect Models'}</span>
+                            </button>
+                          </div>
+                        </div>
+
+                        {/* Detect Status Banner */}
+                        {detectStatus && (
+                          <div
+                            style={{
+                              padding: '8px 12px',
+                              borderRadius: '6px',
+                              fontSize: '0.76rem',
+                              fontWeight: 600,
+                              marginBottom: '8px',
+                              background: detectStatus.startsWith('✅') ? '#f0fdf4' : '#fffbeb',
+                              color: detectStatus.startsWith('✅') ? '#166534' : '#92400e',
+                              border: detectStatus.startsWith('✅') ? '1px solid #bbf7d0' : '1px solid #fde68a'
+                            }}
+                          >
+                            {detectStatus}
+                          </div>
+                        )}
+
+                        {/* Model Dropdown from Auto-Detected / Preset List */}
+                        {displayedModels.length > 0 && (
+                          <div style={{ marginBottom: '8px' }}>
+                            <label style={{ display: 'block', fontSize: '0.72rem', color: '#64748b', fontWeight: 600, marginBottom: '3px' }}>
+                              Choose from {modelFilterType === 'free' ? 'Free-Tier' : 'Available'} Models ({displayedModels.length} available):
+                            </label>
+                            <select
+                              value={displayedModels.some((m) => m.id === aiConfig.model) ? aiConfig.model : ''}
+                              onChange={(e) => {
+                                if (e.target.value) {
+                                  setAiConfig({ ...aiConfig, model: e.target.value });
+                                }
+                              }}
+                              style={{
+                                width: '100%',
+                                padding: '9px 12px',
+                                borderRadius: '8px',
+                                border: '1.5px solid #0284c7',
+                                background: '#f8fafc',
+                                fontSize: '0.85rem',
+                                fontWeight: 600,
+                                color: '#0f172a'
+                              }}
+                            >
+                              <option value="">-- Select from {displayedModels.length} {modelFilterType === 'free' ? 'Free' : 'Available'} Models --</option>
+                              {displayedModels.map((m) => (
+                                <option key={m.id} value={m.id}>
+                                  {m.isFree ? '🎁 [FREE] ' : '⭐ [PRO] '}
+                                  {m.name || m.id} ({m.id})
+                                </option>
+                              ))}
+                            </select>
+                          </div>
+                        )}
+
+                        {/* Custom / Active Model Input */}
+                        <div>
+                          <label style={{ display: 'block', fontSize: '0.72rem', color: '#64748b', fontWeight: 600, marginBottom: '3px' }}>
+                            Active Model Identifier (Custom or Selected):
+                          </label>
+                          <input
+                            type="text"
+                            value={aiConfig.model}
+                            onChange={(e) => setAiConfig({ ...aiConfig, model: e.target.value })}
+                            placeholder="e.g. llama-3.3-70b-versatile, gemini-2.0-flash, or gpt-4o-mini"
+                            style={{
+                              width: '100%',
+                              padding: '9px 12px',
+                              borderRadius: '8px',
+                              border: '1.5px solid #cbd5e1',
+                              fontSize: '0.85rem',
+                              fontFamily: 'monospace'
+                            }}
+                          />
+                        </div>
+                        <div style={{ fontSize: '0.7rem', color: '#64748b', marginTop: '4px' }}>
+                          💡 Tip: Ensure model matches your provider. Groq accepts Llama/Mixtral/Gemma models; OpenRouter supports `:free` models; Gemini uses `gemini-2.0-flash`.
+                        </div>
                       </div>
 
                       {aiTestStatus.message && (
@@ -1300,7 +1537,28 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                       </select>
                     </div>
 
-                    <div style={{ display: 'flex', gap: '8px' }}>
+                    <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                      <button
+                        type="button"
+                        onClick={() => setIsFullscreen(!isFullscreen)}
+                        style={{
+                          padding: '8px 14px',
+                          background: isFullscreen ? 'rgba(2, 132, 199, 0.15)' : '#f1f5f9',
+                          border: isFullscreen ? '1px solid #0284c7' : '1px solid #cbd5e1',
+                          color: isFullscreen ? '#0284c7' : '#334155',
+                          borderRadius: '8px',
+                          fontWeight: 700,
+                          fontSize: '0.82rem',
+                          cursor: 'pointer',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '6px'
+                        }}
+                      >
+                        <span>{isFullscreen ? '🗗' : '⛶'}</span>
+                        <span>{isFullscreen ? 'Exit Full Screen Studio' : 'Full Screen Studio'}</span>
+                      </button>
+
                       <button
                         onClick={() => setIsCreatingManual(!isCreatingManual)}
                         style={{
@@ -1401,7 +1659,7 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                       <span>Target: 15-Minute Exam Hall Standard</span>
                     </div>
 
-                    <div style={{ maxHeight: '420px', overflowY: 'auto' }}>
+                    <div style={{ maxHeight: isFullscreen ? 'calc(100vh - 290px)' : '420px', overflowY: 'auto' }}>
                       <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.82rem' }}>
                         <thead>
                           <tr style={{ background: '#f1f5f9', color: '#475569', borderBottom: '1px solid #e2e8f0' }}>
@@ -1434,16 +1692,35 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                                 </td>
                                 <td style={{ padding: '10px 14px', fontWeight: 600 }}>{p.wordCount}w</td>
                                 <td style={{ padding: '10px 14px' }}>
-                                  {isCustom ? (
+                                  <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
                                     <button
-                                      onClick={() => handleDeleteCustomPassage(p.id)}
-                                      style={{ background: '#fee2e2', border: '1px solid #fca5a5', color: '#991b1b', padding: '3px 8px', borderRadius: '4px', fontSize: '0.72rem', fontWeight: 700, cursor: 'pointer' }}
+                                      type="button"
+                                      onClick={() => setPreviewPassage(p)}
+                                      style={{
+                                        background: '#eff6ff',
+                                        border: '1px solid #bfdbfe',
+                                        color: '#1d4ed8',
+                                        padding: '3px 8px',
+                                        borderRadius: '4px',
+                                        fontSize: '0.72rem',
+                                        fontWeight: 700,
+                                        cursor: 'pointer'
+                                      }}
                                     >
-                                      Delete
+                                      👁️ Preview
                                     </button>
-                                  ) : (
-                                    <span style={{ fontSize: '0.72rem', color: '#94a3b8' }}>Core Test</span>
-                                  )}
+                                    {isCustom ? (
+                                      <button
+                                        type="button"
+                                        onClick={() => handleDeleteCustomPassage(p.id)}
+                                        style={{ background: '#fee2e2', border: '1px solid #fca5a5', color: '#991b1b', padding: '3px 8px', borderRadius: '4px', fontSize: '0.72rem', fontWeight: 700, cursor: 'pointer' }}
+                                      >
+                                        Delete
+                                      </button>
+                                    ) : (
+                                      <span style={{ fontSize: '0.72rem', color: '#94a3b8' }}>Core Test</span>
+                                    )}
+                                  </div>
                                 </td>
                               </tr>
                             );
@@ -1669,6 +1946,130 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                   </div>
                 </div>
               )}
+            </div>
+          </div>
+        )}
+
+        {/* Preview Modal for Passage Studio */}
+        {previewPassage && (
+          <div
+            style={{
+              position: 'fixed',
+              inset: 0,
+              backgroundColor: 'rgba(15, 23, 42, 0.75)',
+              backdropFilter: 'blur(4px)',
+              zIndex: 10005,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: '16px'
+            }}
+            onClick={() => setPreviewPassage(null)}
+          >
+            <div
+              style={{
+                backgroundColor: '#ffffff',
+                borderRadius: '14px',
+                maxWidth: '750px',
+                width: '100%',
+                maxHeight: '88vh',
+                display: 'flex',
+                flexDirection: 'column',
+                boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.35)',
+                overflow: 'hidden',
+                border: '1px solid #334155'
+              }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div
+                style={{
+                  padding: '16px 20px',
+                  background: 'linear-gradient(135deg, #090d16 0%, #0f172a 100%)',
+                  color: '#ffffff',
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center'
+                }}
+              >
+                <div>
+                  <div style={{ fontSize: '1.05rem', fontWeight: 800 }}>{previewPassage.title}</div>
+                  <div style={{ fontSize: '0.74rem', color: '#94a3b8', display: 'flex', gap: '8px', marginTop: '4px' }}>
+                    <span>ID: {previewPassage.id}</span>
+                    <span>•</span>
+                    <span>{previewPassage.language.toUpperCase()}</span>
+                    <span>•</span>
+                    <span>{previewPassage.wordCount} words</span>
+                    <span>•</span>
+                    <span>{previewPassage.difficulty.toUpperCase()}</span>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setPreviewPassage(null)}
+                  style={{
+                    background: 'rgba(255, 255, 255, 0.1)',
+                    border: 'none',
+                    borderRadius: '50%',
+                    width: '32px',
+                    height: '32px',
+                    color: '#ffffff',
+                    fontSize: '1.2rem',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center'
+                  }}
+                >
+                  ×
+                </button>
+              </div>
+
+              <div
+                style={{
+                  padding: '24px',
+                  overflowY: 'auto',
+                  fontSize: '0.98rem',
+                  lineHeight: '1.8',
+                  color: '#1e293b',
+                  whiteSpace: 'pre-wrap',
+                  fontFamily: previewPassage.language.includes('hindi')
+                    ? "'Mangal', 'Noto Sans Devanagari', sans-serif"
+                    : 'inherit'
+                }}
+              >
+                {previewPassage.text}
+              </div>
+
+              <div
+                style={{
+                  padding: '12px 20px',
+                  background: '#f8fafc',
+                  borderTop: '1px solid #e2e8f0',
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center'
+                }}
+              >
+                <span style={{ fontSize: '0.75rem', color: '#64748b' }}>
+                  Target Speed: {previewPassage.language === 'english' ? '30 WPM (85% Accuracy)' : '25 WPM (85% Accuracy)'}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setPreviewPassage(null)}
+                  style={{
+                    padding: '8px 18px',
+                    background: '#0284c7',
+                    color: '#ffffff',
+                    border: 'none',
+                    borderRadius: '6px',
+                    fontWeight: 700,
+                    fontSize: '0.82rem',
+                    cursor: 'pointer'
+                  }}
+                >
+                  Close Preview
+                </button>
+              </div>
             </div>
           </div>
         )}
