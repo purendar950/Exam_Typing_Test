@@ -153,12 +153,7 @@ export const WordDocumentScreen: React.FC<WordDocumentScreenProps> = ({ onBackTo
     }
     setKeystrokes((prev) => prev + 1);
 
-    // If IME is composing, NEVER intercept
-    if (isComposingRef.current || e.nativeEvent.isComposing || e.key === 'Process' || e.keyCode === 229) {
-      return;
-    }
-
-    // If key is already Devanagari, let browser type natively
+    // If key is already Devanagari, let browser type naturally
     if (/^[\u0900-\u097F]$/.test(e.key)) {
       return;
     }
@@ -198,6 +193,8 @@ export const WordDocumentScreen: React.FC<WordDocumentScreenProps> = ({ onBackTo
       el.value = newContent;
       el.selectionStart = el.selectionEnd = start + textToInsert.length;
       setContent(newContent);
+    } else {
+      setContent(el.value);
     }
   };
 
@@ -210,11 +207,8 @@ export const WordDocumentScreen: React.FC<WordDocumentScreenProps> = ({ onBackTo
     }
     setKeystrokes((prev) => prev + 1);
 
-    if (isComposingRef.current || nativeEvent.isComposing || nativeEvent.inputType === 'insertCompositionText') {
-      return;
-    }
-
-    if (nativeEvent.data && /^[\u0900-\u097F]+$/.test(nativeEvent.data)) {
+    // Never intercept if data is already Devanagari (native Hindi IME / Indic keyboard)
+    if (nativeEvent.data && /[\u0900-\u097F]/.test(nativeEvent.data)) {
       return;
     }
 
@@ -222,7 +216,8 @@ export const WordDocumentScreen: React.FC<WordDocumentScreenProps> = ({ onBackTo
       return;
     }
 
-    if (language === 'hindi_mangal' && inscriptMappingEnabled && nativeEvent.data && nativeEvent.inputType === 'insertText') {
+    // For Android/tablet QWERTY keyboards typing English in Mangal Inscript mode:
+    if (language === 'hindi_mangal' && inscriptMappingEnabled && nativeEvent.data) {
       const translated = translateEnglishStringToHindi(nativeEvent.data, 'mangal');
       if (translated !== nativeEvent.data) {
         e.preventDefault();
@@ -233,10 +228,23 @@ export const WordDocumentScreen: React.FC<WordDocumentScreenProps> = ({ onBackTo
   };
 
   const handleContentChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    const nextVal = e.target.value;
+    let nextVal = e.target.value;
 
     if (!startTime && nextVal.length > 0) {
       setStartTime(Date.now());
+    }
+
+    // Safeguard for Hindi Mangal with Inscript mapping enabled:
+    // If any English ASCII letters exist in the value, automatically convert them to Inscript!
+    if (language === 'hindi_mangal' && inscriptMappingEnabled && /[a-zA-Z]/.test(nextVal)) {
+      const el = e.target;
+      const start = el.selectionStart;
+      const end = el.selectionEnd;
+      nextVal = translateEnglishStringToHindi(nextVal, 'mangal');
+      el.value = nextVal;
+      if (start !== null && end !== null) {
+        el.setSelectionRange(start, end);
+      }
     }
 
     setContent(nextVal);
