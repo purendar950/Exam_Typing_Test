@@ -250,6 +250,10 @@ export const App: React.FC = () => {
             onStartTest={handleStartTest}
             settings={settings}
             onUpdateSettings={handleUpdateSettings}
+            currentUser={currentUser}
+            history={history}
+            onOpenAuth={() => setIsAuthOpen(true)}
+            onOpenDashboard={() => setIsDashboardOpen(true)}
           />
         )}
 

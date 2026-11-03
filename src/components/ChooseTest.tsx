@@ -1,33 +1,49 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { Passage, Language, ExamCategory, TestSettings } from '../types';
+import { Passage, Language, ExamCategory, TestSettings, EvaluationResult } from '../types';
+import { UserProfile } from '../services/firebase';
 
 interface ChooseTestProps {
   passages: Passage[];
   onStartTest: (passage: Passage, customDurationMinutes?: number) => void;
   settings: TestSettings;
   onUpdateSettings: (newSettings: Partial<TestSettings>) => void;
+  currentUser?: UserProfile | null;
+  history?: EvaluationResult[];
+  onOpenAuth?: () => void;
+  onOpenDashboard?: () => void;
 }
 
 export const ChooseTest: React.FC<ChooseTestProps> = ({
   passages,
   onStartTest,
   settings,
-  onUpdateSettings
+  onUpdateSettings,
+  currentUser,
+  history = [],
+  onOpenAuth,
+  onOpenDashboard
 }) => {
-  // Mode: 'ar_form' (Screenshots 2 & 3) vs 'special_cards' (Screenshot 4)
-  const [viewMode, setViewMode] = useState<'ar_form' | 'special_cards'>('ar_form');
+  // Mode: 'portal' (Fintech/EdTech Exam Series Portal) vs 'classic_form' (Legacy Date-wise Form)
+  const [viewMode, setViewMode] = useState<'portal' | 'classic_form'>('portal');
 
-  // Form states matching Screenshots 2 & 3
-  const [selectedLanguage, setSelectedLanguage] = useState<Language>('english');
-  const [selectedDate, setSelectedDate] = useState<string>('2026-10-26');
-  const [selectedPassageId, setSelectedPassageId] = useState<string>('');
+  // Portal Filter States
+  const [selectedExamTrack, setSelectedExamTrack] = useState<string>('all');
+  const [selectedLanguage, setSelectedLanguage] = useState<Language | 'all'>('all');
+  const [selectedDifficulty, setSelectedDifficulty] = useState<string>('all');
+  const [searchQuery, setSearchQuery] = useState<string>('');
   const [selectedDuration, setSelectedDuration] = useState<number>(15);
-  const [inputLimit, setInputLimit] = useState<string>('Words');
-  const [isPassageDropdownOpen, setIsPassageDropdownOpen] = useState<boolean>(false);
-  const [selectedCategoryTab, setSelectedCategoryTab] = useState<string>('all');
+  const [visibleCount, setVisibleCount] = useState<number>(18);
+
+  // Classic Form States (Screenshots 2 & 3)
+  const [classicLanguage, setClassicLanguage] = useState<Language>('english');
+  const [classicDate, setClassicDate] = useState<string>('2026-10-26');
+  const [classicPassageId, setClassicPassageId] = useState<string>('');
+  const [classicDuration, setClassicDuration] = useState<number>(15);
+  const [classicInputLimit, setClassicInputLimit] = useState<string>('Words');
+  const [isClassicDropdownOpen, setIsClassicDropdownOpen] = useState<boolean>(false);
   const [isLoadingPassages, setIsLoadingPassages] = useState<boolean>(false);
 
-  // Convert date format YYYY-MM-DD to DD/MM/YYYY for AR Typing display
+  // Date converters
   const toDisplayDate = (isoDate: string) => {
     if (!isoDate) return '';
     const parts = isoDate.split('-');
@@ -37,71 +53,132 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
     return isoDate;
   };
 
-  // Convert DD/MM/YYYY to YYYY-MM-DD
-  const toIsoDate = (displayDate: string) => {
-    const parts = displayDate.split('/');
-    if (parts.length === 3) {
-      return `${parts[2]}-${parts[1]}-${parts[0]}`;
+  // Performance KPI calculations for Candidate Banner
+  const kpiStats = useMemo(() => {
+    const totalAttempted = history.length;
+    if (totalAttempted === 0) {
+      return {
+        totalAttempted: 0,
+        bestSpeed: 0,
+        avgAccuracy: 0,
+        isQualified: false,
+        passedTestsCount: 0
+      };
     }
-    return displayDate;
-  };
 
-  // Passages matching selected language
-  const languagePassages = useMemo(() => {
-    return passages.filter((p) => p.language === selectedLanguage);
-  }, [passages, selectedLanguage]);
+    const speeds = history.map((h) => h.netWpm || 0);
+    const bestSpeed = Math.round(Math.max(...speeds) * 10) / 10;
+    const avgAccuracy = Math.round(
+      history.reduce((sum, h) => sum + (h.accuracy || 0), 0) / totalAttempted
+    );
+    const passedTestsCount = history.filter((h) => h.isQualified).length;
+    const isQualified = passedTestsCount > 0;
 
-  // Available unique dates for the current language
-  const availableIsoDates = useMemo(() => {
-    return Array.from(new Set(languagePassages.map((p) => p.date).filter(Boolean)))
+    return {
+      totalAttempted,
+      bestSpeed,
+      avgAccuracy,
+      isQualified,
+      passedTestsCount
+    };
+  }, [history]);
+
+  // Lookup map for test history by passage id or title
+  const pastAttemptsMap = useMemo(() => {
+    const map = new Map<string, { bestSpeed: number; bestAcc: number; isQualified: boolean; count: number }>();
+    history.forEach((h) => {
+      const key = h.testId || h.testTitle;
+      const existing = map.get(key);
+      if (!existing) {
+        map.set(key, {
+          bestSpeed: h.netWpm,
+          bestAcc: h.accuracy,
+          isQualified: h.isQualified,
+          count: 1
+        });
+      } else {
+        existing.bestSpeed = Math.max(existing.bestSpeed, h.netWpm);
+        existing.bestAcc = Math.max(existing.bestAcc, h.accuracy);
+        if (h.isQualified) existing.isQualified = true;
+        existing.count += 1;
+      }
+    });
+    return map;
+  }, [history]);
+
+  // Filtered passages for Portal Grid
+  const filteredPortalPassages = useMemo(() => {
+    return passages.filter((p) => {
+      // Exam Track Filter
+      if (selectedExamTrack === 'up_police_co' && p.category !== 'up_police_co') return false;
+      if (selectedExamTrack === 'up_police_asi' && p.category !== 'up_police_asi') return false;
+      if (selectedExamTrack === 'drills' && (p.duration > 5 && p.wordCount > 250)) return false;
+      if (selectedExamTrack === 'mock15' && p.duration < 15 && p.wordCount < 400) return false;
+
+      // Language Filter
+      if (selectedLanguage !== 'all' && p.language !== selectedLanguage) return false;
+
+      // Difficulty Filter
+      if (selectedDifficulty !== 'all' && p.difficulty !== selectedDifficulty) return false;
+
+      // Search Query Filter
+      if (searchQuery.trim()) {
+        const q = searchQuery.toLowerCase().trim();
+        const titleMatch = p.title.toLowerCase().includes(q);
+        const textMatch = p.text.toLowerCase().includes(q);
+        const dateMatch = p.date ? p.date.includes(q) : false;
+        if (!titleMatch && !textMatch && !dateMatch) return false;
+      }
+
+      return true;
+    });
+  }, [passages, selectedExamTrack, selectedLanguage, selectedDifficulty, searchQuery]);
+
+  // Reset pagination when filter changes
+  useEffect(() => {
+    setVisibleCount(18);
+  }, [selectedExamTrack, selectedLanguage, selectedDifficulty, searchQuery]);
+
+  // Classic Form data helpers
+  const classicLanguagePassages = useMemo(() => {
+    return passages.filter((p) => p.language === classicLanguage);
+  }, [passages, classicLanguage]);
+
+  const classicAvailableDates = useMemo(() => {
+    return Array.from(new Set(classicLanguagePassages.map((p) => p.date).filter(Boolean)))
       .sort()
       .reverse();
-  }, [languagePassages]);
+  }, [classicLanguagePassages]);
 
-  // Auto-initialize selectedDate if current selectedDate is not among available dates
   useEffect(() => {
-    if (availableIsoDates.length > 0 && !availableIsoDates.includes(selectedDate)) {
-      setSelectedDate(availableIsoDates[0]);
+    if (classicAvailableDates.length > 0 && !classicAvailableDates.includes(classicDate)) {
+      setClassicDate(classicAvailableDates[0]);
     }
-  }, [availableIsoDates, selectedDate]);
+  }, [classicAvailableDates, classicDate]);
 
-  // Passages matching current language and date
-  const activePassageList = useMemo(() => {
-    const exactMatches = languagePassages.filter((p) => p.date === selectedDate);
-    if (exactMatches.length > 0) {
-      return exactMatches;
-    }
-    // If no exact match, return empty array so user is prompted to pick an available date
-    return [];
-  }, [languagePassages, selectedDate]);
+  const classicActiveList = useMemo(() => {
+    return classicLanguagePassages.filter((p) => p.date === classicDate);
+  }, [classicLanguagePassages, classicDate]);
 
-  // Handle date change with simulated AR Typing loading feedback
-  const handleDateChange = (newDate: string) => {
+  const currentClassicSelectedPassage = useMemo(() => {
+    if (!classicPassageId) return null;
+    return classicActiveList.find((p) => p.id === classicPassageId) || null;
+  }, [classicPassageId, classicActiveList]);
+
+  const handleClassicLanguageChange = (newLang: Language) => {
     setIsLoadingPassages(true);
-    setSelectedDate(newDate);
-    setSelectedPassageId('');
-    setTimeout(() => {
-      setIsLoadingPassages(false);
-    }, 180);
+    setClassicLanguage(newLang);
+    setClassicPassageId('');
+    setTimeout(() => setIsLoadingPassages(false), 160);
   };
 
-  // Handle language change
-  const handleLanguageChange = (newLang: Language) => {
+  const handleClassicDateChange = (newDate: string) => {
     setIsLoadingPassages(true);
-    setSelectedLanguage(newLang);
-    setSelectedPassageId('');
-    setTimeout(() => {
-      setIsLoadingPassages(false);
-    }, 180);
+    setClassicDate(newDate);
+    setClassicPassageId('');
+    setTimeout(() => setIsLoadingPassages(false), 160);
   };
 
-  // Currently selected passage object
-  const currentSelectedPassage = useMemo(() => {
-    if (!selectedPassageId) return null;
-    return activePassageList.find((p) => p.id === selectedPassageId) || null;
-  }, [selectedPassageId, activePassageList]);
-
-  // Difficulty badge letter
   const getDifficultyBadge = (diff: string) => {
     switch (diff) {
       case 'easy':
@@ -114,136 +191,594 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
     }
   };
 
-  // Special passages list (Screenshot 4)
-  const specialPassages = useMemo(() => {
-    return passages.filter((p) => {
-      if (p.language !== selectedLanguage) return false;
-      if (selectedCategoryTab !== 'all' && p.category !== selectedCategoryTab) return false;
-      return true;
-    });
-  }, [passages, selectedLanguage, selectedCategoryTab]);
-
   return (
-    <div style={{ backgroundColor: '#faf8f5', minHeight: 'calc(100vh - 70px)', padding: '24px 16px' }}>
-      <div className="container" style={{ maxWidth: '880px' }}>
-        
-        {/* VIEW 1: AR TYPING FORM SELECTOR (Screenshots 2 & 3) */}
-        {viewMode === 'ar_form' && (
-          <div
-            className="card"
-            style={{
-              background: '#ffffff',
-              borderRadius: '12px',
-              padding: '32px 28px',
-              boxShadow: '0 4px 12px rgba(0, 0, 0, 0.05)',
-              border: '1px solid #e2e8f0'
-            }}
-          >
-            {/* Top Teal Action Button: Click for Special Passages */}
-            <div style={{ textAlign: 'center', marginBottom: '20px' }}>
+    <div className="exam-portal-wrapper">
+      <div className="container">
+
+        {/* ========================================================
+            VIEW MODE 1: MODERN FINTECH / EDTECH EXAM PORTAL
+            ======================================================== */}
+        {viewMode === 'portal' && (
+          <div>
+            {/* Candidate Overview & Performance KPI Strip */}
+            <section className="exam-hero-banner">
+              <div className="exam-hero-top">
+                <div>
+                  <h1 className="exam-hero-title">
+                    <span>👮</span>
+                    {currentUser ? (
+                      <>Welcome, {currentUser.displayName}</>
+                    ) : (
+                      <>UP Police Typing Examination Portal</>
+                    )}
+                  </h1>
+                  <div className="exam-hero-sub">
+                    {currentUser ? (
+                      <>
+                        <span className="exam-hero-badge">Roll: {currentUser.rollNumber}</span>
+                        <span>•</span>
+                        <span>Post: {currentUser.category === 'up_police_asi' ? 'UP Police ASI' : 'UP Police Computer Operator'}</span>
+                        <span>•</span>
+                        <span
+                          style={{ textDecoration: 'underline', cursor: 'pointer', color: '#bfdbfe' }}
+                          onClick={onOpenDashboard}
+                        >
+                          View Dossier & Leaderboard →
+                        </span>
+                      </>
+                    ) : (
+                      <>
+                        <span>UPPRPB Benchmark: Hindi 25 WPM (Mangal/Kruti) | English 30 WPM | 85% Accuracy</span>
+                        <span>•</span>
+                        <button
+                          onClick={onOpenAuth}
+                          style={{
+                            background: '#ffffff',
+                            color: '#0f2c59',
+                            border: 'none',
+                            padding: '3px 10px',
+                            borderRadius: '12px',
+                            fontWeight: 700,
+                            fontSize: '0.75rem',
+                            cursor: 'pointer'
+                          }}
+                        >
+                          Candidate Login / Sign-up 👤
+                        </button>
+                      </>
+                    )}
+                  </div>
+                </div>
+
+                {/* Switch to Classic AR Typing Form */}
+                <button
+                  onClick={() => setViewMode('classic_form')}
+                  className="btn btn-sm"
+                  style={{
+                    background: 'rgba(255, 255, 255, 0.15)',
+                    color: '#ffffff',
+                    border: '1px solid rgba(255, 255, 255, 0.25)',
+                    fontWeight: 600,
+                    fontSize: '0.82rem',
+                    backdropFilter: 'blur(4px)'
+                  }}
+                  title="Switch to Date-wise Dropdown Form"
+                >
+                  <span>📅</span> Classic Date Selector ☰
+                </button>
+              </div>
+
+              {/* KPI Strip */}
+              <div className="exam-kpi-grid">
+                <div className="exam-kpi-card">
+                  <div className="exam-kpi-label">Tests Attempted</div>
+                  <div className="exam-kpi-value">{kpiStats.totalAttempted}</div>
+                  <div className="exam-kpi-hint">
+                    {kpiStats.totalAttempted > 0 ? `${kpiStats.passedTestsCount} passed` : 'Start your first mock test'}
+                  </div>
+                </div>
+
+                <div className="exam-kpi-card">
+                  <div className="exam-kpi-label">Top Net Speed</div>
+                  <div className="exam-kpi-value">
+                    {kpiStats.bestSpeed > 0 ? `${kpiStats.bestSpeed} WPM` : '--'}
+                  </div>
+                  <div className="exam-kpi-hint">Pass Target: 25 Hindi / 30 Eng</div>
+                </div>
+
+                <div className="exam-kpi-card">
+                  <div className="exam-kpi-label">Avg. Accuracy</div>
+                  <div className="exam-kpi-value">
+                    {kpiStats.avgAccuracy > 0 ? `${kpiStats.avgAccuracy}%` : '--'}
+                  </div>
+                  <div className="exam-kpi-hint">Min. Benchmark: ≥ 85.0%</div>
+                </div>
+
+                <div className="exam-kpi-card">
+                  <div className="exam-kpi-label">UPPRPB Status</div>
+                  <div
+                    className="exam-kpi-value"
+                    style={{
+                      fontSize: '1.25rem',
+                      color: kpiStats.isQualified ? '#86efac' : '#fde047'
+                    }}
+                  >
+                    {kpiStats.isQualified ? 'QUALIFIED 🟢' : kpiStats.totalAttempted > 0 ? 'PREPARING 🟡' : 'READY TO TEST'}
+                  </div>
+                  <div className="exam-kpi-hint">
+                    {kpiStats.isQualified ? 'Meets official standards' : 'Requires 85% Acc + Speed'}
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            {/* Exam Track Segmented Tabs */}
+            <div className="exam-track-tabs">
               <button
-                onClick={() => setViewMode('special_cards')}
-                className="btn"
-                style={{
-                  backgroundColor: '#0d9488',
-                  color: '#ffffff',
-                  fontWeight: 700,
-                  fontSize: '1rem',
-                  padding: '12px 28px',
-                  borderRadius: '8px',
-                  boxShadow: '0 2px 4px rgba(13, 148, 136, 0.25)',
-                  cursor: 'pointer',
-                  border: 'none',
-                  transition: 'all 0.2s ease'
-                }}
+                className={`exam-track-tab ${selectedExamTrack === 'all' ? 'active' : ''}`}
+                onClick={() => setSelectedExamTrack('all')}
               >
-                Click for Special Passages
+                <span>🎯</span> All Test Series
+                <span className="exam-track-count">{passages.length}</span>
+              </button>
+              <button
+                className={`exam-track-tab ${selectedExamTrack === 'up_police_co' ? 'active' : ''}`}
+                onClick={() => setSelectedExamTrack('up_police_co')}
+              >
+                <span>👮</span> UP Police Computer Operator
+                <span className="exam-track-count">
+                  {passages.filter((p) => p.category === 'up_police_co').length}
+                </span>
+              </button>
+              <button
+                className={`exam-track-tab ${selectedExamTrack === 'up_police_asi' ? 'active' : ''}`}
+                onClick={() => setSelectedExamTrack('up_police_asi')}
+              >
+                <span>📑</span> UP Police ASI (Clerk/Acct)
+                <span className="exam-track-count">
+                  {passages.filter((p) => p.category === 'up_police_asi').length}
+                </span>
+              </button>
+              <button
+                className={`exam-track-tab ${selectedExamTrack === 'mock15' ? 'active' : ''}`}
+                onClick={() => setSelectedExamTrack('mock15')}
+              >
+                <span>⏱️</span> 15-Min Official Mocks
+                <span className="exam-track-count">
+                  {passages.filter((p) => p.duration >= 15 || p.wordCount >= 400).length}
+                </span>
+              </button>
+              <button
+                className={`exam-track-tab ${selectedExamTrack === 'drills' ? 'active' : ''}`}
+                onClick={() => setSelectedExamTrack('drills')}
+              >
+                <span>⚡</span> Rapid Drills (2-5 Min)
+                <span className="exam-track-count">
+                  {passages.filter((p) => p.duration <= 5 || p.wordCount <= 300).length}
+                </span>
               </button>
             </div>
 
-            {/* OR Divider */}
+            {/* Fintech Filter Toolbar */}
+            <div className="exam-toolbar">
+              {/* Row 1: Language & Difficulty Filters */}
+              <div className="exam-toolbar-row">
+                {/* Language Pills */}
+                <div className="exam-filter-group">
+                  <span style={{ fontSize: '0.82rem', fontWeight: 700, color: '#64748b', marginRight: '4px' }}>
+                    Language:
+                  </span>
+                  <button
+                    className={`exam-filter-chip ${selectedLanguage === 'all' ? 'active' : ''}`}
+                    onClick={() => setSelectedLanguage('all')}
+                  >
+                    All Languages
+                  </button>
+                  <button
+                    className={`exam-filter-chip ${selectedLanguage === 'english' ? 'active' : ''}`}
+                    onClick={() => setSelectedLanguage('english')}
+                  >
+                    🇬🇧 English (30 WPM)
+                  </button>
+                  <button
+                    className={`exam-filter-chip ${selectedLanguage === 'hindi_mangal' ? 'active' : ''}`}
+                    onClick={() => setSelectedLanguage('hindi_mangal')}
+                  >
+                    🇮🇳 हिंदी मंगल (25 WPM)
+                  </button>
+                  <button
+                    className={`exam-filter-chip ${selectedLanguage === 'hindi_kruti' ? 'active' : ''}`}
+                    onClick={() => setSelectedLanguage('hindi_kruti')}
+                  >
+                    🇮🇳 कुर्ती देव 010 (25 WPM)
+                  </button>
+                </div>
+
+                {/* Duration Picker */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <span style={{ fontSize: '0.82rem', fontWeight: 700, color: '#64748b' }}>
+                    Timer:
+                  </span>
+                  <select
+                    value={selectedDuration}
+                    onChange={(e) => setSelectedDuration(Number(e.target.value))}
+                    style={{
+                      padding: '6px 12px',
+                      borderRadius: '6px',
+                      border: '1px solid #cbd5e1',
+                      fontSize: '0.85rem',
+                      fontWeight: 600,
+                      color: '#0f172a',
+                      background: '#ffffff',
+                      outline: 'none'
+                    }}
+                  >
+                    <option value={15}>15 Min (UPPRPB Exam Standard)</option>
+                    <option value={10}>10 Min</option>
+                    <option value={5}>5 Min (Speed Drill)</option>
+                    <option value={2}>2 Min (Sprint)</option>
+                  </select>
+                </div>
+              </div>
+
+              {/* Row 2: Difficulty Chips & Live Search Box */}
+              <div className="exam-toolbar-row">
+                {/* Difficulty Chips */}
+                <div className="exam-filter-group">
+                  <span style={{ fontSize: '0.82rem', fontWeight: 700, color: '#64748b', marginRight: '4px' }}>
+                    Difficulty:
+                  </span>
+                  <button
+                    className={`exam-filter-chip ${selectedDifficulty === 'all' ? 'active' : ''}`}
+                    onClick={() => setSelectedDifficulty('all')}
+                  >
+                    All
+                  </button>
+                  <button
+                    className={`exam-filter-chip ${selectedDifficulty === 'easy' ? 'active' : ''}`}
+                    onClick={() => setSelectedDifficulty('easy')}
+                  >
+                    🟢 Easy
+                  </button>
+                  <button
+                    className={`exam-filter-chip ${selectedDifficulty === 'medium' ? 'active' : ''}`}
+                    onClick={() => setSelectedDifficulty('medium')}
+                  >
+                    🟡 Moderate
+                  </button>
+                  <button
+                    className={`exam-filter-chip ${selectedDifficulty === 'hard' ? 'active' : ''}`}
+                    onClick={() => setSelectedDifficulty('hard')}
+                  >
+                    🔴 Hard
+                  </button>
+                </div>
+
+                {/* Instant Search Box */}
+                <div className="exam-search-box">
+                  <svg
+                    className="exam-search-icon"
+                    width="16"
+                    height="16"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    viewBox="0 0 24 24"
+                  >
+                    <circle cx="11" cy="11" r="8" />
+                    <line x1="21" y1="21" x2="16.65" y2="16.65" />
+                  </svg>
+                  <input
+                    type="text"
+                    className="exam-search-input"
+                    placeholder="Search mock test by topic, title or date..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                  />
+                  {searchQuery && (
+                    <button
+                      onClick={() => setSearchQuery('')}
+                      style={{
+                        position: 'absolute',
+                        right: '10px',
+                        top: '50%',
+                        transform: 'translateY(-50%)',
+                        background: 'none',
+                        border: 'none',
+                        cursor: 'pointer',
+                        color: '#94a3b8',
+                        fontSize: '0.9rem'
+                      }}
+                    >
+                      ✕
+                    </button>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Test Cards Header */}
             <div
               style={{
                 display: 'flex',
                 alignItems: 'center',
-                textAlign: 'center',
-                margin: '20px 0',
-                color: '#64748b',
-                fontWeight: 700,
-                fontSize: '0.9rem'
+                justifyContent: 'space-between',
+                marginBottom: '16px'
               }}
             >
-              <div style={{ flex: 1, height: '1px', backgroundColor: '#e2e8f0' }} />
-              <span style={{ padding: '0 16px' }}>OR</span>
-              <div style={{ flex: 1, height: '1px', backgroundColor: '#e2e8f0' }} />
+              <div style={{ fontSize: '0.95rem', fontWeight: 700, color: '#334155' }}>
+                Available Examination Tests ({filteredPortalPassages.length})
+              </div>
+              <div style={{ fontSize: '0.8rem', color: '#64748b' }}>
+                Showing {Math.min(visibleCount, filteredPortalPassages.length)} of {filteredPortalPassages.length}
+              </div>
             </div>
 
-            {/* Difficulty Legend (Screenshot 2) */}
-            <div
-              style={{
-                display: 'flex',
-                justifyContent: 'center',
-                gap: '16px',
-                marginBottom: '24px',
-                fontSize: '0.85rem',
-                color: '#475569',
-                flexWrap: 'wrap'
-              }}
-            >
-              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                <span className="ar-badge-difficulty ar-badge-b">B</span> - Basic
-              </span>
-              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                <span className="ar-badge-difficulty ar-badge-e">E</span> - Easy
-              </span>
-              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                <span className="ar-badge-difficulty ar-badge-m">M</span> - Moderate
-              </span>
-              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                <span className="ar-badge-difficulty ar-badge-h">H</span> - Hard
-              </span>
-            </div>
-
-            {/* AR Typing Platform Selection Form */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-              
-              {/* 1. Select Language */}
-              <div style={{ display: 'grid', gridTemplateColumns: '160px 1fr', alignItems: 'center', gap: '16px' }}>
-                <label style={{ fontWeight: 700, color: '#1e293b', fontSize: '0.95rem' }}>
-                  Select Language:
-                </label>
-                <select
-                  value={selectedLanguage}
-                  onChange={(e) => handleLanguageChange(e.target.value as Language)}
-                  style={{
-                    padding: '10px 14px',
-                    borderRadius: '6px',
-                    border: '1px solid #cbd5e1',
-                    fontSize: '0.95rem',
-                    fontFamily: 'inherit',
-                    backgroundColor: '#ffffff',
-                    outline: 'none',
-                    fontWeight: 600,
-                    color: '#0f172a'
+            {/* Test Cards Grid */}
+            {filteredPortalPassages.length === 0 ? (
+              <div
+                style={{
+                  background: '#ffffff',
+                  borderRadius: '12px',
+                  padding: '48px 24px',
+                  textAlign: 'center',
+                  border: '1px solid #e2e8f0'
+                }}
+              >
+                <div style={{ fontSize: '2.5rem', marginBottom: '12px' }}>🔍</div>
+                <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: '#0f172a', marginBottom: '8px' }}>
+                  No matching tests found
+                </h3>
+                <p style={{ fontSize: '0.9rem', color: '#64748b', marginBottom: '16px' }}>
+                  Try resetting your filters or search keywords to view all available tests.
+                </p>
+                <button
+                  className="btn btn-primary btn-sm"
+                  onClick={() => {
+                    setSelectedExamTrack('all');
+                    setSelectedLanguage('all');
+                    setSelectedDifficulty('all');
+                    setSearchQuery('');
                   }}
                 >
-                  <option value="english">English (UP Police CO & ASI - 30+ WPM)</option>
-                  <option value="hindi_mangal">हिंदी - मंगल इनस्क्रिप्ट (Mangal Inscript - 25+ WPM)</option>
-                  <option value="hindi_kruti">हिंदी - कुर्ती देव (Kruti Dev 010 - 25+ WPM)</option>
-                </select>
+                  Reset Filters
+                </button>
+              </div>
+            ) : (
+              <div className="exam-grid">
+                {filteredPortalPassages.slice(0, visibleCount).map((passage, idx) => {
+                  const past = pastAttemptsMap.get(passage.id) || pastAttemptsMap.get(passage.title);
+                  const simulatedCandidates = 14200 + ((idx * 843) % 19500);
+
+                  return (
+                    <div
+                      key={passage.id}
+                      className="exam-test-card"
+                      onClick={() => onStartTest(passage, selectedDuration)}
+                      style={{ cursor: 'pointer' }}
+                    >
+                      <div>
+                        {/* Badges Row */}
+                        <div className="exam-card-badges">
+                          <span
+                            className={`exam-tag ${
+                              passage.category === 'up_police_asi' ? 'exam-tag-asi' : 'exam-tag-co'
+                            }`}
+                          >
+                            {passage.category === 'up_police_asi' ? 'UP Police ASI' : 'UP Police CO'}
+                          </span>
+
+                          <span
+                            className={`exam-tag ${
+                              passage.language === 'english' ? 'exam-tag-lang-en' : 'exam-tag-lang-hi'
+                            }`}
+                          >
+                            {passage.language === 'english'
+                              ? 'English'
+                              : passage.language === 'hindi_mangal'
+                              ? 'मंगल'
+                              : 'कुर्ती देव'}
+                          </span>
+
+                          <span
+                            className={`exam-tag ${
+                              passage.difficulty === 'easy'
+                                ? 'exam-tag-diff-easy'
+                                : passage.difficulty === 'hard'
+                                ? 'exam-tag-diff-hard'
+                                : 'exam-tag-diff-medium'
+                            }`}
+                          >
+                            {passage.difficulty.toUpperCase()}
+                          </span>
+                        </div>
+
+                        {/* Title */}
+                        <h3 className="exam-card-title" title={passage.title}>
+                          {passage.title}
+                        </h3>
+
+                        {/* Date */}
+                        <div className="exam-card-date">
+                          📅 {toDisplayDate(passage.date || '2026-10-26')} • UPPRPB Pattern Mock
+                        </div>
+
+                        {/* Stats Row */}
+                        <div className="exam-card-stats">
+                          <div className="exam-card-stat">
+                            <div className="exam-card-stat-label">Duration</div>
+                            <div className="exam-card-stat-val">{selectedDuration}:00m</div>
+                          </div>
+                          <div className="exam-card-stat">
+                            <div className="exam-card-stat-label">Words</div>
+                            <div className="exam-card-stat-val">{passage.wordCount}</div>
+                          </div>
+                          <div className="exam-card-stat">
+                            <div className="exam-card-stat-label">Min. Acc</div>
+                            <div className="exam-card-stat-val">85%</div>
+                          </div>
+                        </div>
+
+                        {/* Past Performance Chip */}
+                        {past ? (
+                          <div
+                            className={`exam-card-past-score ${
+                              past.isQualified ? 'exam-score-passed' : 'exam-score-failed'
+                            }`}
+                          >
+                            <span>
+                              ✓ {past.isQualified ? 'Qualified' : 'Attempted'} • Best: {past.bestSpeed} WPM ({past.bestAcc}%)
+                            </span>
+                            <span style={{ fontSize: '0.68rem', opacity: 0.8 }}>
+                              {past.count} {past.count === 1 ? 'try' : 'tries'}
+                            </span>
+                          </div>
+                        ) : (
+                          <div className="exam-card-past-score exam-score-not-attempted">
+                            <span>○ Not yet attempted</span>
+                            <span style={{ fontSize: '0.68rem' }}>Ready to test</span>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Footer & CTA */}
+                      <div className="exam-card-footer">
+                        <div className="exam-card-attempts">
+                          <span>👥</span> {simulatedCandidates.toLocaleString()}
+                        </div>
+                        <button
+                          className="exam-start-btn"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onStartTest(passage, selectedDuration);
+                          }}
+                        >
+                          {past ? 'Retest ↺' : 'Start Test →'}
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+
+            {/* Load More Button */}
+            {visibleCount < filteredPortalPassages.length && (
+              <div style={{ textAlign: 'center', marginTop: '32px' }}>
+                <button
+                  className="btn btn-secondary"
+                  onClick={() => setVisibleCount((prev) => prev + 18)}
+                  style={{
+                    fontWeight: 700,
+                    padding: '10px 28px',
+                    borderRadius: '8px'
+                  }}
+                >
+                  Load More Tests ({filteredPortalPassages.length - visibleCount} remaining) ↓
+                </button>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* ========================================================
+            VIEW MODE 2: CLASSIC DATE-WISE FORM (AR TYPING REPLICA)
+            ======================================================== */}
+        {viewMode === 'classic_form' && (
+          <div style={{ maxWidth: '880px', margin: '0 auto' }}>
+            <div style={{ marginBottom: '16px' }}>
+              <button
+                onClick={() => setViewMode('portal')}
+                className="btn btn-secondary btn-sm"
+                style={{ fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+              >
+                <span>←</span> Back to Exam Series Portal
+              </button>
+            </div>
+
+            <div
+              className="card"
+              style={{
+                background: '#ffffff',
+                borderRadius: '12px',
+                padding: '32px 28px',
+                boxShadow: '0 4px 12px rgba(0, 0, 0, 0.05)',
+                border: '1px solid #e2e8f0'
+              }}
+            >
+              <div style={{ textAlign: 'center', marginBottom: '20px' }}>
+                <button
+                  onClick={() => setViewMode('portal')}
+                  className="btn"
+                  style={{
+                    backgroundColor: '#0284c7',
+                    color: '#ffffff',
+                    fontWeight: 700,
+                    fontSize: '1rem',
+                    padding: '12px 28px',
+                    borderRadius: '8px',
+                    boxShadow: '0 2px 4px rgba(2, 132, 199, 0.25)',
+                    cursor: 'pointer',
+                    border: 'none',
+                    transition: 'all 0.2s ease'
+                  }}
+                >
+                  View All Exam Test Cards (Fintech Grid)
+                </button>
               </div>
 
-              {/* 2. Select Date */}
-              <div style={{ display: 'grid', gridTemplateColumns: '160px 1fr', alignItems: 'center', gap: '16px' }}>
-                <label style={{ fontWeight: 700, color: '#1e293b', fontSize: '0.95rem' }}>
-                  Select Date:
-                </label>
-                <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
-                  {/* Calendar Input */}
-                  <input
-                    type="date"
-                    value={selectedDate}
-                    onChange={(e) => handleDateChange(e.target.value)}
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  textAlign: 'center',
+                  margin: '20px 0',
+                  color: '#64748b',
+                  fontWeight: 700,
+                  fontSize: '0.9rem'
+                }}
+              >
+                <div style={{ flex: 1, height: '1px', backgroundColor: '#e2e8f0' }} />
+                <span style={{ padding: '0 16px' }}>CLASSIC DATE-WISE PASSAGE SELECTOR</span>
+                <div style={{ flex: 1, height: '1px', backgroundColor: '#e2e8f0' }} />
+              </div>
+
+              {/* Difficulty Legend */}
+              <div
+                style={{
+                  display: 'flex',
+                  justifyContent: 'center',
+                  gap: '16px',
+                  marginBottom: '24px',
+                  fontSize: '0.85rem',
+                  color: '#475569',
+                  flexWrap: 'wrap'
+                }}
+              >
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                  <span className="ar-badge-difficulty ar-badge-b">B</span> - Basic
+                </span>
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                  <span className="ar-badge-difficulty ar-badge-e">E</span> - Easy
+                </span>
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                  <span className="ar-badge-difficulty ar-badge-m">M</span> - Moderate
+                </span>
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                  <span className="ar-badge-difficulty ar-badge-h">H</span> - Hard
+                </span>
+              </div>
+
+              {/* Form Controls */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                {/* 1. Select Language */}
+                <div style={{ display: 'grid', gridTemplateColumns: '160px 1fr', alignItems: 'center', gap: '16px' }}>
+                  <label style={{ fontWeight: 700, color: '#1e293b', fontSize: '0.95rem' }}>
+                    Select Language:
+                  </label>
+                  <select
+                    value={classicLanguage}
+                    onChange={(e) => handleClassicLanguageChange(e.target.value as Language)}
                     style={{
                       padding: '10px 14px',
                       borderRadius: '6px',
@@ -253,454 +788,222 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
                       backgroundColor: '#ffffff',
                       outline: 'none',
                       fontWeight: 600,
-                      color: '#0f172a',
-                      flex: '1 1 180px'
+                      color: '#0f172a'
                     }}
-                  />
-                  {/* AR Typing Official Date Selector Dropdown */}
+                  >
+                    <option value="english">English (UP Police CO & ASI - 30+ WPM)</option>
+                    <option value="hindi_mangal">हिंदी - मंगल इनस्क्रिप्ट (Mangal Inscript - 25+ WPM)</option>
+                    <option value="hindi_kruti">हिंदी - कुर्ती देव (Kruti Dev 010 - 25+ WPM)</option>
+                  </select>
+                </div>
+
+                {/* 2. Select Date */}
+                <div style={{ display: 'grid', gridTemplateColumns: '160px 1fr', alignItems: 'center', gap: '16px' }}>
+                  <label style={{ fontWeight: 700, color: '#1e293b', fontSize: '0.95rem' }}>
+                    Select Date:
+                  </label>
+                  <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
+                    <input
+                      type="date"
+                      value={classicDate}
+                      onChange={(e) => handleClassicDateChange(e.target.value)}
+                      style={{
+                        padding: '10px 14px',
+                        borderRadius: '6px',
+                        border: '1px solid #cbd5e1',
+                        fontSize: '0.95rem',
+                        fontFamily: 'inherit',
+                        backgroundColor: '#ffffff',
+                        outline: 'none',
+                        fontWeight: 600,
+                        color: '#0f172a',
+                        flex: '1 1 180px'
+                      }}
+                    />
+                    <select
+                      value={classicDate}
+                      onChange={(e) => handleClassicDateChange(e.target.value)}
+                      style={{
+                        padding: '10px 14px',
+                        borderRadius: '6px',
+                        border: '1px solid #cbd5e1',
+                        fontSize: '0.9rem',
+                        fontFamily: 'inherit',
+                        backgroundColor: '#f8fafc',
+                        outline: 'none',
+                        fontWeight: 600,
+                        color: '#1e293b',
+                        flex: '1 1 200px'
+                      }}
+                    >
+                      {classicAvailableDates.map((d, idx) => (
+                        <option key={d} value={d}>
+                          {toDisplayDate(d)} {idx === 0 ? '(Latest Passage)' : ''}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+
+                {/* 3. Select Passage */}
+                <div style={{ display: 'grid', gridTemplateColumns: '160px 1fr', alignItems: 'flex-start', gap: '16px' }}>
+                  <label style={{ fontWeight: 700, color: '#1e293b', fontSize: '0.95rem', paddingTop: '10px' }}>
+                    Select Passage:
+                  </label>
+                  <div style={{ position: 'relative' }}>
+                    <div
+                      onClick={() => !isLoadingPassages && setIsClassicDropdownOpen(!isClassicDropdownOpen)}
+                      style={{
+                        padding: '12px 14px',
+                        borderRadius: '6px',
+                        border: '1px solid #cbd5e1',
+                        fontSize: '0.95rem',
+                        backgroundColor: isLoadingPassages ? '#f1f5f9' : '#ffffff',
+                        cursor: isLoadingPassages ? 'wait' : 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        fontWeight: currentClassicSelectedPassage ? 700 : 500,
+                        color: currentClassicSelectedPassage ? '#0f172a' : '#64748b',
+                        boxShadow: isClassicDropdownOpen ? '0 0 0 2px rgba(2, 132, 199, 0.2)' : 'none'
+                      }}
+                    >
+                      <span>
+                        {isLoadingPassages
+                          ? 'Loading passages...'
+                          : currentClassicSelectedPassage
+                          ? `${currentClassicSelectedPassage.title} (${currentClassicSelectedPassage.wordCount} words)`
+                          : `Select Passage (${classicActiveList.length} available)`}
+                      </span>
+                      <span>▼</span>
+                    </div>
+
+                    {isClassicDropdownOpen && !isLoadingPassages && (
+                      <div
+                        style={{
+                          position: 'absolute',
+                          top: '100%',
+                          left: 0,
+                          right: 0,
+                          marginTop: '4px',
+                          backgroundColor: '#ffffff',
+                          borderRadius: '8px',
+                          border: '1px solid #cbd5e1',
+                          boxShadow: '0 10px 25px rgba(0,0,0,0.1)',
+                          zIndex: 50,
+                          maxHeight: '260px',
+                          overflowY: 'auto'
+                        }}
+                      >
+                        {classicActiveList.map((p) => {
+                          const badge = getDifficultyBadge(p.difficulty);
+                          return (
+                            <div
+                              key={p.id}
+                              onClick={() => {
+                                setClassicPassageId(p.id);
+                                setIsClassicDropdownOpen(false);
+                              }}
+                              style={{
+                                padding: '10px 14px',
+                                borderBottom: '1px solid #f1f5f9',
+                                cursor: 'pointer',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'space-between',
+                                backgroundColor: classicPassageId === p.id ? '#f0f9ff' : 'transparent'
+                              }}
+                            >
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                <span className={`ar-badge-difficulty ${badge.cls}`}>{badge.label}</span>
+                                <span style={{ fontWeight: 600, color: '#1e293b' }}>{p.title}</span>
+                              </div>
+                              <span style={{ fontSize: '0.85rem', color: '#64748b' }}>
+                                {p.wordCount} words
+                              </span>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* 4. Select Duration */}
+                <div style={{ display: 'grid', gridTemplateColumns: '160px 1fr', alignItems: 'center', gap: '16px' }}>
+                  <label style={{ fontWeight: 700, color: '#1e293b', fontSize: '0.95rem' }}>
+                    Select Duration:
+                  </label>
                   <select
-                    value={selectedDate}
-                    onChange={(e) => handleDateChange(e.target.value)}
+                    value={classicDuration}
+                    onChange={(e) => setClassicDuration(Number(e.target.value))}
                     style={{
                       padding: '10px 14px',
                       borderRadius: '6px',
                       border: '1px solid #cbd5e1',
-                      fontSize: '0.9rem',
+                      fontSize: '0.95rem',
                       fontFamily: 'inherit',
-                      backgroundColor: '#f8fafc',
+                      backgroundColor: '#ffffff',
                       outline: 'none',
                       fontWeight: 600,
-                      color: '#1e293b',
-                      flex: '1 1 200px'
+                      color: '#0f172a'
                     }}
                   >
-                    {availableIsoDates.map((d, idx) => (
-                      <option key={d} value={d}>
-                        {toDisplayDate(d)} {idx === 0 ? '(Latest AR Typing)' : ''}
-                      </option>
-                    ))}
+                    <option value={15}>15:00 min (Official UP Police Benchmark)</option>
+                    <option value={10}>10:00 min</option>
+                    <option value={5}>05:00 min (Quick Drill)</option>
                   </select>
                 </div>
-              </div>
 
-              {/* Date Status & Feedback Banner (AR Typing Platform Toast Notification) */}
-              <div style={{ paddingLeft: '176px' }}>
-                {activePassageList.length > 0 ? (
-                  <div
+                {/* 5. Input Limit */}
+                <div style={{ display: 'grid', gridTemplateColumns: '160px 1fr', alignItems: 'center', gap: '16px' }}>
+                  <label style={{ fontWeight: 700, color: '#1e293b', fontSize: '0.95rem' }}>
+                    Input Limit:
+                  </label>
+                  <select
+                    value={classicInputLimit}
+                    onChange={(e) => setClassicInputLimit(e.target.value)}
                     style={{
-                      background: '#f0fdf4',
-                      border: '1px solid #bbf7d0',
-                      color: '#166534',
-                      padding: '8px 14px',
-                      borderRadius: '6px',
-                      fontSize: '0.85rem',
-                      fontWeight: 600,
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: '6px'
-                    }}
-                  >
-                    <span>✓</span> Total {activePassageList.length} passage(s) found for {toDisplayDate(selectedDate)}
-                  </div>
-                ) : (
-                  <div
-                    style={{
-                      background: '#fffbeb',
-                      border: '1px solid #fde68a',
-                      color: '#92400e',
                       padding: '10px 14px',
                       borderRadius: '6px',
-                      fontSize: '0.85rem'
+                      border: '1px solid #cbd5e1',
+                      fontSize: '0.95rem',
+                      fontFamily: 'inherit',
+                      backgroundColor: '#ffffff',
+                      outline: 'none',
+                      fontWeight: 600,
+                      color: '#0f172a'
                     }}
                   >
-                    <div style={{ fontWeight: 700, marginBottom: '6px' }}>
-                      ⚠️ No passages uploaded for {toDisplayDate(selectedDate)} yet.
-                    </div>
-                    <div style={{ fontSize: '0.8rem', color: '#b45309', marginBottom: '8px' }}>
-                      Please select an available test date from AR Typing:
-                    </div>
-                    <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
-                      {availableIsoDates.slice(0, 6).map((d) => (
-                        <button
-                          key={d}
-                          type="button"
-                          onClick={() => handleDateChange(d)}
-                          style={{
-                            padding: '4px 10px',
-                            borderRadius: '4px',
-                            border: '1px solid #f59e0b',
-                            background: '#ffffff',
-                            color: '#b45309',
-                            fontWeight: 700,
-                            fontSize: '0.75rem',
-                            cursor: 'pointer'
-                          }}
-                        >
-                          {toDisplayDate(d)}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
+                    <option value="Words">Words (Official Exam Mode)</option>
+                    <option value="Full Passage">Full Passage</option>
+                  </select>
+                </div>
 
-              {/* 3. Select Passage (Custom Dropdown matching Screenshot 2) */}
-              <div style={{ display: 'grid', gridTemplateColumns: '160px 1fr', alignItems: 'flex-start', gap: '16px', position: 'relative' }}>
-                <label style={{ fontWeight: 700, color: '#1e293b', fontSize: '0.95rem', marginTop: '10px' }}>
-                  Select Passage:
-                </label>
-                
-                <div style={{ position: 'relative', width: '100%' }}>
-                  {isLoadingPassages ? (
-                    <div
-                      style={{
-                        padding: '10px 14px',
-                        color: '#0284c7',
-                        fontWeight: 700,
-                        fontSize: '0.95rem'
-                      }}
-                    >
-                      Loading passages for {toDisplayDate(selectedDate)}...
-                    </div>
-                  ) : (
-                    <>
-                      <button
-                        type="button"
-                        onClick={() => setIsPassageDropdownOpen(!isPassageDropdownOpen)}
-                        style={{
-                          width: '100%',
-                          padding: '10px 14px',
-                          borderRadius: '6px',
-                          border: isPassageDropdownOpen ? '2px solid #000000' : '1px solid #cbd5e1',
-                          fontSize: '0.95rem',
-                          fontFamily: 'inherit',
-                          backgroundColor: selectedPassageId ? '#f0fdf4' : '#000000',
-                          color: selectedPassageId ? '#0f172a' : '#ffffff',
-                          fontWeight: 700,
-                          textAlign: 'left',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'space-between',
-                          cursor: 'pointer'
-                        }}
-                      >
-                        <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', paddingRight: '8px' }}>
-                          {currentSelectedPassage ? currentSelectedPassage.title : 'Select passage for typing'}
-                        </span>
-                        <span style={{ fontSize: '0.8rem' }}>▼</span>
-                      </button>
-
-                      {/* Dropdown Menu Popup (Screenshot 2) */}
-                      {isPassageDropdownOpen && (
-                        <div
-                          style={{
-                            position: 'absolute',
-                            top: '100%',
-                            left: 0,
-                            right: 0,
-                            marginTop: '4px',
-                            background: '#ffffff',
-                            border: '1px solid #cbd5e1',
-                            borderRadius: '8px',
-                            boxShadow: '0 10px 25px rgba(0, 0, 0, 0.15)',
-                            zIndex: 50,
-                            maxHeight: '320px',
-                            overflowY: 'auto'
-                          }}
-                        >
-                          {activePassageList.length === 0 ? (
-                            <div style={{ padding: '16px', color: '#64748b', textAlign: 'center', fontSize: '0.9rem' }}>
-                              No passages found for this date.
-                            </div>
-                          ) : (
-                            activePassageList.map((p) => {
-                              const badge = getDifficultyBadge(p.difficulty);
-                              const isSelected = p.id === selectedPassageId;
-                              return (
-                                <div
-                                  key={p.id}
-                                  onClick={() => {
-                                    setSelectedPassageId(p.id);
-                                    setIsPassageDropdownOpen(false);
-                                  }}
-                                  style={{
-                                    padding: '12px 14px',
-                                    borderBottom: '1px solid #f1f5f9',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'space-between',
-                                    cursor: 'pointer',
-                                    backgroundColor: isSelected ? '#f0fdf4' : 'transparent',
-                                    transition: 'background 0.15s ease'
-                                  }}
-                                  onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#f8fafc')}
-                                  onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = isSelected ? '#f0fdf4' : 'transparent')}
-                                >
-                                  <div style={{ flex: 1, paddingRight: '12px' }}>
-                                    <div style={{ fontWeight: 600, fontSize: '0.9rem', color: '#0f172a' }}>
-                                      {p.title}
-                                    </div>
-                                    <div style={{ fontSize: '0.75rem', color: '#64748b', marginTop: '2px' }}>
-                                      {p.wordCount} words • {p.category === 'up_police_co' ? 'UP Police CO' : 'UP Police ASI'}
-                                    </div>
-                                  </div>
-                                  <span className={`ar-badge-difficulty ${badge.cls}`}>
-                                    {badge.label}
-                                  </span>
-                                </div>
-                              );
-                            })
-                          )}
-
-                          {/* Clear Selection */}
-                          {selectedPassageId && (
-                            <div
-                              onClick={() => {
-                                setSelectedPassageId('');
-                                setIsPassageDropdownOpen(false);
-                              }}
-                              style={{
-                                padding: '12px 14px',
-                                color: '#dc2626',
-                                fontWeight: 700,
-                                fontSize: '0.85rem',
-                                textAlign: 'left',
-                                cursor: 'pointer',
-                                background: '#fff5f5'
-                              }}
-                            >
-                              Clear Selection
-                            </div>
-                          )}
-                        </div>
-                      )}
-                    </>
-                  )}
+                {/* Start Button */}
+                <div style={{ marginTop: '16px' }}>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const passToStart = currentClassicSelectedPassage || classicActiveList[0];
+                      if (passToStart) {
+                        onStartTest(passToStart, classicDuration);
+                      }
+                    }}
+                    disabled={classicActiveList.length === 0}
+                    className="btn btn-primary"
+                    style={{
+                      padding: '12px 36px',
+                      fontSize: '1rem',
+                      fontWeight: 700,
+                      borderRadius: '8px'
+                    }}
+                  >
+                    {classicPassageId ? 'Start Typing Test →' : 'Start Latest Test →'}
+                  </button>
                 </div>
               </div>
-
-              {/* 4. Time Duration */}
-              <div style={{ display: 'grid', gridTemplateColumns: '160px 1fr', alignItems: 'center', gap: '16px' }}>
-                <label style={{ fontWeight: 700, color: '#1e293b', fontSize: '0.95rem' }}>
-                  Time Duration:
-                </label>
-                <select
-                  value={selectedDuration}
-                  onChange={(e) => setSelectedDuration(parseInt(e.target.value, 10))}
-                  style={{
-                    padding: '10px 14px',
-                    borderRadius: '6px',
-                    border: '1px solid #cbd5e1',
-                    fontSize: '0.95rem',
-                    fontFamily: 'inherit',
-                    backgroundColor: '#ffffff',
-                    outline: 'none',
-                    fontWeight: 600,
-                    color: '#0f172a'
-                  }}
-                >
-                  <option value={15}>15:00 min (Official UP Police Benchmark)</option>
-                  <option value={10}>10:00 min</option>
-                  <option value={5}>05:00 min (Quick Drill)</option>
-                </select>
-              </div>
-
-              {/* 5. Input Limit */}
-              <div style={{ display: 'grid', gridTemplateColumns: '160px 1fr', alignItems: 'center', gap: '16px' }}>
-                <label style={{ fontWeight: 700, color: '#1e293b', fontSize: '0.95rem' }}>
-                  Input Limit:
-                </label>
-                <select
-                  value={inputLimit}
-                  onChange={(e) => setInputLimit(e.target.value)}
-                  style={{
-                    padding: '10px 14px',
-                    borderRadius: '6px',
-                    border: '1px solid #cbd5e1',
-                    fontSize: '0.95rem',
-                    fontFamily: 'inherit',
-                    backgroundColor: '#ffffff',
-                    outline: 'none',
-                    fontWeight: 600,
-                    color: '#0f172a'
-                  }}
-                >
-                  <option value="Words">Words (Official Exam Mode)</option>
-                  <option value="Full Passage">Full Passage</option>
-                </select>
-              </div>
-
-              {/* Action Button: Next (Screenshot 3) */}
-              <div style={{ marginTop: '16px', display: 'flex', gap: '12px', justifyContent: 'flex-start' }}>
-                <button
-                  type="button"
-                  onClick={() => {
-                    const passToStart = currentSelectedPassage || activePassageList[0];
-                    if (passToStart) {
-                      onStartTest(passToStart, selectedDuration);
-                    }
-                  }}
-                  disabled={activePassageList.length === 0}
-                  className="btn"
-                  style={{
-                    backgroundColor: activePassageList.length > 0 ? (selectedPassageId ? '#0d9488' : '#0f172a') : '#94a3b8',
-                    color: '#ffffff',
-                    fontWeight: 700,
-                    fontSize: '1rem',
-                    padding: '12px 36px',
-                    borderRadius: '6px',
-                    border: 'none',
-                    cursor: activePassageList.length > 0 ? 'pointer' : 'not-allowed',
-                    boxShadow: selectedPassageId ? '0 2px 6px rgba(13, 148, 136, 0.3)' : 'none',
-                    transition: 'all 0.2s ease'
-                  }}
-                >
-                  {selectedPassageId ? 'Start Typing Test' : 'Next'}
-                </button>
-              </div>
-
             </div>
-          </div>
-        )}
-
-        {/* VIEW 2: SPECIAL PASSAGES CARDS (Screenshot 4) */}
-        {viewMode === 'special_cards' && (
-          <div>
-            {/* Top Navigation Bar */}
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px', flexWrap: 'wrap', gap: '12px' }}>
-              <button
-                onClick={() => setViewMode('ar_form')}
-                className="btn btn-secondary btn-sm"
-                style={{ fontWeight: 700, display: 'flex', alignItems: 'center', gap: '6px' }}
-              >
-                <span>←</span> Back to Date-wise Passages
-              </button>
-
-              <div style={{ display: 'flex', gap: '8px' }}>
-                <button
-                  onClick={() => setSelectedLanguage('english')}
-                  className={`btn btn-sm ${selectedLanguage === 'english' ? 'btn-primary' : 'btn-secondary'}`}
-                >
-                  English
-                </button>
-                <button
-                  onClick={() => setSelectedLanguage('hindi_mangal')}
-                  className={`btn btn-sm ${selectedLanguage === 'hindi_mangal' ? 'btn-primary' : 'btn-secondary'}`}
-                >
-                  हिंदी मंगल
-                </button>
-                <button
-                  onClick={() => setSelectedLanguage('hindi_kruti')}
-                  className={`btn btn-sm ${selectedLanguage === 'hindi_kruti' ? 'btn-primary' : 'btn-secondary'}`}
-                >
-                  कुर्ती देव
-                </button>
-              </div>
-            </div>
-
-            {/* Post Filter Tabs */}
-            <div style={{ display: 'flex', gap: '8px', marginBottom: '20px' }}>
-              <button
-                onClick={() => setSelectedCategoryTab('all')}
-                className={`btn btn-sm ${selectedCategoryTab === 'all' ? 'btn-primary' : 'btn-secondary'}`}
-              >
-                All Special Passages ({specialPassages.length})
-              </button>
-              <button
-                onClick={() => setSelectedCategoryTab('up_police_co')}
-                className={`btn btn-sm ${selectedCategoryTab === 'up_police_co' ? 'btn-primary' : 'btn-secondary'}`}
-              >
-                UP Police Computer Operator
-              </button>
-              <button
-                onClick={() => setSelectedCategoryTab('up_police_asi')}
-                className={`btn btn-sm ${selectedCategoryTab === 'up_police_asi' ? 'btn-primary' : 'btn-secondary'}`}
-              >
-                UP Police ASI (Clerk/Acct)
-              </button>
-            </div>
-
-            {/* Special Cards Grid (Screenshot 4) */}
-            <div
-              style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fill, minmax(360px, 1fr))',
-                gap: '20px'
-              }}
-            >
-              {specialPassages.map((passage, idx) => {
-                const simulatedCount = 1000000 + ((idx * 137482) % 1500000);
-                return (
-                  <div
-                    key={passage.id}
-                    className="ar-special-card"
-                    onClick={() => onStartTest(passage, selectedDuration)}
-                  >
-                    <div>
-                      {/* Created Date */}
-                      <div style={{ fontSize: '0.75rem', fontWeight: 800, color: '#64748b', letterSpacing: '0.5px', marginBottom: '8px' }}>
-                        CREATED- {toDisplayDate(passage.date || '2026-10-25').toUpperCase()}
-                      </div>
-
-                      {/* Main Police Exam Header */}
-                      <h3 style={{ fontSize: '1.2rem', fontWeight: 800, color: '#0f172a', marginBottom: '4px', lineHeight: 1.3 }}>
-                        UP Police SI/ASI/Computer Oper...
-                      </h3>
-
-                      {/* Specific Topic Title */}
-                      <div style={{ fontSize: '0.9rem', fontWeight: 600, color: '#0284c7', marginBottom: '16px' }}>
-                        {passage.title}
-                      </div>
-                    </div>
-
-                    <div>
-                      {/* Words & Duration Row (Screenshot 4) */}
-                      <div
-                        style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'space-between',
-                          fontSize: '0.9rem',
-                          color: '#334155',
-                          fontWeight: 600,
-                          marginBottom: '16px'
-                        }}
-                      >
-                        <span>{passage.wordCount} words</span>
-                        <span>{passage.duration || 15}:00 min.</span>
-                      </div>
-
-                      {/* User Count Pill & Start Button */}
-                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                        <div
-                          style={{
-                            background: '#000000',
-                            color: '#ffffff',
-                            padding: '6px 14px',
-                            borderRadius: '6px',
-                            fontWeight: 700,
-                            fontSize: '0.85rem',
-                            display: 'inline-flex',
-                            alignItems: 'center',
-                            gap: '6px'
-                          }}
-                        >
-                          <span>👤</span> {simulatedCount.toLocaleString()}
-                        </div>
-
-                        <button
-                          className="btn btn-sm btn-primary"
-                          style={{ fontWeight: 700 }}
-                        >
-                          Start Test →
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-
           </div>
         )}
 
