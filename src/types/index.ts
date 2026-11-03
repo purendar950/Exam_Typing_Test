@@ -34,6 +34,7 @@ export interface SubCategoryFilter {
 
 export interface Passage {
   id: string;
+  testNumber?: number;
   title: string;
   language: Language;
   category: ExamCategory;
