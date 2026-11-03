@@ -462,6 +462,10 @@ export const App: React.FC = () => {
         onDailyLiveGenerated={(tests) => {
           setDailyLivePassages(tests);
         }}
+        currentUser={currentUser}
+        onLoginSuccess={(user) => {
+          setCurrentUser(user);
+        }}
       />
 
       <PwaInstallPrompt />
