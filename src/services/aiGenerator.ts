@@ -29,6 +29,8 @@ export interface DetectedModel {
   name: string;
   isFree: boolean;
   contextLength?: number;
+  isReplying?: boolean;
+  replyStatus?: 'replying' | 'failed' | 'testing' | 'untested';
 }
 
 export interface AiProviderPreset {
@@ -48,12 +50,13 @@ export const AI_PRESETS: AiProviderPreset[] = [
     name: 'Groq Cloud',
     badge: '⚡ Ultra-Fast & Free Tier',
     baseUrl: 'https://api.groq.com/openai/v1',
-    defaultModel: 'llama-3.3-70b-versatile',
-    model: 'llama-3.3-70b-versatile',
-    info: 'Ultra-fast inference (500+ tok/s) with generous free tier for Llama 3.3.',
+    defaultModel: 'llama-3.1-8b-instant',
+    model: 'llama-3.1-8b-instant',
+    info: 'Ultra-fast inference (500+ tok/s) with generous free tier for Llama 3.1 & 3.3.',
     popularModels: [
-      { id: 'llama-3.3-70b-versatile', name: 'Llama 3.3 70B Versatile (Top Quality)', isFree: true },
-      { id: 'llama-3.1-8b-instant', name: 'Llama 3.1 8B Instant (Ultra Fast)', isFree: true },
+      { id: 'llama-3.1-8b-instant', name: 'Llama 3.1 8B Instant (Active & Fast)', isFree: true },
+      { id: 'deepseek-r1-distill-llama-70b', name: 'DeepSeek R1 Distill 70B (High Reasoning)', isFree: true },
+      { id: 'llama-3.3-70b-versatile', name: 'Llama 3.3 70B Versatile', isFree: true },
       { id: 'mixtral-8x7b-32768', name: 'Mixtral 8x7B (32K context)', isFree: true },
       { id: 'gemma2-9b-it', name: 'Google Gemma 2 9B IT', isFree: true }
     ]
@@ -356,6 +359,56 @@ export async function testAiConnection(config: AiConfig): Promise<{ success: boo
     return { success: true, message: `Connected successfully! Response: "${reply.trim()}"` };
   } catch (err: any) {
     return { success: false, message: `Network error: ${err?.message || 'Unable to reach endpoint'}` };
+  }
+}
+
+// Quick ping to check if a specific model is replying actively (no 404/auth errors)
+export async function verifyModelReplying(
+  baseUrl: string,
+  apiKey: string,
+  model: string
+): Promise<{ replying: boolean; message: string }> {
+  const cleanUrl = cleanBaseUrl(baseUrl);
+  const endpoint = `${cleanUrl}/chat/completions`;
+  const trimmedKey = (apiKey || '').trim();
+
+  try {
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json'
+    };
+    if (trimmedKey) {
+      headers['Authorization'] = `Bearer ${trimmedKey}`;
+    }
+    if (cleanUrl.includes('openrouter')) {
+      headers['HTTP-Referer'] = 'https://purendar950.github.io/Typing-computer-operator-/';
+      headers['X-Title'] = 'UP Typing Exam Suite';
+    }
+
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 7000);
+
+    const body = {
+      model,
+      messages: [{ role: 'user', content: 'Ping' }],
+      max_tokens: 2,
+      temperature: 0.1
+    };
+
+    const res = await fetch(endpoint, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify(body),
+      signal: controller.signal
+    });
+    clearTimeout(timeoutId);
+
+    if (res.ok) {
+      return { replying: true, message: 'Model is replying actively and ready!' };
+    }
+    const errText = await res.text();
+    return { replying: false, message: `HTTP ${res.status}: ${errText.slice(0, 140)}` };
+  } catch (err: any) {
+    return { replying: false, message: err?.message || 'Connection failed' };
   }
 }
 
