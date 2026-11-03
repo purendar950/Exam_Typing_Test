@@ -38,6 +38,8 @@ export interface Passage {
   title: string;
   language: Language;
   category: ExamCategory;
+  categoryGroup?: string;
+  examSlug?: string;
   duration: number; // in minutes (default 15 for UP Police CO / ASI)
   wordCount: number;
   text: string;

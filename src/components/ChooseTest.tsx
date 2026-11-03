@@ -988,6 +988,22 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
   const mock15Count = useMemo(() => passages.filter((p) => p.duration >= 15 || p.wordCount >= 400).length, [passages]);
   const drillsCount = useMemo(() => passages.filter((p) => p.duration <= 5 || p.wordCount <= 300).length, [passages]);
 
+  // Active exam/post filtered passage counts for mode badges
+  const activePostPassages = useMemo(() => {
+    const activeGroup = selectedExamProfile?.categoryGroup || (activePost ? activePost.categoryGroup : undefined);
+    const activeSlug = selectedExamProfile?.slug || (activePost ? activePost.id : undefined);
+
+    return passages.filter((p) => {
+      if (activeSlug && p.examSlug && p.examSlug !== activeSlug) return false;
+      if (activeGroup && p.categoryGroup && p.categoryGroup !== activeGroup) return false;
+      return true;
+    });
+  }, [passages, selectedExamProfile, activePost]);
+
+  const activeEngCount = useMemo(() => activePostPassages.filter((p) => p.language === 'english').length, [activePostPassages]);
+  const activeMangalCount = useMemo(() => activePostPassages.filter((p) => p.language === 'hindi_mangal').length, [activePostPassages]);
+  const activeKrutiCount = useMemo(() => activePostPassages.filter((p) => p.language === 'hindi_kruti').length, [activePostPassages]);
+
   // Exam Courses (Matching TestMentor Screenshot with Actual Data)
   const EXAM_COURSES: ExamCourse[] = useMemo(
     () => [
@@ -1115,7 +1131,7 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
         icon: '🇬🇧',
         bg: '#eff6ff',
         border: '#bfdbfe',
-        badge: `${engCount} Tests • ${spd} WPM Target`,
+        badge: `${activeEngCount > 0 ? activeEngCount : engCount} Tests • ${spd} WPM Target`,
         badgeColor: '#1d4ed8',
         badgeBg: '#dbeafe',
         description: `Official ${spd} WPM qualifying passages for ${activePost?.postTitle || 'Exam'}.`,
@@ -1134,7 +1150,7 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
         icon: '🇮🇳',
         bg: '#fef3c7',
         border: '#fde68a',
-        badge: `${mangalCount} Tests • ${spd} WPM Target`,
+        badge: `${activeMangalCount > 0 ? activeMangalCount : mangalCount} Tests • ${spd} WPM Target`,
         badgeColor: '#b45309',
         badgeBg: '#fef3c7',
         description: `Official Mangal Inscript layout at ${spd} WPM benchmark speed.`,
@@ -1149,7 +1165,7 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
         icon: '🇮🇳',
         bg: '#f0fdf4',
         border: '#bbf7d0',
-        badge: `${krutiCount} Tests • ${spd} WPM Target`,
+        badge: `${activeKrutiCount > 0 ? activeKrutiCount : krutiCount} Tests • ${spd} WPM Target`,
         badgeColor: '#15803d',
         badgeBg: '#dcfce7',
         description: 'Traditional Remington Hindi layout with authentic character codes.',
@@ -1260,10 +1276,23 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
 
   // Filtered passages for Level 3
   const filteredLevel3Passages = useMemo(() => {
+    const activeGroup = selectedExamProfile?.categoryGroup || (activePost ? activePost.categoryGroup : undefined);
+    const activeSlug = selectedExamProfile?.slug || (activePost ? activePost.id : undefined);
+
     const filtered = passages.filter((p) => {
       // 1. Exam Filter
-      if (currentExam.categoryFilter === 'up_police_co' && p.category !== 'up_police_co') return false;
-      if (currentExam.categoryFilter === 'up_police_asi' && p.category !== 'up_police_asi') return false;
+      if (currentExam.categoryFilter === 'up_police_co') {
+        if (p.category !== 'up_police_co') return false;
+      } else if (currentExam.categoryFilter === 'up_police_asi') {
+        if (p.category !== 'up_police_asi') return false;
+      } else if (activeSlug && p.examSlug && p.examSlug !== activeSlug) {
+        return false;
+      } else if (activeGroup) {
+        if (p.categoryGroup && p.categoryGroup !== activeGroup) {
+          return false;
+        }
+      }
+
       if (currentExam.categoryFilter === 'drills' && (p.duration > 5 && p.wordCount > 250)) return false;
       if (currentExam.categoryFilter === 'mock15' && p.duration < 15 && p.wordCount < 400) return false;
 
@@ -1323,7 +1352,7 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
       }
       return 0;
     });
-  }, [passages, currentExam, currentMode, selectedDifficulty, searchQuery, level3SortBy, todayIso]);
+  }, [passages, currentExam, currentMode, selectedDifficulty, searchQuery, level3SortBy, todayIso, selectedExamProfile, activePost]);
 
   // Reset pagination on filter change
   useEffect(() => {
