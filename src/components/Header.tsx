@@ -1,5 +1,6 @@
 import React from 'react';
 import { TestSettings } from '../types';
+import { UserProfile } from '../services/firebase';
 
 interface HeaderProps {
   currentTab: 'tests' | 'learn' | 'book';
@@ -9,6 +10,9 @@ interface HeaderProps {
   onOpenHindiHelper: () => void;
   settings: TestSettings;
   onToggleSound: () => void;
+  currentUser: UserProfile | null;
+  onOpenAuth: () => void;
+  onOpenDashboard: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -18,7 +22,10 @@ export const Header: React.FC<HeaderProps> = ({
   onOpenHistory,
   onOpenHindiHelper,
   settings,
-  onToggleSound
+  onToggleSound,
+  currentUser,
+  onOpenAuth,
+  onOpenDashboard
 }) => {
   return (
     <header className="app-header">
@@ -104,6 +111,64 @@ export const Header: React.FC<HeaderProps> = ({
               </svg>
             )}
           </button>
+
+          {currentUser ? (
+            <button
+              className="nav-btn candidate-profile-btn"
+              onClick={onOpenDashboard}
+              title={`Candidate: ${currentUser.displayName} (${currentUser.rollNumber}) • View Stats & Cloud Records`}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px',
+                background: '#f0fdf4',
+                border: '1px solid #86efac',
+                color: '#166534',
+                fontWeight: 600,
+                borderRadius: '20px',
+                padding: '4px 12px',
+                marginLeft: '4px'
+              }}
+            >
+              <span style={{ fontSize: '1.05rem' }}>👤</span>
+              <span style={{ maxWidth: '110px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                {currentUser.displayName}
+              </span>
+              <span
+                style={{
+                  fontSize: '0.68rem',
+                  background: currentUser.uid.startsWith('local-') ? '#fef3c7' : '#dcfce7',
+                  color: currentUser.uid.startsWith('local-') ? '#92400e' : '#15803d',
+                  padding: '1px 6px',
+                  borderRadius: '10px',
+                  fontWeight: 700
+                }}
+              >
+                {currentUser.uid.startsWith('local-') ? '⚡ Local' : '☁️ Cloud'}
+              </span>
+            </button>
+          ) : (
+            <button
+              className="nav-btn"
+              onClick={onOpenAuth}
+              title="Candidate Sign In / Sign Up (Cloud Records)"
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px',
+                background: '#eff6ff',
+                border: '1px solid #bfdbfe',
+                color: '#1d4ed8',
+                fontWeight: 600,
+                borderRadius: '8px',
+                padding: '5px 12px',
+                marginLeft: '4px'
+              }}
+            >
+              <span style={{ fontSize: '1rem' }}>🔑</span>
+              <span>Sign In / Register</span>
+            </button>
+          )}
         </nav>
       </div>
     </header>

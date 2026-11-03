@@ -10,8 +10,16 @@ import { WordDocumentScreen } from './components/WordDocumentScreen';
 import { RulesModal } from './components/RulesModal';
 import { HistoryModal } from './components/HistoryModal';
 import { HindiHelperModal } from './components/HindiHelperModal';
+import { AuthModal } from './components/AuthModal';
+import { UserDashboardModal } from './components/UserDashboardModal';
 import { PwaInstallPrompt } from './components/PwaInstallPrompt';
 import { audioEngine } from './utils/audioEngine';
+import {
+  subscribeToAuth,
+  saveTestResultToCloud,
+  logoutUser,
+  UserProfile
+} from './services/firebase';
 
 const DEFAULT_SETTINGS: TestSettings = {
   highlightEnabled: false,
@@ -65,6 +73,27 @@ export const App: React.FC = () => {
   const [isRulesOpen, setIsRulesOpen] = useState<boolean>(false);
   const [isHistoryOpen, setIsHistoryOpen] = useState<boolean>(false);
   const [isHindiHelperOpen, setIsHindiHelperOpen] = useState<boolean>(false);
+  const [isAuthOpen, setIsAuthOpen] = useState<boolean>(false);
+  const [isDashboardOpen, setIsDashboardOpen] = useState<boolean>(false);
+
+  // Active Authenticated / Local Candidate User
+  const [currentUser, setCurrentUser] = useState<UserProfile | null>(null);
+
+  // Subscribe to Firebase Auth and Local User session
+  useEffect(() => {
+    const unsubscribe = subscribeToAuth((user) => {
+      setCurrentUser(user);
+      if (user && user.displayName) {
+        setSettings((prev) => ({
+          ...prev,
+          candidateName: user.displayName
+        }));
+      }
+    });
+    return () => {
+      unsubscribe();
+    };
+  }, []);
 
   // Save settings
   const handleUpdateSettings = (newSettings: Partial<TestSettings>) => {
@@ -97,10 +126,11 @@ export const App: React.FC = () => {
   };
 
   // Finish test
-  const handleFinishTest = (result: EvaluationResult) => {
+  const handleFinishTest = async (result: EvaluationResult) => {
     setCurrentResult(result);
     setCurrentView('result');
-    // Save to history
+
+    // Save to local history
     setHistory((prev) => {
       const updated = [result, ...prev].slice(0, 50);
       try {
@@ -110,6 +140,15 @@ export const App: React.FC = () => {
       }
       return updated;
     });
+
+    // Cloud Firestore Sync (if user is logged in or offline-synced)
+    if (currentUser) {
+      try {
+        await saveTestResultToCloud(currentUser.uid, result);
+      } catch (err) {
+        console.warn('Failed cloud test sync:', err);
+      }
+    }
   };
 
   // Retake
@@ -171,6 +210,9 @@ export const App: React.FC = () => {
           onOpenHindiHelper={() => setIsHindiHelperOpen(true)}
           settings={settings}
           onToggleSound={toggleSound}
+          currentUser={currentUser}
+          onOpenAuth={() => setIsAuthOpen(true)}
+          onOpenDashboard={() => setIsDashboardOpen(true)}
         />
       )}
 
@@ -201,6 +243,13 @@ export const App: React.FC = () => {
             onRetakeTest={handleRetakeTest}
             onChooseAnother={() => setCurrentView('choose')}
             onPracticeWrongWords={handlePracticeWrongWords}
+            onOpenDashboard={() => {
+              if (currentUser) {
+                setIsDashboardOpen(true);
+              } else {
+                setIsAuthOpen(true);
+              }
+            }}
           />
         )}
 
@@ -251,6 +300,40 @@ export const App: React.FC = () => {
         onClose={() => setIsHindiHelperOpen(false)}
         defaultLayout={selectedPassage?.language === 'hindi_kruti' ? 'kruti' : 'mangal'}
       />
+
+      <AuthModal
+        isOpen={isAuthOpen}
+        onClose={() => setIsAuthOpen(false)}
+        onLoginSuccess={(user) => {
+          setCurrentUser(user);
+          setSettings((prev) => ({
+            ...prev,
+            candidateName: user.displayName
+          }));
+        }}
+      />
+
+      {currentUser && (
+        <UserDashboardModal
+          isOpen={isDashboardOpen}
+          onClose={() => setIsDashboardOpen(false)}
+          user={currentUser}
+          onLogout={async () => {
+            await logoutUser();
+            setCurrentUser(null);
+            setIsDashboardOpen(false);
+          }}
+          onViewScorecard={(res) => {
+            setCurrentResult(res);
+            setCurrentView('result');
+            setIsDashboardOpen(false);
+          }}
+          onPracticeWrongWords={(words) => {
+            setIsDashboardOpen(false);
+            handlePracticeWrongWords(words);
+          }}
+        />
+      )}
 
       <PwaInstallPrompt />
     </div>
