@@ -1,6 +1,7 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { Passage, Language, ExamCategory, TestSettings, EvaluationResult } from '../types';
 import { UserProfile } from '../services/firebase';
+import appLogo from '../assets/logo.png';
 
 interface ChooseTestProps {
   passages: Passage[];
@@ -392,11 +393,23 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
             ======================================================== */}
         <div className="testmentor-trust-bar">
           <div className="testmentor-brand-info">
-            <div className="testmentor-brand-logo">TM</div>
+            <img
+              src={appLogo}
+              alt="Exam Typing"
+              style={{
+                width: '54px',
+                height: '54px',
+                borderRadius: '50%',
+                objectFit: 'cover',
+                boxShadow: '0 3px 10px rgba(2, 132, 199, 0.35)',
+                border: '2px solid #38bdf8',
+                flexShrink: 0
+              }}
+            />
             <div>
-              <div className="testmentor-brand-title">UP Typing Mentor</div>
+              <div className="testmentor-brand-title">Exam Typing</div>
               <div className="testmentor-brand-sub">
-                Trusted typing exam practice for UP Police & Government aspirants
+                Typing Practice for Competitive Exams • UP Police & Government Aspirants
               </div>
             </div>
           </div>
