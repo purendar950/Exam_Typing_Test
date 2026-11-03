@@ -11,6 +11,7 @@ import {
   GoogleAuthProvider,
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
+  sendPasswordResetEmail,
   signOut,
   onAuthStateChanged,
   updateProfile,
@@ -511,6 +512,15 @@ export async function signInAdminWithEmail(email: string, pass: string): Promise
 
   localStorage.setItem(STORAGE_KEY_ACTIVE_USER, JSON.stringify(profile));
   return profile;
+}
+
+// Send Admin Password Reset / Setup Email
+export async function sendAdminPasswordReset(email: string): Promise<void> {
+  const cleanEmail = email.trim().toLowerCase();
+  if (!cleanEmail) {
+    throw new Error('Please enter your admin email address first.');
+  }
+  await sendPasswordResetEmail(auth, cleanEmail);
 }
 
 // 2. Create New Admin Account directly in Firebase
