@@ -46,39 +46,26 @@ interface ExamMode {
   durationFilter?: number;
 }
 
-// Component for a Unified Exam Post Card with interactive Hindi & English tabs
-const UnifiedExamCard: React.FC<{
+// Component for an Exam Type Card (shows inside tests: English, Hindi, Live, Drills)
+const ExamTypePostCard: React.FC<{
   post: UnifiedExamPost;
-  onQuickStart: (exam: ExamProfile) => void;
-  onBrowse: (exam: ExamProfile) => void;
-  languageFilter: 'all' | 'english' | 'hindi';
+  onEnterExam: (post: UnifiedExamPost) => void;
+  onQuickMode: (post: UnifiedExamPost, modeId: string, variant: ExamProfile) => void;
   getEmblemForGroup: (group: string) => string;
-}> = ({ post, onQuickStart, onBrowse, languageFilter, getEmblemForGroup }) => {
-  const [selectedVariantIdx, setSelectedVariantIdx] = useState<number>(() => {
-    if (languageFilter === 'english') {
-      const engIdx = post.variants.findIndex((v) => v.language === 'english');
-      return engIdx >= 0 ? engIdx : 0;
-    }
-    if (languageFilter === 'hindi') {
-      const hiIdx = post.variants.findIndex((v) => v.language.startsWith('hindi'));
-      return hiIdx >= 0 ? hiIdx : 0;
-    }
-    const defHiIdx = post.variants.findIndex((v) => v.language.startsWith('hindi'));
-    return defHiIdx >= 0 ? defHiIdx : 0;
-  });
+}> = ({ post, onEnterExam, onQuickMode, getEmblemForGroup }) => {
+  const engVariant = post.variants.find((v) => v.language === 'english');
+  const mangalVariant = post.variants.find((v) => v.language.startsWith('hindi'));
+  const hasEnglish = Boolean(engVariant);
+  const hasHindi = Boolean(mangalVariant);
 
-  useEffect(() => {
-    if (languageFilter === 'english') {
-      const engIdx = post.variants.findIndex((v) => v.language === 'english');
-      if (engIdx >= 0) setSelectedVariantIdx(engIdx);
-    } else if (languageFilter === 'hindi') {
-      const hiIdx = post.variants.findIndex((v) => v.language.startsWith('hindi'));
-      if (hiIdx >= 0) setSelectedVariantIdx(hiIdx);
-    }
-  }, [languageFilter, post.variants]);
-
-  const activeVariant = post.variants[selectedVariantIdx] || post.variants[0];
-  const isHindiActive = activeVariant.language.startsWith('hindi');
+  const benchmarkText = useMemo(() => {
+    const parts: string[] = [];
+    if (mangalVariant) parts.push(`Hindi ${mangalVariant.targetSpeed} WPM`);
+    if (engVariant) parts.push(`English ${engVariant.targetSpeed} WPM`);
+    parts.push(`${post.variants[0]?.durationMinutes || 15} Mins`);
+    parts.push(`≥${post.variants[0]?.minAccuracy || 85}% Acc`);
+    return parts.join(' • ');
+  }, [post, engVariant, mangalVariant]);
 
   const getTypeBadgeStyle = (type: string) => {
     switch (type) {
@@ -103,24 +90,26 @@ const UnifiedExamCard: React.FC<{
 
   return (
     <div
-      className="exam-card-hover"
+      className="testmentor-exam-card exam-card-hover"
+      onClick={() => onEnterExam(post)}
       style={{
         background: '#ffffff',
         border: '1.5px solid #e2e8f0',
-        borderRadius: '12px',
-        padding: '16px',
+        borderRadius: '14px',
+        padding: '18px',
         display: 'flex',
         flexDirection: 'column',
         justifyContent: 'space-between',
+        cursor: 'pointer',
         boxShadow: '0 2px 4px rgba(0,0,0,0.03)',
-        transition: 'all 0.15s ease'
+        transition: 'all 0.18s ease'
       }}
     >
       <div>
         {/* Top Header: Organization & Exam Type Badge */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px', gap: '8px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', minWidth: 0 }}>
-            <span style={{ fontSize: '1.25rem', flexShrink: 0 }}>{getEmblemForGroup(post.categoryGroup)}</span>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px', gap: '8px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', minWidth: 0 }}>
+            <span style={{ fontSize: '1.4rem', flexShrink: 0 }}>{getEmblemForGroup(post.categoryGroup)}</span>
             <span style={{
               fontSize: '0.72rem',
               fontWeight: 700,
@@ -154,193 +143,163 @@ const UnifiedExamCard: React.FC<{
 
         {/* Post Title */}
         <h3 style={{
-          fontSize: '1.02rem',
-          fontWeight: 700,
+          fontSize: '1.05rem',
+          fontWeight: 800,
           color: '#0f172a',
-          margin: '0 0 12px 0',
-          lineHeight: 1.35,
-          minHeight: '38px'
+          margin: '0 0 8px 0',
+          lineHeight: 1.35
         }}>
           {post.postTitle}
         </h3>
 
-        {/* Language Tabs / Selector */}
-        {post.variants.length > 1 ? (
-          <div style={{
-            display: 'flex',
-            gap: '6px',
-            background: '#f8fafc',
-            padding: '4px',
-            borderRadius: '8px',
-            border: '1px solid #f1f5f9',
-            marginBottom: '12px'
-          }}>
-            {post.variants.map((v, idx) => {
-              const isSelected = idx === selectedVariantIdx;
-              const isHindi = v.language.startsWith('hindi');
-              const langLabel = isHindi
-                ? (v.language === 'hindi_kruti' ? 'Hindi (Kruti)' : 'Hindi (Mangal)')
-                : 'English';
-              return (
-                <button
-                  key={v.id}
-                  onClick={() => setSelectedVariantIdx(idx)}
-                  type="button"
-                  style={{
-                    flex: 1,
-                    padding: '6px 8px',
-                    borderRadius: '6px',
-                    border: isSelected ? '1px solid var(--primary, #0284c7)' : '1px solid transparent',
-                    background: isSelected ? '#ffffff' : 'transparent',
-                    color: isSelected ? 'var(--primary, #0284c7)' : '#64748b',
-                    fontWeight: isSelected ? 700 : 500,
-                    fontSize: '0.78rem',
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: '4px',
-                    boxShadow: isSelected ? '0 1px 3px rgba(0,0,0,0.08)' : 'none',
-                    transition: 'all 0.15s ease'
-                  }}
-                >
-                  <span>{isHindi ? '🇮🇳' : '🇬🇧'}</span>
-                  <span>{langLabel}</span>
-                  <span style={{
-                    fontSize: '0.68rem',
-                    fontWeight: 700,
-                    background: isSelected ? '#e0f2fe' : '#e2e8f0',
-                    color: isSelected ? '#0369a1' : '#64748b',
-                    padding: '1px 5px',
-                    borderRadius: '8px'
-                  }}>
-                    {v.targetSpeed} WPM
-                  </span>
-                </button>
-              );
-            })}
-          </div>
-        ) : (
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            background: '#f8fafc',
-            padding: '6px 10px',
-            borderRadius: '8px',
-            border: '1px solid #f1f5f9',
-            marginBottom: '12px'
-          }}>
-            <span style={{
-              fontSize: '0.76rem',
-              fontWeight: 700,
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px',
-              color: isHindiActive ? '#b45309' : '#1d4ed8'
-            }}>
-              <span>{isHindiActive ? '🇮🇳' : '🇬🇧'}</span>
-              <span>
-                {isHindiActive
-                  ? (activeVariant.language === 'hindi_kruti' ? 'Hindi (Kruti Dev)' : 'Hindi (Mangal Inscript)')
-                  : 'English'}
-              </span>
-            </span>
-            <span style={{
-              fontSize: '0.7rem',
-              fontWeight: 700,
-              background: '#e2e8f0',
-              color: '#475569',
-              padding: '1px 6px',
-              borderRadius: '8px'
-            }}>
-              Official Benchmark
-            </span>
-          </div>
-        )}
+        {/* Passing Benchmark Strip */}
+        <div style={{
+          background: '#f8fafc',
+          border: '1px solid #f1f5f9',
+          borderRadius: '8px',
+          padding: '8px 10px',
+          marginBottom: '12px',
+          fontSize: '0.78rem',
+          color: '#334155',
+          fontWeight: 600,
+          display: 'flex',
+          alignItems: 'center',
+          gap: '6px'
+        }}>
+          <span>🎯</span>
+          <span>{benchmarkText}</span>
+        </div>
 
-        {/* Benchmark Badges for Active Selection */}
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginBottom: '14px' }}>
-          <span style={{
-            fontSize: '0.75rem',
-            fontWeight: 700,
-            background: '#f0fdf4',
-            color: '#16a34a',
-            padding: '3px 8px',
-            borderRadius: '6px',
-            border: '1px solid #bbf7d0'
-          }}>
-            🎯 {activeVariant.targetSpeed} WPM Speed
-          </span>
-          <span style={{
-            fontSize: '0.75rem',
-            fontWeight: 700,
-            background: '#f8fafc',
-            color: '#475569',
-            padding: '3px 8px',
-            borderRadius: '6px',
-            border: '1px solid #e2e8f0'
-          }}>
-            ⏱️ {activeVariant.durationMinutes} Mins
-          </span>
-          <span style={{
-            fontSize: '0.75rem',
-            fontWeight: 700,
-            background: '#fffbeb',
-            color: '#b45309',
-            padding: '3px 8px',
-            borderRadius: '6px',
-            border: '1px solid #fde68a'
-          }}>
-            🎯 &ge; {activeVariant.minAccuracy}% Accuracy
-          </span>
-          <span style={{
-            fontSize: '0.72rem',
-            color: '#64748b',
-            padding: '3px 6px',
-            borderRadius: '4px'
-          }}>
-            {activeVariant.inputType === 'character' ? `📏 ${activeVariant.inputLimit} Chars` : `📏 ${activeVariant.inputLimit} Words`}
-          </span>
+        {/* Available Tests Inside: English, Hindi, Live, Drills */}
+        <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginBottom: '14px' }}>
+          {hasEnglish && (
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                onQuickMode(post, 'english', engVariant!);
+              }}
+              style={{
+                fontSize: '0.72rem',
+                background: '#eff6ff',
+                color: '#1d4ed8',
+                padding: '4px 8px',
+                borderRadius: '6px',
+                fontWeight: 700,
+                border: '1px solid #bfdbfe',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '4px',
+                cursor: 'pointer'
+              }}
+              title="Open English test mode"
+            >
+              <span>🇬🇧</span>
+              <span>English ({engVariant?.targetSpeed} WPM)</span>
+            </button>
+          )}
+
+          {hasHindi && (
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                onQuickMode(post, 'hindi_mangal', mangalVariant!);
+              }}
+              style={{
+                fontSize: '0.72rem',
+                background: '#fef3c7',
+                color: '#b45309',
+                padding: '4px 8px',
+                borderRadius: '6px',
+                fontWeight: 700,
+                border: '1px solid #fde68a',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '4px',
+                cursor: 'pointer'
+              }}
+              title="Open Hindi Mangal test mode"
+            >
+              <span>🇮🇳</span>
+              <span>Hindi ({mangalVariant?.targetSpeed} WPM)</span>
+            </button>
+          )}
+
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              onQuickMode(post, 'daily_live', post.variants[0]);
+            }}
+            style={{
+              fontSize: '0.72rem',
+              background: '#fff7ed',
+              color: '#c2410c',
+              padding: '4px 8px',
+              borderRadius: '6px',
+              fontWeight: 700,
+              border: '1px solid #fed7aa',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '4px',
+              cursor: 'pointer'
+            }}
+            title="Open Daily Live Tests"
+          >
+            <span>🔥</span>
+            <span>Live Tests</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              onQuickMode(post, 'drills', post.variants[0]);
+            }}
+            style={{
+              fontSize: '0.72rem',
+              background: '#faf5ff',
+              color: '#7e22ce',
+              padding: '4px 8px',
+              borderRadius: '6px',
+              fontWeight: 700,
+              border: '1px solid #e9d5ff',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '4px',
+              cursor: 'pointer'
+            }}
+            title="Open Speed Drills"
+          >
+            <span>⚡</span>
+            <span>Drills</span>
+          </button>
         </div>
       </div>
 
-      {/* Actions */}
-      <div style={{ display: 'flex', gap: '8px', borderTop: '1px solid #f1f5f9', paddingTop: '12px' }}>
-        <button
-          onClick={() => onQuickStart(activeVariant)}
-          className="btn btn-primary"
-          style={{
-            flex: 1,
-            padding: '7px 12px',
-            fontSize: '0.82rem',
-            fontWeight: 700,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: '4px'
-          }}
-          title={`Start official ${activeVariant.durationMinutes}-min test with ${activeVariant.targetSpeed} WPM target`}
-        >
-          <span>⚡</span>
-          <span>
-            Start {isHindiActive ? 'Hindi' : 'English'} Mock ({activeVariant.durationMinutes}m)
-          </span>
-        </button>
-        <button
-          onClick={() => onBrowse(activeVariant)}
-          className="btn btn-secondary"
-          style={{
-            padding: '7px 12px',
-            fontSize: '0.82rem',
-            fontWeight: 600,
-            whiteSpace: 'nowrap'
-          }}
-          title="Select from library of passages for this exam"
-        >
-          <span>Browse</span>
+      {/* Card Footer Button: "Enter Exam Series (English, Hindi, Live →)" */}
+      <div style={{
+        borderTop: '1px solid #f1f5f9',
+        paddingTop: '12px',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between'
+      }}>
+        <span style={{ fontSize: '0.8rem', color: '#64748b', fontWeight: 600 }}>
+          {post.variants.length} Mediums • Official Benchmarks
+        </span>
+        <span style={{
+          fontSize: '0.84rem',
+          fontWeight: 800,
+          color: 'var(--primary, #0284c7)',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '4px'
+        }}>
+          <span>Enter Exam Hub</span>
           <span>→</span>
-        </button>
+        </span>
       </div>
     </div>
   );
@@ -361,7 +320,7 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
 }) => {
   // Navigation: 1 (All Exams), 2 (Medium / Mode Selection), 3 (Test Material Grid), or 'classic_form'
   const [navLevel, setNavLevel] = useState<1 | 2 | 3 | 'classic_form'>(1);
-  const [activeExamId, setActiveExamId] = useState<string>('up_police_co');
+  const [activeExamId, setActiveExamId] = useState<string>('up-police-co-asi');
   const [activeModeId, setActiveModeId] = useState<string>('english');
 
   // Level 3 Filter states
@@ -384,6 +343,7 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
   const [selectedExamSubFilter, setSelectedExamSubFilter] = useState<string>('all');
   const [examSearchQuery, setExamSearchQuery] = useState<string>('');
   const [selectedExamLanguageFilter, setSelectedExamLanguageFilter] = useState<'all' | 'english' | 'hindi'>('all');
+  const [selectedUnifiedPost, setSelectedUnifiedPost] = useState<UnifiedExamPost | null>(null);
   const [selectedExamProfile, setSelectedExamProfile] = useState<ExamProfile | null>(null);
   const [visibleExamsCount, setVisibleExamsCount] = useState<number>(24);
 
@@ -532,6 +492,35 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
       );
       return matchType || matchAsi || matchCo || matchDeo || matchRoAro || matchAssistant || matchCourt || matchSteno;
     }).length;
+  };
+
+  const activePost = useMemo(() => {
+    if (selectedUnifiedPost) return selectedUnifiedPost;
+    return UNIFIED_EXAM_POSTS.find((p) => p.id === activeExamId) || UNIFIED_EXAM_POSTS[0];
+  }, [selectedUnifiedPost, activeExamId]);
+
+  const engVariant = useMemo(() => activePost?.variants.find((v) => v.language === 'english'), [activePost]);
+  const mangalVariant = useMemo(() => activePost?.variants.find((v) => v.language.startsWith('hindi')), [activePost]);
+  const krutiVariant = useMemo(() => activePost?.variants.find((v) => v.language === 'hindi_kruti'), [activePost]);
+
+  const handleEnterExam = (post: UnifiedExamPost) => {
+    setSelectedUnifiedPost(post);
+    setActiveExamId(post.id);
+    setSelectedExamProfile(post.variants[0] || null);
+    setNavLevel(2);
+  };
+
+  const handleQuickMode = (post: UnifiedExamPost, modeId: string, variant: ExamProfile) => {
+    setSelectedUnifiedPost(post);
+    setActiveExamId(post.id);
+    setSelectedExamProfile(variant);
+    setActiveModeId(modeId);
+    if (modeId === 'drills') {
+      setSelectedDuration(5);
+    } else {
+      setSelectedDuration(variant.durationMinutes || 15);
+    }
+    setNavLevel(3);
   };
 
   const handleQuickStartExam = (exam: ExamProfile) => {
@@ -710,106 +699,150 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
 
   // Active Exam Object
   const currentExam = useMemo(() => {
+    if (activePost) {
+      const parts: string[] = [];
+      if (mangalVariant) parts.push(`Hindi ${mangalVariant.targetSpeed} WPM`);
+      if (engVariant) parts.push(`English ${engVariant.targetSpeed} WPM`);
+      parts.push(`${activePost.variants[0]?.durationMinutes || 15} Mins`);
+      parts.push(`≥${activePost.variants[0]?.minAccuracy || 85}% Acc`);
+
+      return {
+        id: activePost.id,
+        title: activePost.postTitle,
+        shortTitle: activePost.postTitle,
+        emblemEmoji: getEmblemForGroup(activePost.categoryGroup),
+        badge: `${activePost.variants.length} Mediums Available`,
+        passingBenchmark: parts.join(' • '),
+        categoryFilter: 'all' as ExamCategory | 'all',
+        description: `Official ${activePost.organization} examination test series.`
+      };
+    }
     return EXAM_COURSES.find((e) => e.id === activeExamId) || EXAM_COURSES[0];
-  }, [EXAM_COURSES, activeExamId]);
+  }, [activePost, EXAM_COURSES, activeExamId, mangalVariant, engVariant]);
 
   // Level 2 Modes (English, Hindi Mangal, Hindi Kruti, Live Simulation, Practice Drills, Study Material)
-  const EXAM_MODES: ExamMode[] = useMemo(
-    () => [
-      {
+  const EXAM_MODES: ExamMode[] = useMemo(() => {
+    const modes: ExamMode[] = [];
+
+    const hasEnglish = Boolean(engVariant) || !activePost || activePost.variants.length === 0 || activePost.variants.some(v => v.language === 'english');
+    const hasHindi = Boolean(mangalVariant) || Boolean(krutiVariant) || activePost?.variants.some(v => v.language.startsWith('hindi'));
+
+    // 1. English
+    if (hasEnglish) {
+      const spd = engVariant?.targetSpeed || 30;
+      const dur = engVariant?.durationMinutes || 15;
+      modes.push({
         id: 'english',
         title: 'English Typing Tests',
         icon: '🇬🇧',
         bg: '#eff6ff',
         border: '#bfdbfe',
-        badge: `${engCount} Tests • 30 WPM`,
+        badge: `${engCount} Tests • ${spd} WPM Target`,
         badgeColor: '#1d4ed8',
         badgeBg: '#dbeafe',
-        description: 'Standard 30 WPM UPPRPB qualifying passages on English QWERTY keyboard.',
+        description: `Official ${spd} WPM qualifying passages for ${activePost?.postTitle || 'Exam'}.`,
         languageFilter: 'english',
-        durationFilter: 15
-      },
-      {
+        durationFilter: dur
+      });
+    }
+
+    // 2. Hindi Mangal
+    if (hasHindi) {
+      const spd = mangalVariant?.targetSpeed || 25;
+      const dur = mangalVariant?.durationMinutes || 15;
+      modes.push({
         id: 'hindi_mangal',
         title: 'हिंदी मंगल (Mangal Inscript)',
         icon: '🇮🇳',
         bg: '#fef3c7',
         border: '#fde68a',
-        badge: `${mangalCount} Tests • 25 WPM`,
+        badge: `${mangalCount} Tests • ${spd} WPM Target`,
         badgeColor: '#b45309',
         badgeBg: '#fef3c7',
-        description: 'Official 25 WPM benchmark with Inscript layout & halant conjunct rules.',
+        description: `Official Mangal Inscript layout at ${spd} WPM benchmark speed.`,
         languageFilter: 'hindi_mangal',
-        durationFilter: 15
-      },
-      {
+        durationFilter: dur
+      });
+
+      // 3. Hindi Kruti Dev
+      modes.push({
         id: 'hindi_kruti',
-        title: 'हिंदी कुर्ती देव (Kruti Dev 010)',
+        title: 'हिंदी कृति देव (Kruti Dev 010)',
         icon: '🇮🇳',
         bg: '#f0fdf4',
         border: '#bbf7d0',
-        badge: `${krutiCount} Tests • 25 WPM`,
+        badge: `${krutiCount} Tests • ${spd} WPM Target`,
         badgeColor: '#15803d',
         badgeBg: '#dcfce7',
         description: 'Traditional Remington Hindi layout with authentic character codes.',
         languageFilter: 'hindi_kruti',
-        durationFilter: 15
-      },
-      {
-        id: 'daily_live',
-        title: "Daily Live Tests (AI AR-Typing)",
-        icon: '🔥',
-        bg: '#fff7ed',
-        border: '#fed7aa',
-        badge: '8 Live Tests Today (4 Eng + 4 Hindi)',
-        badgeColor: '#c2410c',
-        badgeBg: '#ffedd5',
-        description: 'Daily fresh 15-min tests with AR-Typing Medium & Hard calibration.',
-        languageFilter: 'all',
-        durationFilter: 15
-      },
-      {
-        id: 'live_mock',
-        title: 'Live Exam Hall Simulation',
-        icon: '🔴',
-        bg: '#fef2f2',
-        border: '#fecaca',
-        badge: `${mock15Count} Tests • 15:00 Strict`,
-        badgeColor: '#b91c1c',
-        badgeBg: '#fee2e2',
-        description: 'Full 15-minute countdown, strict UP Police evaluation formula & full-screen mode.',
-        languageFilter: 'all',
-        durationFilter: 15
-      },
-      {
-        id: 'drills',
-        title: 'Daily Practice & Speed Boosters',
-        icon: '⚡',
-        bg: '#faf5ff',
-        border: '#e9d5ff',
-        badge: `${drillsCount > 0 ? drillsCount : 24} Drills • 2 & 5 Min`,
-        badgeColor: '#7e22ce',
-        badgeBg: '#f3e8ff',
-        description: 'Short targeted drills focusing on weak keys, punctuation, and number rows.',
-        languageFilter: 'all',
-        durationFilter: 5
-      },
-      {
-        id: 'study',
-        title: 'Study Material & Special Key Codes',
-        icon: '📖',
-        bg: '#f8fafc',
-        border: '#cbd5e1',
-        badge: 'Official Rules & ALT Codes',
-        badgeColor: '#334155',
-        badgeBg: '#e2e8f0',
-        description: 'Official UPPRPB evaluation formula, Mangal/Kruti shortcuts & finger guides.',
-        languageFilter: 'all',
-        durationFilter: 15
-      }
-    ],
-    [engCount, mangalCount, krutiCount, mock15Count, drillsCount]
-  );
+        durationFilter: dur
+      });
+    }
+
+    // 4. Daily Live Tests
+    const postDur = activePost?.variants[0]?.durationMinutes || 15;
+    modes.push({
+      id: 'daily_live',
+      title: 'Daily Live Tests (AI AR-Typing)',
+      icon: '🔥',
+      bg: '#fff7ed',
+      border: '#fed7aa',
+      badge: '8 Live Tests Today (4 Eng + 4 Hindi)',
+      badgeColor: '#c2410c',
+      badgeBg: '#ffedd5',
+      description: `Daily fresh tests calibrated for ${activePost?.postTitle || 'Exam'} with Medium & Hard levels.`,
+      languageFilter: 'all',
+      durationFilter: postDur
+    });
+
+    // 5. Live Simulation
+    modes.push({
+      id: 'live_mock',
+      title: 'Live Exam Hall Simulation',
+      icon: '🔴',
+      bg: '#fef2f2',
+      border: '#fecaca',
+      badge: `${mock15Count} Full Mocks • ${postDur}:00 Strict`,
+      badgeColor: '#b91c1c',
+      badgeBg: '#fee2e2',
+      description: `Full ${postDur}-minute countdown, strict evaluation formula & full-screen mode.`,
+      languageFilter: 'all',
+      durationFilter: postDur
+    });
+
+    // 6. Practice Drills
+    modes.push({
+      id: 'drills',
+      title: 'Daily Practice & Speed Boosters',
+      icon: '⚡',
+      bg: '#faf5ff',
+      border: '#e9d5ff',
+      badge: `${drillsCount > 0 ? drillsCount : 24} Speed Drills • 2 & 5 Min`,
+      badgeColor: '#7e22ce',
+      badgeBg: '#f3e8ff',
+      description: 'Short targeted drills focusing on weak keys, punctuation, and number rows.',
+      languageFilter: 'all',
+      durationFilter: 5
+    });
+
+    // 7. Study Material
+    modes.push({
+      id: 'study',
+      title: 'Study Material & Special Key Codes',
+      icon: '📖',
+      bg: '#f8fafc',
+      border: '#cbd5e1',
+      badge: 'Official Rules & Cutoffs',
+      badgeColor: '#334155',
+      badgeBg: '#e2e8f0',
+      description: `Official ${activePost?.organization || 'Department'} evaluation rules & keyboard codes.`,
+      languageFilter: 'all',
+      durationFilter: postDur
+    });
+
+    return modes;
+  }, [activePost, engVariant, mangalVariant, krutiVariant, engCount, mangalCount, krutiCount, mock15Count, drillsCount]);
 
   // Active Mode Object
   const currentMode = useMemo(() => {
@@ -1520,12 +1553,11 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
               marginBottom: '24px'
             }}>
               {filteredUnifiedPosts.slice(0, visibleExamsCount).map((post) => (
-                <UnifiedExamCard
+                <ExamTypePostCard
                   key={post.id}
                   post={post}
-                  onQuickStart={handleQuickStartExam}
-                  onBrowse={handleBrowseExamPassages}
-                  languageFilter={selectedExamLanguageFilter}
+                  onEnterExam={handleEnterExam}
+                  onQuickMode={handleQuickMode}
                   getEmblemForGroup={getEmblemForGroup}
                 />
               ))}
@@ -1592,8 +1624,8 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
               <button
                 className="btn btn-success"
                 onClick={() => {
-                  setActiveExamId('up_police_co');
-                  setNavLevel(2);
+                  const coPost = UNIFIED_EXAM_POSTS.find((p) => p.id === 'up-police-co-asi') || UNIFIED_EXAM_POSTS[0];
+                  handleEnterExam(coPost);
                 }}
                 style={{ padding: '12px 28px', fontWeight: 800, fontSize: '0.95rem' }}
               >
@@ -1611,24 +1643,34 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
             {/* Breadcrumb Bar */}
             <div className="level-breadcrumb-bar">
               <span className="level-breadcrumb-link" onClick={() => setNavLevel(1)}>
-                🏠 All Courses
+                🏠 All Exams & Courses
               </span>
               <span className="level-breadcrumb-sep">/</span>
-              <span className="level-breadcrumb-current">{currentExam.shortTitle}</span>
+              <span className="level-breadcrumb-current">{activePost.postTitle}</span>
             </div>
 
             {/* Exam Hero Card */}
             <div className="level2-hero-card">
               <div className="level2-exam-info">
                 <div className="level2-exam-emblem">
-                  <span>{currentExam.emblemEmoji}</span>
+                  <span>{getEmblemForGroup(activePost.categoryGroup)}</span>
                 </div>
                 <div>
-                  <h2 className="level2-exam-title">{currentExam.title}</h2>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+                    <span style={{ fontSize: '0.75rem', fontWeight: 700, padding: '2px 8px', borderRadius: '4px', background: '#f8fafc', color: '#334155', border: '1px solid #e2e8f0' }}>
+                      {activePost.organization}
+                    </span>
+                    <span style={{ fontSize: '0.75rem', fontWeight: 700, padding: '2px 8px', borderRadius: '4px', background: '#e0f2fe', color: '#0369a1', border: '1px solid #bae6fd' }}>
+                      {activePost.examTypeLabel}
+                    </span>
+                  </div>
+                  <h2 className="level2-exam-title">{activePost.postTitle}</h2>
                   <div className="level2-exam-benchmarks">
-                    <span className="level2-bench-badge">🎯 {currentExam.passingBenchmark}</span>
-                    <span className="level2-bench-badge">⏱️ 15 Mins Exam Duration</span>
-                    <span className="level2-bench-badge">📝 85% Accuracy Mandatory</span>
+                    {engVariant && <span className="level2-bench-badge">🎯 English: {engVariant.targetSpeed} WPM Speed</span>}
+                    {mangalVariant && <span className="level2-bench-badge">🎯 Hindi: {mangalVariant.targetSpeed} WPM Speed</span>}
+                    <span className="level2-bench-badge">⏱️ {activePost.variants[0]?.durationMinutes || 15} Mins Duration</span>
+                    <span className="level2-bench-badge">📝 ≥ {activePost.variants[0]?.minAccuracy || 85}% Accuracy Mandatory</span>
+                    <span className="level2-bench-badge">📏 {activePost.variants[0]?.inputType === 'character' ? `${activePost.variants[0]?.inputLimit} Chars` : `${activePost.variants[0]?.inputLimit} Words`}</span>
                   </div>
                 </div>
               </div>
@@ -1638,7 +1680,7 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
                 onClick={() => setNavLevel(1)}
                 style={{ fontWeight: 700, borderRadius: '8px', padding: '8px 16px' }}
               >
-                ← Back to All Courses
+                ← Back to All Exams
               </button>
             </div>
 
@@ -1648,11 +1690,11 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
                 Select Medium or Practice Mode
               </h3>
               <p style={{ fontSize: '0.88rem', color: '#64748b' }}>
-                Choose whether you want to practice in English, Hindi Mangal, Hindi Kruti, Live Simulation, or Drills.
+                Choose whether you want to practice in English, Hindi Mangal, Hindi Kruti, Live Simulation, or Drills for {activePost.postTitle}.
               </p>
             </div>
 
-            {/* 6 Mode Cards Grid */}
+            {/* Mode Cards Grid (English, Hindi, Live, Simulation, Drills, Study) */}
             <div className="level2-mode-grid">
               {EXAM_MODES.map((mode) => (
                 <div
@@ -1660,10 +1702,24 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
                   className="level2-mode-card"
                   onClick={() => {
                     setActiveModeId(mode.id);
-                    if (mode.id === 'drills') {
+                    if (mode.id === 'english') {
+                      const v = engVariant || activePost.variants[0];
+                      setSelectedExamProfile(v);
+                      setSelectedDuration(v.durationMinutes);
+                    } else if (mode.id === 'hindi_mangal') {
+                      const v = mangalVariant || activePost.variants[0];
+                      setSelectedExamProfile(v);
+                      setSelectedDuration(v.durationMinutes);
+                    } else if (mode.id === 'hindi_kruti') {
+                      const v = krutiVariant || mangalVariant || activePost.variants[0];
+                      setSelectedExamProfile(v);
+                      setSelectedDuration(v.durationMinutes);
+                    } else if (mode.id === 'drills') {
+                      setSelectedExamProfile(activePost.variants[0]);
                       setSelectedDuration(5);
-                    } else if (mode.id === 'live_mock') {
-                      setSelectedDuration(15);
+                    } else {
+                      setSelectedExamProfile(activePost.variants[0]);
+                      setSelectedDuration(activePost.variants[0]?.durationMinutes || 15);
                     }
                     setNavLevel(3);
                   }}
@@ -1705,59 +1761,66 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
             {/* Breadcrumb Navigation */}
             <div className="level-breadcrumb-bar">
               <span className="level-breadcrumb-link" onClick={() => setNavLevel(1)}>
-                🏠 All Courses
+                🏠 All Exams
               </span>
               <span className="level-breadcrumb-sep">/</span>
               <span className="level-breadcrumb-link" onClick={() => setNavLevel(2)}>
-                {selectedExamProfile ? selectedExamProfile.title : currentExam.shortTitle}
+                {activePost.postTitle}
               </span>
               <span className="level-breadcrumb-sep">/</span>
               <span className="level-breadcrumb-current">{currentMode.title}</span>
             </div>
 
             {/* Active Exam Profile Banner */}
-            {selectedExamProfile && (
-              <div
-                style={{
-                  background: 'linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%)',
-                  border: '1.5px solid #93c5fd',
-                  borderRadius: '12px',
-                  padding: '14px 20px',
-                  marginBottom: '16px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  flexWrap: 'wrap',
-                  gap: '12px'
-                }}
-              >
-                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                  <span style={{ fontSize: '1.8rem' }}>{getEmblemForGroup(selectedExamProfile.categoryGroup)}</span>
-                  <div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <strong style={{ color: '#1e40af', fontSize: '1.02rem' }}>{selectedExamProfile.title}</strong>
-                      <span style={{ background: '#3b82f6', color: '#ffffff', fontSize: '0.72rem', fontWeight: 800, padding: '2px 8px', borderRadius: '10px' }}>
-                        Active Target Exam
-                      </span>
-                    </div>
-                    <div style={{ fontSize: '0.82rem', color: '#2563eb', marginTop: '2px' }}>
-                      Official Benchmark: <strong>{selectedExamProfile.targetSpeed} WPM Speed</strong> &bull; Timer: <strong>{selectedExamProfile.durationMinutes} Mins</strong> &bull; Min Accuracy: <strong>{selectedExamProfile.minAccuracy}%</strong> &bull; {selectedExamProfile.inputType === 'character' ? `${selectedExamProfile.inputLimit} Chars` : `${selectedExamProfile.inputLimit} Words`}
-                    </div>
+            <div
+              style={{
+                background: 'linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%)',
+                border: '1.5px solid #93c5fd',
+                borderRadius: '12px',
+                padding: '14px 20px',
+                marginBottom: '16px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                flexWrap: 'wrap',
+                gap: '12px'
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <span style={{ fontSize: '1.8rem' }}>{getEmblemForGroup(activePost.categoryGroup)}</span>
+                <div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <strong style={{ color: '#1e40af', fontSize: '1.02rem' }}>{activePost.postTitle}</strong>
+                    <span style={{ background: '#3b82f6', color: '#ffffff', fontSize: '0.72rem', fontWeight: 800, padding: '2px 8px', borderRadius: '10px' }}>
+                      Active Target Exam
+                    </span>
+                  </div>
+                  <div style={{ fontSize: '0.82rem', color: '#2563eb', marginTop: '2px' }}>
+                    Official Benchmark: <strong>{selectedExamProfile ? selectedExamProfile.targetSpeed : (engVariant?.targetSpeed || 30)} WPM Speed</strong> &bull; Timer: <strong>{selectedDuration} Mins</strong> &bull; Min Accuracy: <strong>{selectedExamProfile?.minAccuracy || 85}%</strong> &bull; Mode: <strong>{currentMode.title}</strong>
                   </div>
                 </div>
+              </div>
 
+              <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                <button
+                  onClick={() => setNavLevel(2)}
+                  className="btn btn-sm btn-secondary"
+                  style={{ background: '#ffffff', fontWeight: 700, borderColor: '#93c5fd', color: '#1e40af' }}
+                >
+                  Change Mode (English/Hindi/Live)
+                </button>
                 <button
                   onClick={() => {
                     setSelectedExamProfile(null);
                     setNavLevel(1);
                   }}
                   className="btn btn-sm btn-secondary"
-                  style={{ background: '#ffffff', fontWeight: 700, borderColor: '#93c5fd', color: '#1e40af' }}
+                  style={{ background: '#ffffff', fontWeight: 700, borderColor: '#cbd5e1', color: '#475569' }}
                 >
-                  Change Exam (129 Available)
+                  Change Exam (All 129)
                 </button>
               </div>
-            )}
+            </div>
 
             {/* Mode Banner */}
             <div
