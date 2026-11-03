@@ -13,6 +13,33 @@ interface ChooseTestProps {
   onOpenDashboard?: () => void;
 }
 
+// Level 1: Exam Definition Interface
+interface ExamCourse {
+  id: string;
+  title: string;
+  shortTitle: string;
+  emblemEmoji: string;
+  badge: string;
+  passingBenchmark: string;
+  categoryFilter?: ExamCategory | 'all' | 'drills' | 'mock15';
+  description: string;
+}
+
+// Level 2: Mode Definition Interface
+interface ExamMode {
+  id: string;
+  title: string;
+  icon: string;
+  bg: string;
+  border: string;
+  badge: string;
+  badgeColor: string;
+  badgeBg: string;
+  description: string;
+  languageFilter?: Language | 'all';
+  durationFilter?: number;
+}
+
 export const ChooseTest: React.FC<ChooseTestProps> = ({
   passages,
   onStartTest,
@@ -23,18 +50,18 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
   onOpenAuth,
   onOpenDashboard
 }) => {
-  // Mode: 'portal' (Fintech/EdTech Exam Series Portal) vs 'classic_form' (Legacy Date-wise Form)
-  const [viewMode, setViewMode] = useState<'portal' | 'classic_form'>('portal');
+  // Navigation: 1 (All Exams), 2 (Medium / Mode Selection), 3 (Test Material Grid), or 'classic_form'
+  const [navLevel, setNavLevel] = useState<1 | 2 | 3 | 'classic_form'>(1);
+  const [activeExamId, setActiveExamId] = useState<string>('up_police_co');
+  const [activeModeId, setActiveModeId] = useState<string>('english');
 
-  // Portal Filter States
-  const [selectedExamTrack, setSelectedExamTrack] = useState<string>('all');
-  const [selectedLanguage, setSelectedLanguage] = useState<Language | 'all'>('all');
+  // Level 3 Filter states
   const [selectedDifficulty, setSelectedDifficulty] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [selectedDuration, setSelectedDuration] = useState<number>(15);
   const [visibleCount, setVisibleCount] = useState<number>(18);
 
-  // Classic Form States (Screenshots 2 & 3)
+  // Classic Form states
   const [classicLanguage, setClassicLanguage] = useState<Language>('english');
   const [classicDate, setClassicDate] = useState<string>('2026-10-26');
   const [classicPassageId, setClassicPassageId] = useState<string>('');
@@ -43,7 +70,7 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
   const [isClassicDropdownOpen, setIsClassicDropdownOpen] = useState<boolean>(false);
   const [isLoadingPassages, setIsLoadingPassages] = useState<boolean>(false);
 
-  // Date converters
+  // Date converter
   const toDisplayDate = (isoDate: string) => {
     if (!isoDate) return '';
     const parts = isoDate.split('-');
@@ -53,49 +80,209 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
     return isoDate;
   };
 
-  // Performance KPI calculations for Candidate Banner
+  // Exam Courses (Matching TestMentor Screenshot)
+  const EXAM_COURSES: ExamCourse[] = useMemo(
+    () => [
+      {
+        id: 'up_police_co',
+        title: 'UP Police (UPPRPB) SI, ASI, Computer Operator Typing Tests',
+        shortTitle: 'UP Police Computer Operator',
+        emblemEmoji: '👮',
+        badge: '150+ Tests',
+        passingBenchmark: 'Hindi 25 WPM • English 30 WPM • 85% Acc',
+        categoryFilter: 'up_police_co',
+        description: 'Official Grade-A & ASI test series on Mangal Inscript, Kruti Dev & English.'
+      },
+      {
+        id: 'up_police_asi',
+        title: 'UP Police ASI (Clerk, Accounts & Confidential) Typing Tests',
+        shortTitle: 'UP Police ASI Ministerial',
+        emblemEmoji: '📑',
+        badge: '100+ Tests',
+        passingBenchmark: 'Hindi 25 WPM • English 30 WPM • 85% Acc',
+        categoryFilter: 'up_police_asi',
+        description: 'Special administrative, legal and police clerical test passages.'
+      },
+      {
+        id: 'upsssc',
+        title: 'UPSSSC Junior Assistant Typing Skill Test Series',
+        shortTitle: 'UPSSSC Junior Assistant',
+        emblemEmoji: '🏛️',
+        badge: '85+ Tests',
+        passingBenchmark: 'Hindi 25 WPM • English 30 WPM • 85% Acc',
+        categoryFilter: 'all',
+        description: 'Government Secretariat & Departmental clerical typing passages.'
+      },
+      {
+        id: 'allahabad_hc',
+        title: 'ALLAHABAD HC JA & Paid Apprentices & Steno Typing Tests',
+        shortTitle: 'Allahabad High Court (RO/ARO/JA)',
+        emblemEmoji: '⚖️',
+        badge: '75+ Tests',
+        passingBenchmark: '25 WPM Hindi • 30 WPM English',
+        categoryFilter: 'all',
+        description: 'High Court legal judgment & gazette editorial typing practice.'
+      },
+      {
+        id: 'ssc_chsl',
+        title: 'SSC CHSL 2024-2025 Typing Test Series',
+        shortTitle: 'SSC CHSL / CGL Tier-II',
+        emblemEmoji: '🏢',
+        badge: '60+ Tests',
+        passingBenchmark: '35 WPM English • 30 WPM Hindi',
+        categoryFilter: 'all',
+        description: 'Staff Selection Commission standard 10-min & 15-min speed test modules.'
+      },
+      {
+        id: 'delhi_police',
+        title: 'Delhi Police Typing Course Test Series',
+        shortTitle: 'Delhi Police HCM / AWO',
+        emblemEmoji: '🛡️',
+        badge: '50+ Tests',
+        passingBenchmark: '30 WPM English • 25 WPM Hindi',
+        categoryFilter: 'all',
+        description: 'Head Constable Ministerial & Wireless Operator typing evaluation.'
+      },
+      {
+        id: 'mock15',
+        title: 'UP Police Full Length 15-Minute Official Mocks',
+        shortTitle: '15-Min Official Exam Mocks',
+        emblemEmoji: '⏱️',
+        badge: 'Hall Replica',
+        passingBenchmark: '15:00 Strict Timer • 85% Accuracy',
+        categoryFilter: 'mock15',
+        description: 'Official 15-minute simulated exam hall environment with real evaluation.'
+      },
+      {
+        id: 'drills',
+        title: '2-Min & 5-Min Rapid Weak-Keys & Speed Booster Drills',
+        shortTitle: 'Speed & Accuracy Drills',
+        emblemEmoji: '⚡',
+        badge: 'Sprint Drills',
+        passingBenchmark: 'High-frequency weak keys & error correction',
+        categoryFilter: 'drills',
+        description: 'Quick sprint drills designed to eliminate typos and boost finger agility.'
+      }
+    ],
+    []
+  );
+
+  // Active Exam Object
+  const currentExam = useMemo(() => {
+    return EXAM_COURSES.find((e) => e.id === activeExamId) || EXAM_COURSES[0];
+  }, [EXAM_COURSES, activeExamId]);
+
+  // Level 2 Modes (English, Hindi Mangal, Hindi Kruti, Live Simulation, Practice Drills, Study Material)
+  const EXAM_MODES: ExamMode[] = useMemo(
+    () => [
+      {
+        id: 'english',
+        title: 'English Typing Tests',
+        icon: '🇬🇧',
+        bg: '#eff6ff',
+        border: '#bfdbfe',
+        badge: '30 WPM Benchmark',
+        badgeColor: '#1d4ed8',
+        badgeBg: '#dbeafe',
+        description: 'Standard 30 WPM UPPRPB qualifying passages on English QWERTY keyboard.',
+        languageFilter: 'english',
+        durationFilter: 15
+      },
+      {
+        id: 'hindi_mangal',
+        title: 'हिंदी मंगल (Mangal Inscript)',
+        icon: '🇮🇳',
+        bg: '#fef3c7',
+        border: '#fde68a',
+        badge: '25 WPM Benchmark',
+        badgeColor: '#b45309',
+        badgeBg: '#fef3c7',
+        description: 'Official 25 WPM benchmark with Inscript layout & halant conjunct rules.',
+        languageFilter: 'hindi_mangal',
+        durationFilter: 15
+      },
+      {
+        id: 'hindi_kruti',
+        title: 'हिंदी कुर्ती देव (Kruti Dev 010)',
+        icon: '🇮🇳',
+        bg: '#f0fdf4',
+        border: '#bbf7d0',
+        badge: '25 WPM Benchmark',
+        badgeColor: '#15803d',
+        badgeBg: '#dcfce7',
+        description: 'Traditional Remington Hindi layout with authentic character codes.',
+        languageFilter: 'hindi_kruti',
+        durationFilter: 15
+      },
+      {
+        id: 'live_mock',
+        title: 'Live Exam Hall Simulation',
+        icon: '🔴',
+        bg: '#fef2f2',
+        border: '#fecaca',
+        badge: '15:00 Strict Timer',
+        badgeColor: '#b91c1c',
+        badgeBg: '#fee2e2',
+        description: 'Full 15-minute countdown, strict UP Police evaluation formula & full-screen mode.',
+        languageFilter: 'all',
+        durationFilter: 15
+      },
+      {
+        id: 'drills',
+        title: 'Daily Practice & Speed Boosters',
+        icon: '⚡',
+        bg: '#faf5ff',
+        border: '#e9d5ff',
+        badge: '2 & 5 Min Sprints',
+        badgeColor: '#7e22ce',
+        badgeBg: '#f3e8ff',
+        description: 'Short targeted drills focusing on weak keys, punctuation, and number rows.',
+        languageFilter: 'all',
+        durationFilter: 5
+      },
+      {
+        id: 'study',
+        title: 'Study Material & Special Key Codes',
+        icon: '📖',
+        bg: '#f8fafc',
+        border: '#cbd5e1',
+        badge: 'Rules & ALT Codes',
+        badgeColor: '#334155',
+        badgeBg: '#e2e8f0',
+        description: 'Official UPPRPB evaluation formula, Mangal/Kruti shortcuts & finger guides.',
+        languageFilter: 'all',
+        durationFilter: 15
+      }
+    ],
+    []
+  );
+
+  // Active Mode Object
+  const currentMode = useMemo(() => {
+    return EXAM_MODES.find((m) => m.id === activeModeId) || EXAM_MODES[0];
+  }, [EXAM_MODES, activeModeId]);
+
+  // Overall KPI statistics
   const kpiStats = useMemo(() => {
     const totalAttempted = history.length;
     if (totalAttempted === 0) {
-      return {
-        totalAttempted: 0,
-        bestSpeed: 0,
-        avgAccuracy: 0,
-        isQualified: false,
-        passedTestsCount: 0
-      };
+      return { totalAttempted: 0, bestSpeed: 0, avgAccuracy: 0, isQualified: false, passedTestsCount: 0 };
     }
-
     const speeds = history.map((h) => h.netWpm || 0);
     const bestSpeed = Math.round(Math.max(...speeds) * 10) / 10;
-    const avgAccuracy = Math.round(
-      history.reduce((sum, h) => sum + (h.accuracy || 0), 0) / totalAttempted
-    );
+    const avgAccuracy = Math.round(history.reduce((sum, h) => sum + (h.accuracy || 0), 0) / totalAttempted);
     const passedTestsCount = history.filter((h) => h.isQualified).length;
-    const isQualified = passedTestsCount > 0;
-
-    return {
-      totalAttempted,
-      bestSpeed,
-      avgAccuracy,
-      isQualified,
-      passedTestsCount
-    };
+    return { totalAttempted, bestSpeed, avgAccuracy, isQualified: passedTestsCount > 0, passedTestsCount };
   }, [history]);
 
-  // Lookup map for test history by passage id or title
+  // Past Attempts Map
   const pastAttemptsMap = useMemo(() => {
     const map = new Map<string, { bestSpeed: number; bestAcc: number; isQualified: boolean; count: number }>();
     history.forEach((h) => {
       const key = h.testId || h.testTitle;
       const existing = map.get(key);
       if (!existing) {
-        map.set(key, {
-          bestSpeed: h.netWpm,
-          bestAcc: h.accuracy,
-          isQualified: h.isQualified,
-          count: 1
-        });
+        map.set(key, { bestSpeed: h.netWpm, bestAcc: h.accuracy, isQualified: h.isQualified, count: 1 });
       } else {
         existing.bestSpeed = Math.max(existing.bestSpeed, h.netWpm);
         existing.bestAcc = Math.max(existing.bestAcc, h.accuracy);
@@ -106,38 +293,43 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
     return map;
   }, [history]);
 
-  // Filtered passages for Portal Grid
-  const filteredPortalPassages = useMemo(() => {
+  // Filtered passages for Level 3
+  const filteredLevel3Passages = useMemo(() => {
     return passages.filter((p) => {
-      // Exam Track Filter
-      if (selectedExamTrack === 'up_police_co' && p.category !== 'up_police_co') return false;
-      if (selectedExamTrack === 'up_police_asi' && p.category !== 'up_police_asi') return false;
-      if (selectedExamTrack === 'drills' && (p.duration > 5 && p.wordCount > 250)) return false;
-      if (selectedExamTrack === 'mock15' && p.duration < 15 && p.wordCount < 400) return false;
+      // 1. Exam Filter
+      if (currentExam.categoryFilter === 'up_police_co' && p.category !== 'up_police_co') return false;
+      if (currentExam.categoryFilter === 'up_police_asi' && p.category !== 'up_police_asi') return false;
+      if (currentExam.categoryFilter === 'drills' && (p.duration > 5 && p.wordCount > 250)) return false;
+      if (currentExam.categoryFilter === 'mock15' && p.duration < 15 && p.wordCount < 400) return false;
 
-      // Language Filter
-      if (selectedLanguage !== 'all' && p.language !== selectedLanguage) return false;
+      // 2. Mode Filter
+      if (currentMode.languageFilter && currentMode.languageFilter !== 'all') {
+        if (p.language !== currentMode.languageFilter) return false;
+      }
+      if (currentMode.id === 'drills' && p.duration > 5 && p.wordCount > 300) {
+        return false;
+      }
 
-      // Difficulty Filter
+      // 3. Difficulty Filter
       if (selectedDifficulty !== 'all' && p.difficulty !== selectedDifficulty) return false;
 
-      // Search Query Filter
+      // 4. Search Filter
       if (searchQuery.trim()) {
         const q = searchQuery.toLowerCase().trim();
         const titleMatch = p.title.toLowerCase().includes(q);
         const textMatch = p.text.toLowerCase().includes(q);
         const dateMatch = p.date ? p.date.includes(q) : false;
-        if (!titleMatch && !textMatch && !dateMatch) return false;
+        if (!titleMatch && !textMatch && dateMatch === false) return false;
       }
 
       return true;
     });
-  }, [passages, selectedExamTrack, selectedLanguage, selectedDifficulty, searchQuery]);
+  }, [passages, currentExam, currentMode, selectedDifficulty, searchQuery]);
 
-  // Reset pagination when filter changes
+  // Reset pagination on filter change
   useEffect(() => {
     setVisibleCount(18);
-  }, [selectedExamTrack, selectedLanguage, selectedDifficulty, searchQuery]);
+  }, [activeExamId, activeModeId, selectedDifficulty, searchQuery]);
 
   // Classic Form data helpers
   const classicLanguagePassages = useMemo(() => {
@@ -196,85 +388,108 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
       <div className="container">
 
         {/* ========================================================
-            VIEW MODE 1: MODERN FINTECH / EDTECH EXAM PORTAL
+            TOP BRAND & STATS BAR (TestMentor Style Replica)
             ======================================================== */}
-        {viewMode === 'portal' && (
-          <div>
-            {/* Candidate Overview & Performance KPI Strip */}
-            <section className="exam-hero-banner">
-              <div className="exam-hero-top">
+        <div className="testmentor-trust-bar">
+          <div className="testmentor-brand-info">
+            <div className="testmentor-brand-logo">TM</div>
+            <div>
+              <div className="testmentor-brand-title">UP Typing Mentor</div>
+              <div className="testmentor-brand-sub">
+                Trusted typing exam practice for UP Police & Government aspirants
+              </div>
+            </div>
+          </div>
+
+          <div className="testmentor-metrics-row">
+            <div className="testmentor-metric-pill">
+              <span style={{ fontSize: '1.2rem' }}>📄</span>
+              <div>
+                <div className="testmentor-metric-val">1,50,000+</div>
+                <div className="testmentor-metric-lbl">Typing Tests Taken</div>
+              </div>
+            </div>
+
+            <div className="testmentor-metric-pill">
+              <span style={{ fontSize: '1.2rem' }}>👮</span>
+              <div>
+                <div className="testmentor-metric-val">85% Accuracy</div>
+                <div className="testmentor-metric-lbl">UPPRPB Benchmark</div>
+              </div>
+            </div>
+
+            <div className="testmentor-metric-pill">
+              <span style={{ fontSize: '1.2rem' }}>⚡</span>
+              <div>
+                <div className="testmentor-metric-val">25 / 30 WPM</div>
+                <div className="testmentor-metric-lbl">Hindi & English Pass</div>
+              </div>
+            </div>
+
+            {/* Candidate profile or login trigger */}
+            {currentUser ? (
+              <div
+                className="testmentor-metric-pill"
+                onClick={onOpenDashboard}
+                style={{ cursor: 'pointer', background: '#f0fdf4', borderColor: '#86efac' }}
+                title="Click to view candidate statistics & examination dossier"
+              >
+                <span style={{ fontSize: '1.2rem' }}>👤</span>
                 <div>
-                  <h1 className="exam-hero-title">
-                    <span>👮</span>
-                    {currentUser ? (
-                      <>Welcome, {currentUser.displayName}</>
-                    ) : (
-                      <>UP Police Typing Examination Portal</>
-                    )}
-                  </h1>
-                  <div className="exam-hero-sub">
-                    {currentUser ? (
-                      <>
-                        <span className="exam-hero-badge">Roll: {currentUser.rollNumber}</span>
-                        <span>•</span>
-                        <span>Post: {currentUser.category === 'up_police_asi' ? 'UP Police ASI' : 'UP Police Computer Operator'}</span>
-                        <span>•</span>
-                        <span
-                          style={{ textDecoration: 'underline', cursor: 'pointer', color: '#bfdbfe' }}
-                          onClick={onOpenDashboard}
-                        >
-                          View Dossier & Leaderboard →
-                        </span>
-                      </>
-                    ) : (
-                      <>
-                        <span>UPPRPB Benchmark: Hindi 25 WPM (Mangal/Kruti) | English 30 WPM | 85% Accuracy</span>
-                        <span>•</span>
-                        <button
-                          onClick={onOpenAuth}
-                          style={{
-                            background: '#ffffff',
-                            color: '#0f2c59',
-                            border: 'none',
-                            padding: '3px 10px',
-                            borderRadius: '12px',
-                            fontWeight: 700,
-                            fontSize: '0.75rem',
-                            cursor: 'pointer'
-                          }}
-                        >
-                          Candidate Login / Sign-up 👤
-                        </button>
-                      </>
-                    )}
+                  <div className="testmentor-metric-val" style={{ color: '#166534' }}>
+                    {currentUser.displayName}
+                  </div>
+                  <div className="testmentor-metric-lbl" style={{ color: '#15803d' }}>
+                    Roll: {currentUser.rollNumber} • Dossier →
                   </div>
                 </div>
+              </div>
+            ) : (
+              <button
+                onClick={onOpenAuth}
+                className="btn btn-sm btn-primary"
+                style={{ borderRadius: '10px', padding: '8px 16px', fontWeight: 700 }}
+              >
+                Candidate Login 👤
+              </button>
+            )}
 
-                {/* Switch to Classic AR Typing Form */}
-                <button
-                  onClick={() => setViewMode('classic_form')}
-                  className="btn btn-sm"
-                  style={{
-                    background: 'rgba(255, 255, 255, 0.15)',
-                    color: '#ffffff',
-                    border: '1px solid rgba(255, 255, 255, 0.25)',
-                    fontWeight: 600,
-                    fontSize: '0.82rem',
-                    backdropFilter: 'blur(4px)'
-                  }}
-                  title="Switch to Date-wise Dropdown Form"
-                >
-                  <span>📅</span> Classic Date Selector ☰
-                </button>
+            {/* Classic Date Selector Toggle */}
+            <button
+              onClick={() => setNavLevel(navLevel === 'classic_form' ? 1 : 'classic_form')}
+              className="btn btn-sm btn-secondary"
+              style={{ borderRadius: '10px', padding: '8px 14px', fontWeight: 600, fontSize: '0.8rem' }}
+              title="Toggle classic date-wise passage selector"
+            >
+              {navLevel === 'classic_form' ? '← Back to Courses' : '📅 Classic Date Selector ☰'}
+            </button>
+          </div>
+        </div>
+
+        {/* ========================================================
+            LEVEL 1: "ALL COURSES" EXAM GRID (TestMentor Screen)
+            ======================================================== */}
+        {navLevel === 1 && (
+          <div>
+            {/* Candidate Performance KPI Strip */}
+            <section className="exam-hero-banner" style={{ padding: '22px 26px', marginBottom: '24px' }}>
+              <div className="exam-hero-top" style={{ marginBottom: '14px' }}>
+                <div>
+                  <h2 className="exam-hero-title" style={{ fontSize: '1.25rem' }}>
+                    <span>🎯</span> Examination Performance Overview
+                  </h2>
+                  <div className="exam-hero-sub">
+                    <span>Target: UP Police Computer Operator Grade-A & ASI (2024-2026)</span>
+                  </div>
+                </div>
               </div>
 
-              {/* KPI Strip */}
               <div className="exam-kpi-grid">
                 <div className="exam-kpi-card">
                   <div className="exam-kpi-label">Tests Attempted</div>
                   <div className="exam-kpi-value">{kpiStats.totalAttempted}</div>
                   <div className="exam-kpi-hint">
-                    {kpiStats.totalAttempted > 0 ? `${kpiStats.passedTestsCount} passed` : 'Start your first mock test'}
+                    {kpiStats.totalAttempted > 0 ? `${kpiStats.passedTestsCount} qualified` : 'Start your first exam series'}
                   </div>
                 </div>
 
@@ -283,7 +498,7 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
                   <div className="exam-kpi-value">
                     {kpiStats.bestSpeed > 0 ? `${kpiStats.bestSpeed} WPM` : '--'}
                   </div>
-                  <div className="exam-kpi-hint">Pass Target: 25 Hindi / 30 Eng</div>
+                  <div className="exam-kpi-hint">Target: 25 Hindi / 30 English</div>
                 </div>
 
                 <div className="exam-kpi-card">
@@ -291,7 +506,7 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
                   <div className="exam-kpi-value">
                     {kpiStats.avgAccuracy > 0 ? `${kpiStats.avgAccuracy}%` : '--'}
                   </div>
-                  <div className="exam-kpi-hint">Min. Benchmark: ≥ 85.0%</div>
+                  <div className="exam-kpi-hint">Passing standard: ≥ 85.0%</div>
                 </div>
 
                 <div className="exam-kpi-card">
@@ -299,400 +514,675 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
                   <div
                     className="exam-kpi-value"
                     style={{
-                      fontSize: '1.25rem',
+                      fontSize: '1.15rem',
                       color: kpiStats.isQualified ? '#86efac' : '#fde047'
                     }}
                   >
                     {kpiStats.isQualified ? 'QUALIFIED 🟢' : kpiStats.totalAttempted > 0 ? 'PREPARING 🟡' : 'READY TO TEST'}
                   </div>
-                  <div className="exam-kpi-hint">
-                    {kpiStats.isQualified ? 'Meets official standards' : 'Requires 85% Acc + Speed'}
-                  </div>
+                  <div className="exam-kpi-hint">Official UPPRPB benchmark</div>
                 </div>
               </div>
             </section>
 
-            {/* Exam Track Segmented Tabs */}
-            <div className="exam-track-tabs">
-              <button
-                className={`exam-track-tab ${selectedExamTrack === 'all' ? 'active' : ''}`}
-                onClick={() => setSelectedExamTrack('all')}
-              >
-                <span>🎯</span> All Test Series
-                <span className="exam-track-count">{passages.length}</span>
-              </button>
-              <button
-                className={`exam-track-tab ${selectedExamTrack === 'up_police_co' ? 'active' : ''}`}
-                onClick={() => setSelectedExamTrack('up_police_co')}
-              >
-                <span>👮</span> UP Police Computer Operator
-                <span className="exam-track-count">
-                  {passages.filter((p) => p.category === 'up_police_co').length}
-                </span>
-              </button>
-              <button
-                className={`exam-track-tab ${selectedExamTrack === 'up_police_asi' ? 'active' : ''}`}
-                onClick={() => setSelectedExamTrack('up_police_asi')}
-              >
-                <span>📑</span> UP Police ASI (Clerk/Acct)
-                <span className="exam-track-count">
-                  {passages.filter((p) => p.category === 'up_police_asi').length}
-                </span>
-              </button>
-              <button
-                className={`exam-track-tab ${selectedExamTrack === 'mock15' ? 'active' : ''}`}
-                onClick={() => setSelectedExamTrack('mock15')}
-              >
-                <span>⏱️</span> 15-Min Official Mocks
-                <span className="exam-track-count">
-                  {passages.filter((p) => p.duration >= 15 || p.wordCount >= 400).length}
-                </span>
-              </button>
-              <button
-                className={`exam-track-tab ${selectedExamTrack === 'drills' ? 'active' : ''}`}
-                onClick={() => setSelectedExamTrack('drills')}
-              >
-                <span>⚡</span> Rapid Drills (2-5 Min)
-                <span className="exam-track-count">
-                  {passages.filter((p) => p.duration <= 5 || p.wordCount <= 300).length}
-                </span>
-              </button>
+            {/* "All Courses" Header (TestMentor Replica) */}
+            <div className="testmentor-courses-header">
+              <h2 className="testmentor-courses-title">
+                <span>📚</span> All Courses & Typing Test Series
+              </h2>
+              <span style={{ fontSize: '0.85rem', color: '#64748b', fontWeight: 600 }}>
+                Select an exam course to explore Hindi, English, Live Mocks & Drills
+              </span>
             </div>
 
-            {/* Fintech Filter Toolbar */}
-            <div className="exam-toolbar">
-              {/* Row 1: Language & Difficulty Filters */}
-              <div className="exam-toolbar-row">
-                {/* Language Pills */}
-                <div className="exam-filter-group">
-                  <span style={{ fontSize: '0.82rem', fontWeight: 700, color: '#64748b', marginRight: '4px' }}>
-                    Language:
-                  </span>
-                  <button
-                    className={`exam-filter-chip ${selectedLanguage === 'all' ? 'active' : ''}`}
-                    onClick={() => setSelectedLanguage('all')}
-                  >
-                    All Languages
-                  </button>
-                  <button
-                    className={`exam-filter-chip ${selectedLanguage === 'english' ? 'active' : ''}`}
-                    onClick={() => setSelectedLanguage('english')}
-                  >
-                    🇬🇧 English (30 WPM)
-                  </button>
-                  <button
-                    className={`exam-filter-chip ${selectedLanguage === 'hindi_mangal' ? 'active' : ''}`}
-                    onClick={() => setSelectedLanguage('hindi_mangal')}
-                  >
-                    🇮🇳 हिंदी मंगल (25 WPM)
-                  </button>
-                  <button
-                    className={`exam-filter-chip ${selectedLanguage === 'hindi_kruti' ? 'active' : ''}`}
-                    onClick={() => setSelectedLanguage('hindi_kruti')}
-                  >
-                    🇮🇳 कुर्ती देव 010 (25 WPM)
-                  </button>
-                </div>
+            {/* TestMentor Multi-column Exam Grid */}
+            <div className="testmentor-grid">
+              {EXAM_COURSES.map((course) => (
+                <div
+                  key={course.id}
+                  className="testmentor-exam-card"
+                  onClick={() => {
+                    setActiveExamId(course.id);
+                    setNavLevel(2);
+                  }}
+                >
+                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                    <div className="testmentor-emblem-wrap">
+                      <span>{course.emblemEmoji}</span>
+                    </div>
+                    <div className="testmentor-exam-title">{course.title}</div>
+                  </div>
 
-                {/* Duration Picker */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <span style={{ fontSize: '0.82rem', fontWeight: 700, color: '#64748b' }}>
-                    Timer:
-                  </span>
-                  <select
-                    value={selectedDuration}
-                    onChange={(e) => setSelectedDuration(Number(e.target.value))}
-                    style={{
-                      padding: '6px 12px',
-                      borderRadius: '6px',
-                      border: '1px solid #cbd5e1',
-                      fontSize: '0.85rem',
-                      fontWeight: 600,
-                      color: '#0f172a',
-                      background: '#ffffff',
-                      outline: 'none'
-                    }}
-                  >
-                    <option value={15}>15 Min (UPPRPB Exam Standard)</option>
-                    <option value={10}>10 Min</option>
-                    <option value={5}>5 Min (Speed Drill)</option>
-                    <option value={2}>2 Min (Sprint)</option>
-                  </select>
+                  <div style={{ width: '100%', marginTop: '8px' }}>
+                    <div className="testmentor-exam-badge">{course.badge}</div>
+                  </div>
                 </div>
-              </div>
-
-              {/* Row 2: Difficulty Chips & Live Search Box */}
-              <div className="exam-toolbar-row">
-                {/* Difficulty Chips */}
-                <div className="exam-filter-group">
-                  <span style={{ fontSize: '0.82rem', fontWeight: 700, color: '#64748b', marginRight: '4px' }}>
-                    Difficulty:
-                  </span>
-                  <button
-                    className={`exam-filter-chip ${selectedDifficulty === 'all' ? 'active' : ''}`}
-                    onClick={() => setSelectedDifficulty('all')}
-                  >
-                    All
-                  </button>
-                  <button
-                    className={`exam-filter-chip ${selectedDifficulty === 'easy' ? 'active' : ''}`}
-                    onClick={() => setSelectedDifficulty('easy')}
-                  >
-                    🟢 Easy
-                  </button>
-                  <button
-                    className={`exam-filter-chip ${selectedDifficulty === 'medium' ? 'active' : ''}`}
-                    onClick={() => setSelectedDifficulty('medium')}
-                  >
-                    🟡 Moderate
-                  </button>
-                  <button
-                    className={`exam-filter-chip ${selectedDifficulty === 'hard' ? 'active' : ''}`}
-                    onClick={() => setSelectedDifficulty('hard')}
-                  >
-                    🔴 Hard
-                  </button>
-                </div>
-
-                {/* Instant Search Box */}
-                <div className="exam-search-box">
-                  <svg
-                    className="exam-search-icon"
-                    width="16"
-                    height="16"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    viewBox="0 0 24 24"
-                  >
-                    <circle cx="11" cy="11" r="8" />
-                    <line x1="21" y1="21" x2="16.65" y2="16.65" />
-                  </svg>
-                  <input
-                    type="text"
-                    className="exam-search-input"
-                    placeholder="Search mock test by topic, title or date..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                  />
-                  {searchQuery && (
-                    <button
-                      onClick={() => setSearchQuery('')}
-                      style={{
-                        position: 'absolute',
-                        right: '10px',
-                        top: '50%',
-                        transform: 'translateY(-50%)',
-                        background: 'none',
-                        border: 'none',
-                        cursor: 'pointer',
-                        color: '#94a3b8',
-                        fontSize: '0.9rem'
-                      }}
-                    >
-                      ✕
-                    </button>
-                  )}
-                </div>
-              </div>
+              ))}
             </div>
 
-            {/* Test Cards Header */}
+            {/* Yearly Pass / Feature Banner (TestMentor Screen Bottom) */}
             <div
               style={{
+                background: 'linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%)',
+                border: '1.5px solid #86efac',
+                borderRadius: '16px',
+                padding: '28px 32px',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'space-between',
-                marginBottom: '16px'
+                flexWrap: 'wrap',
+                gap: '20px'
               }}
             >
-              <div style={{ fontSize: '0.95rem', fontWeight: 700, color: '#334155' }}>
-                Available Examination Tests ({filteredPortalPassages.length})
+              <div>
+                <div
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    background: '#166534',
+                    color: '#ffffff',
+                    padding: '3px 10px',
+                    borderRadius: '12px',
+                    fontSize: '0.75rem',
+                    fontWeight: 700,
+                    marginBottom: '8px'
+                  }}
+                >
+                  🏆 UP POLICE COMPUTER OPERATOR (GRADE-A) TYPING PASS
+                </div>
+                <h3 style={{ fontSize: '1.3rem', fontWeight: 800, color: '#14532d', marginBottom: '6px' }}>
+                  Complete Exam Hall Typing Preparation
+                </h3>
+                <p style={{ color: '#166534', fontSize: '0.9rem', maxWidth: '640px', lineHeight: 1.5 }}>
+                  Practice real exam-hall passages in Hindi (Mangal Inscript & Kruti Dev 010) and English with instant
+                  evaluation of Gross Speed, Net Speed, Full/Half Mistakes, and 85% Accuracy check.
+                </p>
               </div>
-              <div style={{ fontSize: '0.8rem', color: '#64748b' }}>
-                Showing {Math.min(visibleCount, filteredPortalPassages.length)} of {filteredPortalPassages.length}
+
+              <button
+                className="btn btn-success"
+                onClick={() => {
+                  setActiveExamId('up_police_co');
+                  setNavLevel(2);
+                }}
+                style={{ padding: '12px 28px', fontWeight: 800, fontSize: '0.95rem' }}
+              >
+                Explore UP Police CO Series →
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* ========================================================
+            LEVEL 2: EXAM HUB & MODE SELECTION (English, Hindi, Live, Practice)
+            ======================================================== */}
+        {navLevel === 2 && (
+          <div>
+            {/* Breadcrumb Bar */}
+            <div className="level-breadcrumb-bar">
+              <span className="level-breadcrumb-link" onClick={() => setNavLevel(1)}>
+                🏠 All Courses
+              </span>
+              <span className="level-breadcrumb-sep">/</span>
+              <span className="level-breadcrumb-current">{currentExam.shortTitle}</span>
+            </div>
+
+            {/* Exam Hero Card */}
+            <div className="level2-hero-card">
+              <div className="level2-exam-info">
+                <div className="level2-exam-emblem">
+                  <span>{currentExam.emblemEmoji}</span>
+                </div>
+                <div>
+                  <h2 className="level2-exam-title">{currentExam.title}</h2>
+                  <div className="level2-exam-benchmarks">
+                    <span className="level2-bench-badge">🎯 {currentExam.passingBenchmark}</span>
+                    <span className="level2-bench-badge">⏱️ 15 Mins Exam Duration</span>
+                    <span className="level2-bench-badge">📝 85% Accuracy Mandatory</span>
+                  </div>
+                </div>
+              </div>
+
+              <button
+                className="btn btn-secondary btn-sm"
+                onClick={() => setNavLevel(1)}
+                style={{ fontWeight: 700, borderRadius: '8px', padding: '8px 16px' }}
+              >
+                ← Back to All Courses
+              </button>
+            </div>
+
+            {/* Modes Header */}
+            <div style={{ marginBottom: '16px' }}>
+              <h3 style={{ fontSize: '1.2rem', fontWeight: 800, color: '#0f172a', marginBottom: '4px' }}>
+                Select Medium or Practice Mode
+              </h3>
+              <p style={{ fontSize: '0.88rem', color: '#64748b' }}>
+                Choose whether you want to practice in English, Hindi Mangal, Hindi Kruti, Live Simulation, or Drills.
+              </p>
+            </div>
+
+            {/* 6 Mode Cards Grid */}
+            <div className="level2-mode-grid">
+              {EXAM_MODES.map((mode) => (
+                <div
+                  key={mode.id}
+                  className="level2-mode-card"
+                  onClick={() => {
+                    setActiveModeId(mode.id);
+                    if (mode.id === 'drills') {
+                      setSelectedDuration(5);
+                    } else if (mode.id === 'live_mock') {
+                      setSelectedDuration(15);
+                    }
+                    setNavLevel(3);
+                  }}
+                >
+                  <div>
+                    <div className="level2-mode-top">
+                      <div className="level2-mode-icon" style={{ background: mode.bg, border: `1px solid ${mode.border}` }}>
+                        <span>{mode.icon}</span>
+                      </div>
+                      <div>
+                        <div className="level2-mode-title">{mode.title}</div>
+                        <div className="level2-mode-sub">{mode.description}</div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="level2-mode-footer">
+                    <span
+                      className="level2-mode-badge"
+                      style={{ color: mode.badgeColor, background: mode.badgeBg }}
+                    >
+                      {mode.badge}
+                    </span>
+                    <span style={{ fontSize: '0.85rem', fontWeight: 700, color: '#0284c7' }}>
+                      Explore Material →
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* ========================================================
+            LEVEL 3: TEST MATERIAL & PRACTICE LIST
+            ======================================================== */}
+        {navLevel === 3 && (
+          <div>
+            {/* Breadcrumb Navigation */}
+            <div className="level-breadcrumb-bar">
+              <span className="level-breadcrumb-link" onClick={() => setNavLevel(1)}>
+                🏠 All Courses
+              </span>
+              <span className="level-breadcrumb-sep">/</span>
+              <span className="level-breadcrumb-link" onClick={() => setNavLevel(2)}>
+                {currentExam.shortTitle}
+              </span>
+              <span className="level-breadcrumb-sep">/</span>
+              <span className="level-breadcrumb-current">{currentMode.title}</span>
+            </div>
+
+            {/* Mode Banner */}
+            <div
+              style={{
+                background: currentMode.bg,
+                border: `1.5px solid ${currentMode.border}`,
+                borderRadius: '12px',
+                padding: '18px 24px',
+                marginBottom: '20px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                flexWrap: 'wrap',
+                gap: '12px'
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <span style={{ fontSize: '2rem' }}>{currentMode.icon}</span>
+                <div>
+                  <h2 style={{ fontSize: '1.25rem', fontWeight: 800, color: '#0f172a', marginBottom: '2px' }}>
+                    {currentMode.title} - Test Material
+                  </h2>
+                  <div style={{ fontSize: '0.85rem', color: '#475569' }}>
+                    {currentExam.shortTitle} • {currentMode.description}
+                  </div>
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', gap: '8px' }}>
+                <button
+                  className="btn btn-secondary btn-sm"
+                  onClick={() => setNavLevel(2)}
+                  style={{ fontWeight: 700 }}
+                >
+                  ← Back to Modes
+                </button>
+                <button
+                  className="btn btn-secondary btn-sm"
+                  onClick={() => setNavLevel(1)}
+                  style={{ fontWeight: 700 }}
+                >
+                  All Courses
+                </button>
               </div>
             </div>
 
-            {/* Test Cards Grid */}
-            {filteredPortalPassages.length === 0 ? (
+            {/* SPECIAL MODE: STUDY MATERIAL & SPECIAL CODES (Mode 6) */}
+            {currentMode.id === 'study' ? (
               <div
+                className="card"
                 style={{
                   background: '#ffffff',
                   borderRadius: '12px',
-                  padding: '48px 24px',
-                  textAlign: 'center',
-                  border: '1px solid #e2e8f0'
+                  padding: '28px',
+                  border: '1px solid #e2e8f0',
+                  marginBottom: '24px'
                 }}
               >
-                <div style={{ fontSize: '2.5rem', marginBottom: '12px' }}>🔍</div>
-                <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: '#0f172a', marginBottom: '8px' }}>
-                  No matching tests found
+                <h3 style={{ fontSize: '1.2rem', fontWeight: 800, color: '#0f172a', marginBottom: '14px' }}>
+                  📖 UP Police Computer Operator & ASI Typing Rules & Evaluation Formula
                 </h3>
-                <p style={{ fontSize: '0.9rem', color: '#64748b', marginBottom: '16px' }}>
-                  Try resetting your filters or search keywords to view all available tests.
-                </p>
-                <button
-                  className="btn btn-primary btn-sm"
-                  onClick={() => {
-                    setSelectedExamTrack('all');
-                    setSelectedLanguage('all');
-                    setSelectedDifficulty('all');
-                    setSearchQuery('');
+
+                <div
+                  style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+                    gap: '16px',
+                    marginBottom: '24px'
                   }}
                 >
-                  Reset Filters
-                </button>
+                  <div style={{ background: '#f8fafc', padding: '16px', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
+                    <div style={{ fontWeight: 700, color: '#0f172a', marginBottom: '6px' }}>
+                      ⚡ Speed Calculation Formula
+                    </div>
+                    <p style={{ fontSize: '0.85rem', color: '#475569', lineHeight: 1.5 }}>
+                      • <strong>Gross WPM</strong> = (Total Keystrokes / 5) / Time (Minutes)<br />
+                      • <strong>Net WPM</strong> = Gross WPM - (Mistakes / Time)<br />
+                      • <strong>Hindi Target</strong>: 25 Net WPM (Mangal Inscript or Kruti Dev)<br />
+                      • <strong>English Target</strong>: 30 Net WPM
+                    </p>
+                  </div>
+
+                  <div style={{ background: '#f8fafc', padding: '16px', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
+                    <div style={{ fontWeight: 700, color: '#0f172a', marginBottom: '6px' }}>
+                      🎯 Accuracy & Penalty Rules
+                    </div>
+                    <p style={{ fontSize: '0.85rem', color: '#475569', lineHeight: 1.5 }}>
+                      • <strong>Minimum Accuracy</strong>: 85.0% mandatory for qualification.<br />
+                      • <strong>Full Mistakes</strong>: Missing words, substituted words, spelling errors.<br />
+                      • <strong>Half Mistakes</strong>: Spacing errors, punctuation errors, capitalization errors.
+                    </p>
+                  </div>
+                </div>
+
+                <h4 style={{ fontSize: '1rem', fontWeight: 700, color: '#0f172a', marginBottom: '10px' }}>
+                  ⌨️ Frequent Kruti Dev 010 & Mangal Inscript Special ALT Codes:
+                </h4>
+                <div
+                  style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))',
+                    gap: '10px',
+                    fontSize: '0.85rem'
+                  }}
+                >
+                  {[
+                    { code: 'Alt + 0161', char: 'ह्न' },
+                    { code: 'Alt + 0170', char: 'क्क' },
+                    { code: 'Alt + 0179', char: 'ट्ट' },
+                    { code: 'Alt + 0180', char: 'ट्ठ' },
+                    { code: 'Alt + 0181', char: 'ड्ड' },
+                    { code: 'Alt + 0182', char: 'ड्ढ' },
+                    { code: 'Alt + 0188', char: 'द्ग' },
+                    { code: 'Alt + 0204', char: 'त्त' },
+                    { code: 'Alt + 0216', char: '्य' },
+                    { code: 'Alt + 0227', char: 'ह्म' }
+                  ].map((item) => (
+                    <div
+                      key={item.code}
+                      style={{
+                        background: '#f1f5f9',
+                        padding: '8px 12px',
+                        borderRadius: '6px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        fontWeight: 600
+                      }}
+                    >
+                      <span style={{ color: '#0284c7' }}>{item.code}</span>
+                      <span style={{ fontSize: '1.1rem', color: '#0f172a' }}>{item.char}</span>
+                    </div>
+                  ))}
+                </div>
+
+                <div style={{ marginTop: '24px', display: 'flex', gap: '12px' }}>
+                  <button
+                    className="btn btn-primary"
+                    onClick={() => {
+                      setActiveModeId('english');
+                    }}
+                  >
+                    Start English Mock Test →
+                  </button>
+                  <button
+                    className="btn btn-secondary"
+                    onClick={() => {
+                      setActiveModeId('hindi_mangal');
+                    }}
+                  >
+                    Start Hindi Mangal Test →
+                  </button>
+                </div>
               </div>
             ) : (
-              <div className="exam-grid">
-                {filteredPortalPassages.slice(0, visibleCount).map((passage, idx) => {
-                  const past = pastAttemptsMap.get(passage.id) || pastAttemptsMap.get(passage.title);
-                  const simulatedCandidates = 14200 + ((idx * 843) % 19500);
+              /* REGULAR TEST MATERIAL GRID */
+              <div>
+                {/* Filters Toolbar */}
+                <div className="exam-toolbar">
+                  <div className="exam-toolbar-row">
+                    {/* Difficulty Chips */}
+                    <div className="exam-filter-group">
+                      <span style={{ fontSize: '0.82rem', fontWeight: 700, color: '#64748b', marginRight: '4px' }}>
+                        Difficulty:
+                      </span>
+                      <button
+                        className={`exam-filter-chip ${selectedDifficulty === 'all' ? 'active' : ''}`}
+                        onClick={() => setSelectedDifficulty('all')}
+                      >
+                        All Difficulties
+                      </button>
+                      <button
+                        className={`exam-filter-chip ${selectedDifficulty === 'easy' ? 'active' : ''}`}
+                        onClick={() => setSelectedDifficulty('easy')}
+                      >
+                        🟢 Easy
+                      </button>
+                      <button
+                        className={`exam-filter-chip ${selectedDifficulty === 'medium' ? 'active' : ''}`}
+                        onClick={() => setSelectedDifficulty('medium')}
+                      >
+                        🟡 Moderate
+                      </button>
+                      <button
+                        className={`exam-filter-chip ${selectedDifficulty === 'hard' ? 'active' : ''}`}
+                        onClick={() => setSelectedDifficulty('hard')}
+                      >
+                        🔴 Hard
+                      </button>
+                    </div>
 
-                  return (
-                    <div
-                      key={passage.id}
-                      className="exam-test-card"
-                      onClick={() => onStartTest(passage, selectedDuration)}
-                      style={{ cursor: 'pointer' }}
-                    >
-                      <div>
-                        {/* Badges Row */}
-                        <div className="exam-card-badges">
-                          <span
-                            className={`exam-tag ${
-                              passage.category === 'up_police_asi' ? 'exam-tag-asi' : 'exam-tag-co'
-                            }`}
-                          >
-                            {passage.category === 'up_police_asi' ? 'UP Police ASI' : 'UP Police CO'}
-                          </span>
+                    {/* Timer Selector */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <span style={{ fontSize: '0.82rem', fontWeight: 700, color: '#64748b' }}>
+                        Timer:
+                      </span>
+                      <select
+                        value={selectedDuration}
+                        onChange={(e) => setSelectedDuration(Number(e.target.value))}
+                        style={{
+                          padding: '6px 12px',
+                          borderRadius: '6px',
+                          border: '1px solid #cbd5e1',
+                          fontSize: '0.85rem',
+                          fontWeight: 600,
+                          color: '#0f172a',
+                          background: '#ffffff',
+                          outline: 'none'
+                        }}
+                      >
+                        <option value={15}>15 Min (UPPRPB Official)</option>
+                        <option value={10}>10 Min</option>
+                        <option value={5}>5 Min (Speed Drill)</option>
+                        <option value={2}>2 Min (Sprint)</option>
+                      </select>
+                    </div>
+                  </div>
 
-                          <span
-                            className={`exam-tag ${
-                              passage.language === 'english' ? 'exam-tag-lang-en' : 'exam-tag-lang-hi'
-                            }`}
-                          >
-                            {passage.language === 'english'
-                              ? 'English'
-                              : passage.language === 'hindi_mangal'
-                              ? 'मंगल'
-                              : 'कुर्ती देव'}
-                          </span>
-
-                          <span
-                            className={`exam-tag ${
-                              passage.difficulty === 'easy'
-                                ? 'exam-tag-diff-easy'
-                                : passage.difficulty === 'hard'
-                                ? 'exam-tag-diff-hard'
-                                : 'exam-tag-diff-medium'
-                            }`}
-                          >
-                            {passage.difficulty.toUpperCase()}
-                          </span>
-                        </div>
-
-                        {/* Title */}
-                        <h3 className="exam-card-title" title={passage.title}>
-                          {passage.title}
-                        </h3>
-
-                        {/* Date */}
-                        <div className="exam-card-date">
-                          📅 {toDisplayDate(passage.date || '2026-10-26')} • UPPRPB Pattern Mock
-                        </div>
-
-                        {/* Stats Row */}
-                        <div className="exam-card-stats">
-                          <div className="exam-card-stat">
-                            <div className="exam-card-stat-label">Duration</div>
-                            <div className="exam-card-stat-val">{selectedDuration}:00m</div>
-                          </div>
-                          <div className="exam-card-stat">
-                            <div className="exam-card-stat-label">Words</div>
-                            <div className="exam-card-stat-val">{passage.wordCount}</div>
-                          </div>
-                          <div className="exam-card-stat">
-                            <div className="exam-card-stat-label">Min. Acc</div>
-                            <div className="exam-card-stat-val">85%</div>
-                          </div>
-                        </div>
-
-                        {/* Past Performance Chip */}
-                        {past ? (
-                          <div
-                            className={`exam-card-past-score ${
-                              past.isQualified ? 'exam-score-passed' : 'exam-score-failed'
-                            }`}
-                          >
-                            <span>
-                              ✓ {past.isQualified ? 'Qualified' : 'Attempted'} • Best: {past.bestSpeed} WPM ({past.bestAcc}%)
-                            </span>
-                            <span style={{ fontSize: '0.68rem', opacity: 0.8 }}>
-                              {past.count} {past.count === 1 ? 'try' : 'tries'}
-                            </span>
-                          </div>
-                        ) : (
-                          <div className="exam-card-past-score exam-score-not-attempted">
-                            <span>○ Not yet attempted</span>
-                            <span style={{ fontSize: '0.68rem' }}>Ready to test</span>
-                          </div>
-                        )}
-                      </div>
-
-                      {/* Footer & CTA */}
-                      <div className="exam-card-footer">
-                        <div className="exam-card-attempts">
-                          <span>👥</span> {simulatedCandidates.toLocaleString()}
-                        </div>
+                  {/* Search Bar */}
+                  <div className="exam-toolbar-row">
+                    <div className="exam-search-box">
+                      <svg
+                        className="exam-search-icon"
+                        width="16"
+                        height="16"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        viewBox="0 0 24 24"
+                      >
+                        <circle cx="11" cy="11" r="8" />
+                        <line x1="21" y1="21" x2="16.65" y2="16.65" />
+                      </svg>
+                      <input
+                        type="text"
+                        className="exam-search-input"
+                        placeholder="Search test by passage topic, keyword or date..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                      />
+                      {searchQuery && (
                         <button
-                          className="exam-start-btn"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            onStartTest(passage, selectedDuration);
+                          onClick={() => setSearchQuery('')}
+                          style={{
+                            position: 'absolute',
+                            right: '10px',
+                            top: '50%',
+                            transform: 'translateY(-50%)',
+                            background: 'none',
+                            border: 'none',
+                            cursor: 'pointer',
+                            color: '#94a3b8',
+                            fontSize: '0.9rem'
                           }}
                         >
-                          {past ? 'Retest ↺' : 'Start Test →'}
+                          ✕
                         </button>
-                      </div>
+                      )}
                     </div>
-                  );
-                })}
-              </div>
-            )}
+                  </div>
+                </div>
 
-            {/* Load More Button */}
-            {visibleCount < filteredPortalPassages.length && (
-              <div style={{ textAlign: 'center', marginTop: '32px' }}>
-                <button
-                  className="btn btn-secondary"
-                  onClick={() => setVisibleCount((prev) => prev + 18)}
+                {/* Available Tests Count */}
+                <div
                   style={{
-                    fontWeight: 700,
-                    padding: '10px 28px',
-                    borderRadius: '8px'
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    marginBottom: '16px'
                   }}
                 >
-                  Load More Tests ({filteredPortalPassages.length - visibleCount} remaining) ↓
-                </button>
+                  <div style={{ fontSize: '0.95rem', fontWeight: 700, color: '#334155' }}>
+                    Available Tests in {currentMode.title} ({filteredLevel3Passages.length})
+                  </div>
+                  <div style={{ fontSize: '0.8rem', color: '#64748b' }}>
+                    Showing {Math.min(visibleCount, filteredLevel3Passages.length)} of {filteredLevel3Passages.length}
+                  </div>
+                </div>
+
+                {/* Tests Grid */}
+                {filteredLevel3Passages.length === 0 ? (
+                  <div
+                    style={{
+                      background: '#ffffff',
+                      borderRadius: '12px',
+                      padding: '48px 24px',
+                      textAlign: 'center',
+                      border: '1px solid #e2e8f0'
+                    }}
+                  >
+                    <div style={{ fontSize: '2.5rem', marginBottom: '12px' }}>🔍</div>
+                    <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: '#0f172a', marginBottom: '8px' }}>
+                      No matching tests found in this category
+                    </h3>
+                    <p style={{ fontSize: '0.9rem', color: '#64748b', marginBottom: '16px' }}>
+                      Try selecting another difficulty level or resetting your search keyword.
+                    </p>
+                    <button
+                      className="btn btn-primary btn-sm"
+                      onClick={() => {
+                        setSelectedDifficulty('all');
+                        setSearchQuery('');
+                      }}
+                    >
+                      Reset Filters
+                    </button>
+                  </div>
+                ) : (
+                  <div className="exam-grid">
+                    {filteredLevel3Passages.slice(0, visibleCount).map((passage, idx) => {
+                      const past = pastAttemptsMap.get(passage.id) || pastAttemptsMap.get(passage.title);
+                      const simulatedCandidates = 14200 + ((idx * 843) % 19500);
+
+                      return (
+                        <div
+                          key={passage.id}
+                          className="exam-test-card"
+                          onClick={() => onStartTest(passage, selectedDuration)}
+                          style={{ cursor: 'pointer' }}
+                        >
+                          <div>
+                            {/* Badges Row */}
+                            <div className="exam-card-badges">
+                              <span
+                                className={`exam-tag ${
+                                  passage.category === 'up_police_asi' ? 'exam-tag-asi' : 'exam-tag-co'
+                                }`}
+                              >
+                                {passage.category === 'up_police_asi' ? 'UP Police ASI' : 'UP Police CO'}
+                              </span>
+
+                              <span
+                                className={`exam-tag ${
+                                  passage.language === 'english' ? 'exam-tag-lang-en' : 'exam-tag-lang-hi'
+                                }`}
+                              >
+                                {passage.language === 'english'
+                                  ? 'English'
+                                  : passage.language === 'hindi_mangal'
+                                  ? 'मंगल'
+                                  : 'कुर्ती देव'}
+                              </span>
+
+                              <span
+                                className={`exam-tag ${
+                                  passage.difficulty === 'easy'
+                                    ? 'exam-tag-diff-easy'
+                                    : passage.difficulty === 'hard'
+                                    ? 'exam-tag-diff-hard'
+                                    : 'exam-tag-diff-medium'
+                                }`}
+                              >
+                                {passage.difficulty.toUpperCase()}
+                              </span>
+                            </div>
+
+                            {/* Title */}
+                            <h3 className="exam-card-title" title={passage.title}>
+                              {passage.title}
+                            </h3>
+
+                            {/* Date */}
+                            <div className="exam-card-date">
+                              📅 {toDisplayDate(passage.date || '2026-10-26')} • UPPRPB Pattern Passage
+                            </div>
+
+                            {/* Stats */}
+                            <div className="exam-card-stats">
+                              <div className="exam-card-stat">
+                                <div className="exam-card-stat-label">Duration</div>
+                                <div className="exam-card-stat-val">{selectedDuration}:00m</div>
+                              </div>
+                              <div className="exam-card-stat">
+                                <div className="exam-card-stat-label">Words</div>
+                                <div className="exam-card-stat-val">{passage.wordCount}</div>
+                              </div>
+                              <div className="exam-card-stat">
+                                <div className="exam-card-stat-label">Target Acc</div>
+                                <div className="exam-card-stat-val">85%</div>
+                              </div>
+                            </div>
+
+                            {/* Past Candidate Score */}
+                            {past ? (
+                              <div
+                                className={`exam-card-past-score ${
+                                  past.isQualified ? 'exam-score-passed' : 'exam-score-failed'
+                                }`}
+                              >
+                                <span>
+                                  ✓ {past.isQualified ? 'Qualified' : 'Attempted'} • Best: {past.bestSpeed} WPM ({past.bestAcc}%)
+                                </span>
+                                <span style={{ fontSize: '0.68rem', opacity: 0.8 }}>
+                                  {past.count} {past.count === 1 ? 'try' : 'tries'}
+                                </span>
+                              </div>
+                            ) : (
+                              <div className="exam-card-past-score exam-score-not-attempted">
+                                <span>○ Not yet attempted</span>
+                                <span style={{ fontSize: '0.68rem' }}>Ready to test</span>
+                              </div>
+                            )}
+                          </div>
+
+                          {/* Footer & Start Button */}
+                          <div className="exam-card-footer">
+                            <div className="exam-card-attempts">
+                              <span>👥</span> {simulatedCandidates.toLocaleString()}
+                            </div>
+                            <button
+                              className="exam-start-btn"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                onStartTest(passage, selectedDuration);
+                              }}
+                            >
+                              {past ? 'Retest ↺' : 'Start Test →'}
+                            </button>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+
+                {/* Load More Button */}
+                {visibleCount < filteredLevel3Passages.length && (
+                  <div style={{ textAlign: 'center', marginTop: '32px' }}>
+                    <button
+                      className="btn btn-secondary"
+                      onClick={() => setVisibleCount((prev) => prev + 18)}
+                      style={{
+                        fontWeight: 700,
+                        padding: '10px 28px',
+                        borderRadius: '8px'
+                      }}
+                    >
+                      Load More Tests ({filteredLevel3Passages.length - visibleCount} remaining) ↓
+                    </button>
+                  </div>
+                )}
               </div>
             )}
           </div>
         )}
 
         {/* ========================================================
-            VIEW MODE 2: CLASSIC DATE-WISE FORM (AR TYPING REPLICA)
+            VIEW MODE: CLASSIC DATE-WISE FORM (AR TYPING REPLICA)
             ======================================================== */}
-        {viewMode === 'classic_form' && (
+        {navLevel === 'classic_form' && (
           <div style={{ maxWidth: '880px', margin: '0 auto' }}>
             <div style={{ marginBottom: '16px' }}>
               <button
-                onClick={() => setViewMode('portal')}
+                onClick={() => setNavLevel(1)}
                 className="btn btn-secondary btn-sm"
                 style={{ fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: '6px' }}
               >
-                <span>←</span> Back to Exam Series Portal
+                <span>←</span> Back to All Courses
               </button>
             </div>
 
@@ -708,7 +1198,7 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
             >
               <div style={{ textAlign: 'center', marginBottom: '20px' }}>
                 <button
-                  onClick={() => setViewMode('portal')}
+                  onClick={() => setNavLevel(1)}
                   className="btn"
                   style={{
                     backgroundColor: '#0284c7',
@@ -723,7 +1213,7 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
                     transition: 'all 0.2s ease'
                   }}
                 >
-                  View All Exam Test Cards (Fintech Grid)
+                  View All Courses (TestMentor Grid)
                 </button>
               </div>
 
