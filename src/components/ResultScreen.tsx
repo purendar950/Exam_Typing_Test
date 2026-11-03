@@ -277,7 +277,10 @@ export const ResultScreen: React.FC<ResultScreenProps> = ({
                 }}
               >
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <span style={{ fontSize: '1.5rem', fontWeight: 800, color: '#b45309' }}>
+                  <span
+                    className={result.language === 'hindi_kruti' ? 'font-kruti' : ''}
+                    style={{ fontSize: '1.5rem', fontWeight: 800, color: '#b45309' }}
+                  >
                     {item.character}
                   </span>
                   <span
@@ -374,7 +377,7 @@ export const ResultScreen: React.FC<ResultScreenProps> = ({
         </div>
 
         <div
-          className="diff-box"
+          className={`diff-box ${result.language === 'hindi_kruti' ? 'font-kruti' : ''}`}
           dangerouslySetInnerHTML={{ __html: result.diffHtml }}
         />
       </div>

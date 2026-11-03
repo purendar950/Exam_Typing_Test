@@ -1,5 +1,30 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+Devanagari:wght@400;500;600;700&display=swap');
 
+@font-face {
+  font-family: 'Kruti Dev 010';
+  src: url('./assets/fonts/KrutiDev010.ttf') format('truetype'),
+       local('Kruti Dev 010'),
+       local('KrutiDev010');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'KrutiDev010';
+  src: url('./assets/fonts/KrutiDev010.ttf') format('truetype'),
+       local('Kruti Dev 010'),
+       local('KrutiDev010');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+.font-kruti {
+  font-family: 'Kruti Dev 010', 'KrutiDev010', -apple-system, BlinkMacSystemFont, sans-serif !important;
+  letter-spacing: 0.25px;
+}
+
 :root {
   --primary: #0284c7;
   --primary-hover: #0369a1;
@@ -1014,6 +1039,26 @@ body {
   line-height: 1.7;
   color: #0f172a;
   box-sizing: border-box;
+}
+
+.ar-source-box.font-kruti {
+  font-family: 'Kruti Dev 010', 'KrutiDev010', sans-serif !important;
+  font-size: clamp(1.25rem, 1.6vw, 1.45rem);
+  letter-spacing: 0.35px;
+  line-height: 1.9;
+}
+
+.ar-typing-textarea.font-kruti {
+  font-family: 'Kruti Dev 010', 'KrutiDev010', sans-serif !important;
+  font-size: clamp(1.2rem, 1.5vw, 1.4rem);
+  letter-spacing: 0.35px;
+  line-height: 1.85;
+}
+
+.diff-box.font-kruti {
+  font-family: 'Kruti Dev 010', 'KrutiDev010', sans-serif !important;
+  font-size: 1.15rem;
+  line-height: 1.85;
 }
 
 @media (max-width: 768px) {

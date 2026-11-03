@@ -323,20 +323,20 @@ export const OFFICIAL_ALT_CODES: AltCodeItem[] = [
   { code: 'Alt + 0223', char: 'ß', name: 'Sharp S', category: 'common' },
   { code: 'Alt + 0247', char: '÷', name: 'Division Sign', category: 'common' },
 
-  // Kruti Dev 010 Special Conjuncts
-  { code: 'Alt + 0161', char: 'द्व', name: 'द्व (द + ् + व) जैसे द्वार', category: 'kruti' },
-  { code: 'Alt + 0163', char: 'ट्ट', name: 'ट्ट (ट + ् + ट) जैसे पट्टी', category: 'kruti' },
-  { code: 'Alt + 0165', char: 'द्ध', name: 'द्ध (द + ् + ध) जैसे शुद्ध', category: 'kruti' },
-  { code: 'Alt + 0170', char: 'द्य', name: 'द्य (द + ् + य) जैसे विद्या', category: 'kruti' },
-  { code: 'Alt + 0174', char: 'क्त', name: 'क्त (क + ् + त) जैसे भक्त', category: 'kruti' },
-  { code: 'Alt + 0178', char: 'ष्ठ', name: 'ष्ठ (ष + ् + ठ) जैसे पृष्ठ', category: 'kruti' },
-  { code: 'Alt + 0180', char: 'ह्न', name: 'ह्न (ह + ् + न) जैसे चिन्ह', category: 'kruti' },
-  { code: 'Alt + 0188', char: 'हृ', name: 'हृ (ह + ृ) जैसे हृदय', category: 'kruti' },
-  { code: 'Alt + 0204', char: 'त्त', name: 'त्त (त + ् + त) जैसे उत्तर', category: 'kruti' },
-  { code: 'Alt + 0205', char: 'ट्र', name: 'ट्र (ट + ्र) जैसे राष्ट्र', category: 'kruti' },
-  { code: 'Alt + 0216', char: 'क्र', name: 'क्र (क + ्र) जैसे क्रम', category: 'kruti' },
-  { code: 'Alt + 0221', char: 'द्द', name: 'द्द (द + ् + द) जैसे उद्देश्य', category: 'kruti' },
-  { code: 'Alt + 0227', char: 'ह्म', name: 'ह्म (ह + ् + म) जैसे ब्राह्मण', category: 'kruti' },
+  // Kruti Dev 010 Special Conjuncts (Exact ASCII codes produced by Windows Alt Numpad)
+  { code: 'Alt + 0161', char: '\u00A1', name: 'द्व (द + ् + व) जैसे द्वार', category: 'kruti' },
+  { code: 'Alt + 0163', char: '\u00A3', name: 'ट्ट (ट + ् + ट) जैसे पट्टी', category: 'kruti' },
+  { code: 'Alt + 0165', char: '\u00A5', name: 'द्ध (द + ् + ध) जैसे शुद्ध', category: 'kruti' },
+  { code: 'Alt + 0170', char: '\u00AA', name: 'द्य (द + ् + य) जैसे विद्या', category: 'kruti' },
+  { code: 'Alt + 0174', char: '\u00AE', name: 'क्त (क + ् + त) जैसे भक्त', category: 'kruti' },
+  { code: 'Alt + 0178', char: '\u00B2', name: 'ष्ठ (ष + ् + ठ) जैसे पृष्ठ', category: 'kruti' },
+  { code: 'Alt + 0180', char: '\u00B4', name: 'ह्न (ह + ् + न) जैसे चिन्ह', category: 'kruti' },
+  { code: 'Alt + 0188', char: '\u00BC', name: 'हृ (ह + ृ) जैसे हृदय', category: 'kruti' },
+  { code: 'Alt + 0204', char: '\u00CC', name: 'त्त (त + ् + त) जैसे उत्तर', category: 'kruti' },
+  { code: 'Alt + 0205', char: '\u00CD', name: 'ट्र (ट + ्र) जैसे राष्ट्र', category: 'kruti' },
+  { code: 'Alt + 0216', char: '\u00D8', name: 'क्र (क + ्र) जैसे क्रम', category: 'kruti' },
+  { code: 'Alt + 0221', char: '\u00DD', name: 'द्द (द + ् + द) जैसे उद्देश्य', category: 'kruti' },
+  { code: 'Alt + 0227', char: '\u00E3', name: 'ह्म (ह + ् + म) जैसे ब्राह्मण', category: 'kruti' },
 ];
 
 /**

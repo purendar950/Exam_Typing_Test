@@ -65,6 +65,8 @@ export const WordDocumentScreen: React.FC<WordDocumentScreenProps> = ({ onBackTo
   const [startTime, setStartTime] = useState<number | null>(null);
   const [keystrokes, setKeystrokes] = useState<number>(0);
 
+  const [inscriptMappingEnabled, setInscriptMappingEnabled] = useState<boolean>(true);
+  const isComposingRef = useRef<boolean>(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const previewRef = useRef<HTMLDivElement>(null);
 
@@ -151,16 +153,25 @@ export const WordDocumentScreen: React.FC<WordDocumentScreenProps> = ({ onBackTo
     }
     setKeystrokes((prev) => prev + 1);
 
-    // Hindi translation if typing in Hindi mode
-    if (language === 'hindi_mangal') {
+    // If IME is composing, NEVER intercept
+    if (isComposingRef.current || e.nativeEvent.isComposing || e.key === 'Process' || e.keyCode === 229) {
+      return;
+    }
+
+    // If key is already Devanagari, let browser type natively
+    if (/^[\u0900-\u097F]$/.test(e.key)) {
+      return;
+    }
+
+    // For Kruti Dev or English: direct typing
+    if (language === 'hindi_kruti' || language === 'english') {
+      return;
+    }
+
+    // For Hindi Mangal Inscript QWERTY translation:
+    if (language === 'hindi_mangal' && inscriptMappingEnabled) {
       if (e.key.length === 1 && !e.ctrlKey && !e.metaKey && !e.altKey) {
         const translated = translateToMangalInscript(e.key, e.shiftKey, e.code);
-        e.preventDefault();
-        insertTextAtCursor(translated);
-      }
-    } else if (language === 'hindi_kruti') {
-      if (e.key.length === 1 && !e.ctrlKey && !e.metaKey && !e.altKey) {
-        const translated = translateToKrutiDev(e.key, e.shiftKey, e.code);
         e.preventDefault();
         insertTextAtCursor(translated);
       }
@@ -170,29 +181,49 @@ export const WordDocumentScreen: React.FC<WordDocumentScreenProps> = ({ onBackTo
   const insertTextAtCursor = (textToInsert: string) => {
     const el = textareaRef.current;
     if (!el) return;
-    const start = el.selectionStart;
-    const end = el.selectionEnd;
-    const before = content.substring(0, start);
-    const after = content.substring(end);
-    const newContent = before + textToInsert + after;
-    setContent(newContent);
-    setTimeout(() => {
+
+    let success = false;
+    try {
+      success = document.execCommand('insertText', false, textToInsert);
+    } catch {
+      success = false;
+    }
+
+    if (!success) {
+      const start = el.selectionStart ?? 0;
+      const end = el.selectionEnd ?? 0;
+      const before = el.value.substring(0, start);
+      const after = el.value.substring(end);
+      const newContent = before + textToInsert + after;
+      el.value = newContent;
       el.selectionStart = el.selectionEnd = start + textToInsert.length;
-    }, 0);
+      setContent(newContent);
+    }
   };
 
   const handleBeforeInput = (e: React.FormEvent<HTMLTextAreaElement>) => {
     const nativeEvent = e.nativeEvent as InputEvent;
-    if (!nativeEvent || !nativeEvent.data) return;
+    if (!nativeEvent) return;
 
     if (!startTime) {
       setStartTime(Date.now());
     }
     setKeystrokes((prev) => prev + 1);
 
-    if (language === 'hindi_mangal' || language === 'hindi_kruti') {
-      const layout = language === 'hindi_kruti' ? 'kruti' : 'mangal';
-      const translated = translateEnglishStringToHindi(nativeEvent.data, layout);
+    if (isComposingRef.current || nativeEvent.isComposing || nativeEvent.inputType === 'insertCompositionText') {
+      return;
+    }
+
+    if (nativeEvent.data && /^[\u0900-\u097F]+$/.test(nativeEvent.data)) {
+      return;
+    }
+
+    if (language === 'english' || language === 'hindi_kruti') {
+      return;
+    }
+
+    if (language === 'hindi_mangal' && inscriptMappingEnabled && nativeEvent.data && nativeEvent.inputType === 'insertText') {
+      const translated = translateEnglishStringToHindi(nativeEvent.data, 'mangal');
       if (translated !== nativeEvent.data) {
         e.preventDefault();
         insertTextAtCursor(translated);
@@ -203,60 +234,12 @@ export const WordDocumentScreen: React.FC<WordDocumentScreenProps> = ({ onBackTo
 
   const handleContentChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const nextVal = e.target.value;
-    const prevVal = content;
 
     if (!startTime && nextVal.length > 0) {
       setStartTime(Date.now());
     }
 
-    if (language === 'english') {
-      setContent(nextVal);
-      return;
-    }
-
-    const layout = language === 'hindi_kruti' ? 'kruti' : 'mangal';
-
-    let prefixLen = 0;
-    while (
-      prefixLen < prevVal.length &&
-      prefixLen < nextVal.length &&
-      prevVal[prefixLen] === nextVal[prefixLen]
-    ) {
-      prefixLen++;
-    }
-
-    let suffixLen = 0;
-    while (
-      suffixLen < (prevVal.length - prefixLen) &&
-      suffixLen < (nextVal.length - prefixLen) &&
-      prevVal[prevVal.length - 1 - suffixLen] === nextVal[nextVal.length - 1 - suffixLen]
-    ) {
-      suffixLen++;
-    }
-
-    const inserted = nextVal.slice(prefixLen, nextVal.length - suffixLen);
-
-    if (!inserted) {
-      setContent(nextVal);
-      return;
-    }
-
-    const translatedInserted = translateEnglishStringToHindi(inserted, layout);
-
-    const finalVal =
-      prevVal.slice(0, prefixLen) +
-      translatedInserted +
-      prevVal.slice(prevVal.length - suffixLen);
-
-    setContent(finalVal);
-
-    const newCursor = prefixLen + translatedInserted.length;
-    setTimeout(() => {
-      if (textareaRef.current) {
-        textareaRef.current.selectionStart = newCursor;
-        textareaRef.current.selectionEnd = newCursor;
-      }
-    }, 0);
+    setContent(nextVal);
   };
 
   // Replace a misspelled word with a suggestion
@@ -374,7 +357,7 @@ export const WordDocumentScreen: React.FC<WordDocumentScreenProps> = ({ onBackTo
       case 'Mangal':
         return "'Noto Sans Devanagari', Mangal, sans-serif";
       case 'Kruti Dev 010':
-        return "'Kruti Dev 010', 'Inter', sans-serif";
+        return "'Kruti Dev 010', 'KrutiDev010', sans-serif";
       case 'Calibri':
       default:
         return "'Calibri', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif";
@@ -802,7 +785,11 @@ export const WordDocumentScreen: React.FC<WordDocumentScreenProps> = ({ onBackTo
                 fontSize: '0.98rem',
                 lineHeight: 1.7,
                 color: '#0f172a',
-                fontFamily: language.includes('hindi') ? "'Noto Sans Devanagari', Mangal, sans-serif" : 'Georgia, serif',
+                fontFamily: language === 'hindi_kruti'
+                  ? "'Kruti Dev 010', 'KrutiDev010', sans-serif"
+                  : language.includes('hindi')
+                  ? "'Noto Sans Devanagari', Mangal, sans-serif"
+                  : 'Georgia, serif',
                 background: '#f8fafc',
                 borderBottom: '1px solid #e2e8f0'
               }}
@@ -885,6 +872,13 @@ export const WordDocumentScreen: React.FC<WordDocumentScreenProps> = ({ onBackTo
             onChange={handleContentChange}
             onBeforeInput={handleBeforeInput}
             onKeyDown={handleKeyDown}
+            onCompositionStart={() => {
+              isComposingRef.current = true;
+            }}
+            onCompositionEnd={(e) => {
+              isComposingRef.current = false;
+              setContent((e.target as HTMLTextAreaElement).value);
+            }}
             onScroll={handleScroll}
             autoCapitalize="off"
             autoCorrect="off"
