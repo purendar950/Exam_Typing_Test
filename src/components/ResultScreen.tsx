@@ -7,13 +7,15 @@ interface ResultScreenProps {
   onRetakeTest: () => void;
   onChooseAnother: () => void;
   onPracticeWrongWords: (words: string[]) => void;
+  onOpenDashboard?: () => void;
 }
 
 export const ResultScreen: React.FC<ResultScreenProps> = ({
   result,
   onRetakeTest,
   onChooseAnother,
-  onPracticeWrongWords
+  onPracticeWrongWords,
+  onOpenDashboard
 }) => {
   // Fire confetti if candidate qualified!
   useEffect(() => {
@@ -82,6 +84,15 @@ export const ResultScreen: React.FC<ResultScreenProps> = ({
           <button onClick={onChooseAnother} className="btn btn-secondary">
             Select Another Test
           </button>
+          {onOpenDashboard && (
+            <button
+              onClick={onOpenDashboard}
+              className="btn btn-secondary no-print"
+              style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
+            >
+              <span>📊 Candidate Records</span>
+            </button>
+          )}
           <button onClick={handlePrint} className="btn btn-secondary no-print">
             🖨️ Print Score Card
           </button>
