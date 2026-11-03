@@ -27,6 +27,7 @@ import {
   query,
   orderBy,
   limit,
+  deleteDoc,
   Firestore,
   enableIndexedDbPersistence
 } from 'firebase/firestore';
@@ -41,6 +42,8 @@ export interface UserProfile {
   category: 'up_police_co' | 'up_police_asi';
   photoURL?: string;
   isAnonymous?: boolean;
+  isAdmin?: boolean;
+  role?: 'admin' | 'candidate';
   createdAt: string;
 }
 
@@ -226,6 +229,17 @@ export function subscribeToAuth(callback: (user: UserProfile | null) => void): (
       const snap = await getDoc(doc(db, 'users', fbUser.uid));
       if (snap.exists()) {
         const profile = snap.data() as UserProfile;
+        let isAdmin = !!profile.isAdmin || profile.role === 'admin';
+        if (!isAdmin) {
+          try {
+            const adminDoc = await getDoc(doc(db, 'admins', fbUser.uid));
+            if (adminDoc.exists()) isAdmin = true;
+          } catch {
+            // Ignore
+          }
+        }
+        profile.isAdmin = isAdmin;
+        profile.role = isAdmin ? 'admin' : 'candidate';
         localStorage.setItem(STORAGE_KEY_ACTIVE_USER, JSON.stringify(profile));
         callback(profile);
         return;
@@ -402,6 +416,233 @@ export const registerCandidate = async (
 export const loginCandidate = async (identifier: string, pass?: string) => {
   return signInWithEmail(identifier, pass || 'pass1234');
 };
+
+// -------------------------------------------------------------
+// Firebase Admin Authentication & Authorization Functions
+// -------------------------------------------------------------
+
+export function isUserAdmin(user: UserProfile | null): boolean {
+  if (!user) return false;
+  return !!user.isAdmin || user.role === 'admin';
+}
+
+// Check if any admin exists in Firestore (for first-time auto-bootstrap)
+export async function checkHasAnyAdmin(): Promise<boolean> {
+  try {
+    const q = query(collection(db, 'admins'), limit(1));
+    const snap = await getDocs(q);
+    if (!snap.empty) return true;
+
+    // Check users collection for any isAdmin === true
+    const userQ = query(collection(db, 'users'), limit(50));
+    const userSnap = await getDocs(userQ);
+    let found = false;
+    userSnap.forEach((d) => {
+      const data = d.data();
+      if (data.isAdmin === true || data.role === 'admin') found = true;
+    });
+    return found;
+  } catch {
+    return false;
+  }
+}
+
+// 1. Sign in Admin with Email & Password via Firebase Auth
+export async function signInAdminWithEmail(email: string, pass: string): Promise<UserProfile> {
+  const cleanEmail = email.trim().toLowerCase();
+  const cred = await signInWithEmailAndPassword(auth, cleanEmail, pass);
+  const user = cred.user;
+
+  // Verify Admin authorization in Firestore
+  const userDocRef = doc(db, 'users', user.uid);
+  const snap = await getDoc(userDocRef);
+
+  let isAdmin = false;
+  let profile: UserProfile;
+
+  if (snap.exists()) {
+    profile = snap.data() as UserProfile;
+    isAdmin = !!profile.isAdmin || profile.role === 'admin';
+  } else {
+    profile = {
+      uid: user.uid,
+      email: user.email,
+      displayName: user.displayName || 'ADMIN OFFICER',
+      rollNumber: 'ADMIN-01',
+      category: 'up_police_co',
+      createdAt: new Date().toISOString()
+    };
+  }
+
+  // Check admins collection
+  try {
+    const adminDoc = await getDoc(doc(db, 'admins', user.uid));
+    if (adminDoc.exists()) isAdmin = true;
+  } catch {
+    // Ignore
+  }
+
+  // If no admin has ever been created in Firestore, auto-bootstrap the first login as Super Admin
+  if (!isAdmin) {
+    const hasAny = await checkHasAnyAdmin();
+    if (!hasAny) {
+      isAdmin = true;
+    }
+  }
+
+  if (!isAdmin) {
+    throw new Error('Access Denied: This Firebase account does not have Administrator privileges. Please contact system authority.');
+  }
+
+  profile.isAdmin = true;
+  profile.role = 'admin';
+
+  await setDoc(userDocRef, profile, { merge: true });
+  try {
+    await setDoc(doc(db, 'admins', user.uid), {
+      uid: user.uid,
+      email: user.email,
+      role: 'super_admin',
+      updatedAt: new Date().toISOString()
+    }, { merge: true });
+  } catch {
+    // Ignore
+  }
+
+  localStorage.setItem(STORAGE_KEY_ACTIVE_USER, JSON.stringify(profile));
+  return profile;
+}
+
+// 2. Create New Admin Account directly in Firebase
+export async function createAdminAccountWithEmail(
+  email: string,
+  pass: string,
+  displayName: string
+): Promise<UserProfile> {
+  const cleanEmail = email.trim().toLowerCase();
+  const cleanName = displayName.trim().toUpperCase() || 'UP ADMIN OFFICER';
+
+  const cred = await createUserWithEmailAndPassword(auth, cleanEmail, pass);
+  await updateProfile(cred.user, { displayName: cleanName });
+
+  const adminProfile: UserProfile = {
+    uid: cred.user.uid,
+    email: cred.user.email,
+    displayName: cleanName,
+    rollNumber: `ADMIN-${Math.floor(100 + Math.random() * 900)}`,
+    category: 'up_police_co',
+    isAdmin: true,
+    role: 'admin',
+    createdAt: new Date().toISOString()
+  };
+
+  await setDoc(doc(db, 'users', cred.user.uid), adminProfile, { merge: true });
+  try {
+    await setDoc(doc(db, 'admins', cred.user.uid), {
+      uid: cred.user.uid,
+      email: cred.user.email,
+      displayName: cleanName,
+      role: 'super_admin',
+      createdAt: new Date().toISOString()
+    }, { merge: true });
+  } catch {
+    // Ignore
+  }
+
+  localStorage.setItem(STORAGE_KEY_ACTIVE_USER, JSON.stringify(adminProfile));
+  return adminProfile;
+}
+
+// 3. 1-Click Google Sign In as Admin
+export async function signInAdminWithGoogle(): Promise<UserProfile> {
+  const provider = new GoogleAuthProvider();
+  provider.setCustomParameters({ prompt: 'select_account' });
+
+  const result = await signInWithPopup(auth, provider);
+  const fbUser = result.user;
+
+  const userDocRef = doc(db, 'users', fbUser.uid);
+  const snap = await getDoc(userDocRef);
+
+  let profile: UserProfile;
+  let isAdmin = false;
+
+  if (snap.exists()) {
+    profile = snap.data() as UserProfile;
+    isAdmin = !!profile.isAdmin || profile.role === 'admin';
+  } else {
+    profile = {
+      uid: fbUser.uid,
+      email: fbUser.email,
+      displayName: fbUser.displayName || 'ADMIN OFFICER',
+      rollNumber: `ADMIN-${Math.floor(100 + Math.random() * 900)}`,
+      category: 'up_police_co',
+      photoURL: fbUser.photoURL || undefined,
+      createdAt: new Date().toISOString()
+    };
+  }
+
+  try {
+    const adminDoc = await getDoc(doc(db, 'admins', fbUser.uid));
+    if (adminDoc.exists()) isAdmin = true;
+  } catch {
+    // Ignore
+  }
+
+  // If no admin exists yet in database, first Google account is granted Super Admin!
+  if (!isAdmin) {
+    const hasAny = await checkHasAnyAdmin();
+    if (!hasAny) {
+      isAdmin = true;
+    }
+  }
+
+  if (!isAdmin) {
+    throw new Error('Access Denied: This Google account is not registered as an Administrator in Firestore.');
+  }
+
+  profile.isAdmin = true;
+  profile.role = 'admin';
+
+  await setDoc(userDocRef, profile, { merge: true });
+  try {
+    await setDoc(doc(db, 'admins', fbUser.uid), {
+      uid: fbUser.uid,
+      email: fbUser.email,
+      role: 'super_admin',
+      updatedAt: new Date().toISOString()
+    }, { merge: true });
+  } catch {
+    // Ignore
+  }
+
+  localStorage.setItem(STORAGE_KEY_ACTIVE_USER, JSON.stringify(profile));
+  return profile;
+}
+
+// 4. Toggle User Admin Role in Firestore
+export async function toggleUserAdminRole(targetUid: string, makeAdmin: boolean): Promise<void> {
+  const userRef = doc(db, 'users', targetUid);
+  await setDoc(userRef, {
+    isAdmin: makeAdmin,
+    role: makeAdmin ? 'admin' : 'candidate'
+  }, { merge: true });
+
+  const adminRef = doc(db, 'admins', targetUid);
+  if (makeAdmin) {
+    await setDoc(adminRef, {
+      uid: targetUid,
+      role: 'admin',
+      promotedAt: new Date().toISOString()
+    }, { merge: true });
+  } else {
+    try {
+      await deleteDoc(adminRef);
+    } catch {
+      // Ignore
+    }
+  }
+}
 
 export const isFirebaseConfigured = () => true;
 export const getSavedFirebaseConfig = () => FIREBASE_CONFIG;
