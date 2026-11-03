@@ -1041,6 +1041,12 @@ body {
   box-sizing: border-box;
 }
 
+.ar-typing-textarea:read-only {
+  caret-color: #0f172a !important;
+  cursor: text !important;
+  background-color: transparent !important;
+}
+
 .ar-source-box.font-kruti {
   font-family: 'Kruti Dev 010', 'KrutiDev010', sans-serif !important;
   font-size: clamp(1.25rem, 1.6vw, 1.45rem);

@@ -143,6 +143,42 @@ export const WordDocumentScreen: React.FC<WordDocumentScreenProps> = ({ onBackTo
   }, [startTime, wordCount]);
 
   // Handle typing keystroke
+  const insertTextAtCursor = (textToInsert: string) => {
+    const el = textareaRef.current;
+    if (!el) return;
+
+    const start = el.selectionStart ?? el.value.length;
+    const end = el.selectionEnd ?? el.value.length;
+    const current = el.value;
+    const next = current.substring(0, start) + textToInsert + current.substring(end);
+    el.value = next;
+    const newPos = start + textToInsert.length;
+    el.selectionStart = el.selectionEnd = newPos;
+    setContent(next);
+  };
+
+  const deleteCharacter = () => {
+    const el = textareaRef.current;
+    if (!el) return;
+    const start = el.selectionStart ?? el.value.length;
+    const end = el.selectionEnd ?? el.value.length;
+    const current = el.value;
+    if (start === end) {
+      if (start > 0) {
+        const next = current.substring(0, start - 1) + current.substring(end);
+        el.value = next;
+        el.selectionStart = el.selectionEnd = start - 1;
+        setContent(next);
+      }
+    } else {
+      const next = current.substring(0, start) + current.substring(end);
+      el.value = next;
+      el.selectionStart = el.selectionEnd = start;
+      setContent(next);
+    }
+  };
+
+  // Handle typing keystroke
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (soundEnabled && !['Shift', 'Control', 'Alt', 'Meta', 'CapsLock'].includes(e.key)) {
       audioEngine.playKeyClick();
@@ -153,53 +189,76 @@ export const WordDocumentScreen: React.FC<WordDocumentScreenProps> = ({ onBackTo
     }
     setKeystrokes((prev) => prev + 1);
 
-    // 1. If IME is composing (Android Gboard, Windows Indic IME), NEVER intercept!
-    if (isComposingRef.current || e.nativeEvent.isComposing || e.key === 'Process' || e.keyCode === 229) {
+    const isMangalInscript = language === 'hindi_mangal' && inscriptMappingEnabled;
+
+    // 1. If IME is composing and NOT in Mangal Inscript mapped mode, let native IME work
+    if (!isMangalInscript && (isComposingRef.current || e.nativeEvent.isComposing || e.key === 'Process' || e.keyCode === 229)) {
       return;
     }
 
-    // If key is already Devanagari, let browser type naturally
-    if (/^[\u0900-\u097F]$/.test(e.key)) {
-      return;
-    }
-
-    // For Kruti Dev or English: direct typing
-    if (language === 'hindi_kruti' || language === 'english') {
-      return;
-    }
-
-    // For Hindi Mangal Inscript QWERTY translation:
-    if (language === 'hindi_mangal' && inscriptMappingEnabled) {
-      if (e.key.length === 1 && !e.ctrlKey && !e.metaKey && !e.altKey) {
-        const translated = translateToMangalInscript(e.key, e.shiftKey, e.code);
+    if (e.key === 'Backspace' || e.code === 'Backspace') {
+      if (isMangalInscript) {
         e.preventDefault();
-        insertTextAtCursor(translated);
+        deleteCharacter();
       }
-    }
-  };
-
-  const insertTextAtCursor = (textToInsert: string) => {
-    const el = textareaRef.current;
-    if (!el) return;
-
-    let success = false;
-    try {
-      success = document.execCommand('insertText', false, textToInsert);
-    } catch {
-      success = false;
+      return;
     }
 
-    if (!success) {
-      const start = el.selectionStart ?? 0;
-      const end = el.selectionEnd ?? 0;
-      const before = el.value.substring(0, start);
-      const after = el.value.substring(end);
-      const newContent = before + textToInsert + after;
-      el.value = newContent;
-      el.selectionStart = el.selectionEnd = start + textToInsert.length;
-      setContent(newContent);
-    } else {
-      setContent(el.value);
+    if (e.key === 'Enter' || e.code === 'Enter') {
+      if (isMangalInscript) {
+        e.preventDefault();
+        insertTextAtCursor('\n');
+      }
+      return;
+    }
+
+    if (e.key === 'Tab') {
+      e.preventDefault();
+      if (isMangalInscript) {
+        insertTextAtCursor('    ');
+      }
+      return;
+    }
+
+    if (isMangalInscript) {
+      if (e.key === ' ' || e.code === 'Space') {
+        e.preventDefault();
+        insertTextAtCursor(' ');
+        return;
+      }
+
+      const isPrintable =
+        (e.key.length === 1 && !e.ctrlKey && !e.altKey && !e.metaKey) ||
+        (Boolean(e.code) && (
+          e.code.startsWith('Key') ||
+          e.code.startsWith('Digit') ||
+          e.code.startsWith('Bracket') ||
+          e.code === 'Backquote' ||
+          e.code === 'Minus' ||
+          e.code === 'Equal' ||
+          e.code === 'Semicolon' ||
+          e.code === 'Quote' ||
+          e.code === 'Comma' ||
+          e.code === 'Period' ||
+          e.code === 'Slash' ||
+          e.code === 'Backslash'
+        ));
+
+      if (isPrintable) {
+        e.preventDefault();
+        if (/^[\u0900-\u097F]$/.test(e.key)) {
+          insertTextAtCursor(e.key);
+          return;
+        }
+
+        const isShift =
+          e.shiftKey ||
+          (e.key >= 'A' && e.key <= 'Z') ||
+          (typeof e.getModifierState === 'function' && e.getModifierState('CapsLock'));
+        const hindiChar = translateToMangalInscript(e.key, isShift, e.code);
+        insertTextAtCursor(hindiChar);
+        return;
+      }
     }
   };
 
@@ -212,27 +271,11 @@ export const WordDocumentScreen: React.FC<WordDocumentScreenProps> = ({ onBackTo
     }
     setKeystrokes((prev) => prev + 1);
 
-    // Never intercept during active IME composition
-    if (isComposingRef.current || nativeEvent.isComposing || nativeEvent.inputType === 'insertCompositionText') {
-      return;
-    }
-
-    // Never intercept if data is already Devanagari (native Hindi IME / Indic keyboard)
-    if (nativeEvent.data && /[\u0900-\u097F]/.test(nativeEvent.data)) {
-      return;
-    }
-
-    if (language === 'english' || language === 'hindi_kruti') {
-      return;
-    }
-
-    // For physical QWERTY keyboards typing English in Mangal Inscript mode:
-    if (language === 'hindi_mangal' && inscriptMappingEnabled && nativeEvent.data && nativeEvent.inputType === 'insertText') {
-      const translated = translateEnglishStringToHindi(nativeEvent.data, 'mangal');
-      if (translated !== nativeEvent.data) {
-        e.preventDefault();
+    if (language === 'hindi_mangal' && inscriptMappingEnabled) {
+      e.preventDefault();
+      if (nativeEvent.data) {
+        const translated = translateEnglishStringToHindi(nativeEvent.data, 'mangal');
         insertTextAtCursor(translated);
-        if (soundEnabled) audioEngine.playKeyClick();
       }
     }
   };
@@ -245,15 +288,7 @@ export const WordDocumentScreen: React.FC<WordDocumentScreenProps> = ({ onBackTo
       setStartTime(Date.now());
     }
 
-    // If actively composing with an IME (Gboard, Samsung Keyboard, Windows Indic IME),
-    // NEVER touch el.value or mutate selection!
-    if (isComposingRef.current) {
-      setContent(nextVal);
-      return;
-    }
-
-    // Safeguard for Hindi Mangal with Inscript mapping enabled (no IME composition):
-    if (language === 'hindi_mangal' && inscriptMappingEnabled && /[a-zA-Z]/.test(nextVal) && !/[\u0900-\u097F]/.test(nextVal)) {
+    if (language === 'hindi_mangal' && inscriptMappingEnabled && /[a-zA-Z]/.test(nextVal)) {
       const start = el.selectionStart;
       const end = el.selectionEnd;
       nextVal = translateEnglishStringToHindi(nextVal, 'mangal');
@@ -896,15 +931,22 @@ export const WordDocumentScreen: React.FC<WordDocumentScreenProps> = ({ onBackTo
             onChange={handleContentChange}
             onBeforeInput={handleBeforeInput}
             onKeyDown={handleKeyDown}
+            readOnly={language === 'hindi_mangal' && inscriptMappingEnabled}
             onCompositionStart={() => {
               isComposingRef.current = true;
             }}
             onCompositionEnd={(e) => {
               isComposingRef.current = false;
-              setContent((e.target as HTMLTextAreaElement).value);
+              const el = e.target as HTMLTextAreaElement;
+              let val = el.value;
+              if (language === 'hindi_mangal' && inscriptMappingEnabled && /[a-zA-Z]/.test(val)) {
+                val = translateEnglishStringToHindi(val, 'mangal');
+                el.value = val;
+              }
+              setContent(val);
             }}
             onScroll={handleScroll}
-            autoCapitalize="off"
+            autoCapitalize="none"
             autoCorrect="off"
             autoComplete="off"
             spellCheck={false}
@@ -923,6 +965,8 @@ export const WordDocumentScreen: React.FC<WordDocumentScreenProps> = ({ onBackTo
               textAlign: 'inherit',
               lineHeight: 'inherit',
               color: '#0f172a',
+              caretColor: '#0f172a',
+              cursor: 'text',
               padding: 0,
               margin: 0
             }}
