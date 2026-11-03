@@ -112,8 +112,22 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
     if (dailyTab === 'hindi') {
       return todayDailyLiveTests.filter((p) => p.language.startsWith('hindi'));
     }
-    return todayDailyLiveTests;
   }, [todayDailyLiveTests, dailyTab]);
+
+  const englishLiveTests = useMemo(
+    () => todayDailyLiveTests.filter((p) => p.language === 'english'),
+    [todayDailyLiveTests]
+  );
+
+  const hindiMangalLiveTests = useMemo(
+    () => todayDailyLiveTests.filter((p) => p.language === 'hindi_mangal'),
+    [todayDailyLiveTests]
+  );
+
+  const krutiLiveTests = useMemo(
+    () => passages.filter((p) => p.language === 'hindi_kruti').slice(0, 4),
+    [passages]
+  );
 
   // Dynamic actual passage statistics from database
   const coCount = useMemo(() => passages.filter((p) => p.category === 'up_police_co').length, [passages]);
@@ -444,6 +458,125 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
     }
   };
 
+  const renderLiveTestCard = (t: Passage) => {
+    const isHindi = t.language.startsWith('hindi');
+    const isHard = t.difficulty === 'hard';
+    const attempt = pastAttemptsMap.get(t.id) || pastAttemptsMap.get(t.title);
+
+    return (
+      <div
+        key={t.id}
+        style={{
+          background: '#ffffff',
+          border: '1px solid #bbf7d0',
+          borderRadius: '12px',
+          padding: '14px',
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'space-between',
+          boxShadow: '0 1px 3px rgba(0,0,0,0.05)'
+        }}
+      >
+        <div>
+          {/* Badges */}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <span style={{ fontSize: '1.1rem' }}>{isHindi ? '🇮🇳' : '🇬🇧'}</span>
+              <span
+                style={{
+                  fontSize: '0.7rem',
+                  fontWeight: 700,
+                  padding: '2px 6px',
+                  borderRadius: '4px',
+                  background: isHindi ? '#fef3c7' : '#eff6ff',
+                  color: isHindi ? '#b45309' : '#1d4ed8'
+                }}
+              >
+                {t.language === 'english' ? 'English' : t.language === 'hindi_mangal' ? 'Mangal' : 'Kruti Dev'}
+              </span>
+              <span
+                style={{
+                  fontSize: '0.7rem',
+                  fontWeight: 700,
+                  padding: '2px 6px',
+                  borderRadius: '4px',
+                  background: isHard ? '#fee2e2' : '#f0fdf4',
+                  color: isHard ? '#b91c1c' : '#15803d'
+                }}
+              >
+                {isHard ? 'HARD' : 'MEDIUM'}
+              </span>
+            </div>
+
+            <span style={{ fontSize: '0.72rem', color: '#64748b', fontWeight: 600 }}>
+              ⏱️ 15:00
+            </span>
+          </div>
+
+          {/* Title */}
+          <h4
+            style={{
+              margin: '0 0 6px 0',
+              fontSize: '0.92rem',
+              fontWeight: 700,
+              color: '#1e293b',
+              lineHeight: 1.3
+            }}
+          >
+            {t.title}
+          </h4>
+
+          <div style={{ fontSize: '0.75rem', color: '#64748b', marginBottom: '10px' }}>
+            {t.wordCount} words • Official UP Police Benchmarks
+          </div>
+        </div>
+
+        {/* Footer & Action */}
+        <div
+          style={{
+            borderTop: '1px solid #f1f5f9',
+            paddingTop: '10px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: '8px'
+          }}
+        >
+          {attempt ? (
+            <div style={{ fontSize: '0.75rem', fontWeight: 700, color: attempt.isQualified ? '#15803d' : '#b45309' }}>
+              {attempt.isQualified ? '✅ Qualified' : 'Completed'}: {attempt.bestSpeed} WPM ({attempt.bestAcc}%)
+            </div>
+          ) : (
+            <span style={{ fontSize: '0.75rem', color: '#94a3b8', fontWeight: 600 }}>
+              ⏳ Not Attempted
+            </span>
+          )}
+
+          <button
+            onClick={() => onStartTest(t, 15)}
+            style={{
+              background: attempt ? '#f1f5f9' : '#166534',
+              color: attempt ? '#334155' : '#ffffff',
+              border: attempt ? '1px solid #cbd5e1' : 'none',
+              padding: '6px 12px',
+              borderRadius: '6px',
+              fontSize: '0.78rem',
+              fontWeight: 700,
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '4px',
+              whiteSpace: 'nowrap'
+            }}
+          >
+            <span>▶</span>
+            <span>{attempt ? 'Retake 15-Min' : 'Start Test'}</span>
+          </button>
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div className="exam-portal-wrapper">
       <div className="container">
@@ -554,7 +687,7 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
           <div>
             {/* Candidate Performance KPI Strip */}
             <section className="exam-hero-banner" style={{ padding: '22px 26px', marginBottom: '24px' }}>
-              <div className="exam-hero-top" style={{ marginBottom: '14px' }}>
+              <div className="exam-hero-top" style={{ marginBottom: '14px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px' }}>
                 <div>
                   <h2 className="exam-hero-title" style={{ fontSize: '1.25rem' }}>
                     <span>🎯</span> Examination Performance Overview
@@ -562,6 +695,80 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
                   <div className="exam-hero-sub">
                     <span>Target: UP Police Computer Operator Grade-A & ASI (2024-2026)</span>
                   </div>
+                </div>
+
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+                  <button
+                    onClick={() => {
+                      setActiveModeId('daily_live');
+                      setNavLevel(3);
+                    }}
+                    style={{
+                      background: 'linear-gradient(135deg, #166534 0%, #15803d 100%)',
+                      color: '#ffffff',
+                      border: 'none',
+                      padding: '7px 14px',
+                      borderRadius: '8px',
+                      fontSize: '0.8rem',
+                      fontWeight: 700,
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '6px',
+                      boxShadow: '0 2px 4px rgba(22, 101, 52, 0.25)'
+                    }}
+                    title="View Today's 8 AI Live Examination Tests"
+                  >
+                    <span>🔥</span>
+                    <span>Today's Live Tests (8 Active) →</span>
+                  </button>
+
+                  {onOpenAiGenerator && (
+                    <button
+                      onClick={onOpenAiGenerator}
+                      style={{
+                        background: 'linear-gradient(135deg, #0284c7 0%, #0369a1 100%)',
+                        color: '#ffffff',
+                        border: 'none',
+                        padding: '7px 14px',
+                        borderRadius: '8px',
+                        fontSize: '0.8rem',
+                        fontWeight: 700,
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '6px',
+                        boxShadow: '0 2px 4px rgba(2, 132, 199, 0.25)'
+                      }}
+                      title="AI Test Generator (AR Typing Standard)"
+                    >
+                      <span>⚡</span>
+                      <span>AI Generator</span>
+                    </button>
+                  )}
+
+                  {onOpenAdmin && (
+                    <button
+                      onClick={onOpenAdmin}
+                      style={{
+                        background: '#0f172a',
+                        color: '#38bdf8',
+                        border: '1px solid #334155',
+                        padding: '7px 14px',
+                        borderRadius: '8px',
+                        fontSize: '0.8rem',
+                        fontWeight: 700,
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '6px'
+                      }}
+                      title="Enterprise Admin Control Panel"
+                    >
+                      <span>🛡️</span>
+                      <span>Admin Panel</span>
+                    </button>
+                  )}
                 </div>
               </div>
 
@@ -603,285 +810,6 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
                   </div>
                   <div className="exam-kpi-hint">Official UPPRPB benchmark</div>
                 </div>
-              </div>
-            </section>
-
-            {/* Daily Live Tests Showcase Banner (8 Tests: 4 Eng + 4 Hindi • AR Typing Standard) */}
-            <section
-              style={{
-                background: 'linear-gradient(135deg, #ffffff 0%, #f0fdf4 100%)',
-                border: '1.5px solid #86efac',
-                borderRadius: '16px',
-                padding: '20px 24px',
-                marginBottom: '26px',
-                boxShadow: '0 4px 15px -3px rgba(22, 101, 52, 0.08)'
-              }}
-            >
-              {/* Top Row: Title, Date, Tabs & AI Generator Button */}
-              <div
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  flexWrap: 'wrap',
-                  gap: '12px',
-                  borderBottom: '1px solid #dcfce7',
-                  paddingBottom: '14px',
-                  marginBottom: '16px'
-                }}
-              >
-                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                  <span style={{ fontSize: '1.8rem' }}>🔥</span>
-                  <div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-                      <h3 style={{ margin: 0, fontSize: '1.15rem', fontWeight: 800, color: '#14532d' }}>
-                        Today's AI Live Examination Tests (दैनिक लाइव टेस्ट)
-                      </h3>
-                      <span
-                        style={{
-                          background: '#fee2e2',
-                          color: '#dc2626',
-                          fontSize: '0.72rem',
-                          fontWeight: 800,
-                          padding: '2px 8px',
-                          borderRadius: '12px',
-                          border: '1px solid #fca5a5'
-                        }}
-                      >
-                        LIVE • {toDisplayDate(todayIso)}
-                      </span>
-                    </div>
-                    <p style={{ margin: '3px 0 0 0', fontSize: '0.82rem', color: '#166534' }}>
-                      8 Official Daily Tests calibrated to AR Typing Medium & Hard standards (4 English + 4 Hindi • 15:00 Strict Countdown)
-                    </p>
-                  </div>
-                </div>
-
-                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
-                  {/* Language filter pills */}
-                  <div style={{ display: 'flex', background: '#dcfce7', borderRadius: '8px', padding: '3px' }}>
-                    <button
-                      onClick={() => setDailyTab('all')}
-                      style={{
-                        padding: '4px 10px',
-                        border: 'none',
-                        borderRadius: '6px',
-                        fontSize: '0.75rem',
-                        fontWeight: 700,
-                        cursor: 'pointer',
-                        background: dailyTab === 'all' ? '#166534' : 'transparent',
-                        color: dailyTab === 'all' ? '#ffffff' : '#166534'
-                      }}
-                    >
-                      All 8 Tests
-                    </button>
-                    <button
-                      onClick={() => setDailyTab('english')}
-                      style={{
-                        padding: '4px 10px',
-                        border: 'none',
-                        borderRadius: '6px',
-                        fontSize: '0.75rem',
-                        fontWeight: 700,
-                        cursor: 'pointer',
-                        background: dailyTab === 'english' ? '#166534' : 'transparent',
-                        color: dailyTab === 'english' ? '#ffffff' : '#166534'
-                      }}
-                    >
-                      🇬🇧 English (4)
-                    </button>
-                    <button
-                      onClick={() => setDailyTab('hindi')}
-                      style={{
-                        padding: '4px 10px',
-                        border: 'none',
-                        borderRadius: '6px',
-                        fontSize: '0.75rem',
-                        fontWeight: 700,
-                        cursor: 'pointer',
-                        background: dailyTab === 'hindi' ? '#166534' : 'transparent',
-                        color: dailyTab === 'hindi' ? '#ffffff' : '#166534'
-                      }}
-                    >
-                      🇮🇳 Hindi (4)
-                    </button>
-                  </div>
-
-                  {onOpenAiGenerator && (
-                    <button
-                      onClick={onOpenAiGenerator}
-                      style={{
-                        background: 'linear-gradient(135deg, #0284c7 0%, #0369a1 100%)',
-                        color: '#ffffff',
-                        border: 'none',
-                        padding: '7px 14px',
-                        borderRadius: '8px',
-                        fontSize: '0.8rem',
-                        fontWeight: 700,
-                        cursor: 'pointer',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '6px',
-                        boxShadow: '0 2px 4px rgba(2, 132, 199, 0.25)'
-                      }}
-                      title="Configure AI Base URL, API Key & Generate Tests"
-                    >
-                      <span>⚡</span>
-                      <span>AI Generator</span>
-                    </button>
-                  )}
-
-                  {onOpenAdmin && (
-                    <button
-                      onClick={onOpenAdmin}
-                      style={{
-                        background: '#0f172a',
-                        color: '#38bdf8',
-                        border: '1px solid #334155',
-                        padding: '7px 14px',
-                        borderRadius: '8px',
-                        fontSize: '0.8rem',
-                        fontWeight: 700,
-                        cursor: 'pointer',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '6px'
-                      }}
-                      title="Enterprise Admin Control Panel (AI, Question Bank & Candidate Management)"
-                    >
-                      <span>🛡️</span>
-                      <span>Admin Panel</span>
-                    </button>
-                  )}
-                </div>
-              </div>
-
-              {/* 8 Tests Grid */}
-              <div
-                style={{
-                  display: 'grid',
-                  gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
-                  gap: '12px'
-                }}
-              >
-                {displayDailyLiveTests.map((t) => {
-                  const isHindi = t.language.startsWith('hindi');
-                  const isHard = t.difficulty === 'hard';
-                  const attempt = pastAttemptsMap.get(t.id) || pastAttemptsMap.get(t.title);
-
-                  return (
-                    <div
-                      key={t.id}
-                      style={{
-                        background: '#ffffff',
-                        border: '1px solid #bbf7d0',
-                        borderRadius: '12px',
-                        padding: '14px',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        justifyContent: 'space-between',
-                        boxShadow: '0 1px 3px rgba(0,0,0,0.05)'
-                      }}
-                    >
-                      <div>
-                        {/* Badges */}
-                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                            <span style={{ fontSize: '1.1rem' }}>{isHindi ? '🇮🇳' : '🇬🇧'}</span>
-                            <span
-                              style={{
-                                fontSize: '0.7rem',
-                                fontWeight: 700,
-                                padding: '2px 6px',
-                                borderRadius: '4px',
-                                background: isHindi ? '#fef3c7' : '#eff6ff',
-                                color: isHindi ? '#b45309' : '#1d4ed8'
-                              }}
-                            >
-                              {t.language === 'english' ? 'English' : t.language === 'hindi_mangal' ? 'Mangal' : 'Kruti Dev'}
-                            </span>
-                            <span
-                              style={{
-                                fontSize: '0.7rem',
-                                fontWeight: 700,
-                                padding: '2px 6px',
-                                borderRadius: '4px',
-                                background: isHard ? '#fee2e2' : '#f0fdf4',
-                                color: isHard ? '#b91c1c' : '#15803d'
-                              }}
-                            >
-                              {isHard ? 'HARD' : 'MEDIUM'}
-                            </span>
-                          </div>
-
-                          <span style={{ fontSize: '0.72rem', color: '#64748b', fontWeight: 600 }}>
-                            ⏱️ 15:00
-                          </span>
-                        </div>
-
-                        {/* Title */}
-                        <h4
-                          style={{
-                            margin: '0 0 6px 0',
-                            fontSize: '0.92rem',
-                            fontWeight: 700,
-                            color: '#1e293b',
-                            lineHeight: 1.3
-                          }}
-                        >
-                          {t.title}
-                        </h4>
-
-                        <div style={{ fontSize: '0.75rem', color: '#64748b', marginBottom: '10px' }}>
-                          {t.wordCount} words • Official UP Police Benchmarks
-                        </div>
-                      </div>
-
-                      {/* Footer & Action */}
-                      <div
-                        style={{
-                          borderTop: '1px solid #f1f5f9',
-                          paddingTop: '10px',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'space-between',
-                          gap: '8px'
-                        }}
-                      >
-                        {attempt ? (
-                          <div style={{ fontSize: '0.75rem', fontWeight: 700, color: attempt.isQualified ? '#15803d' : '#b45309' }}>
-                            {attempt.isQualified ? '✅ Qualified' : 'Completed'}: {attempt.bestSpeed} WPM ({attempt.bestAcc}%)
-                          </div>
-                        ) : (
-                          <span style={{ fontSize: '0.75rem', color: '#94a3b8', fontWeight: 600 }}>
-                            ⏳ Not Attempted
-                          </span>
-                        )}
-
-                        <button
-                          onClick={() => onStartTest(t, 15)}
-                          style={{
-                            background: attempt ? '#f1f5f9' : '#166534',
-                            color: attempt ? '#334155' : '#ffffff',
-                            border: attempt ? '1px solid #cbd5e1' : 'none',
-                            padding: '6px 12px',
-                            borderRadius: '6px',
-                            fontSize: '0.78rem',
-                            fontWeight: 700,
-                            cursor: 'pointer',
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '4px',
-                            whiteSpace: 'nowrap'
-                          }}
-                        >
-                          <span>▶</span>
-                          <span>{attempt ? 'Retake 15-Min' : 'Start Test'}</span>
-                        </button>
-                      </div>
-                    </div>
-                  );
-                })}
               </div>
             </section>
 
@@ -1242,6 +1170,379 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
             ) : (
               /* REGULAR TEST MATERIAL GRID */
               <div>
+                {/* 1. DAILY LIVE TESTS SHOWCASE IN LIVE/DAILY MODES */}
+                {(currentMode.id === 'daily_live' || currentMode.id === 'live_mock') && (
+                  <section
+                    style={{
+                      background: 'linear-gradient(135deg, #ffffff 0%, #f0fdf4 100%)',
+                      border: '1.5px solid #86efac',
+                      borderRadius: '16px',
+                      padding: '20px 24px',
+                      marginBottom: '24px',
+                      boxShadow: '0 4px 15px -3px rgba(22, 101, 52, 0.08)'
+                    }}
+                  >
+                    <div
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        flexWrap: 'wrap',
+                        gap: '12px',
+                        borderBottom: '1px solid #dcfce7',
+                        paddingBottom: '14px',
+                        marginBottom: '16px'
+                      }}
+                    >
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                        <span style={{ fontSize: '1.8rem' }}>🔥</span>
+                        <div>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                            <h3 style={{ margin: 0, fontSize: '1.15rem', fontWeight: 800, color: '#14532d' }}>
+                              Today's AI Live Examination Tests (दैनिक लाइव टेस्ट)
+                            </h3>
+                            <span
+                              style={{
+                                background: '#fee2e2',
+                                color: '#dc2626',
+                                fontSize: '0.72rem',
+                                fontWeight: 800,
+                                padding: '2px 8px',
+                                borderRadius: '12px',
+                                border: '1px solid #fca5a5'
+                              }}
+                            >
+                              LIVE • {toDisplayDate(todayIso)}
+                            </span>
+                          </div>
+                          <p style={{ margin: '3px 0 0 0', fontSize: '0.82rem', color: '#166534' }}>
+                            8 Official Daily Tests calibrated to AR Typing Medium & Hard standards (4 English + 4 Hindi • 15:00 Strict Countdown)
+                          </p>
+                        </div>
+                      </div>
+
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+                        <div style={{ display: 'flex', background: '#dcfce7', borderRadius: '8px', padding: '3px' }}>
+                          <button
+                            onClick={() => setDailyTab('all')}
+                            style={{
+                              padding: '4px 10px',
+                              border: 'none',
+                              borderRadius: '6px',
+                              fontSize: '0.75rem',
+                              fontWeight: 700,
+                              cursor: 'pointer',
+                              background: dailyTab === 'all' ? '#166534' : 'transparent',
+                              color: dailyTab === 'all' ? '#ffffff' : '#166534'
+                            }}
+                          >
+                            All 8 Tests
+                          </button>
+                          <button
+                            onClick={() => setDailyTab('english')}
+                            style={{
+                              padding: '4px 10px',
+                              border: 'none',
+                              borderRadius: '6px',
+                              fontSize: '0.75rem',
+                              fontWeight: 700,
+                              cursor: 'pointer',
+                              background: dailyTab === 'english' ? '#166534' : 'transparent',
+                              color: dailyTab === 'english' ? '#ffffff' : '#166534'
+                            }}
+                          >
+                            🇬🇧 English (4)
+                          </button>
+                          <button
+                            onClick={() => setDailyTab('hindi')}
+                            style={{
+                              padding: '4px 10px',
+                              border: 'none',
+                              borderRadius: '6px',
+                              fontSize: '0.75rem',
+                              fontWeight: 700,
+                              cursor: 'pointer',
+                              background: dailyTab === 'hindi' ? '#166534' : 'transparent',
+                              color: dailyTab === 'hindi' ? '#ffffff' : '#166534'
+                            }}
+                          >
+                            🇮🇳 Hindi (4)
+                          </button>
+                        </div>
+
+                        {onOpenAiGenerator && (
+                          <button
+                            onClick={onOpenAiGenerator}
+                            style={{
+                              background: 'linear-gradient(135deg, #0284c7 0%, #0369a1 100%)',
+                              color: '#ffffff',
+                              border: 'none',
+                              padding: '7px 14px',
+                              borderRadius: '8px',
+                              fontSize: '0.8rem',
+                              fontWeight: 700,
+                              cursor: 'pointer',
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '6px',
+                              boxShadow: '0 2px 4px rgba(2, 132, 199, 0.25)'
+                            }}
+                          >
+                            <span>⚡</span>
+                            <span>AI Generator</span>
+                          </button>
+                        )}
+                      </div>
+                    </div>
+
+                    <div
+                      style={{
+                        display: 'grid',
+                        gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+                        gap: '12px'
+                      }}
+                    >
+                      {displayDailyLiveTests.map(renderLiveTestCard)}
+                    </div>
+                  </section>
+                )}
+
+                {/* 2. ENGLISH LIVE TESTS IN ENGLISH MODE */}
+                {currentMode.id === 'english' && englishLiveTests.length > 0 && (
+                  <section
+                    style={{
+                      background: 'linear-gradient(135deg, #ffffff 0%, #eff6ff 100%)',
+                      border: '1.5px solid #93c5fd',
+                      borderRadius: '16px',
+                      padding: '20px 24px',
+                      marginBottom: '24px',
+                      boxShadow: '0 4px 15px -3px rgba(29, 78, 216, 0.08)'
+                    }}
+                  >
+                    <div
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        flexWrap: 'wrap',
+                        gap: '12px',
+                        borderBottom: '1px solid #dbeafe',
+                        paddingBottom: '14px',
+                        marginBottom: '16px'
+                      }}
+                    >
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                        <span style={{ fontSize: '1.8rem' }}>🇬🇧</span>
+                        <div>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                            <h3 style={{ margin: 0, fontSize: '1.15rem', fontWeight: 800, color: '#1e3a8a' }}>
+                              Today's English AI Live Examination Tests (4 Live Tests)
+                            </h3>
+                            <span
+                              style={{
+                                background: '#dbeafe',
+                                color: '#1d4ed8',
+                                fontSize: '0.72rem',
+                                fontWeight: 800,
+                                padding: '2px 8px',
+                                borderRadius: '12px',
+                                border: '1px solid #bfdbfe'
+                              }}
+                            >
+                              LIVE • {toDisplayDate(todayIso)}
+                            </span>
+                          </div>
+                          <p style={{ margin: '3px 0 0 0', fontSize: '0.82rem', color: '#1d4ed8' }}>
+                            4 Official English Tests calibrated to AR Typing Medium & Hard standards (2 Medium + 2 Hard • 520–580 Words)
+                          </p>
+                        </div>
+                      </div>
+
+                      {onOpenAiGenerator && (
+                        <button
+                          onClick={onOpenAiGenerator}
+                          style={{
+                            background: '#1d4ed8',
+                            color: '#ffffff',
+                            border: 'none',
+                            padding: '6px 12px',
+                            borderRadius: '8px',
+                            fontSize: '0.78rem',
+                            fontWeight: 700,
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '4px'
+                          }}
+                        >
+                          <span>⚡</span>
+                          <span>Generate Live Test</span>
+                        </button>
+                      )}
+                    </div>
+
+                    <div
+                      style={{
+                        display: 'grid',
+                        gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+                        gap: '12px'
+                      }}
+                    >
+                      {englishLiveTests.map(renderLiveTestCard)}
+                    </div>
+                  </section>
+                )}
+
+                {/* 3. HINDI MANGAL LIVE TESTS IN HINDI MANGAL MODE */}
+                {currentMode.id === 'hindi_mangal' && hindiMangalLiveTests.length > 0 && (
+                  <section
+                    style={{
+                      background: 'linear-gradient(135deg, #ffffff 0%, #fef3c7 100%)',
+                      border: '1.5px solid #fcd34d',
+                      borderRadius: '16px',
+                      padding: '20px 24px',
+                      marginBottom: '24px',
+                      boxShadow: '0 4px 15px -3px rgba(180, 83, 9, 0.08)'
+                    }}
+                  >
+                    <div
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        flexWrap: 'wrap',
+                        gap: '12px',
+                        borderBottom: '1px solid #fde68a',
+                        paddingBottom: '14px',
+                        marginBottom: '16px'
+                      }}
+                    >
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                        <span style={{ fontSize: '1.8rem' }}>🇮🇳</span>
+                        <div>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                            <h3 style={{ margin: 0, fontSize: '1.15rem', fontWeight: 800, color: '#78350f' }}>
+                              Today's हिंदी मंगल (Mangal Inscript) AI Live Tests (4 Live Tests)
+                            </h3>
+                            <span
+                              style={{
+                                background: '#fef3c7',
+                                color: '#b45309',
+                                fontSize: '0.72rem',
+                                fontWeight: 800,
+                                padding: '2px 8px',
+                                borderRadius: '12px',
+                                border: '1px solid #fde68a'
+                              }}
+                            >
+                              LIVE • {toDisplayDate(todayIso)}
+                            </span>
+                          </div>
+                          <p style={{ margin: '3px 0 0 0', fontSize: '0.82rem', color: '#92400e' }}>
+                            4 Official Hindi Mangal Inscript Tests calibrated to AR Typing Medium & Hard (25 WPM • 85% Accuracy)
+                          </p>
+                        </div>
+                      </div>
+
+                      {onOpenAiGenerator && (
+                        <button
+                          onClick={onOpenAiGenerator}
+                          style={{
+                            background: '#b45309',
+                            color: '#ffffff',
+                            border: 'none',
+                            padding: '6px 12px',
+                            borderRadius: '8px',
+                            fontSize: '0.78rem',
+                            fontWeight: 700,
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '4px'
+                          }}
+                        >
+                          <span>⚡</span>
+                          <span>Generate Live Test</span>
+                        </button>
+                      )}
+                    </div>
+
+                    <div
+                      style={{
+                        display: 'grid',
+                        gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+                        gap: '12px'
+                      }}
+                    >
+                      {hindiMangalLiveTests.map(renderLiveTestCard)}
+                    </div>
+                  </section>
+                )}
+
+                {/* 4. HINDI KRUTI LIVE TESTS IN HINDI KRUTI MODE */}
+                {currentMode.id === 'hindi_kruti' && krutiLiveTests.length > 0 && (
+                  <section
+                    style={{
+                      background: 'linear-gradient(135deg, #ffffff 0%, #f0fdf4 100%)',
+                      border: '1.5px solid #86efac',
+                      borderRadius: '16px',
+                      padding: '20px 24px',
+                      marginBottom: '24px',
+                      boxShadow: '0 4px 15px -3px rgba(22, 101, 52, 0.08)'
+                    }}
+                  >
+                    <div
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        flexWrap: 'wrap',
+                        gap: '12px',
+                        borderBottom: '1px solid #dcfce7',
+                        paddingBottom: '14px',
+                        marginBottom: '16px'
+                      }}
+                    >
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                        <span style={{ fontSize: '1.8rem' }}>🇮🇳</span>
+                        <div>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                            <h3 style={{ margin: 0, fontSize: '1.15rem', fontWeight: 800, color: '#14532d' }}>
+                              Today's हिंदी कुर्ती देव (Kruti Dev 010) Live Tests
+                            </h3>
+                            <span
+                              style={{
+                                background: '#dcfce7',
+                                color: '#166534',
+                                fontSize: '0.72rem',
+                                fontWeight: 800,
+                                padding: '2px 8px',
+                                borderRadius: '12px',
+                                border: '1px solid #bbf7d0'
+                              }}
+                            >
+                              FEATURED • Kruti Dev 010
+                            </span>
+                          </div>
+                          <p style={{ margin: '3px 0 0 0', fontSize: '0.82rem', color: '#166534' }}>
+                            Remington Keyboard Layout • Authentic Kruti Dev 010 High-Difficulty Exam Tests (25 WPM Target)
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div
+                      style={{
+                        display: 'grid',
+                        gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+                        gap: '12px'
+                      }}
+                    >
+                      {krutiLiveTests.map(renderLiveTestCard)}
+                    </div>
+                  </section>
+                )}
+
                 {/* Filters Toolbar */}
                 <div className="exam-toolbar">
                   <div className="exam-toolbar-row">

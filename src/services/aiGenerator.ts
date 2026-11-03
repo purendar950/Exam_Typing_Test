@@ -9,6 +9,7 @@
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { db } from './firebase';
 import { Passage, Language, ExamCategory } from '../types';
+import { saveCustomPassage } from './adminService';
 
 export interface AiConfig {
   baseUrl: string;
@@ -245,10 +246,10 @@ export const DAILY_8_SLOTS: DailySlotPlan[] = [
   },
   {
     slot: 8,
-    language: 'hindi_kruti',
+    language: 'hindi_mangal',
     difficulty: 'hard',
     category: 'up_police_asi',
-    subType: 'Hindi Kruti/Mangal Hard #2',
+    subType: 'Hindi Mangal Hard #2',
     topic: 'शासकीय राजभाषा परिपत्र, विभागीय अधिसूचनाएं एवं संवैधानिक विधिक व्यवस्था'
   }
 ];
@@ -521,7 +522,101 @@ export async function fetchProviderModels(
   }
 }
 
-// 5. Generate Single Passage from AI
+/// 5. Robust AI JSON / Text Extraction Parser
+export function extractPassageFromAiResponse(
+  rawContent: string,
+  defaultTitle: string
+): { title: string; text: string } {
+  let cleaned = (rawContent || '').trim();
+
+  // Strip Markdown code fences (e.g. ```json ... ```)
+  if (cleaned.startsWith('```')) {
+    cleaned = cleaned.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '').trim();
+  }
+
+  // 1. Direct JSON parse
+  try {
+    const obj = JSON.parse(cleaned);
+    if (obj && typeof obj.text === 'string' && obj.text.trim()) {
+      return {
+        title: (obj.title || defaultTitle).trim(),
+        text: obj.text.replace(/[\r\n]+/g, ' ').replace(/\s+/g, ' ').trim()
+      };
+    }
+  } catch {
+    // Continue
+  }
+
+  // 2. Extract balanced outer { ... } block
+  const firstBrace = cleaned.indexOf('{');
+  const lastBrace = cleaned.lastIndexOf('}');
+  if (firstBrace !== -1 && lastBrace > firstBrace) {
+    const candidateJson = cleaned.slice(firstBrace, lastBrace + 1);
+    try {
+      const obj = JSON.parse(candidateJson);
+      if (obj && typeof obj.text === 'string' && obj.text.trim()) {
+        return {
+          title: (obj.title || defaultTitle).trim(),
+          text: obj.text.replace(/[\r\n]+/g, ' ').replace(/\s+/g, ' ').trim()
+        };
+      }
+    } catch {
+      // Continue to field extraction
+    }
+  }
+
+  // 3. Regex extraction for "title"
+  let extractedTitle = defaultTitle;
+  const titleMatch =
+    cleaned.match(/"title"\s*:\s*"([^"\\]*(?:\\.[^"\\]*)*)"/i) ||
+    cleaned.match(/(?:title|शीर्षक)\s*[:=]\s*["']?([^"\n\r]+)["']?/i);
+  if (titleMatch && titleMatch[1]) {
+    extractedTitle = titleMatch[1].replace(/\\"/g, '"').trim();
+  }
+
+  // 4. Regex extraction for "text"
+  let extractedText = '';
+  const textMatch = cleaned.match(/"text"\s*:\s*"/i);
+  if (textMatch && textMatch.index !== undefined) {
+    const startIndex = textMatch.index + textMatch[0].length;
+    let endIndex = cleaned.lastIndexOf('"}');
+    if (endIndex === -1) {
+      endIndex = cleaned.lastIndexOf('"');
+    }
+    if (endIndex > startIndex) {
+      extractedText = cleaned.slice(startIndex, endIndex);
+    } else {
+      extractedText = cleaned.slice(startIndex);
+    }
+  }
+
+  // 5. Fallback: if extractedText is still empty or too short, strip JSON wrapping
+  if (!extractedText || extractedText.trim().length < 50) {
+    extractedText = cleaned
+      .replace(/\{[\s\S]*?"title"[\s\S]*?"text"\s*:\s*"?/i, '')
+      .replace(/"?\s*\}\s*$/i, '')
+      .replace(/^#+\s+.*$/gm, '')
+      .replace(/[*_~`]/g, '')
+      .trim();
+  }
+
+  // Sanitize text: replace escaped characters and multiple whitespaces
+  const sanitizedText = extractedText
+    .replace(/\\"/g, '"')
+    .replace(/\\n/g, ' ')
+    .replace(/\\t/g, ' ')
+    .replace(/\\r/g, ' ')
+    .replace(/[\r\n]+/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+
+  return {
+    title: extractedTitle.replace(/[\r\n]+/g, ' ').trim() || defaultTitle,
+    text: sanitizedText
+  };
+}
+
+// 6. Generate Single Passage from AI calibrated to AR Typing Standards
 async function generateSinglePassage(
   slot: DailySlotPlan,
   dateStr: string,
@@ -541,79 +636,124 @@ async function generateSinglePassage(
     // English
     systemPrompt =
       'You are the principal typing examination evaluator and passage creator for Uttar Pradesh Police Recruitment Board (UPPRPB) and AR Typing portal.';
-    userPrompt = `Generate an official competitive examination typing passage in standard English.
+    if (isHard) {
+      userPrompt = `Generate an official competitive examination typing passage in standard English strictly conforming to the AR Typing HARD level standard for UP Police Computer Operator Grade-A and ASI examinations.
 Topic: ${slot.topic}
-Difficulty: ${isHard ? 'HARD (high vocabulary complexity, legal/forensic/technical terms, acronyms, dates, numbers, quotes, hyphens, and multi-clause sentences matching AR Typing hard level)' : 'MEDIUM (standard editorial prose, balanced vocabulary, commas, periods, clear sentence structure)'}
-Target word count: Exactly 520 to 580 words. (Crucial: Must be between 500 and 600 words for a 15-minute exam).
-Rules:
-- Continuous paragraph prose suitable for live typing test.
-- Absolutely NO bullet points, NO numbered lists, NO asterisks, and NO markdown formatting inside the text.
-- Return ONLY valid JSON format:
+Difficulty: HARD (Official UP Police Examination Standard)
+Requirements:
+1. Target Word Count: Exactly 520 to 580 words (CRUCIAL: Must be between 510 and 590 words for the 15-minute examination hall test).
+2. Content & Vocabulary:
+   - High vocabulary density, official judicial, administrative, legislative and forensic terminology.
+   - Include official departmental abbreviations and legal acronyms (e.g. "IPC", "CrPC", "UPPRPB", "CCTNS", "FIR", "IT Act", "CCTV", "AI", "DNA").
+   - Include historical dates (e.g. "26 November 2008", "15.08.1947"), statistics, percentages (e.g. "45.8%"), and serial numbers.
+   - Include hyphenated compound terms (e.g. "state-of-the-art", "real-time", "multi-agency"), paired quotation marks ("..."), and complex compound-complex sentence clauses.
+3. Formatting:
+   - Exactly 3 to 4 continuous paragraphs of formal prose.
+   - Absolutely NO bullet points, NO numbered lists, NO asterisks, and NO markdown headers/bolding.
+4. Output Format:
+Return ONLY valid JSON (no surrounding markdown code fences):
 {
-  "title": "A clear official title for the test (max 7-9 words)",
-  "text": "The full continuous passage text..."
+  "title": "Short descriptive official title (max 7-9 words)",
+  "text": "The complete 520-580 word continuous passage text here..."
 }`;
+    } else {
+      userPrompt = `Generate an official competitive examination typing passage in standard English strictly conforming to the AR Typing MEDIUM level standard for UP Police Computer Operator Grade-A and ASI examinations.
+Topic: ${slot.topic}
+Difficulty: MEDIUM (Balanced Editorial Standard)
+Requirements:
+1. Target Word Count: Exactly 500 to 540 words (for the 15-minute examination hall test).
+2. Content & Vocabulary:
+   - Balanced editorial, socioeconomic and administrative prose.
+   - Clean sentence structure, standard commas, periods, and occasional years or data figures.
+   - Fluid vocabulary suitable for candidates targeting 30 to 35 WPM net speed.
+3. Formatting:
+   - Exactly 3 continuous paragraphs of formal prose.
+   - Absolutely NO bullet points, NO numbered lists, NO asterisks, and NO markdown formatting.
+4. Output Format:
+Return ONLY valid JSON (no surrounding markdown code fences):
+{
+  "title": "Short descriptive official title (max 7-9 words)",
+  "text": "The complete 500-540 word continuous passage text here..."
+}`;
+    }
   } else {
     // Hindi
     systemPrompt =
-      'आप उत्तर प्रदेश पुलिस भर्ती एवं प्रोन्नति बोर्ड (UPPRPB) और एआर टाइपिंग (AR Typing) पोर्टल के मुख्य टंकण सामग्री निर्माता हैं।';
-    userPrompt = `दिए गए विषय पर मानक खड़ी बोली हिंदी (देवनागरी यूनिकोड) में आधिकारिक 15-मिनट की परीक्षा सामग्री तैयार करें।
+      'आप उत्तर प्रदेश पुलिस भर्ती एवं प्रोन्नति बोर्ड (UPPRPB) एवं एआर टाइपिंग (AR Typing) पोर्टल के मुख्य टंकण सामग्री निर्माता एवं वरिष्ठ परीक्षा नियंत्रक हैं।';
+    if (isHard) {
+      userPrompt = `दिए गए विषय पर उत्तर प्रदेश पुलिस कंप्यूटर ऑपरेटर (ग्रेड-ए) एवं एएसआई टंकण परीक्षा के 'कठिन स्तर' (HARD LEVEL) के अनुसार आधिकारिक 15-मिनट की टंकण सामग्री तैयार करें।
 विषय: ${slot.topic}
-कठिनाई स्तर: ${isHard ? 'कठिन (HARD) - उच्च स्तरीय प्रशासनिक, विधिक एवं तकनीकी शब्दावली, संयुक्त व्यंजन (जैसे प्र, द्वा, ष्ट, द्ध, र्, ज्ञ, त्र), उद्धरण चिह्न और संख्याएं।' : 'मध्यम (MEDIUM) - संतुलित शब्दावली, स्पष्ट वाक्य संरचना, पूर्ण विराम, अल्पविराम, मंगल इनस्क्रिप्ट कीबोर्ड के अनुकूल।'}
-लक्षित शब्द संख्या: ठीक 520 से 580 शब्द (15 मिनट की परीक्षा के लिए 500 से 600 शब्दों के बीच अनिवार्य)।
-नियम:
-- निरंतर पैराग्राफ गद्यांश जो आधिकारिक टाइपिंग टेस्ट में उपयुक्त हो।
-- कोई बुलेट पॉइंट, क्रमांकित सूची, स्टार चिह्न (*) या मार्कडाउन फॉर्मेटिंग न लगाएं।
-- शुद्ध देवनागरी यूनिकोड (NFC)।
-- केवल वैध JSON प्रारूप में उत्तर दें:
+कठिनाई स्तर: कठिन (HARD LEVEL • आधिकारिक परीक्षा मानक)
+अनिवार्य आवश्यकताएं:
+1. लक्षित शब्द संख्या: ठीक 520 से 580 शब्द (15 मिनट की परीक्षा के लिए 510 से 590 शब्दों के बीच अनिवार्य)।
+2. शब्दावली एवं व्याकरण मानक:
+   - उच्च स्तरीय विधिक, प्रशासनिक, संवैधानिक, तकनीकी एवं न्यायिक शब्दावली।
+   - कठिन एवं जटिल संयुक्त व्यंजन प्रचुरता में शामिल करें, जैसे: 'द्ध' (जैसे बुद्धि, शुद्ध), 'द्व' (जैसे द्वार, विद्वान), 'द्य' (जैसे विद्या, उद्योग), 'ष्ट' (जैसे दृष्टिकोण, विशिष्ट), 'क्त' (जैसे शक्ति, संयुक्त), 'ह्न' (जैसे चिह्न), 'हृ' (जैसे हृदय), 'त्त' (जैसे उत्तर, संपत्ति), 'ट्र' (जैसे ट्रैफिक, राष्ट्रीय), 'क्र' (जैसे क्रम, प्रक्रिया), 'द्द' (जैसे उद्देश्य, मुद्दा), 'ह्म' (जैसे ब्रह्म)।
+   - शुद्ध नुक्ता युक्त शब्द (जैसे फ़ैसला, ज़िला, ख़ास), अल्पविराम (,), पूर्णविराम (।), उद्धरण चिह्न ('...') और सांख्यिकीय आंकड़े।
+3. प्रारूप:
+   - 3 से 4 निरंतर पैराग्राफ।
+   - कोई बुलेट पॉइंट नहीं, कोई नंबरिंग नहीं, कोई स्टार (*) चिह्न या मार्कडाउन बोल्डिंग नहीं।
+   - मानक देवनागरी यूनिकोड (NFC)।
+4. उत्तर केवल वैध JSON प्रारूप में दें:
 {
   "title": "परीक्षण का आधिकारिक शीर्षक (अधिकतम 7-9 शब्द)",
-  "text": "पूर्ण गद्यांश..."
+  "text": "पूर्ण 520 से 580 शब्दों का गद्यांश..."
 }`;
+    } else {
+      userPrompt = `दिए गए विषय पर उत्तर प्रदेश पुलिस कंप्यूटर ऑपरेटर एवं एएसआई टंकण परीक्षा के 'मध्यम स्तर' (MEDIUM LEVEL) के अनुसार आधिकारिक 15-मिनट की टंकण सामग्री तैयार करें।
+विषय: ${slot.topic}
+कठिनाई स्तर: मध्यम (MEDIUM LEVEL • संतुलित मानक)
+अनिवार्य आवश्यकताएं:
+1. लक्षित शब्द संख्या: ठीक 500 से 540 शब्द (15 मिनट की परीक्षा हेतु)।
+2. शब्दावली एवं संरचना:
+   - मानक खड़ी बोली हिंदी (देवनागरी यूनिकोड), स्पष्ट वाक्य विन्यास, संतुलित प्रशासनिक एवं सामान्य ज्ञान शब्दावली।
+   - सामान्य संयुक्त व्यंजन (प्र, त्र, ज्ञ, श्र, क्ष), अल्पविराम और पूर्णविराम।
+   - मंगल इनस्क्रिप्ट कीबोर्ड पर 25 से 30 WPM की गति बनाए रखने के लिए उपयुक्त।
+3. प्रारूप:
+   - 3 निरंतर पैराग्राफ।
+   - कोई बुलेट पॉइंट, नंबरिंग या मार्कडाउन फॉर्मेटिंग न लगाएं।
+4. उत्तर केवल वैध JSON प्रारूप में दें:
+{
+  "title": "परीक्षण का आधिकारिक शीर्षक (अधिकतम 7-9 शब्द)",
+  "text": "पूर्ण 500 से 540 शब्दों का गद्यांश..."
+}`;
+    }
   }
 
   const endpoint = `${baseUrl}/chat/completions`;
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${apiKey}`
+  };
+  if (baseUrl.includes('openrouter')) {
+    headers['HTTP-Referer'] = 'https://purendar950.github.io/Typing-computer-operator-/';
+    headers['X-Title'] = 'UP Police Typing Exam Suite';
+  }
+
   const res = await fetch(endpoint, {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${apiKey}`
-    },
+    headers,
     body: JSON.stringify({
       model,
       messages: [
         { role: 'system', content: systemPrompt },
         { role: 'user', content: userPrompt }
       ],
-      temperature: 0.7
+      temperature: 0.7,
+      max_tokens: 3500
     })
   });
 
   if (!res.ok) {
     const errorText = await res.text();
-    throw new Error(`AI Request Failed (${res.status}): ${errorText.slice(0, 100)}`);
+    throw new Error(`AI Request Failed (${res.status}): ${errorText.slice(0, 120)}`);
   }
 
   const data = await res.json();
   const rawContent = data.choices?.[0]?.message?.content || '';
+  const parsed = extractPassageFromAiResponse(rawContent, `Live Exam Test #${slot.slot} (${slot.subType})`);
 
-  // Extract JSON
-  let parsed: { title: string; text: string };
-  try {
-    const jsonMatch = rawContent.match(/\{[\s\S]*\}/);
-    if (!jsonMatch) {
-      throw new Error('No JSON object found in AI response');
-    }
-    parsed = JSON.parse(jsonMatch[0]);
-  } catch (parseErr) {
-    throw new Error(`Failed to parse AI output as JSON: ${parseErr}`);
-  }
-
-  const cleanText = parsed.text
-    .replace(/[\r\n]+/g, ' ')
-    .replace(/\s+/g, ' ')
-    .trim();
-
+  const cleanText = parsed.text;
   const words = cleanText.split(/\s+/).filter(Boolean);
   const wordCount = words.length;
 
@@ -628,6 +768,130 @@ Rules:
     date: dateStr,
     text: cleanText
   };
+}
+
+// Reusable single test generator calibrated to AR Typing Medium & Hard standards
+export async function generateCustomTest(options: {
+  language: Language;
+  difficulty: 'medium' | 'hard';
+  category: ExamCategory;
+  topic: string;
+  targetWords?: number;
+  config: AiConfig;
+}): Promise<Passage> {
+  const { language, difficulty, category, topic, targetWords, config } = options;
+  const baseUrl = cleanBaseUrl(config.baseUrl);
+  const apiKey = config.apiKey.trim();
+  const model = config.model.trim() || 'gemini-2.5-flash';
+
+  if (!apiKey) {
+    throw new Error('API Key is missing. Please configure your API key in AI Settings.');
+  }
+
+  const isHindi = language.startsWith('hindi');
+  const isHard = difficulty === 'hard';
+  const wordCountTarget = targetWords || (isHard ? 550 : 520);
+
+  let systemPrompt = '';
+  let userPrompt = '';
+
+  if (!isHindi) {
+    systemPrompt =
+      'You are the principal typing examination passage author for Uttar Pradesh Police Recruitment Board (UPPRPB) and AR Typing portal.';
+    if (isHard) {
+      userPrompt = `Generate an official AR Typing HARD level competitive examination typing passage in standard English on '${topic}'.
+Target Word Count: Exactly ${wordCountTarget} words (between 520 and 580 words).
+Requirements: High vocabulary complexity, official legal/administrative/police terminology, departmental acronyms, quotes, hyphens, and statistical dates. Continuous 3-4 paragraphs, no bullet points, no markdown.
+Return ONLY valid JSON:
+{
+  "title": "Official Title (${topic})",
+  "text": "Full continuous passage text here..."
+}`;
+    } else {
+      userPrompt = `Generate an official AR Typing MEDIUM level competitive examination typing passage in standard English on '${topic}'.
+Target Word Count: Exactly ${wordCountTarget} words (between 500 and 540 words).
+Requirements: Balanced vocabulary, clear administrative and general knowledge prose, standard punctuation, continuous 3 paragraphs, no bullet points, no markdown.
+Return ONLY valid JSON:
+{
+  "title": "Official Title (${topic})",
+  "text": "Full continuous passage text here..."
+}`;
+    }
+  } else {
+    systemPrompt =
+      'आप उत्तर प्रदेश पुलिस भर्ती एवं प्रोन्नति बोर्ड (UPPRPB) एवं एआर टाइपिंग (AR Typing) पोर्टल के मुख्य टंकण सामग्री निर्माता हैं।';
+    if (isHard) {
+      userPrompt = `दिए गए विषय '${topic}' पर आधिकारिक एआर टाइपिंग 'कठिन स्तर' (HARD) मानक के अनुसार 15-मिनट की टंकण सामग्री तैयार करें।
+लक्षित शब्द संख्या: ठीक ${wordCountTarget} शब्द (520 से 580 शब्दों के बीच)।
+अनिवार्यता: उच्च विधिक एवं प्रशासनिक शब्दावली, कठिन संयुक्त व्यंजन (द्ध, द्व, द्य, ष्ट, क्त, ह्न, हृ, त्त, ट्र, क्र, द्द), नुक्ता शब्द (फ़, ज़), उद्धरण चिह्न, 3-4 निरंतर पैराग्राफ, कोई बुलेट नहीं।
+केवल शुद्ध JSON दें:
+{
+  "title": "आधिकारिक शीर्षक (${topic})",
+  "text": "पूर्ण गद्यांश..."
+}`;
+    } else {
+      userPrompt = `दिए गए विषय '${topic}' पर आधिकारिक एआर टाइपिंग 'मध्यम स्तर' (MEDIUM) मानक के अनुसार 15-मिनट की टंकण सामग्री तैयार करें।
+लक्षित शब्द संख्या: ठीक ${wordCountTarget} शब्द (500 से 540 शब्दों के बीच)।
+अनिवार्यता: मानक देवनागरी यूनिकोड, संतुलित शब्दावली, मंगल इनस्क्रिप्ट अनुकूल, 3 निरंतर पैराग्राफ, कोई बुलेट नहीं।
+केवल शुद्ध JSON दें:
+{
+  "title": "आधिकारिक शीर्षक (${topic})",
+  "text": "पूर्ण गद्यांश..."
+}`;
+    }
+  }
+
+  const endpoint = `${baseUrl}/chat/completions`;
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${apiKey}`
+  };
+  if (baseUrl.includes('openrouter')) {
+    headers['HTTP-Referer'] = 'https://purendar950.github.io/Typing-computer-operator-/';
+    headers['X-Title'] = 'UP Police Typing Exam Suite';
+  }
+
+  const res = await fetch(endpoint, {
+    method: 'POST',
+    headers,
+    body: JSON.stringify({
+      model,
+      messages: [
+        { role: 'system', content: systemPrompt },
+        { role: 'user', content: userPrompt }
+      ],
+      temperature: 0.7,
+      max_tokens: 3500
+    })
+  });
+
+  if (!res.ok) {
+    const errorText = await res.text();
+    throw new Error(`AI Request Failed (${res.status}): ${errorText.slice(0, 120)}`);
+  }
+
+  const data = await res.json();
+  const rawContent = data.choices?.[0]?.message?.content || '';
+  const parsed = extractPassageFromAiResponse(rawContent, `Custom AI Test: ${topic}`);
+
+  const cleanText = parsed.text;
+  const wordCount = cleanText.split(/\s+/).filter(Boolean).length;
+  const todayStr = new Date().toISOString().split('T')[0];
+
+  const newPassage: Passage = {
+    id: `custom-ai-${Date.now()}`,
+    title: parsed.title || `Custom AI Test: ${topic}`,
+    language,
+    category,
+    duration: 15,
+    wordCount,
+    difficulty,
+    date: todayStr,
+    text: cleanText
+  };
+
+  await saveCustomPassage(newPassage);
+  return newPassage;
 }
 
 // 5. Generate All 8 Daily Live Tests
@@ -801,4 +1065,41 @@ export function getFallbackDailyPassages(dateStr: string, bank: Passage[]): Pass
   ];
 
   return selected;
+}
+
+// 9. Automatic Daily Live Generation Background Trigger
+export async function triggerAutoDailyGenerationIfDue(
+  dateStr: string,
+  onGenerated?: (passages: Passage[]) => void
+): Promise<void> {
+  // Check if today already has AI tests in localStorage
+  try {
+    const cached = localStorage.getItem(`${STORAGE_KEY_DAILY_PREFIX}${dateStr}`);
+    if (cached) {
+      const parsed = JSON.parse(cached);
+      if (Array.isArray(parsed) && parsed.length >= 8) {
+        const hasAiLive = parsed.some((p: Passage) => p.id.startsWith(`ar-live-${dateStr}-slot`));
+        if (hasAiLive) {
+          return;
+        }
+      }
+    }
+  } catch {
+    // Continue
+  }
+
+  const config = await getAiConfig();
+  if (!config.apiKey || !config.autoDaily) {
+    return;
+  }
+
+  console.log('🤖 Auto-Daily: Automatically generating 8 Live Tests for', dateStr);
+  try {
+    const tests = await generateAll8DailyLiveTests(dateStr, config);
+    if (onGenerated && tests && tests.length >= 8) {
+      onGenerated(tests);
+    }
+  } catch (err) {
+    console.warn('Auto-daily generation skipped or failed:', err);
+  }
 }

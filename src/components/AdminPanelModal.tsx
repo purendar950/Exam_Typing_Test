@@ -20,6 +20,7 @@ import {
   saveAiConfig,
   testAiConnection,
   generateAll8DailyLiveTests,
+  generateCustomTest,
   DAILY_8_SLOTS
 } from '../services/aiGenerator';
 import {
@@ -421,7 +422,7 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
     }
   };
 
-  // Generate Custom Single Passage with AI
+  // Generate Custom Single Passage with AI (AR Typing Medium & Hard Calibrated)
   const handleGenerateCustomPassage = async () => {
     if (!aiConfig.apiKey.trim()) {
       setCustomGenMessage('❌ Please enter API Key in AI Engine tab first.');
@@ -433,67 +434,23 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
     }
 
     setIsGeneratingCustom(true);
-    setCustomGenMessage('Generating custom passage using AI model...');
+    setCustomGenMessage('Generating AR Typing calibrated passage using AI model...');
 
     try {
-      const isHindi = customLanguage.startsWith('hindi');
-      const isHard = customDifficulty === 'hard';
-
-      let sys = isHindi
-        ? 'आप उत्तर प्रदेश पुलिस भर्ती एवं प्रोन्नति बोर्ड (UPPRPB) के मुख्य टंकण सामग्री निर्माता हैं।'
-        : 'You are the principal typing test creator for UP Police Recruitment Board and AR Typing portal.';
-
-      let prompt = isHindi
-        ? `दिए गए विषय '${customTopic}' पर शुद्ध मानक खड़ी बोली हिंदी (देवनागरी यूनिकोड) में ${customTargetWords} शब्दों का ${isHard ? 'कठिन (Hard)' : 'मध्यम (Medium)'} गद्यांश तैयार करें। निरंतर पैराग्राफ, कोई बुलेट नहीं। केवल JSON दें: {"title": "...", "text": "..."}`
-        : `Generate an official typing examination passage in standard English on '${customTopic}'. Words: ${customTargetWords}. Difficulty: ${customDifficulty.toUpperCase()}. Continuous text, no bullet points. Return ONLY JSON: {"title": "...", "text": "..."}`;
-
-      const res = await fetch(`${aiConfig.baseUrl.replace(/\/+$/, '')}/chat/completions`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${aiConfig.apiKey.trim()}`
-        },
-        body: JSON.stringify({
-          model: aiConfig.model.trim() || 'gemini-2.5-flash',
-          messages: [
-            { role: 'system', content: sys },
-            { role: 'user', content: prompt }
-          ],
-          temperature: 0.7
-        })
+      const newPassage = await generateCustomTest({
+        language: customLanguage,
+        difficulty: customDifficulty,
+        category: customCategory,
+        topic: customTopic,
+        targetWords: customTargetWords,
+        config: aiConfig
       });
 
-      if (!res.ok) {
-        throw new Error(`AI error (${res.status}): ${(await res.text()).slice(0, 80)}`);
-      }
-
-      const data = await res.json();
-      const raw = data.choices?.[0]?.message?.content || '';
-      const match = raw.match(/\{[\s\S]*\}/);
-      if (!match) throw new Error('No valid JSON returned from model');
-      const parsed = JSON.parse(match[0]);
-
-      const cleanText = parsed.text.replace(/[\r\n]+/g, ' ').replace(/\s+/g, ' ').trim();
-      const wordCount = cleanText.split(/\s+/).filter(Boolean).length;
-
-      const newPassage: Passage = {
-        id: `custom-ai-${Date.now()}`,
-        title: parsed.title || `Custom AI Test: ${customTopic}`,
-        language: customLanguage,
-        category: customCategory,
-        duration: 15,
-        wordCount,
-        difficulty: customDifficulty,
-        date: new Date().toISOString().split('T')[0],
-        text: cleanText
-      };
-
-      await saveCustomPassage(newPassage);
       const updatedCustom = [newPassage, ...customPassagesList];
       setCustomPassagesList(updatedCustom);
       onPassagesUpdated([newPassage, ...passages]);
 
-      setCustomGenMessage(`🎉 Successfully created test: "${newPassage.title}" (${wordCount} words)!`);
+      setCustomGenMessage(`🎉 Successfully created test: "${newPassage.title}" (${newPassage.wordCount} words • ${customDifficulty.toUpperCase()})!`);
       setCustomTopic('');
     } catch (err: any) {
       setCustomGenMessage(`❌ Failed: ${err?.message || 'Error generating passage'}`);
