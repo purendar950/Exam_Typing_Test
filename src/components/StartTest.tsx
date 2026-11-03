@@ -156,86 +156,132 @@ export const StartTest: React.FC<StartTestProps> = ({
     }
   };
 
+  // Helper to insert character at cursor position cleanly with undo/cursor sync
+  const insertCharacter = (char: string) => {
+    if (!textareaRef.current) return;
+    const el = textareaRef.current;
+    const start = el.selectionStart ?? el.value.length;
+    const end = el.selectionEnd ?? el.value.length;
+    const current = el.value;
+    const next = current.substring(0, start) + char + current.substring(end);
+    el.value = next;
+    const newPos = start + char.length;
+    el.selectionStart = el.selectionEnd = newPos;
+    setTypedText(next);
+  };
+
+  // Helper to delete character before cursor (for Backspace in readOnly mode)
+  const deleteCharacter = () => {
+    if (!textareaRef.current) return;
+    const el = textareaRef.current;
+    const start = el.selectionStart ?? el.value.length;
+    const end = el.selectionEnd ?? el.value.length;
+    const current = el.value;
+    if (start === end) {
+      if (start > 0) {
+        const next = current.substring(0, start - 1) + current.substring(end);
+        el.value = next;
+        el.selectionStart = el.selectionEnd = start - 1;
+        setTypedText(next);
+      }
+    } else {
+      const next = current.substring(0, start) + current.substring(end);
+      el.value = next;
+      el.selectionStart = el.selectionEnd = start;
+      setTypedText(next);
+    }
+  };
+
   // Handle key down in typing box
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if (!isTestStarted && e.key.length === 1 && !e.ctrlKey && !e.altKey && !e.metaKey) {
+    const isMangalInscript = passage.language === 'hindi_mangal' && inscriptMappingEnabled;
+
+    if (!isTestStarted && (e.key.length === 1 || e.code === 'Space') && !e.ctrlKey && !e.altKey && !e.metaKey) {
       setIsTestStarted(true);
     }
 
-    // 1. If IME is composing (Android Gboard, Windows Indic IME, Google Input Tools),
-    // NEVER intercept or preventDefault! Doing so breaks the browser's composing span and causes word duplication!
-    if (isComposingRef.current || e.nativeEvent.isComposing || e.key === 'Process' || e.keyCode === 229) {
+    // 1. If IME is composing and NOT in Mangal Inscript mapped mode, let the native IME work
+    if (!isMangalInscript && (isComposingRef.current || e.nativeEvent.isComposing || e.key === 'Process' || e.keyCode === 229)) {
       return;
     }
 
-    if (e.key === 'Backspace') {
+    if (e.key === 'Backspace' || e.code === 'Backspace') {
       if (!settings.backspaceEnabled) {
         e.preventDefault();
         return;
       }
       setBackspaceCount((prev) => prev + 1);
       audioEngine.playKeyClick();
-      return;
-    }
-
-    if (e.key === 'Enter') {
-      audioEngine.playKeyClick();
-      return;
-    }
-
-    if (e.key.length === 1 && !e.ctrlKey && !e.altKey && !e.metaKey) {
-      audioEngine.playKeyClick();
-
-      // If key is ALREADY a Devanagari character (Native Hindi keyboard / Windows Inscript active), let browser type naturally!
-      if (/^[\u0900-\u097F]$/.test(e.key)) {
-        return;
-      }
-
-      // For Kruti Dev test: Candidate types ASCII characters directly (e.g. Hkwe/;).
-      // Kruti Dev 010 font displays them as Hindi glyphs! Do NOT transliterate.
-      if (passage.language === 'hindi_kruti') {
-        return;
-      }
-
-      // For English test: Direct typing.
-      if (passage.language === 'english') {
-        return;
-      }
-
-      // For Hindi Mangal test:
-      // If candidate is typing on a standard English QWERTY keyboard without Hindi software
-      // and Inscript mapping is active, map key to Mangal Inscript character:
-      if (passage.language === 'hindi_mangal' && inscriptMappingEnabled) {
+      if (isMangalInscript) {
         e.preventDefault();
-        const hindiChar = translateToMangalInscript(e.key, e.shiftKey, e.code);
-        insertCharacter(hindiChar);
+        deleteCharacter();
       }
-    }
-  };
-
-  // Helper to insert character at cursor position cleanly with undo/cursor sync
-  const insertCharacter = (char: string) => {
-    if (!textareaRef.current) return;
-    const el = textareaRef.current;
-
-    // Use document.execCommand('insertText') for native browser undo & caret sync
-    let success = false;
-    try {
-      success = document.execCommand('insertText', false, char);
-    } catch {
-      success = false;
+      return;
     }
 
-    if (!success) {
-      const start = el.selectionStart ?? 0;
-      const end = el.selectionEnd ?? 0;
-      const current = el.value;
-      const next = current.substring(0, start) + char + current.substring(end);
-      el.value = next;
-      el.selectionStart = el.selectionEnd = start + char.length;
-      setTypedText(next);
+    if (e.key === 'Enter' || e.code === 'Enter') {
+      audioEngine.playKeyClick();
+      if (isMangalInscript) {
+        e.preventDefault();
+        insertCharacter('\n');
+      }
+      return;
+    }
+
+    if (e.key === 'Tab') {
+      e.preventDefault();
+      return;
+    }
+
+    if (isMangalInscript) {
+      if (e.key === ' ' || e.code === 'Space') {
+        e.preventDefault();
+        audioEngine.playKeyClick();
+        insertCharacter(' ');
+        return;
+      }
+
+      // Check if it's a printable keystroke (character key or standard physical scancode)
+      const isPrintable =
+        (e.key.length === 1 && !e.ctrlKey && !e.altKey && !e.metaKey) ||
+        (Boolean(e.code) && (
+          e.code.startsWith('Key') ||
+          e.code.startsWith('Digit') ||
+          e.code.startsWith('Bracket') ||
+          e.code === 'Backquote' ||
+          e.code === 'Minus' ||
+          e.code === 'Equal' ||
+          e.code === 'Semicolon' ||
+          e.code === 'Quote' ||
+          e.code === 'Comma' ||
+          e.code === 'Period' ||
+          e.code === 'Slash' ||
+          e.code === 'Backslash'
+        ));
+
+      if (isPrintable) {
+        e.preventDefault();
+        audioEngine.playKeyClick();
+
+        // If key is ALREADY a Devanagari character (e.g. native OS Hindi keyboard active), keep it
+        if (/^[\u0900-\u097F]$/.test(e.key)) {
+          insertCharacter(e.key);
+          return;
+        }
+
+        const isShift =
+          e.shiftKey ||
+          (e.key >= 'A' && e.key <= 'Z') ||
+          (typeof e.getModifierState === 'function' && e.getModifierState('CapsLock'));
+        const hindiChar = translateToMangalInscript(e.key, isShift, e.code);
+        insertCharacter(hindiChar);
+        return;
+      }
     } else {
-      setTypedText(el.value);
+      // Normal typing (English, Kruti Dev, or Native Hindi IME)
+      if (e.key.length === 1 && !e.ctrlKey && !e.altKey && !e.metaKey) {
+        audioEngine.playKeyClick();
+      }
     }
   };
 
@@ -248,26 +294,11 @@ export const StartTest: React.FC<StartTestProps> = ({
       setIsTestStarted(true);
     }
 
-    // Never intercept during active IME composition (Gboard / Android / Indic IME)
-    if (isComposingRef.current || nativeEvent.isComposing || nativeEvent.inputType === 'insertCompositionText') {
-      return;
-    }
-
-    // Never intercept if data is already Devanagari (native Hindi IME / Indic keyboard)
-    if (nativeEvent.data && /[\u0900-\u097F]/.test(nativeEvent.data)) {
-      return;
-    }
-
-    // Never intercept for English or Kruti Dev
-    if (passage.language === 'english' || passage.language === 'hindi_kruti') {
-      return;
-    }
-
-    // For physical QWERTY keyboards typing English in Mangal Inscript mode:
-    if (passage.language === 'hindi_mangal' && inscriptMappingEnabled && nativeEvent.data && nativeEvent.inputType === 'insertText') {
-      const translated = translateEnglishStringToHindi(nativeEvent.data, 'mangal');
-      if (translated !== nativeEvent.data) {
-        e.preventDefault();
+    // In Mangal Inscript mapped mode:
+    if (passage.language === 'hindi_mangal' && inscriptMappingEnabled) {
+      e.preventDefault();
+      if (nativeEvent.data) {
+        const translated = translateEnglishStringToHindi(nativeEvent.data, 'mangal');
         insertCharacter(translated);
         audioEngine.playKeyClick();
       }
@@ -283,15 +314,10 @@ export const StartTest: React.FC<StartTestProps> = ({
       setIsTestStarted(true);
     }
 
-    // 1. If actively composing with an IME (Gboard, Samsung Keyboard, Windows Indic IME),
-    // NEVER touch el.value or mutate selection! Doing so breaks Android's composing span and causes word duplication!
-    if (isComposingRef.current) {
-      setTypedText(nextVal);
-      return;
-    }
-
-    // 2. Only for English keyboards with Inscript mapping enabled (no IME composition):
-    if (passage.language === 'hindi_mangal' && inscriptMappingEnabled && /[a-zA-Z]/.test(nextVal) && !/[\u0900-\u097F]/.test(nextVal)) {
+    // Safeguard for Hindi Mangal with Inscript mapping enabled:
+    // If any English ASCII letters exist in the value (e.g. from Android keyboards, Gboard autocomplete,
+    // or unintercepted keystrokes), automatically convert them to Inscript!
+    if (passage.language === 'hindi_mangal' && inscriptMappingEnabled && /[a-zA-Z]/.test(nextVal)) {
       const start = el.selectionStart;
       const end = el.selectionEnd;
       nextVal = translateEnglishStringToHindi(nextVal, 'mangal');
@@ -590,6 +616,7 @@ export const StartTest: React.FC<StartTestProps> = ({
             onChange={handleTextChange}
             onBeforeInput={handleBeforeInput}
             onKeyDown={handleKeyDown}
+            readOnly={passage.language === 'hindi_mangal' && inscriptMappingEnabled}
             onCompositionStart={() => {
               isComposingRef.current = true;
             }}
@@ -600,8 +627,7 @@ export const StartTest: React.FC<StartTestProps> = ({
               if (!isTestStarted && val.length > 0) {
                 setIsTestStarted(true);
               }
-              // Only convert if Inscript mapping is active and string is pure English (not Hindi IME)
-              if (passage.language === 'hindi_mangal' && inscriptMappingEnabled && /[a-zA-Z]/.test(val) && !/[\u0900-\u097F]/.test(val)) {
+              if (passage.language === 'hindi_mangal' && inscriptMappingEnabled && /[a-zA-Z]/.test(val)) {
                 val = translateEnglishStringToHindi(val, 'mangal');
                 el.value = val;
               }
@@ -614,14 +640,16 @@ export const StartTest: React.FC<StartTestProps> = ({
             spellCheck={false}
             autoComplete="off"
             autoCorrect="off"
-            autoCapitalize="off"
+            autoCapitalize="none"
             className={`ar-typing-textarea ${passage.language === 'hindi_kruti' ? 'font-kruti' : ''}`}
             style={{
               fontFamily: passage.language === 'hindi_kruti'
                 ? "'Kruti Dev 010', 'KrutiDev010', sans-serif"
                 : passage.language === 'hindi_mangal'
                 ? "'Noto Sans Devanagari', 'Mangal', sans-serif"
-                : 'inherit'
+                : 'inherit',
+              caretColor: '#000000',
+              cursor: 'text'
             }}
             placeholder={isTestStarted ? '' : 'Click here and start typing...'}
           />
