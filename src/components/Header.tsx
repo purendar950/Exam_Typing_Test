@@ -1,6 +1,7 @@
 import React from 'react';
 import { TestSettings } from '../types';
 import { UserProfile } from '../services/firebase';
+import appLogo from '../assets/logo.png';
 
 interface HeaderProps {
   currentTab: 'tests' | 'learn' | 'book';
@@ -33,10 +34,22 @@ export const Header: React.FC<HeaderProps> = ({
         {/* Top row on mobile / unified row on desktop */}
         <div className="header-top-row">
           <div className="logo-area" onClick={() => onSelectTab('tests')}>
-            <div className="logo-icon">UP</div>
+            <img
+              src={appLogo}
+              alt="Exam Typing"
+              style={{
+                width: '42px',
+                height: '42px',
+                borderRadius: '50%',
+                objectFit: 'cover',
+                boxShadow: '0 2px 6px rgba(2, 132, 199, 0.35)',
+                border: '1.5px solid #38bdf8',
+                flexShrink: 0
+              }}
+            />
             <div>
-              <div className="logo-title">UP Typing Mentor</div>
-              <div className="logo-subtitle">UP Police Computer Operator & ASI Portal</div>
+              <div className="logo-title">Exam Typing</div>
+              <div className="logo-subtitle">Typing Practice for Competitive Exams</div>
             </div>
           </div>
 

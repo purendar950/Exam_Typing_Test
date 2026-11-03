@@ -6,6 +6,7 @@ import {
   createGuestCandidate,
   UserProfile
 } from '../services/firebase';
+import appLogo from '../assets/logo.png';
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -153,27 +154,22 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onLoginSu
           </button>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <div
+            <img
+              src={appLogo}
+              alt="Exam Typing"
               style={{
-                width: '44px',
-                height: '44px',
-                borderRadius: '10px',
-                background: '#ffffff',
-                color: '#1e3a8a',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontWeight: 900,
-                fontSize: '1.2rem',
-                boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
-                border: '2px solid #93c5fd'
+                width: '48px',
+                height: '48px',
+                borderRadius: '50%',
+                objectFit: 'cover',
+                boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
+                border: '2px solid #93c5fd',
+                flexShrink: 0
               }}
-            >
-              UP
-            </div>
+            />
             <div>
               <div style={{ fontSize: '0.72rem', letterSpacing: '0.8px', textTransform: 'uppercase', opacity: 0.85, fontWeight: 700 }}>
-                UPPRPB Typing Mentor • AR Standard
+                Exam Typing • UP Police & Competitive Exams
               </div>
               <h3 style={{ margin: '2px 0 0', fontSize: '1.25rem', fontWeight: 800 }}>
                 Candidate Portal
