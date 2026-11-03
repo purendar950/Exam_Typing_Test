@@ -13,9 +13,11 @@ import { HindiHelperModal } from './components/HindiHelperModal';
 import { AuthModal } from './components/AuthModal';
 import { UserDashboardModal } from './components/UserDashboardModal';
 import { AiGeneratorModal } from './components/AiGeneratorModal';
+import { AdminPanelModal } from './components/AdminPanelModal';
 import { PwaInstallPrompt } from './components/PwaInstallPrompt';
 import { audioEngine } from './utils/audioEngine';
 import { fetchDailyLivePassages } from './services/aiGenerator';
+import { fetchAllCustomPassages } from './services/adminService';
 import {
   subscribeToAuth,
   saveTestResultToCloud,
@@ -98,9 +100,11 @@ export const App: React.FC = () => {
   });
   const [isDashboardOpen, setIsDashboardOpen] = useState<boolean>(false);
   const [isAiGeneratorOpen, setIsAiGeneratorOpen] = useState<boolean>(false);
+  const [isAdminOpen, setIsAdminOpen] = useState<boolean>(false);
   const [dailyLivePassages, setDailyLivePassages] = useState<Passage[]>([]);
+  const [customPassages, setCustomPassages] = useState<Passage[]>([]);
 
-  // Automatically fetch today's 8 Daily Live Tests on app load
+  // Automatically fetch today's 8 Daily Live Tests and Custom Passages on app load
   useEffect(() => {
     const todayIso = new Date().toISOString().split('T')[0];
     fetchDailyLivePassages(todayIso, PASSAGES).then((tests) => {
@@ -108,17 +112,24 @@ export const App: React.FC = () => {
         setDailyLivePassages(tests);
       }
     });
+
+    fetchAllCustomPassages().then((cps) => {
+      if (cps && cps.length > 0) {
+        setCustomPassages(cps);
+      }
+    });
   }, []);
 
-  // Combined Passages (Live Tests + Bank)
+  // Combined Passages (Custom Passages + Live Tests + Bank)
   const allPassages = React.useMemo(() => {
+    const basePool = [...customPassages, ...PASSAGES];
     if (dailyLivePassages.length > 0) {
       const liveIds = new Set(dailyLivePassages.map((p) => p.id));
-      const remaining = PASSAGES.filter((p) => !liveIds.has(p.id));
+      const remaining = basePool.filter((p) => !liveIds.has(p.id));
       return [...dailyLivePassages, ...remaining];
     }
-    return PASSAGES;
-  }, [dailyLivePassages]);
+    return basePool;
+  }, [customPassages, dailyLivePassages]);
 
   // Subscribe to Firebase Auth and Local User session
   useEffect(() => {
@@ -271,6 +282,7 @@ export const App: React.FC = () => {
           onOpenHistory={() => setIsHistoryOpen(true)}
           onOpenHindiHelper={() => setIsHindiHelperOpen(true)}
           onOpenAiGenerator={() => setIsAiGeneratorOpen(true)}
+          onOpenAdmin={() => setIsAdminOpen(true)}
           settings={settings}
           onToggleSound={toggleSound}
           currentUser={currentUser}
@@ -292,6 +304,7 @@ export const App: React.FC = () => {
             onOpenAuth={() => setIsAuthOpen(true)}
             onOpenDashboard={() => setIsDashboardOpen(true)}
             onOpenAiGenerator={() => setIsAiGeneratorOpen(true)}
+            onOpenAdmin={() => setIsAdminOpen(true)}
           />
         )}
 
@@ -351,6 +364,25 @@ export const App: React.FC = () => {
             <p>
               <strong>Uttar Pradesh Police & UPSSSC Computer Operator Typing Mentor</strong> &bull; Based on UPPRPB Official Standards (Hindi 25 WPM Mangal/Kruti, English 30 WPM, 85% Accuracy).
             </p>
+            <div style={{ marginTop: '8px', display: 'flex', justifyContent: 'center', gap: '16px', alignItems: 'center' }}>
+              <button
+                onClick={() => setIsAdminOpen(true)}
+                style={{
+                  background: 'transparent',
+                  border: 'none',
+                  color: '#0284c7',
+                  fontSize: '0.8rem',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '4px'
+                }}
+              >
+                <span>🛡️</span>
+                <span>Examination Authority Admin Portal</span>
+              </button>
+            </div>
           </div>
         </footer>
       )}
@@ -418,6 +450,18 @@ export const App: React.FC = () => {
           setDailyLivePassages(tests);
         }}
         existingPassages={PASSAGES}
+      />
+
+      <AdminPanelModal
+        isOpen={isAdminOpen}
+        onClose={() => setIsAdminOpen(false)}
+        passages={allPassages}
+        onPassagesUpdated={(updated) => {
+          setCustomPassages(updated.filter((p) => p.id.startsWith('custom-')));
+        }}
+        onDailyLiveGenerated={(tests) => {
+          setDailyLivePassages(tests);
+        }}
       />
 
       <PwaInstallPrompt />
