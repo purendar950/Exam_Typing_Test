@@ -47,25 +47,296 @@ interface ExamMode {
 }
 
 // Component for an Exam Type Card (shows inside tests: English, Hindi, Live, Drills)
+// Reusable Benchmark Test Card (Exact TestMentor / Photo Design Replica)
+interface ExamBenchmarkTestCardProps {
+  emblem: string;
+  categoryOrOrg: string;
+  language: string;
+  title: string;
+  targetSpeed: number;
+  durationMinutes: number;
+  minAccuracy: number;
+  limitCount?: number;
+  limitType?: 'Words' | 'Chars';
+  extraBadge?: { text: string; bg: string; color: string; border?: string };
+  pastAttempt?: {
+    isQualified: boolean;
+    bestSpeed: number;
+    bestAcc: number;
+    count: number;
+  };
+  onStartMock: () => void;
+  onBrowse?: () => void;
+  startBtnText?: string;
+  browseBtnText?: string;
+}
+
+const ExamBenchmarkTestCard: React.FC<ExamBenchmarkTestCardProps> = ({
+  emblem,
+  categoryOrOrg,
+  language,
+  title,
+  targetSpeed,
+  durationMinutes,
+  minAccuracy,
+  limitCount = 350,
+  limitType = 'Words',
+  extraBadge,
+  pastAttempt,
+  onStartMock,
+  onBrowse,
+  startBtnText,
+  browseBtnText = 'Browse'
+}) => {
+  const getLanguagePill = (lang: string) => {
+    if (lang === 'english') {
+      return { label: 'English', bg: '#eff6ff', color: '#1d4ed8', border: '#bfdbfe' };
+    }
+    if (lang === 'hindi_mangal' || lang === 'mangal') {
+      return { label: 'Mangal Inscript', bg: '#fef3c7', color: '#b45309', border: '#fde68a' };
+    }
+    if (lang === 'hindi_kruti' || lang === 'kruti') {
+      return { label: 'Kruti Dev', bg: '#fae8ff', color: '#86198f', border: '#f5d0fe' };
+    }
+    if (lang.startsWith('hindi')) {
+      return { label: 'Mangal Inscript', bg: '#fef3c7', color: '#b45309', border: '#fde68a' };
+    }
+    return { label: lang, bg: '#f1f5f9', color: '#475569', border: '#e2e8f0' };
+  };
+
+  const langStyle = getLanguagePill(language);
+
+  return (
+    <div
+      className="testmentor-exam-card exam-card-hover"
+      onClick={onStartMock}
+      style={{
+        background: '#ffffff',
+        border: '1.5px solid #e2e8f0',
+        borderRadius: '14px',
+        padding: '18px',
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'space-between',
+        cursor: 'pointer',
+        boxShadow: '0 2px 4px rgba(0,0,0,0.03)',
+        transition: 'all 0.18s ease'
+      }}
+    >
+      <div>
+        {/* Top Header: Organization/Category on left + Language pill on right */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px', gap: '8px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', minWidth: 0 }}>
+            <span style={{ fontSize: '1.25rem', flexShrink: 0 }}>{emblem}</span>
+            <span style={{
+              fontSize: '0.72rem',
+              fontWeight: 700,
+              padding: '2px 7px',
+              borderRadius: '4px',
+              background: '#f1f5f9',
+              color: '#475569',
+              whiteSpace: 'nowrap',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis'
+            }}>
+              {categoryOrOrg}
+            </span>
+          </div>
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: '5px', flexShrink: 0 }}>
+            {extraBadge && (
+              <span style={{
+                fontSize: '0.7rem',
+                fontWeight: 700,
+                padding: '2px 6px',
+                borderRadius: '4px',
+                background: extraBadge.bg,
+                color: extraBadge.color,
+                border: extraBadge.border ? `1px solid ${extraBadge.border}` : 'none'
+              }}>
+                {extraBadge.text}
+              </span>
+            )}
+            <span style={{
+              fontSize: '0.72rem',
+              fontWeight: 700,
+              padding: '2px 8px',
+              borderRadius: '4px',
+              background: langStyle.bg,
+              color: langStyle.color,
+              border: `1px solid ${langStyle.border}`,
+              whiteSpace: 'nowrap'
+            }}>
+              {langStyle.label}
+            </span>
+          </div>
+        </div>
+
+        {/* Title */}
+        <h3 style={{
+          fontSize: '1.02rem',
+          fontWeight: 800,
+          color: '#0f172a',
+          margin: '0 0 10px 0',
+          lineHeight: 1.35,
+          minHeight: '40px'
+        }}>
+          {title}
+        </h3>
+
+        {/* 4 Complete Benchmark Badges */}
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginBottom: '14px', alignItems: 'center' }}>
+          <span style={{
+            fontSize: '0.75rem',
+            fontWeight: 700,
+            background: '#f0fdf4',
+            color: '#16a34a',
+            padding: '3px 8px',
+            borderRadius: '6px',
+            border: '1px solid #bbf7d0',
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '4px'
+          }}>
+            🎯 {targetSpeed} WPM Speed
+          </span>
+
+          <span style={{
+            fontSize: '0.75rem',
+            fontWeight: 700,
+            background: '#f8fafc',
+            color: '#475569',
+            padding: '3px 8px',
+            borderRadius: '6px',
+            border: '1px solid #e2e8f0',
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '4px'
+          }}>
+            ⏱️ {durationMinutes} Mins
+          </span>
+
+          <span style={{
+            fontSize: '0.75rem',
+            fontWeight: 700,
+            background: '#fffbeb',
+            color: '#b45309',
+            padding: '3px 8px',
+            borderRadius: '6px',
+            border: '1px solid #fde68a',
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '4px'
+          }}>
+            🎯 ≥ {minAccuracy}% Accuracy
+          </span>
+
+          <span style={{
+            fontSize: '0.72rem',
+            color: '#64748b',
+            fontWeight: 600,
+            padding: '3px 6px',
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '3px'
+          }}>
+            📏 {limitCount} {limitType}
+          </span>
+        </div>
+
+        {/* Past Candidate Score if attempted */}
+        {pastAttempt ? (
+          <div style={{
+            background: pastAttempt.isQualified ? '#f0fdf4' : '#fffbeb',
+            border: `1px solid ${pastAttempt.isQualified ? '#bbf7d0' : '#fde68a'}`,
+            color: pastAttempt.isQualified ? '#15803d' : '#b45309',
+            borderRadius: '6px',
+            padding: '5px 10px',
+            fontSize: '0.74rem',
+            fontWeight: 700,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            marginBottom: '12px'
+          }}>
+            <span>✓ {pastAttempt.isQualified ? 'Qualified' : 'Attempted'} • Best: {pastAttempt.bestSpeed} WPM ({pastAttempt.bestAcc}%)</span>
+            <span style={{ fontSize: '0.68rem', opacity: 0.85 }}>{pastAttempt.count} {pastAttempt.count === 1 ? 'try' : 'tries'}</span>
+          </div>
+        ) : null}
+      </div>
+
+      {/* Actions */}
+      <div
+        style={{ display: 'flex', gap: '8px', borderTop: '1px solid #f1f5f9', paddingTop: '12px' }}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <button
+          onClick={onStartMock}
+          className="btn btn-primary"
+          style={{
+            flex: 1,
+            padding: '8px 12px',
+            fontSize: '0.84rem',
+            fontWeight: 700,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '5px',
+            cursor: 'pointer'
+          }}
+          title={`Start official ${durationMinutes}-minute test with ${targetSpeed} WPM speed cutoff`}
+        >
+          <span>⚡</span>
+          <span>{startBtnText || `Start Mock (${durationMinutes}m)`}</span>
+        </button>
+
+        <button
+          onClick={onBrowse || onStartMock}
+          className="btn btn-secondary"
+          style={{
+            padding: '8px 14px',
+            fontSize: '0.84rem',
+            fontWeight: 600,
+            whiteSpace: 'nowrap',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '4px',
+            cursor: 'pointer'
+          }}
+          title="Browse exam passages"
+        >
+          <span>{browseBtnText}</span>
+          <span>→</span>
+        </button>
+      </div>
+    </div>
+  );
+};
+
+// Component for an Exam Type Card (shows inside tests: English, Hindi, Live, Drills)
 const ExamTypePostCard: React.FC<{
   post: UnifiedExamPost;
   onEnterExam: (post: UnifiedExamPost) => void;
   onQuickMode: (post: UnifiedExamPost, modeId: string, variant: ExamProfile) => void;
+  onQuickStart: (post: UnifiedExamPost) => void;
   getEmblemForGroup: (group: string) => string;
-}> = ({ post, onEnterExam, onQuickMode, getEmblemForGroup }) => {
+}> = ({ post, onEnterExam, onQuickMode, onQuickStart, getEmblemForGroup }) => {
   const engVariant = post.variants.find((v) => v.language === 'english');
   const mangalVariant = post.variants.find((v) => v.language.startsWith('hindi'));
   const hasEnglish = Boolean(engVariant);
   const hasHindi = Boolean(mangalVariant);
+  const primaryVariant = engVariant || mangalVariant || post.variants[0];
+  const duration = primaryVariant?.durationMinutes || 15;
+  const minAcc = primaryVariant?.minAccuracy || 85;
 
-  const benchmarkText = useMemo(() => {
-    const parts: string[] = [];
-    if (mangalVariant) parts.push(`Hindi ${mangalVariant.targetSpeed} WPM`);
-    if (engVariant) parts.push(`English ${engVariant.targetSpeed} WPM`);
-    parts.push(`${post.variants[0]?.durationMinutes || 15} Mins`);
-    parts.push(`≥${post.variants[0]?.minAccuracy || 85}% Acc`);
-    return parts.join(' • ');
-  }, [post, engVariant, mangalVariant]);
+  const speedText = useMemo(() => {
+    if (mangalVariant && engVariant) {
+      return `Hindi ${mangalVariant.targetSpeed} / Eng ${engVariant.targetSpeed}`;
+    }
+    if (mangalVariant) return `Hindi ${mangalVariant.targetSpeed}`;
+    if (engVariant) return `English ${engVariant.targetSpeed}`;
+    return `${post.variants[0]?.targetSpeed || 30}`;
+  }, [mangalVariant, engVariant, post]);
 
   const getTypeBadgeStyle = (type: string) => {
     switch (type) {
@@ -146,28 +417,71 @@ const ExamTypePostCard: React.FC<{
           fontSize: '1.05rem',
           fontWeight: 800,
           color: '#0f172a',
-          margin: '0 0 8px 0',
-          lineHeight: 1.35
+          margin: '0 0 10px 0',
+          lineHeight: 1.35,
+          minHeight: '44px'
         }}>
           {post.postTitle}
         </h3>
 
-        {/* Passing Benchmark Strip */}
-        <div style={{
-          background: '#f8fafc',
-          border: '1px solid #f1f5f9',
-          borderRadius: '8px',
-          padding: '8px 10px',
-          marginBottom: '12px',
-          fontSize: '0.78rem',
-          color: '#334155',
-          fontWeight: 600,
-          display: 'flex',
-          alignItems: 'center',
-          gap: '6px'
-        }}>
-          <span>🎯</span>
-          <span>{benchmarkText}</span>
+        {/* 4 Complete Benchmark Badges */}
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginBottom: '14px', alignItems: 'center' }}>
+          <span style={{
+            fontSize: '0.75rem',
+            fontWeight: 700,
+            background: '#f0fdf4',
+            color: '#16a34a',
+            padding: '3px 8px',
+            borderRadius: '6px',
+            border: '1px solid #bbf7d0',
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '4px'
+          }}>
+            🎯 {speedText} WPM Speed
+          </span>
+
+          <span style={{
+            fontSize: '0.75rem',
+            fontWeight: 700,
+            background: '#f8fafc',
+            color: '#475569',
+            padding: '3px 8px',
+            borderRadius: '6px',
+            border: '1px solid #e2e8f0',
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '4px'
+          }}>
+            ⏱️ {duration} Mins
+          </span>
+
+          <span style={{
+            fontSize: '0.75rem',
+            fontWeight: 700,
+            background: '#fffbeb',
+            color: '#b45309',
+            padding: '3px 8px',
+            borderRadius: '6px',
+            border: '1px solid #fde68a',
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '4px'
+          }}>
+            🎯 ≥ {minAcc}% Accuracy
+          </span>
+
+          <span style={{
+            fontSize: '0.72rem',
+            color: '#64748b',
+            fontWeight: 600,
+            padding: '3px 6px',
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '3px'
+          }}>
+            📏 {primaryVariant?.inputType === 'character' ? `${primaryVariant.inputLimit} Chars` : `${primaryVariant?.inputLimit || 500} Words`}
+          </span>
         </div>
 
         {/* Available Tests Inside: English, Hindi, Live, Drills */}
@@ -278,28 +592,54 @@ const ExamTypePostCard: React.FC<{
         </div>
       </div>
 
-      {/* Card Footer Button: "Enter Exam Series (English, Hindi, Live →)" */}
-      <div style={{
-        borderTop: '1px solid #f1f5f9',
-        paddingTop: '12px',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between'
-      }}>
-        <span style={{ fontSize: '0.8rem', color: '#64748b', fontWeight: 600 }}>
-          {post.variants.length} Mediums • Official Benchmarks
-        </span>
-        <span style={{
-          fontSize: '0.84rem',
-          fontWeight: 800,
-          color: 'var(--primary, #0284c7)',
+      {/* Actions: Start Mock + Browse Hub */}
+      <div
+        style={{
+          borderTop: '1px solid #f1f5f9',
+          paddingTop: '12px',
           display: 'flex',
-          alignItems: 'center',
-          gap: '4px'
-        }}>
-          <span>Enter Exam Hub</span>
+          gap: '8px'
+        }}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <button
+          onClick={() => onQuickStart(post)}
+          className="btn btn-primary"
+          style={{
+            flex: 1,
+            padding: '8px 12px',
+            fontSize: '0.84rem',
+            fontWeight: 700,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '5px',
+            cursor: 'pointer'
+          }}
+          title={`Start official ${duration}-min mock test`}
+        >
+          <span>⚡</span>
+          <span>Start Mock ({duration}m)</span>
+        </button>
+
+        <button
+          onClick={() => onEnterExam(post)}
+          className="btn btn-secondary"
+          style={{
+            padding: '8px 14px',
+            fontSize: '0.84rem',
+            fontWeight: 600,
+            whiteSpace: 'nowrap',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '4px',
+            cursor: 'pointer'
+          }}
+          title="Explore exam hub & test modes"
+        >
+          <span>Browse</span>
           <span>→</span>
-        </span>
+        </button>
       </div>
     </div>
   );
@@ -339,6 +679,7 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
   const [isLoadingPassages, setIsLoadingPassages] = useState<boolean>(false);
 
   // 129 All Exams Explorer State
+  const [level1ViewMode, setLevel1ViewMode] = useState<'posts' | 'individual'>('posts');
   const [selectedExamCategory, setSelectedExamCategory] = useState<string>('all');
   const [selectedExamSubFilter, setSelectedExamSubFilter] = useState<string>('all');
   const [examSearchQuery, setExamSearchQuery] = useState<string>('');
@@ -445,6 +786,33 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
     });
   }, [selectedExamCategory, selectedExamSubFilter, selectedExamLanguageFilter, examSearchQuery]);
 
+  const filteredAllExams = useMemo(() => {
+    return ALL_EXAMS.filter((exam) => {
+      // 1. Category group filter
+      if (selectedExamCategory !== 'all' && exam.categoryGroup !== selectedExamCategory) {
+        return false;
+      }
+      // 2. Language filter
+      if (selectedExamLanguageFilter === 'english' && exam.language !== 'english') {
+        return false;
+      }
+      if (selectedExamLanguageFilter === 'hindi' && !exam.language.startsWith('hindi')) {
+        return false;
+      }
+      // 3. Search query
+      if (examSearchQuery.trim()) {
+        const q = examSearchQuery.toLowerCase();
+        const matchTitle = exam.title.toLowerCase().includes(q);
+        const matchSlug = exam.slug.toLowerCase().includes(q);
+        const matchGroup = exam.categoryGroup.toLowerCase().includes(q);
+        if (!matchTitle && !matchSlug && !matchGroup) {
+          return false;
+        }
+      }
+      return true;
+    });
+  }, [selectedExamCategory, selectedExamLanguageFilter, examSearchQuery]);
+
   const getPostCountForSubFilter = (subId: string) => {
     return UNIFIED_EXAM_POSTS.filter((post) => {
       if (selectedExamCategory !== 'all' && post.categoryGroup !== selectedExamCategory) {
@@ -502,6 +870,15 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
   const engVariant = useMemo(() => activePost?.variants.find((v) => v.language === 'english'), [activePost]);
   const mangalVariant = useMemo(() => activePost?.variants.find((v) => v.language.startsWith('hindi')), [activePost]);
   const krutiVariant = useMemo(() => activePost?.variants.find((v) => v.language === 'hindi_kruti'), [activePost]);
+
+  const handleQuickStartPost = (post: UnifiedExamPost) => {
+    setSelectedUnifiedPost(post);
+    setActiveExamId(post.id);
+    const primary = post.variants[0];
+    if (primary) {
+      handleQuickStartExam(primary);
+    }
+  };
 
   const handleEnterExam = (post: UnifiedExamPost) => {
     setSelectedUnifiedPost(post);
@@ -978,119 +1355,33 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
     const isHindi = t.language.startsWith('hindi');
     const isHard = t.difficulty === 'hard';
     const attempt = pastAttemptsMap.get(t.id) || pastAttemptsMap.get(t.title);
+    const speed = selectedExamProfile?.targetSpeed || (isHindi ? (mangalVariant?.targetSpeed || 25) : (engVariant?.targetSpeed || 30));
+    const acc = selectedExamProfile?.minAccuracy || 85;
 
     return (
-      <div
+      <ExamBenchmarkTestCard
         key={t.id}
-        style={{
-          background: '#ffffff',
-          border: '1px solid #bbf7d0',
-          borderRadius: '12px',
-          padding: '14px',
-          display: 'flex',
-          flexDirection: 'column',
-          justifyContent: 'space-between',
-          boxShadow: '0 1px 3px rgba(0,0,0,0.05)'
+        emblem={isHindi ? '🇮🇳' : '🇬🇧'}
+        categoryOrOrg={t.category === 'up_police_asi' ? 'UP Police ASI' : 'UP Police CO'}
+        language={t.language}
+        title={t.title}
+        targetSpeed={speed}
+        durationMinutes={selectedExamProfile?.durationMinutes || 15}
+        minAccuracy={acc}
+        limitCount={t.wordCount}
+        limitType="Words"
+        extraBadge={{
+          text: isHard ? 'HARD • Long Words' : 'MEDIUM',
+          bg: isHard ? '#fee2e2' : '#f0fdf4',
+          color: isHard ? '#b91c1c' : '#15803d',
+          border: isHard ? '#fca5a5' : '#86efac'
         }}
-      >
-        <div>
-          {/* Badges */}
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <span style={{ fontSize: '1.1rem' }}>{isHindi ? '🇮🇳' : '🇬🇧'}</span>
-              <span
-                style={{
-                  fontSize: '0.7rem',
-                  fontWeight: 700,
-                  padding: '2px 6px',
-                  borderRadius: '4px',
-                  background: isHindi ? '#fef3c7' : '#eff6ff',
-                  color: isHindi ? '#b45309' : '#1d4ed8'
-                }}
-              >
-                {t.language === 'english' ? 'English' : t.language === 'hindi_mangal' ? 'Mangal' : 'Kruti Dev'}
-              </span>
-              <span
-                style={{
-                  fontSize: '0.7rem',
-                  fontWeight: 700,
-                  padding: '2px 6px',
-                  borderRadius: '4px',
-                  background: isHard ? '#fee2e2' : '#f0fdf4',
-                  color: isHard ? '#b91c1c' : '#15803d'
-                }}
-                title={isHard ? 'Hard: Predominance of longer words (8–16+ letters, AWL ≥ 7.0)' : 'Medium: Balanced editorial prose'}
-              >
-                {isHard ? 'HARD • Long Words' : 'MEDIUM'}
-              </span>
-            </div>
-
-            <span style={{ fontSize: '0.72rem', color: '#64748b', fontWeight: 600 }}>
-              ⏱️ 15:00
-            </span>
-          </div>
-
-          {/* Title */}
-          <h4
-            style={{
-              margin: '0 0 6px 0',
-              fontSize: '0.92rem',
-              fontWeight: 700,
-              color: '#1e293b',
-              lineHeight: 1.3
-            }}
-          >
-            {t.title}
-          </h4>
-
-          <div style={{ fontSize: '0.75rem', color: '#64748b', marginBottom: '10px' }}>
-            {t.wordCount} words • Official UP Police Benchmarks
-          </div>
-        </div>
-
-        {/* Footer & Action */}
-        <div
-          style={{
-            borderTop: '1px solid #f1f5f9',
-            paddingTop: '10px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            gap: '8px'
-          }}
-        >
-          {attempt ? (
-            <div style={{ fontSize: '0.75rem', fontWeight: 700, color: attempt.isQualified ? '#15803d' : '#b45309' }}>
-              {attempt.isQualified ? '✅ Qualified' : 'Completed'}: {attempt.bestSpeed} WPM ({attempt.bestAcc}%)
-            </div>
-          ) : (
-            <span style={{ fontSize: '0.75rem', color: '#94a3b8', fontWeight: 600 }}>
-              ⏳ Not Attempted
-            </span>
-          )}
-
-          <button
-            onClick={() => onStartTest(t, selectedExamProfile ? selectedExamProfile.durationMinutes : 15, selectedExamProfile)}
-            style={{
-              background: attempt ? '#f1f5f9' : '#166534',
-              color: attempt ? '#334155' : '#ffffff',
-              border: attempt ? '1px solid #cbd5e1' : 'none',
-              padding: '6px 12px',
-              borderRadius: '6px',
-              fontSize: '0.78rem',
-              fontWeight: 700,
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '4px',
-              whiteSpace: 'nowrap'
-            }}
-          >
-            <span>▶</span>
-            <span>{attempt ? 'Retake 15-Min' : 'Start Test'}</span>
-          </button>
-        </div>
-      </div>
+        pastAttempt={attempt}
+        onStartMock={() => onStartTest(t, selectedExamProfile?.durationMinutes || 15, selectedExamProfile)}
+        onBrowse={() => onStartTest(t, selectedExamProfile?.durationMinutes || 15, selectedExamProfile)}
+        startBtnText={attempt ? `Retest (${selectedExamProfile?.durationMinutes || 15}m)` : `Start Mock (${selectedExamProfile?.durationMinutes || 15}m)`}
+        browseBtnText="Start Test"
+      />
     );
   };
 
@@ -1518,53 +1809,111 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
                 )}
               </div>
 
-              {/* Language Medium Filter */}
-              <div style={{ display: 'flex', gap: '6px', alignItems: 'center', flexWrap: 'wrap' }}>
-                <span style={{ fontSize: '0.8rem', color: '#64748b', fontWeight: 600 }}>Medium:</span>
-                {(['all', 'english', 'hindi'] as const).map((lang) => (
+              {/* Language Medium & View Mode Controls */}
+              <div style={{ display: 'flex', gap: '10px', alignItems: 'center', flexWrap: 'wrap' }}>
+                {/* View Switcher */}
+                <div style={{ display: 'flex', background: '#f1f5f9', borderRadius: '8px', padding: '3px', border: '1px solid #e2e8f0' }}>
                   <button
-                    key={lang}
-                    onClick={() => setSelectedExamLanguageFilter(lang)}
+                    onClick={() => setLevel1ViewMode('posts')}
                     style={{
-                      background: selectedExamLanguageFilter === lang ? '#0f172a' : '#ffffff',
-                      color: selectedExamLanguageFilter === lang ? '#ffffff' : '#475569',
-                      border: '1px solid #cbd5e1',
                       padding: '5px 12px',
+                      border: 'none',
                       borderRadius: '6px',
                       fontSize: '0.78rem',
-                      fontWeight: 600,
-                      cursor: 'pointer'
+                      fontWeight: 700,
+                      cursor: 'pointer',
+                      background: level1ViewMode === 'posts' ? '#0f172a' : 'transparent',
+                      color: level1ViewMode === 'posts' ? '#ffffff' : '#64748b',
+                      transition: 'all 0.15s ease'
                     }}
                   >
-                    {lang === 'all' ? 'All' : lang === 'english' ? 'English' : 'Hindi'}
+                    📋 Exam Posts ({filteredUnifiedPosts.length})
                   </button>
-                ))}
-                <span style={{ fontSize: '0.8rem', color: '#64748b', fontWeight: 600, marginLeft: '6px' }}>
-                  ({filteredUnifiedPosts.length} matching posts)
-                </span>
+                  <button
+                    onClick={() => setLevel1ViewMode('individual')}
+                    style={{
+                      padding: '5px 12px',
+                      border: 'none',
+                      borderRadius: '6px',
+                      fontSize: '0.78rem',
+                      fontWeight: 700,
+                      cursor: 'pointer',
+                      background: level1ViewMode === 'individual' ? '#0f172a' : 'transparent',
+                      color: level1ViewMode === 'individual' ? '#ffffff' : '#64748b',
+                      transition: 'all 0.15s ease'
+                    }}
+                  >
+                    🗂️ All 129 Individual Cards ({filteredAllExams.length})
+                  </button>
+                </div>
+
+                {/* Medium Filter */}
+                <div style={{ display: 'flex', gap: '6px', alignItems: 'center', flexWrap: 'wrap' }}>
+                  <span style={{ fontSize: '0.8rem', color: '#64748b', fontWeight: 600 }}>Medium:</span>
+                  {(['all', 'english', 'hindi'] as const).map((lang) => (
+                    <button
+                      key={lang}
+                      onClick={() => setSelectedExamLanguageFilter(lang)}
+                      style={{
+                        background: selectedExamLanguageFilter === lang ? '#0f172a' : '#ffffff',
+                        color: selectedExamLanguageFilter === lang ? '#ffffff' : '#475569',
+                        border: '1px solid #cbd5e1',
+                        padding: '5px 12px',
+                        borderRadius: '6px',
+                        fontSize: '0.78rem',
+                        fontWeight: 600,
+                        cursor: 'pointer'
+                      }}
+                    >
+                      {lang === 'all' ? 'All' : lang === 'english' ? 'English' : 'Hindi'}
+                    </button>
+                  ))}
+                </div>
               </div>
             </div>
 
-            {/* Unified Exam Posts Grid */}
+            {/* Grid Rendering: Either Exam Posts or All 129 Individual Exam Tests */}
             <div style={{
               display: 'grid',
               gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))',
               gap: '16px',
               marginBottom: '24px'
             }}>
-              {filteredUnifiedPosts.slice(0, visibleExamsCount).map((post) => (
-                <ExamTypePostCard
-                  key={post.id}
-                  post={post}
-                  onEnterExam={handleEnterExam}
-                  onQuickMode={handleQuickMode}
-                  getEmblemForGroup={getEmblemForGroup}
-                />
-              ))}
+              {level1ViewMode === 'posts' ? (
+                filteredUnifiedPosts.slice(0, visibleExamsCount).map((post) => (
+                  <ExamTypePostCard
+                    key={post.id}
+                    post={post}
+                    onEnterExam={handleEnterExam}
+                    onQuickMode={handleQuickMode}
+                    onQuickStart={handleQuickStartPost}
+                    getEmblemForGroup={getEmblemForGroup}
+                  />
+                ))
+              ) : (
+                filteredAllExams.slice(0, visibleExamsCount).map((exam) => (
+                  <ExamBenchmarkTestCard
+                    key={exam.id}
+                    emblem={getEmblemForGroup(exam.categoryGroup)}
+                    categoryOrOrg={CATEGORY_GROUPS.find((g) => g.id === exam.categoryGroup)?.title || 'Exam'}
+                    language={exam.language}
+                    title={exam.title}
+                    targetSpeed={exam.targetSpeed}
+                    durationMinutes={exam.durationMinutes}
+                    minAccuracy={exam.minAccuracy}
+                    limitCount={exam.inputLimit}
+                    limitType={exam.inputType === 'character' ? 'Chars' : 'Words'}
+                    onStartMock={() => handleQuickStartExam(exam)}
+                    onBrowse={() => handleBrowseExamPassages(exam)}
+                    startBtnText={`Start Mock (${exam.durationMinutes}m)`}
+                    browseBtnText="Browse"
+                  />
+                ))
+              )}
             </div>
 
             {/* Load More Button */}
-            {visibleExamsCount < filteredUnifiedPosts.length && (
+            {visibleExamsCount < (level1ViewMode === 'posts' ? filteredUnifiedPosts.length : filteredAllExams.length) && (
               <div style={{ textAlign: 'center', marginBottom: '32px' }}>
                 <button
                   onClick={() => setVisibleExamsCount((prev) => prev + 24)}
@@ -1576,7 +1925,7 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
                     borderRadius: '8px'
                   }}
                 >
-                  Load More Exam Posts ({filteredUnifiedPosts.length - visibleExamsCount} remaining) ↓
+                  Load More ({ (level1ViewMode === 'posts' ? filteredUnifiedPosts.length : filteredAllExams.length) - visibleExamsCount } remaining) ↓
                 </button>
               </div>
             )}
@@ -2505,114 +2854,33 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
                   <div className="exam-grid">
                     {filteredLevel3Passages.slice(0, visibleCount).map((passage) => {
                       const past = pastAttemptsMap.get(passage.id) || pastAttemptsMap.get(passage.title);
+                      const cardSpeed = selectedExamProfile?.targetSpeed || (passage.language === 'english' ? (engVariant?.targetSpeed || 30) : (mangalVariant?.targetSpeed || 25));
+                      const cardAcc = selectedExamProfile?.minAccuracy || (activePost.variants[0]?.minAccuracy || 85);
+                      const cardLimit = selectedExamProfile?.inputType === 'character' ? selectedExamProfile.inputLimit : passage.wordCount;
+                      const cardLimitType = selectedExamProfile?.inputType === 'character' ? 'Chars' : 'Words';
+                      const cardCategory = selectedExamProfile
+                        ? (CATEGORY_GROUPS.find((g) => g.id === selectedExamProfile.categoryGroup)?.title || activePost.organization)
+                        : activePost.organization;
+                      const cardEmblem = getEmblemForGroup(selectedExamProfile?.categoryGroup || activePost.categoryGroup);
 
                       return (
-                        <div
+                        <ExamBenchmarkTestCard
                           key={passage.id}
-                          className="exam-test-card"
-                          onClick={() => onStartTest(passage, selectedDuration, selectedExamProfile)}
-                          style={{ cursor: 'pointer' }}
-                        >
-                          <div>
-                            {/* Badges Row */}
-                            <div className="exam-card-badges">
-                              <span
-                                className={`exam-tag ${
-                                  passage.category === 'up_police_asi' ? 'exam-tag-asi' : 'exam-tag-co'
-                                }`}
-                              >
-                                {passage.category === 'up_police_asi' ? 'UP Police ASI' : 'UP Police CO'}
-                              </span>
-
-                              <span
-                                className={`exam-tag ${
-                                  passage.language === 'english' ? 'exam-tag-lang-en' : 'exam-tag-lang-hi'
-                                }`}
-                              >
-                                {passage.language === 'english'
-                                  ? 'English'
-                                  : passage.language === 'hindi_mangal'
-                                  ? 'मंगल'
-                                  : 'कुर्ती देव'}
-                              </span>
-
-                              <span
-                                className={`exam-tag ${
-                                  passage.difficulty === 'easy'
-                                    ? 'exam-tag-diff-easy'
-                                    : passage.difficulty === 'hard'
-                                    ? 'exam-tag-diff-hard'
-                                    : 'exam-tag-diff-medium'
-                                }`}
-                              >
-                                {passage.difficulty.toUpperCase()}
-                              </span>
-                            </div>
-
-                            {/* Title */}
-                            <h3 className="exam-card-title" title={passage.title}>
-                              {passage.title}
-                            </h3>
-
-                            {/* Date */}
-                            <div className="exam-card-date">
-                              📅 {toDisplayDate(passage.date || '2026-10-26')} • UPPRPB Pattern Passage
-                            </div>
-
-                            {/* Stats */}
-                            <div className="exam-card-stats">
-                              <div className="exam-card-stat">
-                                <div className="exam-card-stat-label">Duration</div>
-                                <div className="exam-card-stat-val">{selectedDuration}:00m</div>
-                              </div>
-                              <div className="exam-card-stat">
-                                <div className="exam-card-stat-label">Words</div>
-                                <div className="exam-card-stat-val">{passage.wordCount}</div>
-                              </div>
-                              <div className="exam-card-stat">
-                                <div className="exam-card-stat-label">Target Acc</div>
-                                <div className="exam-card-stat-val">85%</div>
-                              </div>
-                            </div>
-
-                            {/* Past Candidate Score */}
-                            {past ? (
-                              <div
-                                className={`exam-card-past-score ${
-                                  past.isQualified ? 'exam-score-passed' : 'exam-score-failed'
-                                }`}
-                              >
-                                <span>
-                                  ✓ {past.isQualified ? 'Qualified' : 'Attempted'} • Best: {past.bestSpeed} WPM ({past.bestAcc}%)
-                                </span>
-                                <span style={{ fontSize: '0.68rem', opacity: 0.8 }}>
-                                  {past.count} {past.count === 1 ? 'try' : 'tries'}
-                                </span>
-                              </div>
-                            ) : (
-                              <div className="exam-card-past-score exam-score-not-attempted">
-                                <span>○ Not yet attempted</span>
-                                <span style={{ fontSize: '0.68rem' }}>Ready to test</span>
-                              </div>
-                            )}
-                          </div>
-
-                          {/* Footer & Start Button */}
-                          <div className="exam-card-footer">
-                            <div className="exam-card-attempts" style={{ color: '#0284c7', fontWeight: 700 }}>
-                              <span>🆔</span> Test #{passage.id.replace('ar-', '')} • {passage.wordCount}w
-                            </div>
-                            <button
-                              className="exam-start-btn"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                onStartTest(passage, selectedDuration, selectedExamProfile);
-                              }}
-                            >
-                              {past ? 'Retest ↺' : 'Start Test →'}
-                            </button>
-                          </div>
-                        </div>
+                          emblem={cardEmblem}
+                          categoryOrOrg={cardCategory}
+                          language={passage.language}
+                          title={passage.title}
+                          targetSpeed={cardSpeed}
+                          durationMinutes={selectedDuration}
+                          minAccuracy={cardAcc}
+                          limitCount={cardLimit}
+                          limitType={cardLimitType}
+                          pastAttempt={past}
+                          onStartMock={() => onStartTest(passage, selectedDuration, selectedExamProfile)}
+                          onBrowse={() => onStartTest(passage, selectedDuration, selectedExamProfile)}
+                          startBtnText={past ? `Retest (${selectedDuration}m)` : `Start Mock (${selectedDuration}m)`}
+                          browseBtnText="Start Test"
+                        />
                       );
                     })}
                   </div>
