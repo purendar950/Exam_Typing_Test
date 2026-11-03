@@ -1,6 +1,6 @@
 import React from 'react';
 import { TestSettings } from '../types';
-import { UserProfile } from '../services/firebase';
+import { UserProfile, isUserAdmin } from '../services/firebase';
 import appLogo from '../assets/logo.png';
 
 interface HeaderProps {
@@ -76,37 +76,11 @@ export const Header: React.FC<HeaderProps> = ({
               )}
             </button>
 
-            {onOpenAiGenerator && (
-              <button
-                className="nav-btn ai-generator-btn"
-                onClick={onOpenAiGenerator}
-                title="AI Live Test Generator & Settings (AR Typing Standard)"
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '5px',
-                  background: 'linear-gradient(135deg, #0284c7 0%, #0369a1 100%)',
-                  color: '#ffffff',
-                  fontWeight: 700,
-                  borderRadius: '20px',
-                  padding: '5px 12px',
-                  fontSize: '0.78rem',
-                  border: 'none',
-                  boxShadow: '0 2px 4px rgba(2, 132, 199, 0.3)',
-                  cursor: 'pointer',
-                  whiteSpace: 'nowrap'
-                }}
-              >
-                <span>⚡</span>
-                <span>AI Live Tests</span>
-              </button>
-            )}
-
-            {onOpenAdmin && (
+            {currentUser && isUserAdmin(currentUser) && onOpenAdmin && (
               <button
                 className="nav-btn admin-portal-btn"
                 onClick={onOpenAdmin}
-                title="Fintech Administrative Control Suite (AI & System Management)"
+                title="Administrative Control Suite"
                 style={{
                   display: 'flex',
                   alignItems: 'center',
@@ -117,13 +91,14 @@ export const Header: React.FC<HeaderProps> = ({
                   borderRadius: '20px',
                   padding: '5px 12px',
                   fontSize: '0.78rem',
-                  border: '1px solid #334155',
+                  border: '1.5px solid #38bdf8',
+                  boxShadow: '0 2px 6px rgba(56, 189, 248, 0.25)',
                   cursor: 'pointer',
                   whiteSpace: 'nowrap'
                 }}
               >
                 <span>🛡️</span>
-                <span>Admin</span>
+                <span>Admin Suite</span>
               </button>
             )}
 
@@ -131,14 +106,14 @@ export const Header: React.FC<HeaderProps> = ({
               <button
                 className="nav-btn candidate-profile-btn"
                 onClick={onOpenDashboard}
-                title={`Candidate: ${currentUser.displayName} (${currentUser.rollNumber}) • View Stats & Examination Dossier`}
+                title={`User: ${currentUser.displayName} (${currentUser.rollNumber}) • View Stats & Examination Dossier`}
                 style={{
                   display: 'flex',
                   alignItems: 'center',
                   gap: '6px',
-                  background: '#f0fdf4',
-                  border: '1px solid #86efac',
-                  color: '#166534',
+                  background: isUserAdmin(currentUser) ? '#f0fdfa' : '#f0fdf4',
+                  border: isUserAdmin(currentUser) ? '1px solid #5eead4' : '1px solid #86efac',
+                  color: isUserAdmin(currentUser) ? '#0f766e' : '#166534',
                   fontWeight: 600,
                   borderRadius: '20px',
                   padding: '4px 10px',
@@ -153,7 +128,7 @@ export const Header: React.FC<HeaderProps> = ({
                     style={{ width: '22px', height: '22px', borderRadius: '50%', objectFit: 'cover' }}
                   />
                 ) : (
-                  <span style={{ fontSize: '0.95rem' }}>👤</span>
+                  <span style={{ fontSize: '0.95rem' }}>{isUserAdmin(currentUser) ? '🛡️' : '👤'}</span>
                 )}
                 <span style={{ maxWidth: '85px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                   {currentUser.displayName}
@@ -161,37 +136,39 @@ export const Header: React.FC<HeaderProps> = ({
                 <span
                   style={{
                     fontSize: '0.68rem',
-                    background: '#dcfce7',
-                    color: '#15803d',
+                    background: isUserAdmin(currentUser) ? '#ccfbf1' : '#dcfce7',
+                    color: isUserAdmin(currentUser) ? '#115e59' : '#15803d',
                     padding: '1px 6px',
                     borderRadius: '8px',
                     fontWeight: 700
                   }}
                 >
-                  {currentUser.rollNumber}
+                  {isUserAdmin(currentUser) ? 'ADMIN' : currentUser.rollNumber}
                 </span>
               </button>
             ) : (
               <button
                 className="nav-btn"
                 onClick={onOpenAuth}
-                title="Candidate Login & Registration (अभ्यर्थी लॉगिन)"
+                title="Login / Sign In (लॉगिन)"
                 style={{
                   display: 'flex',
                   alignItems: 'center',
                   gap: '6px',
-                  background: '#eff6ff',
-                  border: '1px solid #bfdbfe',
-                  color: '#1d4ed8',
-                  fontWeight: 600,
+                  background: '#0284c7',
+                  border: 'none',
+                  color: '#ffffff',
+                  fontWeight: 700,
                   borderRadius: '8px',
-                  padding: '5px 12px',
+                  padding: '6px 14px',
                   fontSize: '0.82rem',
+                  boxShadow: '0 2px 6px rgba(2, 132, 199, 0.35)',
+                  cursor: 'pointer',
                   whiteSpace: 'nowrap'
                 }}
               >
                 <span style={{ fontSize: '0.95rem' }}>🔑</span>
-                <span>Candidate Login</span>
+                <span>Login</span>
               </button>
             )}
           </div>
@@ -231,18 +208,6 @@ export const Header: React.FC<HeaderProps> = ({
             Learn & Drills
           </button>
 
-          {onOpenAiGenerator && (
-            <button
-              className="nav-btn"
-              onClick={onOpenAiGenerator}
-              title="Daily Live AI Tests (AR Typing Medium & Hard Benchmark)"
-              style={{ color: '#0284c7', fontWeight: 700 }}
-            >
-              <span style={{ fontSize: '0.95rem', marginRight: '4px' }}>⚡</span>
-              AI Live Tests
-            </button>
-          )}
-
           <button
             className="nav-btn"
             onClick={onOpenHindiHelper}
@@ -266,18 +231,6 @@ export const Header: React.FC<HeaderProps> = ({
             </svg>
             History
           </button>
-
-          {onOpenAdmin && (
-            <button
-              className="nav-btn"
-              onClick={onOpenAdmin}
-              title="Enterprise Admin Management Suite"
-              style={{ color: '#0284c7', fontWeight: 700 }}
-            >
-              <span style={{ fontSize: '0.95rem', marginRight: '4px' }}>🛡️</span>
-              Admin
-            </button>
-          )}
         </nav>
       </div>
     </header>
