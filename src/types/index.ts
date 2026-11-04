@@ -75,7 +75,14 @@ export interface EvaluationResult {
   skippedWords: number;
   grossWpm: number;
   netWpm: number;
-  accuracy: number;
+  accuracy: number; // Official UPPRPB Passage Accuracy (Net Correct Words / Total Passage Words)
+  typedAccuracy: number; // Raw Typed Words Accuracy (Net Correct Words / Total Attempted Words)
+  completionRate: number; // Percentage of the passage typed
+  equivalentErrors: number; // Full Mistakes + (0.5 * Half Mistakes)
+  allowedErrors: number; // 5% Permissible Error Margin (Eduquity pattern)
+  excessMistakes: number; // Mistakes beyond 5% allowance
+  penaltyWords: number; // Excess Mistakes * 10 penalty words
+  eduquityNetWpm: number; // Net WPM calculated under Eduquity model
   fullMistakes: number;
   halfMistakes: number;
   errorPercentage: number;
