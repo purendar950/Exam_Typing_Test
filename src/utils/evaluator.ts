@@ -348,35 +348,60 @@ export function evaluateTypingTest(input: EvaluateInput): EvaluationResult {
     diffParts.push(`<span class="diff-skipped">${word}</span>`);
   });
 
-  // TestMentor SSC / UP Police Official Calculation Formulas:
-  // Total Equivalent Errors = Full Mistakes + (0.5 * Half Mistakes)
-  const equivalentErrors = fullMistakes + (halfMistakes * 0.5);
+  // Official UPPRPB & National Exam Calculation Engine:
+  // 1. Total Equivalent Errors = Full Mistakes + (0.5 * Half Mistakes)
+  const equivalentErrors = Math.round((fullMistakes + (halfMistakes * 0.5)) * 10) / 10;
 
-  // Gross Speed (WPM): Standard 5 keystrokes = 1 word
+  // 2. Gross Speed (WPM): Standard 5 keystrokes = 1 word
   const grossWpm = Math.round((totalKeystrokes / 5 / timeTakenMinutes) * 10) / 10;
 
-  // Net Speed (WPM): Gross WPM minus error penalty per minute
-  const penaltyWpm = equivalentErrors / timeTakenMinutes;
+  // 3. UPPRPB Board Direct Net Speed (WPM): Gross WPM minus error points per minute
+  const penaltyWpm = Math.round((equivalentErrors / timeTakenMinutes) * 10) / 10;
   const netWpm = Math.max(0, Math.round((grossWpm - penaltyWpm) * 10) / 10);
 
-  // Total attempted words by candidate
-  const totalEvaluatedWords = Math.max(1, correctWords + fullMistakes + halfMistakes);
+  // 4. Eduquity 5% Error Allowance Pattern (EzTyping Model):
+  // 5% permissible mistake margin on total standard words typed
+  const totalStandardWords = Math.round((totalKeystrokes / 5) * 10) / 10;
+  const allowedErrors = Math.round(totalStandardWords * 0.05 * 10) / 10;
+  const excessMistakes = Math.max(0, Math.round((equivalentErrors - allowedErrors) * 10) / 10);
+  const penaltyWords = Math.round(excessMistakes * 10 * 10) / 10; // 10 words penalty per excess mistake
+  const eduquityNetWpm = Math.max(0, Math.round(((totalStandardWords - penaltyWords) / timeTakenMinutes) * 10) / 10);
 
-  // Accuracy Percentage: 100 * (1 - Equivalent Errors / Total Evaluated Words)
+  // 5. Official Exam Passage-Based Accuracy (The UPPRPB 85% Standard):
+  // Accuracy is measured against the TOTAL WORDS IN THE GIVEN PASSAGE
+  // Formula: [ (Total Typed Words - Total Errors) / Total Passage Words ] * 100
+  const totalPassageWords = Math.max(originalWords.length, 1);
+  const passageBenchmarkDenominator = Math.max(totalPassageWords, typedWords.length);
+  const netCorrectWords = Math.max(0, typedWords.length - equivalentErrors);
   const accuracy = Math.max(
+    0,
+    Math.min(100, Math.round((netCorrectWords / passageBenchmarkDenominator) * 1000) / 10)
+  );
+
+  // 6. Raw Typing Precision (Evaluated only on words attempted by candidate):
+  const totalEvaluatedWords = Math.max(1, correctWords + fullMistakes + halfMistakes);
+  const typedAccuracy = Math.max(
     0,
     Math.min(100, Math.round(((totalEvaluatedWords - equivalentErrors) / totalEvaluatedWords) * 1000) / 10)
   );
 
-  // Error Percentage: (Equivalent Errors / Total Evaluated Words) * 100
-  const errorPercentage = Math.round((equivalentErrors / totalEvaluatedWords) * 1000) / 10;
+  // 7. Passage Completion Rate %:
+  const completionRate = Math.min(
+    100,
+    Math.round((typedWords.length / totalPassageWords) * 1000) / 10
+  );
+
+  // 8. Error Percentage: (Equivalent Errors / Passage Words) * 100
+  const errorPercentage = Math.round((equivalentErrors / passageBenchmarkDenominator) * 1000) / 10;
 
   // Official Qualifying Cutoffs:
-  // If exam-specific cutoff provided, use it. Otherwise fallback to UP Police standard (25 Hindi / 30 English, 85%)
+  // UP Police Standard: 25 Hindi / 30 English, 85.0% official passage accuracy
   const defaultRequiredSpeed = input.language.startsWith('hindi') ? 25 : 30;
   const requiredSpeed = input.targetSpeed && input.targetSpeed > 0 ? input.targetSpeed : defaultRequiredSpeed;
   const requiredAccuracy = input.requiredAccuracy && input.requiredAccuracy > 0 ? input.requiredAccuracy : 85.0;
 
+  // Official Qualification Verdict:
+  // Must fulfill BOTH the Net WPM benchmark AND the 85.0% Passage Accuracy threshold
   const isQualified = netWpm >= requiredSpeed && accuracy >= requiredAccuracy;
 
   const examTitle = input.examProfileTitle || (input.category === 'up_police_asi' ? 'UP Police ASI' : 'UP Police Computer Operator');
@@ -399,6 +424,13 @@ export function evaluateTypingTest(input: EvaluateInput): EvaluationResult {
     grossWpm,
     netWpm,
     accuracy,
+    typedAccuracy,
+    completionRate,
+    equivalentErrors,
+    allowedErrors,
+    excessMistakes,
+    penaltyWords,
+    eduquityNetWpm,
     fullMistakes,
     halfMistakes,
     errorPercentage,
