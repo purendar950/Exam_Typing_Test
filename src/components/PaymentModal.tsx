@@ -827,6 +827,41 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
                       <div style={{ fontSize: '0.72rem', color: '#64748b', textAlign: 'center', marginTop: '2px' }}>
                         🔒 100% Secure • Admin manually approves and activates plan within 15–30 minutes
                       </div>
+
+                      <div
+                        style={{
+                          background: '#f0f9ff',
+                          border: '1px solid #bae6fd',
+                          borderRadius: '8px',
+                          padding: '8px 12px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'space-between',
+                          gap: '8px',
+                          marginTop: '4px'
+                        }}
+                      >
+                        <div style={{ fontSize: '0.74rem', color: '#0369a1', lineHeight: 1.25 }}>
+                          💬 Need instant payment activation or facing UPI issues?
+                        </div>
+                        <a
+                          href="https://t.me/purendar950"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          style={{
+                            fontSize: '0.74rem',
+                            fontWeight: 800,
+                            color: '#0284c7',
+                            textDecoration: 'none',
+                            whiteSpace: 'nowrap',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '4px'
+                          }}
+                        >
+                          Telegram Support ↗
+                        </a>
+                      </div>
                     </form>
                   </div>
                 </div>
