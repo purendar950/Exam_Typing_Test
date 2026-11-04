@@ -14,6 +14,7 @@ interface StartTestProps {
   onFinishTest: (result: EvaluationResult) => void;
   onCancelTest: () => void;
   activeExamProfile?: ExamProfile | null;
+  onOpenRules?: (examId?: string, categoryGroup?: string) => void;
 }
 
 export const StartTest: React.FC<StartTestProps> = ({
@@ -23,7 +24,8 @@ export const StartTest: React.FC<StartTestProps> = ({
   onUpdateSettings,
   onFinishTest,
   onCancelTest,
-  activeExamProfile
+  activeExamProfile,
+  onOpenRules
 }) => {
   const totalSeconds = durationMinutes * 60;
   const [secondsRemaining, setSecondsRemaining] = useState<number>(totalSeconds);
@@ -496,6 +498,30 @@ export const StartTest: React.FC<StartTestProps> = ({
              activeExamProfile?.calculationModel === 'mp_cpct' ? 'Net Speed (Correct Words / Time)' :
              'Official Board Standard'}
           </span>
+          {onOpenRules && (
+            <button
+              type="button"
+              onClick={() => onOpenRules(activeExamProfile?.id, activeExamProfile?.categoryGroup)}
+              style={{
+                marginLeft: '4px',
+                padding: '2px 8px',
+                fontSize: '0.72rem',
+                fontWeight: 700,
+                background: '#0284c7',
+                color: '#ffffff',
+                border: 'none',
+                borderRadius: '4px',
+                cursor: 'pointer',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '3px'
+              }}
+              title="View full official exam guidelines, speed rules, and formula"
+            >
+              <span>📋</span>
+              <span>Instructions</span>
+            </button>
+          )}
         </div>
       </div>
 
