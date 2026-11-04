@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { OFFICIAL_EXAM_RULES, OfficialExamRule, getOfficialRuleForExam } from '../data/officialExamRules';
+import { ExamLogo } from '../utils/examLogos';
 
 interface RulesModalProps {
   isOpen: boolean;
@@ -251,7 +252,10 @@ export const RulesModal: React.FC<RulesModalProps> = ({
                         }}
                       >
                         <td style={{ padding: '8px 10px', fontWeight: 700, color: '#0f172a' }}>
-                          {rule.postTitle}
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            <ExamLogo identifier={rule.id} categoryGroup={rule.categoryGroup} size={24} />
+                            <span>{rule.postTitle}</span>
+                          </div>
                         </td>
                         <td style={{ padding: '8px 10px', color: '#475569' }}>
                           {rule.organization}
@@ -337,17 +341,20 @@ export const RulesModal: React.FC<RulesModalProps> = ({
                   marginBottom: '16px'
                 }}
               >
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '8px' }}>
-                  <div>
-                    <span style={{ fontSize: '0.72rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em', color: '#0369a1', background: '#bae6fd', padding: '2px 8px', borderRadius: '4px' }}>
-                      {activeRule.organization}
-                    </span>
-                    <h3 style={{ margin: '6px 0 2px 0', fontSize: '1.18rem', fontWeight: 800, color: '#0c4a6e' }}>
-                      {activeRule.postTitle}
-                    </h3>
-                    <p style={{ margin: 0, fontSize: '0.78rem', color: '#0369a1', fontWeight: 600 }}>
-                      📋 Official Reference: {activeRule.notificationRef}
-                    </p>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    <ExamLogo identifier={activeRule.id} categoryGroup={activeRule.categoryGroup} size={48} />
+                    <div>
+                      <span style={{ fontSize: '0.72rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em', color: '#0369a1', background: '#bae6fd', padding: '2px 8px', borderRadius: '4px' }}>
+                        {activeRule.organization}
+                      </span>
+                      <h3 style={{ margin: '4px 0 2px 0', fontSize: '1.18rem', fontWeight: 800, color: '#0c4a6e' }}>
+                        {activeRule.postTitle}
+                      </h3>
+                      <p style={{ margin: 0, fontSize: '0.78rem', color: '#0369a1', fontWeight: 600 }}>
+                        📋 Official Reference: {activeRule.notificationRef}
+                      </p>
+                    </div>
                   </div>
 
                   <div style={{ display: 'flex', gap: '8px' }}>

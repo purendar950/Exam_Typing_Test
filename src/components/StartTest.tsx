@@ -5,6 +5,7 @@ import { audioEngine } from '../utils/audioEngine';
 import { evaluateTypingTest } from '../utils/evaluator';
 import { HindiHelperModal } from './HindiHelperModal';
 import { HindiKeyboardLayout } from './HindiKeyboardLayout';
+import { ExamLogo } from '../utils/examLogos';
 
 interface StartTestProps {
   passage: Passage;
@@ -473,8 +474,9 @@ export const StartTest: React.FC<StartTestProps> = ({
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+          <ExamLogo identifier={activeExamProfile?.id || passage.category || ''} categoryGroup={activeExamProfile?.categoryGroup} size={26} />
           <span style={{ fontWeight: 800, color: '#1e293b' }}>
-            🏛️ {activeExamProfile?.title || passage.title}
+            {activeExamProfile?.title || passage.title}
           </span>
           <span style={{ background: '#e0f2fe', color: '#0369a1', padding: '1px 8px', borderRadius: '4px', fontWeight: 700 }}>
             🎯 Target: {activeExamProfile?.targetSpeed || (passage.language.startsWith('hindi') ? 25 : 30)} WPM
