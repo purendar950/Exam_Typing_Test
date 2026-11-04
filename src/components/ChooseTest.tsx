@@ -50,9 +50,7 @@ interface ExamMode {
   durationFilter?: number;
 }
 
-// Component for an Exam Type Card (shows inside tests: English, Hindi, Live, Drills)
-// Reusable Benchmark Test Card (Exact TestMentor / Photo Design Replica)
-// Reusable Benchmark Test Card (Exact TestMentor / Photo Design Replica)
+// Reusable Benchmark Test Card (Examination Grade Card Component)
 interface ExamBenchmarkTestCardProps {
   emblem: string;
   logoIdentifier?: string;
@@ -131,7 +129,7 @@ const ExamBenchmarkTestCard: React.FC<ExamBenchmarkTestCardProps> = ({
 
   return (
     <div
-      className="testmentor-exam-card exam-card-hover benchmark-test-card"
+      className="examportal-exam-card exam-card-hover benchmark-test-card"
       onClick={handleCardClick}
       style={{
         background: isLocked ? '#fffdfa' : '#ffffff',
@@ -526,7 +524,7 @@ const ExamTypePostCard: React.FC<{
 
   return (
     <div
-      className="testmentor-exam-card exam-card-hover benchmark-test-card"
+      className="examportal-exam-card exam-card-hover benchmark-test-card"
       onClick={() => onEnterExam(post)}
       style={{
         background: '#ffffff',
@@ -1354,7 +1352,7 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
   const activeMangalCount = useMemo(() => activePostPassages.filter((p) => p.language === 'hindi_mangal').length, [activePostPassages]);
   const activeKrutiCount = useMemo(() => activePostPassages.filter((p) => p.language === 'hindi_kruti').length, [activePostPassages]);
 
-  // Exam Courses (Matching TestMentor Screenshot with Actual Data)
+  // Exam Courses (Curated Examination Catalog with Official Benchmarks)
   const EXAM_COURSES: ExamCourse[] = useMemo(
     () => [
       {
@@ -1821,10 +1819,10 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
       <div className="container">
 
         {/* ========================================================
-            TOP BRAND & STATS BAR (TestMentor Style Replica)
+            TOP BRAND & STATS BAR
             ======================================================== */}
-        <div className="testmentor-trust-bar">
-          <div className="testmentor-brand-info">
+        <div className="examportal-trust-bar">
+          <div className="examportal-brand-info">
             <img
               src={appLogo}
               alt="Exam Typing"
@@ -1839,41 +1837,41 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
               }}
             />
             <div>
-              <div className="testmentor-brand-title">Exam Typing</div>
-              <div className="testmentor-brand-sub">
+              <div className="examportal-brand-title">Exam Typing</div>
+              <div className="examportal-brand-sub">
                 Typing Practice for Competitive Exams • UP Police & Government Aspirants
               </div>
             </div>
           </div>
 
-          <div className="testmentor-metrics-row">
-            <div className="testmentor-metric-pill">
+          <div className="examportal-metrics-row">
+            <div className="examportal-metric-pill">
               <span style={{ fontSize: '1.2rem' }}>📚</span>
               <div>
-                <div className="testmentor-metric-val">{passages.length} Official Tests</div>
-                <div className="testmentor-metric-lbl">Passage Bank Available</div>
+                <div className="examportal-metric-val">{passages.length} Official Tests</div>
+                <div className="examportal-metric-lbl">Passage Bank Available</div>
               </div>
             </div>
 
-            <div className="testmentor-metric-pill">
+            <div className="examportal-metric-pill">
               <span style={{ fontSize: '1.2rem' }}>🎯</span>
               <div>
-                <div className="testmentor-metric-val">
+                <div className="examportal-metric-val">
                   {kpiStats.totalAttempted > 0 ? `${kpiStats.totalAttempted} Attempted` : '85% Accuracy'}
                 </div>
-                <div className="testmentor-metric-lbl">
+                <div className="examportal-metric-lbl">
                   {kpiStats.totalAttempted > 0 ? `${kpiStats.passedTestsCount} Tests Passed` : 'UPPRPB Benchmark'}
                 </div>
               </div>
             </div>
 
-            <div className="testmentor-metric-pill">
+            <div className="examportal-metric-pill">
               <span style={{ fontSize: '1.2rem' }}>⚡</span>
               <div>
-                <div className="testmentor-metric-val">
+                <div className="examportal-metric-val">
                   {kpiStats.bestSpeed > 0 ? `${kpiStats.bestSpeed} WPM Best` : '25 / 30 WPM'}
                 </div>
-                <div className="testmentor-metric-lbl">
+                <div className="examportal-metric-lbl">
                   {kpiStats.bestSpeed > 0 ? `Avg: ${kpiStats.avgAccuracy}% Accuracy` : 'Hindi & English Pass'}
                 </div>
               </div>
@@ -1882,17 +1880,17 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
             {/* Candidate profile or login trigger */}
             {currentUser ? (
               <div
-                className="testmentor-metric-pill"
+                className="examportal-metric-pill"
                 onClick={onOpenDashboard}
                 style={{ cursor: 'pointer', background: '#f0fdf4', borderColor: '#86efac' }}
                 title="Click to view candidate statistics & examination dossier"
               >
                 <span style={{ fontSize: '1.2rem' }}>👤</span>
                 <div>
-                  <div className="testmentor-metric-val" style={{ color: '#166534' }}>
+                  <div className="examportal-metric-val" style={{ color: '#166534' }}>
                     {currentUser.displayName}
                   </div>
-                  <div className="testmentor-metric-lbl" style={{ color: '#15803d' }}>
+                  <div className="examportal-metric-lbl" style={{ color: '#15803d' }}>
                     Roll: {currentUser.rollNumber} • Dossier →
                   </div>
                 </div>
@@ -1911,7 +1909,7 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
             {onOpenPayment && (
               currentUser?.is_subscribed ? (
                 <div
-                  className="testmentor-metric-pill"
+                  className="examportal-metric-pill"
                   onClick={() => onOpenPayment()}
                   style={{
                     cursor: 'pointer',
@@ -1923,10 +1921,10 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
                 >
                   <span style={{ fontSize: '1.2rem' }}>👑</span>
                   <div>
-                    <div className="testmentor-metric-val" style={{ color: '#15803d' }}>
+                    <div className="examportal-metric-val" style={{ color: '#15803d' }}>
                       Pro Member
                     </div>
-                    <div className="testmentor-metric-lbl" style={{ color: '#16a34a' }}>
+                    <div className="examportal-metric-lbl" style={{ color: '#16a34a' }}>
                       {currentUser.subscriptionPlan || 'Active Plan'} &bull; Details →
                     </div>
                   </div>
@@ -1970,7 +1968,7 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
         </div>
 
         {/* ========================================================
-            LEVEL 1: "ALL COURSES" EXAM GRID (TestMentor Screen)
+            LEVEL 1: "ALL COURSES" EXAM GRID
             ======================================================== */}
         {navLevel === 1 && (
           <div>
@@ -2103,9 +2101,9 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
             </section>
 
             {/* "All 129 Exams" Header */}
-            <div className="testmentor-courses-header" style={{ marginBottom: '16px' }}>
+            <div className="examportal-courses-header" style={{ marginBottom: '16px' }}>
               <div>
-                <h2 className="testmentor-courses-title">
+                <h2 className="examportal-courses-title">
                   <span>🏛️</span> All 129 Government Typing Examinations & Test Series
                 </h2>
                 <span style={{ fontSize: '0.85rem', color: '#64748b', fontWeight: 600 }}>
@@ -2410,7 +2408,7 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
               </div>
             )}
 
-            {/* Yearly Pass / Feature Banner (TestMentor Screen Bottom) */}
+            {/* Yearly Pass / Feature Banner */}
             <div
               style={{
                 background: 'linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%)',
@@ -3577,7 +3575,7 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
                     transition: 'all 0.2s ease'
                   }}
                 >
-                  View All Courses (TestMentor Grid)
+                  Explore All 129 Exam Courses
                 </button>
               </div>
 

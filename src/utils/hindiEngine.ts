@@ -341,7 +341,7 @@ export const OFFICIAL_ALT_CODES: AltCodeItem[] = [
 
 /**
  * Unicode NFKC and Nukta normalizer
- * Matches TestMentor's reverse-engineered normalizer px() / D(e)
+ * Canonicalizes Devanagari combined vowels and Nukta consonants
  */
 export function normalizeHindiText(text: string): string {
   if (!text) return '';
