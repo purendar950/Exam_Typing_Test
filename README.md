@@ -40,8 +40,8 @@
 ### 1. 🏛️ Curated Exam Profiles & Realistic Benchmarks
 Benchmarks are based on published recruitment board notifications and syllabus standards:
 - **UP Police Computer Operator Grade-A & ASI (Clerk / Accounts)**:
-  - Hindi: $\ge 25$ Net WPM on Mangal Inscript with $85.0\%$ qualifying accuracy (15 mins).
-  - English: $\ge 30$ Net WPM with $85.0\%$ qualifying accuracy (15 mins).
+  - Hindi: ≥ 25 Net WPM on Mangal Inscript with 85% qualifying accuracy (15 mins).
+  - English: ≥ 30 Net WPM with 85% qualifying accuracy (15 mins).
 - **UPSSSC Junior Assistant & Steno**: 25 Net WPM Hindi (Mangal or Kruti Dev 010) + 30 Net WPM English (5 mins each).
 - **SSC CHSL & CGL (DEST)**: 35 WPM English (10,500 KDPH) or 30 WPM Hindi (9,000 KDPH) with official 5%–7% error deduction.
 - **Allahabad & Patna High Courts**: 25–30 WPM with strict 50-mark model and 3% error tolerance limits.
@@ -124,32 +124,6 @@ pnpm preview
 
 ---
 
-## 🏷️ Recommended GitHub Topics & Metadata
-
-For optimal discoverability on GitHub, configure your repository **About** settings with:
-
-- **Description:** `⚡ High-performance examination typing test simulator for UP Police Computer Operator, ASI, UPSSSC, SSC DEST, RRB & High Courts with Mangal Inscript, Kruti Dev & real-time evaluation.`
-- **Website:** `https://purendar950.github.io/Typing-computer-operator-/`
-- **Topics:**
-  `typing-test`, `hindi-typing`, `mangal-inscript`, `krutidev`, `upprpb`, `computer-operator`, `react`, `typescript`, `vite`, `pwa`, `exam-preparation`
-
----
-
-## 💡 How to Rename Repository on GitHub
-
-If you wish to rename the repository from `Typing-computer-operator-` to `Exam_Typing_Test`:
-
-1. On GitHub, navigate to your repository: `https://github.com/purendar950/Typing-computer-operator-`
-2. Click **Settings** (top right tab).
-3. Under **General** → **Repository name**, enter `Exam_Typing_Test` (or `exam-typing-test`).
-4. Click **Rename**.
-5. Update your local git remote:
-   ```bash
-   git remote set-url origin https://github.com/purendar950/Exam_Typing_Test.git
-   ```
-*(Note: GitHub automatically redirects traffic from the old URL to the new one).*
-
----
 
 ## 🤝 Contributing
 
