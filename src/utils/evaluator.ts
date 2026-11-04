@@ -310,7 +310,7 @@ export function evaluateTypingTest(input: EvaluateInput): EvaluationResult {
   const totalKeystrokes = normTyped.length;
   const timeTakenMinutes = Math.max(0.1, input.timeTakenSeconds / 60);
 
-  // Run dynamic sequence alignment (TestMentor standard)
+  // Run dynamic sequence alignment algorithm
   const { alignment, skippedWords } = alignWords(originalWords, typedWords, isEnglish);
 
   let correctWords = 0;
@@ -326,12 +326,12 @@ export function evaluateTypingTest(input: EvaluateInput): EvaluationResult {
     } else if (item.type === 'half') {
       halfMistakes++;
       wrongWordsList.push(item.orig);
-      // TestMentor format: typed mistake in orange/red, expected word next to it
+      // Highlighting: typed mistake in orange, expected word hint next to it
       diffParts.push(`<span class="diff-half" title="Half Mistake: typed '${item.typed}', expected '${item.orig}'">${item.typed}</span> <span class="diff-orig-hint">${item.orig}</span>`);
     } else if (item.type === 'full') {
       fullMistakes++;
       wrongWordsList.push(item.orig);
-      // TestMentor format: typed mistake in red, expected word in orange
+      // Highlighting: typed mistake in red, expected word hint next to it
       diffParts.push(`<span class="diff-wrong" title="Full Mistake: typed '${item.typed}', expected '${item.orig}'">${item.typed}</span> <span class="diff-orig-hint">${item.orig}</span>`);
     } else if (item.type === 'omitted') {
       // Word completely missed in the attempted portion
@@ -363,7 +363,7 @@ export function evaluateTypingTest(input: EvaluateInput): EvaluationResult {
   const penaltyWpm = Math.round((equivalentErrors / timeTakenMinutes) * 10) / 10;
   const netWpm = Math.max(0, Math.round((grossWpm - penaltyWpm) * 10) / 10);
 
-  // 4. Eduquity 5% Error Allowance Pattern (EzTyping Model):
+  // 4. Eduquity 5% Error Allowance Pattern (Standard Recruitment Engine):
   // 5% permissible mistake margin on total standard words typed
   const totalStandardWords = Math.round((totalKeystrokes / 5) * 10) / 10;
   const allowedErrors = Math.round(totalStandardWords * 0.05 * 10) / 10;

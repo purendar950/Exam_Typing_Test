@@ -380,7 +380,7 @@ export const ResultScreen: React.FC<ResultScreenProps> = ({
             </span>
           </h3>
           <span style={{ fontSize: '0.73rem', fontWeight: 700, padding: '3px 10px', borderRadius: '12px', background: '#e0f2fe', color: '#0369a1', border: '1px solid #bae6fd' }}>
-            EzTyping & Official Pattern
+            Official Exam Pattern Standard
           </span>
         </div>
 
