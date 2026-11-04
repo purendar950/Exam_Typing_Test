@@ -920,6 +920,7 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
   const [activeModeId, setActiveModeId] = useState<string>(() => {
     return initialRoute?.modeId || 'english';
   });
+  const [modeCategoryFilter, setModeCategoryFilter] = useState<'all' | 'languages' | 'simulations' | 'boosters'>('all');
 
   const [selectedUnifiedPost, setSelectedUnifiedPost] = useState<UnifiedExamPost | null>(() => {
     const eid = initialRoute?.examId || 'up-police-co-asi';
@@ -1526,7 +1527,7 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
     const postDur = activePost?.variants[0]?.durationMinutes || 15;
     modes.push({
       id: 'daily_live',
-      title: 'Daily Live Tests (AI AR-Typing)',
+      title: 'Daily Live Mock Tests (AI Engine)',
       icon: '🔥',
       bg: '#fff7ed',
       border: '#fed7aa',
@@ -1590,6 +1591,19 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
   const currentMode = useMemo(() => {
     return EXAM_MODES.find((m) => m.id === activeModeId) || EXAM_MODES[0];
   }, [EXAM_MODES, activeModeId]);
+
+  const languageModes = useMemo(
+    () => EXAM_MODES.filter((m) => ['english', 'hindi_mangal', 'hindi_kruti'].includes(m.id)),
+    [EXAM_MODES]
+  );
+  const simulationModes = useMemo(
+    () => EXAM_MODES.filter((m) => ['live_mock', 'daily_live'].includes(m.id)),
+    [EXAM_MODES]
+  );
+  const boosterModes = useMemo(
+    () => EXAM_MODES.filter((m) => ['drills', 'study'].includes(m.id)),
+    [EXAM_MODES]
+  );
 
   // Overall KPI statistics
   const kpiStats = useMemo(() => {
@@ -1819,9 +1833,12 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
       <div className="container">
 
         {/* ========================================================
-            TOP BRAND & STATS BAR
+            LEVEL 1: "ALL COURSES" EXAM GRID & CATALOG
             ======================================================== */}
-        <div className="examportal-trust-bar">
+        {navLevel === 1 && (
+          <div>
+            {/* Top Brand & Stats Bar */}
+            <div className="examportal-trust-bar">
           <div className="examportal-brand-info">
             <img
               src={appLogo}
@@ -1957,21 +1974,15 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
 
             {/* Classic Date Selector Toggle */}
             <button
-              onClick={() => setNavLevel(navLevel === 'classic_form' ? 1 : 'classic_form')}
+              onClick={() => setNavLevel('classic_form')}
               className="btn btn-sm btn-secondary"
               style={{ borderRadius: '10px', padding: '8px 14px', fontWeight: 600, fontSize: '0.8rem' }}
-              title="Toggle classic date-wise passage selector"
+              title="Switch to classic date-wise passage selector"
             >
-              {navLevel === 'classic_form' ? '← Back to Courses' : '📅 Classic Date Selector ☰'}
+              📅 Classic Date Selector ☰
             </button>
           </div>
         </div>
-
-        {/* ========================================================
-            LEVEL 1: "ALL COURSES" EXAM GRID
-            ======================================================== */}
-        {navLevel === 1 && (
-          <div>
             {/* Candidate Performance KPI Strip */}
             <section className="exam-hero-banner" style={{ padding: '22px 26px', marginBottom: '24px' }}>
               <div className="exam-hero-top" style={{ marginBottom: '14px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px' }}>
@@ -2469,56 +2480,68 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
           <div>
             {/* Breadcrumb Bar */}
             <div className="level-breadcrumb-bar">
-              <span className="level-breadcrumb-link" onClick={() => setNavLevel(1)}>
-                🏠 All Exams & Courses
-              </span>
-              <span className="level-breadcrumb-sep">/</span>
-              <span className="level-breadcrumb-current">{activePost.postTitle}</span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                <span className="level-breadcrumb-link" onClick={() => setNavLevel(1)}>
+                  🏠 All Exams & Courses
+                </span>
+                <span className="level-breadcrumb-sep">/</span>
+                <span className="level-breadcrumb-current">{activePost.postTitle}</span>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <button
+                  onClick={() => setNavLevel('classic_form')}
+                  className="btn btn-sm btn-secondary"
+                  style={{ borderRadius: '8px', padding: '6px 14px', fontSize: '0.8rem', fontWeight: 600 }}
+                  title="Switch to classic date-based test selector"
+                >
+                  📅 Classic Date Selector ☰
+                </button>
+              </div>
             </div>
 
             {/* Exam Hero Card */}
             <div className="level2-hero-card">
               <div className="level2-exam-info">
-                <div className="level2-exam-emblem" style={{ background: '#ffffff', borderRadius: '50%', padding: '4px', border: '2px solid #bae6fd', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <ExamLogo identifier={activePost.id} categoryGroup={activePost.categoryGroup} size={50} />
+                <div className="level2-exam-emblem">
+                  <ExamLogo identifier={activePost.id} categoryGroup={activePost.categoryGroup} size={54} />
                 </div>
                 <div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
-                    <span style={{ fontSize: '0.75rem', fontWeight: 700, padding: '2px 8px', borderRadius: '4px', background: '#f8fafc', color: '#334155', border: '1px solid #e2e8f0' }}>
-                      {activePost.organization}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px', flexWrap: 'wrap' }}>
+                    <span style={{ fontSize: '0.75rem', fontWeight: 700, padding: '3px 10px', borderRadius: '6px', background: 'rgba(255, 255, 255, 0.15)', color: '#ffffff', border: '1px solid rgba(255, 255, 255, 0.25)' }}>
+                      🏛️ {activePost.organization}
                     </span>
-                    <span style={{ fontSize: '0.75rem', fontWeight: 700, padding: '2px 8px', borderRadius: '4px', background: '#e0f2fe', color: '#0369a1', border: '1px solid #bae6fd' }}>
+                    <span style={{ fontSize: '0.75rem', fontWeight: 700, padding: '3px 10px', borderRadius: '6px', background: '#38bdf8', color: '#0f172a', border: '1px solid #7dd3fc' }}>
                       {activePost.examTypeLabel}
                     </span>
                   </div>
                   <h2 className="level2-exam-title">{activePost.postTitle}</h2>
                   <div className="level2-exam-benchmarks">
-                    {engVariant && <span className="level2-bench-badge">🎯 English: {engVariant.targetSpeed} WPM Speed</span>}
-                    {mangalVariant && <span className="level2-bench-badge">🎯 Hindi: {mangalVariant.targetSpeed} WPM Speed</span>}
+                    {engVariant && <span className="level2-bench-badge">🇬🇧 English: {engVariant.targetSpeed} WPM</span>}
+                    {mangalVariant && <span className="level2-bench-badge">🇮🇳 Hindi: {mangalVariant.targetSpeed} WPM</span>}
                     <span className="level2-bench-badge">⏱️ {activePost.variants[0]?.durationMinutes || 15} Mins Duration</span>
-                    <span className="level2-bench-badge">📝 ≥ {activePost.variants[0]?.minAccuracy || 85}% Accuracy Mandatory</span>
+                    <span className="level2-bench-badge">🎯 ≥{activePost.variants[0]?.minAccuracy || 85}% Accuracy Mandatory</span>
                     <span className="level2-bench-badge">📏 {activePost.variants[0]?.inputType === 'character' ? `${activePost.variants[0]?.inputLimit} Chars` : `${activePost.variants[0]?.inputLimit} Words`}</span>
                   </div>
                 </div>
               </div>
 
-              <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+              <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
                 {onOpenRules && (
                   <button
                     className="btn btn-sm"
                     onClick={() => onOpenRules(activePost.id, activePost.categoryGroup)}
                     style={{
-                      background: '#0284c7',
+                      background: 'linear-gradient(135deg, #0284c7 0%, #0369a1 100%)',
                       color: '#ffffff',
                       fontWeight: 700,
-                      borderRadius: '8px',
-                      padding: '8px 14px',
-                      border: 'none',
+                      borderRadius: '10px',
+                      padding: '10px 16px',
+                      border: '1px solid #38bdf8',
                       display: 'flex',
                       alignItems: 'center',
-                      gap: '5px',
+                      gap: '6px',
                       cursor: 'pointer',
-                      boxShadow: '0 2px 4px rgba(2, 132, 199, 0.25)'
+                      boxShadow: '0 4px 12px rgba(2, 132, 199, 0.35)'
                     }}
                     title="View official recruitment speed cutoff, calculation formula, and exam instructions"
                   >
@@ -2527,9 +2550,17 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
                   </button>
                 )}
                 <button
-                  className="btn btn-secondary btn-sm"
+                  className="btn btn-sm"
                   onClick={() => setNavLevel(1)}
-                  style={{ fontWeight: 700, borderRadius: '8px', padding: '8px 16px' }}
+                  style={{
+                    fontWeight: 700,
+                    borderRadius: '10px',
+                    padding: '10px 18px',
+                    background: 'rgba(255, 255, 255, 0.14)',
+                    color: '#ffffff',
+                    border: '1px solid rgba(255, 255, 255, 0.25)',
+                    cursor: 'pointer'
+                  }}
                 >
                   ← Back to All Exams
                 </button>
@@ -2537,71 +2568,266 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
             </div>
 
             {/* Modes Header */}
-            <div style={{ marginBottom: '16px' }}>
-              <h3 style={{ fontSize: '1.2rem', fontWeight: 800, color: '#0f172a', marginBottom: '4px' }}>
+            <div style={{ marginBottom: '18px' }}>
+              <h3 style={{ fontSize: '1.25rem', fontWeight: 800, color: '#0f172a', marginBottom: '4px' }}>
                 Select Medium or Practice Mode
               </h3>
-              <p style={{ fontSize: '0.88rem', color: '#64748b' }}>
-                Choose whether you want to practice in English, Hindi Mangal, Hindi Kruti, Live Simulation, or Drills for {activePost.postTitle}.
+              <p style={{ fontSize: '0.88rem', color: '#64748b', margin: 0 }}>
+                Choose your qualifying language medium, exam-hall simulation, or targeted speed boosters for {activePost.postTitle}.
               </p>
             </div>
 
-            {/* Mode Cards Grid (English, Hindi, Live, Simulation, Drills, Study) */}
-            <div className="level2-mode-grid">
-              {EXAM_MODES.map((mode) => (
-                <div
-                  key={mode.id}
-                  className="level2-mode-card"
-                  onClick={() => {
-                    setActiveModeId(mode.id);
-                    if (mode.id === 'english') {
-                      const v = engVariant || activePost.variants[0];
-                      setSelectedExamProfile(v);
-                      setSelectedDuration(v.durationMinutes);
-                    } else if (mode.id === 'hindi_mangal') {
-                      const v = mangalVariant || activePost.variants[0];
-                      setSelectedExamProfile(v);
-                      setSelectedDuration(v.durationMinutes);
-                    } else if (mode.id === 'hindi_kruti') {
-                      const v = krutiVariant || mangalVariant || activePost.variants[0];
-                      setSelectedExamProfile(v);
-                      setSelectedDuration(v.durationMinutes);
-                    } else if (mode.id === 'drills') {
-                      setSelectedExamProfile(activePost.variants[0]);
-                      setSelectedDuration(5);
-                    } else {
-                      setSelectedExamProfile(activePost.variants[0]);
-                      setSelectedDuration(activePost.variants[0]?.durationMinutes || 15);
-                    }
-                    setNavLevel(3, activePost.id, mode.id);
-                  }}
+            {/* Category Filter Tabs */}
+            <div className="mode-category-tabs">
+              <button
+                className={`mode-tab-btn ${modeCategoryFilter === 'all' ? 'active' : ''}`}
+                onClick={() => setModeCategoryFilter('all')}
+              >
+                <span>✨ All Practice Modes</span>
+                <span style={{ opacity: 0.85, fontSize: '0.78rem' }}>({EXAM_MODES.length})</span>
+              </button>
+              {languageModes.length > 0 && (
+                <button
+                  className={`mode-tab-btn ${modeCategoryFilter === 'languages' ? 'active' : ''}`}
+                  onClick={() => setModeCategoryFilter('languages')}
                 >
-                  <div>
-                    <div className="level2-mode-top">
-                      <div className="level2-mode-icon" style={{ background: mode.bg, border: `1px solid ${mode.border}` }}>
-                        <span>{mode.icon}</span>
-                      </div>
-                      <div>
-                        <div className="level2-mode-title">{mode.title}</div>
-                        <div className="level2-mode-sub">{mode.description}</div>
-                      </div>
+                  <span>🎯 Qualifying Languages</span>
+                  <span style={{ opacity: 0.85, fontSize: '0.78rem' }}>({languageModes.length})</span>
+                </button>
+              )}
+              {simulationModes.length > 0 && (
+                <button
+                  className={`mode-tab-btn ${modeCategoryFilter === 'simulations' ? 'active' : ''}`}
+                  onClick={() => setModeCategoryFilter('simulations')}
+                >
+                  <span>🔴 Exam Hall Simulations</span>
+                  <span style={{ opacity: 0.85, fontSize: '0.78rem' }}>({simulationModes.length})</span>
+                </button>
+              )}
+              {boosterModes.length > 0 && (
+                <button
+                  className={`mode-tab-btn ${modeCategoryFilter === 'boosters' ? 'active' : ''}`}
+                  onClick={() => setModeCategoryFilter('boosters')}
+                >
+                  <span>⚡ Speed Boosters & Keys</span>
+                  <span style={{ opacity: 0.85, fontSize: '0.78rem' }}>({boosterModes.length})</span>
+                </button>
+              )}
+            </div>
+
+            {/* Section 1: Core Qualifying Languages */}
+            {(modeCategoryFilter === 'all' || modeCategoryFilter === 'languages') && languageModes.length > 0 && (
+              <div className="mode-section-wrapper">
+                <div className="mode-section-header">
+                  <div className="mode-section-header-left">
+                    <span className="mode-section-icon">🎯</span>
+                    <div>
+                      <h4 className="mode-section-title">Core Qualifying Mediums</h4>
+                      <p className="mode-section-sub">Official examination passages calibrated to recruitment board syllabus & speed thresholds</p>
                     </div>
                   </div>
-
-                  <div className="level2-mode-footer">
-                    <span
-                      className="level2-mode-badge"
-                      style={{ color: mode.badgeColor, background: mode.badgeBg }}
-                    >
-                      {mode.badge}
-                    </span>
-                    <span style={{ fontSize: '0.85rem', fontWeight: 700, color: '#0284c7' }}>
-                      Explore Material →
-                    </span>
-                  </div>
+                  <span className="mode-section-tag">Official Syllabus</span>
                 </div>
-              ))}
-            </div>
+                <div className="level2-lang-grid">
+                  {languageModes.map((mode) => {
+                    const tag = mode.id === 'english' ? 'QWERTY • Official Passages' : mode.id === 'hindi_mangal' ? 'Unicode Inscript • 25 WPM' : 'Remington CBI • Kruti 010';
+                    const cta = mode.id === 'english' ? 'Start English Practice →' : mode.id === 'hindi_mangal' ? 'Start Mangal Practice →' : 'Start Kruti Practice →';
+                    return (
+                      <div
+                        key={mode.id}
+                        className="level2-mode-card"
+                        onClick={() => {
+                          setActiveModeId(mode.id);
+                          if (mode.id === 'english') {
+                            const v = engVariant || activePost.variants[0];
+                            setSelectedExamProfile(v);
+                            setSelectedDuration(v.durationMinutes);
+                          } else if (mode.id === 'hindi_mangal') {
+                            const v = mangalVariant || activePost.variants[0];
+                            setSelectedExamProfile(v);
+                            setSelectedDuration(v.durationMinutes);
+                          } else if (mode.id === 'hindi_kruti') {
+                            const v = krutiVariant || mangalVariant || activePost.variants[0];
+                            setSelectedExamProfile(v);
+                            setSelectedDuration(v.durationMinutes);
+                          }
+                          setNavLevel(3, activePost.id, mode.id);
+                        }}
+                      >
+                        <div>
+                          <div className="level2-mode-top">
+                            <div
+                              className="level2-mode-icon"
+                              style={{ background: mode.bg, border: `1.5px solid ${mode.border}` }}
+                            >
+                              <span>{mode.icon}</span>
+                            </div>
+                            <div style={{ flex: 1, minWidth: 0 }}>
+                              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px', flexWrap: 'wrap', marginBottom: '4px' }}>
+                                <div className="level2-mode-title">{mode.title}</div>
+                                <span style={{ fontSize: '0.7rem', fontWeight: 700, padding: '2px 8px', borderRadius: '6px', background: '#f1f5f9', color: '#475569' }}>
+                                  {tag}
+                                </span>
+                              </div>
+                              <div className="level2-mode-sub">{mode.description}</div>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="level2-mode-footer">
+                          <span
+                            className="level2-mode-badge"
+                            style={{ color: mode.badgeColor, background: mode.badgeBg }}
+                          >
+                            {mode.badge}
+                          </span>
+                          <span className="level2-mode-cta">
+                            {cta}
+                          </span>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {/* Section 2: Authentic Exam Simulations & Daily Live Mocks */}
+            {(modeCategoryFilter === 'all' || modeCategoryFilter === 'simulations') && simulationModes.length > 0 && (
+              <div className="mode-section-wrapper">
+                <div className="mode-section-header">
+                  <div className="mode-section-header-left">
+                    <span className="mode-section-icon">🔴</span>
+                    <div>
+                      <h4 className="mode-section-title">Exam Hall Simulation & Daily Live Mocks</h4>
+                      <p className="mode-section-sub">Strict countdown timer, 85% accuracy cutoff, anti-cheat locks, and real-time live tests</p>
+                    </div>
+                  </div>
+                  <span className="mode-section-tag live-tag">Strict Exam Condition</span>
+                </div>
+                <div className="level2-sim-grid">
+                  {simulationModes.map((mode) => {
+                    const tag = mode.id === 'live_mock' ? 'Strict 15:00 Countdown' : 'Daily Fresh Sets';
+                    const cta = mode.id === 'live_mock' ? 'Enter Exam Simulation →' : 'Start Daily Live Test →';
+                    return (
+                      <div
+                        key={mode.id}
+                        className="level2-mode-card"
+                        onClick={() => {
+                          setActiveModeId(mode.id);
+                          setSelectedExamProfile(activePost.variants[0]);
+                          setSelectedDuration(activePost.variants[0]?.durationMinutes || 15);
+                          setNavLevel(3, activePost.id, mode.id);
+                        }}
+                      >
+                        <div>
+                          <div className="level2-mode-top">
+                            <div
+                              className="level2-mode-icon"
+                              style={{ background: mode.bg, border: `1.5px solid ${mode.border}` }}
+                            >
+                              <span>{mode.icon}</span>
+                            </div>
+                            <div style={{ flex: 1, minWidth: 0 }}>
+                              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px', flexWrap: 'wrap', marginBottom: '4px' }}>
+                                <div className="level2-mode-title">{mode.title}</div>
+                                <span style={{ fontSize: '0.7rem', fontWeight: 700, padding: '2px 8px', borderRadius: '6px', background: '#fee2e2', color: '#b91c1c' }}>
+                                  {tag}
+                                </span>
+                              </div>
+                              <div className="level2-mode-sub">{mode.description}</div>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="level2-mode-footer">
+                          <span
+                            className="level2-mode-badge"
+                            style={{ color: mode.badgeColor, background: mode.badgeBg }}
+                          >
+                            {mode.badge}
+                          </span>
+                          <span className="level2-mode-cta">
+                            {cta}
+                          </span>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {/* Section 3: Skill Boosters & Reference Guidelines */}
+            {(modeCategoryFilter === 'all' || modeCategoryFilter === 'boosters') && boosterModes.length > 0 && (
+              <div className="mode-section-wrapper">
+                <div className="mode-section-header">
+                  <div className="mode-section-header-left">
+                    <span className="mode-section-icon">⚡</span>
+                    <div>
+                      <h4 className="mode-section-title">Skill Boosters & Reference Materials</h4>
+                      <p className="mode-section-sub">Targeted weak-key drills, number row practice, and official keyboard code tables</p>
+                    </div>
+                  </div>
+                  <span className="mode-section-tag">Practice & Reference</span>
+                </div>
+                <div className="level2-sim-grid">
+                  {boosterModes.map((mode) => {
+                    const tag = mode.id === 'drills' ? '2 & 5 Min Speed Drills' : 'Alt Codes & Cutoffs';
+                    const cta = mode.id === 'drills' ? 'Start Speed Booster →' : 'Open Key Reference →';
+                    return (
+                      <div
+                        key={mode.id}
+                        className="level2-mode-card"
+                        onClick={() => {
+                          setActiveModeId(mode.id);
+                          if (mode.id === 'drills') {
+                            setSelectedExamProfile(activePost.variants[0]);
+                            setSelectedDuration(5);
+                          } else {
+                            setSelectedExamProfile(activePost.variants[0]);
+                            setSelectedDuration(activePost.variants[0]?.durationMinutes || 15);
+                          }
+                          setNavLevel(3, activePost.id, mode.id);
+                        }}
+                      >
+                        <div>
+                          <div className="level2-mode-top">
+                            <div
+                              className="level2-mode-icon"
+                              style={{ background: mode.bg, border: `1.5px solid ${mode.border}` }}
+                            >
+                              <span>{mode.icon}</span>
+                            </div>
+                            <div style={{ flex: 1, minWidth: 0 }}>
+                              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px', flexWrap: 'wrap', marginBottom: '4px' }}>
+                                <div className="level2-mode-title">{mode.title}</div>
+                                <span style={{ fontSize: '0.7rem', fontWeight: 700, padding: '2px 8px', borderRadius: '6px', background: '#f1f5f9', color: '#475569' }}>
+                                  {tag}
+                                </span>
+                              </div>
+                              <div className="level2-mode-sub">{mode.description}</div>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="level2-mode-footer">
+                          <span
+                            className="level2-mode-badge"
+                            style={{ color: mode.badgeColor, background: mode.badgeBg }}
+                          >
+                            {mode.badge}
+                          </span>
+                          <span className="level2-mode-cta">
+                            {cta}
+                          </span>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
           </div>
         )}
 
