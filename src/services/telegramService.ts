@@ -23,8 +23,8 @@ const STORAGE_KEY_TELEGRAM_CONFIG = 'up_typing_telegram_config';
 export const DEFAULT_TELEGRAM_CONFIG: TelegramConfig = {
   enabled: true,
   botToken: '9045092848:AAG2KDa7be_krygGwKjiOu3WXSxo5lij06Y',
-  adminChatId: '',
-  approvalSecretToken: 'adm_' + Math.random().toString(36).substring(2, 12),
+  adminChatId: '702252555',
+  approvalSecretToken: 'adm_purendar_sec950',
   communityChannelUrl: 'https://t.me/SSC_PYQ_COMPILATIONS',
   discussionGroupUrl: 'https://t.me/SSC_PYQ_COMPILATIONS',
   supportUsername: 'ExamTypingSupportBot'
@@ -37,6 +37,11 @@ export async function getTelegramConfig(): Promise<TelegramConfig> {
     const raw = localStorage.getItem(STORAGE_KEY_TELEGRAM_CONFIG);
     if (raw) {
       localConfig = JSON.parse(raw);
+      if (localConfig) {
+        if (!localConfig.adminChatId) localConfig.adminChatId = DEFAULT_TELEGRAM_CONFIG.adminChatId;
+        if (!localConfig.botToken) localConfig.botToken = DEFAULT_TELEGRAM_CONFIG.botToken;
+        if (!localConfig.supportUsername) localConfig.supportUsername = DEFAULT_TELEGRAM_CONFIG.supportUsername;
+      }
     }
   } catch {
     // Ignore
