@@ -8,6 +8,7 @@ interface ResultScreenProps {
   onChooseAnother: () => void;
   onPracticeWrongWords: (words: string[]) => void;
   onOpenDashboard?: () => void;
+  onOpenRules?: (examId?: string, categoryGroup?: string) => void;
 }
 
 export const ResultScreen: React.FC<ResultScreenProps> = ({
@@ -15,7 +16,8 @@ export const ResultScreen: React.FC<ResultScreenProps> = ({
   onRetakeTest,
   onChooseAnother,
   onPracticeWrongWords,
-  onOpenDashboard
+  onOpenDashboard,
+  onOpenRules
 }) => {
   // Fire confetti if candidate qualified!
   useEffect(() => {
@@ -185,13 +187,38 @@ export const ResultScreen: React.FC<ResultScreenProps> = ({
           <h2 style={{ fontSize: '1.15rem', fontWeight: 800, margin: 0, color: '#0f172a' }}>
             Official {result.qualificationCriteria.examTitle || 'Recruitment'} Benchmark Verification
           </h2>
-          <span style={{ fontSize: '0.75rem', fontWeight: 700, padding: '3px 10px', borderRadius: '12px', background: '#f1f5f9', color: '#475569', border: '1px solid #e2e8f0' }}>
-            {result.calculationModel === 'rrb_eduquity' ? 'RRB CBTST Standards' :
-             result.calculationModel === 'ssc_dest' ? 'SSC DEST Guidelines' :
-             result.calculationModel === 'court_delhi' || result.calculationModel === 'court_ahc' || result.calculationModel === 'court_phhc' ? 'Court & Judicial Rules' :
-             result.calculationModel === 'mp_cpct' ? 'MP CPCT Scoring Model' :
-             'UPPRPB & National Standards'}
-          </span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            {onOpenRules && (
+              <button
+                type="button"
+                onClick={() => onOpenRules(undefined, result.category)}
+                style={{
+                  padding: '3px 10px',
+                  fontSize: '0.75rem',
+                  fontWeight: 700,
+                  borderRadius: '12px',
+                  background: '#e0f2fe',
+                  color: '#0369a1',
+                  border: '1px solid #bae6fd',
+                  cursor: 'pointer',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '4px'
+                }}
+                title="Verify official speed requirements and formula instructions"
+              >
+                <span>📋</span>
+                <span>Official Instructions & Formula</span>
+              </button>
+            )}
+            <span style={{ fontSize: '0.75rem', fontWeight: 700, padding: '3px 10px', borderRadius: '12px', background: '#f1f5f9', color: '#475569', border: '1px solid #e2e8f0' }}>
+              {result.calculationModel === 'rrb_eduquity' ? 'RRB CBTST Standards' :
+               result.calculationModel === 'ssc_dest' ? 'SSC DEST Guidelines' :
+               result.calculationModel === 'court_delhi' || result.calculationModel === 'court_ahc' || result.calculationModel === 'court_phhc' ? 'Court & Judicial Rules' :
+               result.calculationModel === 'mp_cpct' ? 'MP CPCT Scoring Model' :
+               'UPPRPB & National Standards'}
+            </span>
+          </div>
         </div>
 
         <div style={{ overflowX: 'auto' }}>
