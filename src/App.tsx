@@ -229,6 +229,8 @@ export const App: React.FC = () => {
   const [customPassages, setCustomPassages] = useState<Passage[]>([]);
   const [telegramConfig, setTelegramConfig] = useState<TelegramConfig | null>(null);
   const [telegramToast, setTelegramToast] = useState<{ success: boolean; message: string } | null>(null);
+  const [adminInitialTab, setAdminInitialTab] = useState<'overview' | 'live_chat' | 'ai_engine' | 'passages' | 'candidates' | 'payments' | 'settings' | undefined>(undefined);
+  const [adminInitialChatId, setAdminInitialChatId] = useState<string | undefined>(undefined);
 
   // Automatically fetch today's 8 Daily Live Tests, Custom Passages and handle Telegram 1-click approvals
   useEffect(() => {
@@ -262,6 +264,20 @@ export const App: React.FC = () => {
         setTimeout(() => setTelegramToast(null), 10000);
       }
     });
+
+    // Check for direct live chat deep-link from Telegram notification
+    try {
+      const urlParams = new URLSearchParams(window.location.search);
+      const chatParam = urlParams.get('admin_chat');
+      if (chatParam) {
+        setAdminInitialTab('live_chat');
+        setAdminInitialChatId(chatParam);
+        setIsAdminOpen(true);
+        const u = new URL(window.location.href);
+        u.searchParams.delete('admin_chat');
+        window.history.replaceState({}, document.title, u.pathname + (u.search ? u.search : ''));
+      }
+    } catch {}
 
     // Load Telegram configuration for floating action button
     getTelegramConfig().then((cfg) => setTelegramConfig(cfg));
@@ -914,6 +930,8 @@ export const App: React.FC = () => {
         onLoginSuccess={(user) => {
           setCurrentUser(user);
         }}
+        initialTab={adminInitialTab}
+        initialChatId={adminInitialChatId}
       />
 
       <PaymentModal
@@ -982,6 +1000,7 @@ export const App: React.FC = () => {
       {currentView !== 'test' && (
         <TelegramSupportWidget
           config={telegramConfig}
+          currentUser={currentUser}
           onOpenPayment={() => handleOpenPayment()}
         />
       )}

@@ -52,6 +52,12 @@ import {
   testTelegramPing,
   DEFAULT_TELEGRAM_CONFIG
 } from '../services/telegramService';
+import {
+  SupportChatSession,
+  subscribeToAllLiveChats,
+  sendAdminLiveReply,
+  markChatReadByAdmin
+} from '../services/liveChatService';
 import appLogo from '../assets/logo.png';
 
 interface AdminPanelModalProps {
@@ -62,6 +68,8 @@ interface AdminPanelModalProps {
   onDailyLiveGenerated: (tests: Passage[]) => void;
   currentUser?: UserProfile | null;
   onLoginSuccess?: (user: UserProfile) => void;
+  initialTab?: 'overview' | 'live_chat' | 'ai_engine' | 'passages' | 'candidates' | 'payments' | 'settings';
+  initialChatId?: string;
 }
 
 export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
@@ -71,7 +79,9 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
   onPassagesUpdated,
   onDailyLiveGenerated,
   currentUser,
-  onLoginSuccess
+  onLoginSuccess,
+  initialTab,
+  initialChatId
 }) => {
   // Authentication Guard State
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
@@ -87,7 +97,14 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
   const [showPassword, setShowPassword] = useState<boolean>(false);
 
   // Tab State
-  const [activeTab, setActiveTab] = useState<'overview' | 'ai_engine' | 'passages' | 'candidates' | 'payments' | 'settings'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'live_chat' | 'ai_engine' | 'passages' | 'candidates' | 'payments' | 'settings'>(initialTab || 'overview');
+
+  // Live Support Chat State
+  const [liveChatsList, setLiveChatsList] = useState<SupportChatSession[]>([]);
+  const [selectedChatId, setSelectedChatId] = useState<string | null>(initialChatId || null);
+  const [adminReplyText, setAdminReplyText] = useState<string>('');
+  const [isSendingReply, setIsSendingReply] = useState<boolean>(false);
+  const [liveChatSearch, setLiveChatSearch] = useState<string>('');
 
   // Payments & Subscriptions State
   const [paymentsList, setPaymentsList] = useState<PaymentSubmission[]>([]);
@@ -210,8 +227,29 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
 
       // Load Payments & Promo Codes
       loadPaymentsAndPromos();
+
+      if (initialTab) {
+        setActiveTab(initialTab);
+      }
+      if (initialChatId) {
+        setActiveTab('live_chat');
+        setSelectedChatId(initialChatId);
+      }
     }
-  }, [isOpen, currentUser]);
+  }, [isOpen, currentUser, initialTab, initialChatId]);
+
+  // Subscribe to real-time candidate live chat conversations
+  useEffect(() => {
+    if (isAuthenticated) {
+      const unsub = subscribeToAllLiveChats((chats) => {
+        setLiveChatsList(chats);
+        if (chats.length > 0 && !selectedChatId) {
+          setSelectedChatId(chats[0].id);
+        }
+      });
+      return () => unsub();
+    }
+  }, [isAuthenticated, selectedChatId]);
 
   // 1. Firebase Admin Email/Password Sign-In
   const handleFirebaseAdminLogin = async (e: React.FormEvent) => {
@@ -341,6 +379,10 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
   const pendingPaymentsCount = useMemo(() => {
     return paymentsList.filter((p) => p.status === 'pending').length;
   }, [paymentsList]);
+
+  const unreadLiveChatsCount = useMemo(() => {
+    return liveChatsList.filter((c) => c.unreadByAdmin).length;
+  }, [liveChatsList]);
 
   const approvedPaymentsRevenue = useMemo(() => {
     return paymentsList
@@ -1156,6 +1198,10 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
             >
               {[
                 { id: 'overview', label: '📊 Overview & KPIs' },
+                {
+                  id: 'live_chat',
+                  label: `💬 Live Support Desk (${unreadLiveChatsCount > 0 ? `🚨 ${unreadLiveChatsCount} NEW` : liveChatsList.length})`
+                },
                 { id: 'ai_engine', label: '⚡ AI Engine & Daily Generator' },
                 { id: 'passages', label: `📚 Passage Studio (${passages.length})` },
                 { id: 'candidates', label: `👥 Candidates & Firebase Roles (${candidatesList.length})` },
@@ -1275,6 +1321,426 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                         </div>
                       </div>
                     </div>
+                  </div>
+                </div>
+              )}
+
+              {/* --------------------------------------------------
+                  TAB: LIVE SUPPORT DESK (REAL-TIME ASPIRANT CHAT)
+                  -------------------------------------------------- */}
+              {activeTab === 'live_chat' && (
+                <div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+                    <div>
+                      <h3 style={{ margin: 0, fontSize: '1.2rem', fontWeight: 800, color: '#0f172a' }}>
+                        💬 Live Support Desk & Candidate Helpdesk
+                      </h3>
+                      <div style={{ fontSize: '0.8rem', color: '#64748b', marginTop: '2px' }}>
+                        Real-time bidirectional chat with candidates. Candidates message from the website, you reply directly here. Telegram alerts are automatically dispatched.
+                      </div>
+                    </div>
+                    {unreadLiveChatsCount > 0 && (
+                      <span
+                        style={{
+                          background: '#ef4444',
+                          color: '#ffffff',
+                          padding: '4px 10px',
+                          borderRadius: '12px',
+                          fontSize: '0.75rem',
+                          fontWeight: 800,
+                          boxShadow: '0 2px 8px rgba(239, 68, 68, 0.35)'
+                        }}
+                      >
+                        🚨 {unreadLiveChatsCount} UNREAD CONVERSATION{unreadLiveChatsCount > 1 ? 'S' : ''}
+                      </span>
+                    )}
+                  </div>
+
+                  <div
+                    style={{
+                      display: 'flex',
+                      gap: '18px',
+                      height: '620px',
+                      maxHeight: 'calc(100vh - 240px)',
+                      background: '#ffffff',
+                      borderRadius: '14px',
+                      border: '1px solid #e2e8f0',
+                      boxShadow: '0 4px 16px rgba(0,0,0,0.04)',
+                      overflow: 'hidden'
+                    }}
+                  >
+                    {/* Left Panel: Chat Sessions List */}
+                    <div
+                      style={{
+                        width: '320px',
+                        borderRight: '1px solid #e2e8f0',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        background: '#f8fafc'
+                      }}
+                    >
+                      {/* Search / Filter header */}
+                      <div style={{ padding: '12px 14px', borderBottom: '1px solid #e2e8f0', background: '#ffffff' }}>
+                        <input
+                          type="text"
+                          placeholder="Search candidate name or email..."
+                          value={liveChatSearch}
+                          onChange={(e) => setLiveChatSearch(e.target.value)}
+                          style={{
+                            width: '100%',
+                            padding: '8px 12px',
+                            borderRadius: '8px',
+                            border: '1px solid #cbd5e1',
+                            fontSize: '0.8rem',
+                            outline: 'none'
+                          }}
+                        />
+                      </div>
+
+                      {/* Sessions List */}
+                      <div style={{ flex: 1, overflowY: 'auto', padding: '6px' }}>
+                        {liveChatsList.length === 0 ? (
+                          <div style={{ padding: '30px 16px', textAlign: 'center', color: '#94a3b8', fontSize: '0.82rem' }}>
+                            No active support conversations yet. When candidates send a message from the widget, it appears here.
+                          </div>
+                        ) : (
+                          liveChatsList
+                            .filter((c) => {
+                              if (!liveChatSearch.trim()) return true;
+                              const q = liveChatSearch.toLowerCase();
+                              return (
+                                c.userName?.toLowerCase().includes(q) ||
+                                c.userEmail?.toLowerCase().includes(q) ||
+                                c.lastMessage?.toLowerCase().includes(q)
+                              );
+                            })
+                            .map((chat) => {
+                              const isSelected = selectedChatId === chat.id;
+                              return (
+                                <div
+                                  key={chat.id}
+                                  onClick={() => {
+                                    setSelectedChatId(chat.id);
+                                    if (chat.unreadByAdmin) {
+                                      markChatReadByAdmin(chat.id);
+                                    }
+                                  }}
+                                  style={{
+                                    padding: '12px 14px',
+                                    borderRadius: '10px',
+                                    marginBottom: '6px',
+                                    cursor: 'pointer',
+                                    background: isSelected ? '#e0f2fe' : chat.unreadByAdmin ? '#fef2f2' : '#ffffff',
+                                    border: isSelected ? '1.5px solid #0284c7' : chat.unreadByAdmin ? '1.5px solid #f87171' : '1px solid #e2e8f0',
+                                    transition: 'all 0.15s ease'
+                                  }}
+                                >
+                                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '3px' }}>
+                                    <span style={{ fontWeight: 800, fontSize: '0.86rem', color: isSelected ? '#0369a1' : '#0f172a' }}>
+                                      {chat.userName || 'Candidate'}
+                                    </span>
+                                    <span style={{ fontSize: '0.68rem', color: '#94a3b8' }}>
+                                      {new Date(chat.lastMessageAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                    </span>
+                                  </div>
+
+                                  <div
+                                    style={{
+                                      fontSize: '0.74rem',
+                                      color: chat.unreadByAdmin ? '#b91c1c' : '#64748b',
+                                      fontWeight: chat.unreadByAdmin ? 700 : 400,
+                                      whiteSpace: 'nowrap',
+                                      overflow: 'hidden',
+                                      textOverflow: 'ellipsis'
+                                    }}
+                                  >
+                                    {chat.lastMessage || 'No messages'}
+                                  </div>
+
+                                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '6px' }}>
+                                    <span style={{ fontSize: '0.66rem', color: '#94a3b8' }}>
+                                      {chat.userEmail ? chat.userEmail : `#${chat.id.substring(chat.id.length - 6)}`}
+                                    </span>
+                                    {chat.unreadByAdmin && (
+                                      <span
+                                        style={{
+                                          background: '#ef4444',
+                                          color: '#ffffff',
+                                          padding: '1px 6px',
+                                          borderRadius: '8px',
+                                          fontSize: '0.62rem',
+                                          fontWeight: 800
+                                        }}
+                                      >
+                                        NEW
+                                      </span>
+                                    )}
+                                  </div>
+                                </div>
+                              );
+                            })
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Right Panel: Chat Thread */}
+                    {(() => {
+                      const activeChat = liveChatsList.find((c) => c.id === selectedChatId);
+                      if (!activeChat) {
+                        return (
+                          <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', color: '#94a3b8', gap: '8px' }}>
+                            <div style={{ fontSize: '2.5rem' }}>💬</div>
+                            <div style={{ fontWeight: 700, fontSize: '0.95rem' }}>Select a candidate conversation</div>
+                            <div style={{ fontSize: '0.8rem' }}>Click any candidate on the left to review their messages and send replies.</div>
+                          </div>
+                        );
+                      }
+
+                      return (
+                        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+                          {/* Thread Header */}
+                          <div
+                            style={{
+                              padding: '14px 18px',
+                              borderBottom: '1px solid #e2e8f0',
+                              background: '#ffffff',
+                              display: 'flex',
+                              justifyContent: 'space-between',
+                              alignItems: 'center'
+                            }}
+                          >
+                            <div>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                <h4 style={{ margin: 0, fontSize: '0.96rem', fontWeight: 800, color: '#0f172a' }}>
+                                  {activeChat.userName || 'Candidate'}
+                                </h4>
+                                <span
+                                  style={{
+                                    background: '#dcfce7',
+                                    color: '#15803d',
+                                    padding: '2px 8px',
+                                    borderRadius: '10px',
+                                    fontSize: '0.68rem',
+                                    fontWeight: 700
+                                  }}
+                                >
+                                  Active Thread
+                                </span>
+                              </div>
+                              <div style={{ fontSize: '0.74rem', color: '#64748b', marginTop: '2px' }}>
+                                {activeChat.userEmail ? `Email: ${activeChat.userEmail} • ` : ''}Session ID: <code>#{activeChat.id}</code>
+                              </div>
+                            </div>
+
+                            <button
+                              type="button"
+                              onClick={() => {
+                                markChatReadByAdmin(activeChat.id);
+                              }}
+                              style={{
+                                background: '#f1f5f9',
+                                border: '1px solid #cbd5e1',
+                                borderRadius: '6px',
+                                padding: '5px 10px',
+                                fontSize: '0.74rem',
+                                fontWeight: 700,
+                                cursor: 'pointer',
+                                color: '#475569'
+                              }}
+                            >
+                              Mark Read ✓
+                            </button>
+                          </div>
+
+                          {/* Message List */}
+                          <div
+                            style={{
+                              flex: 1,
+                              overflowY: 'auto',
+                              padding: '16px 20px',
+                              display: 'flex',
+                              flexDirection: 'column',
+                              gap: '12px',
+                              background: '#f8fafc'
+                            }}
+                          >
+                            {activeChat.messages?.map((msg) => {
+                              const isAdminMsg = msg.sender === 'admin';
+                              return (
+                                <div
+                                  key={msg.id}
+                                  style={{
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                    alignItems: isAdminMsg ? 'flex-end' : 'flex-start'
+                                  }}
+                                >
+                                  <div
+                                    style={{
+                                      fontSize: '0.68rem',
+                                      fontWeight: 700,
+                                      color: '#64748b',
+                                      marginBottom: '3px',
+                                      display: 'flex',
+                                      alignItems: 'center',
+                                      gap: '5px'
+                                    }}
+                                  >
+                                    <span
+                                      style={{
+                                        background: isAdminMsg ? '#0284c7' : '#64748b',
+                                        color: '#ffffff',
+                                        padding: '1px 5px',
+                                        borderRadius: '4px',
+                                        fontSize: '0.62rem',
+                                        fontWeight: 800
+                                      }}
+                                    >
+                                      {isAdminMsg ? 'YOU (ADMIN)' : 'CANDIDATE'}
+                                    </span>
+                                    <span>{msg.senderName}</span>
+                                    <span>•</span>
+                                    <span>
+                                      {new Date(msg.timestamp).toLocaleTimeString([], {
+                                        hour: '2-digit',
+                                        minute: '2-digit'
+                                      })}
+                                    </span>
+                                  </div>
+
+                                  <div
+                                    style={{
+                                      maxWidth: '75%',
+                                      padding: '10px 14px',
+                                      borderRadius: isAdminMsg ? '14px 14px 2px 14px' : '14px 14px 14px 2px',
+                                      background: isAdminMsg ? '#0f172a' : '#ffffff',
+                                      color: isAdminMsg ? '#ffffff' : '#0f172a',
+                                      fontSize: '0.86rem',
+                                      lineHeight: 1.45,
+                                      boxShadow: '0 2px 6px rgba(0,0,0,0.06)',
+                                      border: isAdminMsg ? 'none' : '1px solid #e2e8f0',
+                                      wordBreak: 'break-word'
+                                    }}
+                                  >
+                                    {msg.text}
+                                  </div>
+                                </div>
+                              );
+                            })}
+                          </div>
+
+                          {/* Quick Canned Responses */}
+                          <div
+                            style={{
+                              background: '#ffffff',
+                              padding: '8px 16px',
+                              borderTop: '1px solid #e2e8f0',
+                              display: 'flex',
+                              gap: '6px',
+                              overflowX: 'auto',
+                              alignItems: 'center'
+                            }}
+                          >
+                            <span style={{ fontSize: '0.7rem', fontWeight: 800, color: '#64748b', whiteSpace: 'nowrap' }}>
+                              ⚡ Quick Replies:
+                            </span>
+                            {[
+                              { label: '✅ Pro Activated', text: '✅ Your Pro access has been approved & activated! Please refresh your browser to start practicing.' },
+                              { label: '🔍 Ask UTR', text: '🔍 Please provide your 12-digit UTR transaction number or UPI payment screenshot so we can verify.' },
+                              { label: '⌨️ Font Help', text: '⌨️ For Mangal Inscript: Enable Hindi (Traditional) in Windows Language Settings. Press Alt+Shift to toggle.' },
+                              { label: '👋 Greeting', text: '👋 Namaste! Thank you for contacting Exam Typing Support Desk. How can we assist you today?' }
+                            ].map((canned, idx) => (
+                              <button
+                                key={idx}
+                                type="button"
+                                onClick={() => setAdminReplyText(canned.text)}
+                                style={{
+                                  background: '#f1f5f9',
+                                  border: '1px solid #cbd5e1',
+                                  borderRadius: '14px',
+                                  padding: '4px 9px',
+                                  fontSize: '0.72rem',
+                                  fontWeight: 700,
+                                  color: '#334155',
+                                  cursor: 'pointer',
+                                  whiteSpace: 'nowrap'
+                                }}
+                              >
+                                {canned.label}
+                              </button>
+                            ))}
+                          </div>
+
+                          {/* Reply Input Form */}
+                          <form
+                            onSubmit={async (e) => {
+                              e.preventDefault();
+                              if (!selectedChatId || !adminReplyText.trim() || isSendingReply) return;
+                              setIsSendingReply(true);
+                              const textToSend = adminReplyText.trim();
+                              setAdminReplyText('');
+                              try {
+                                await sendAdminLiveReply(
+                                  selectedChatId,
+                                  textToSend,
+                                  activeAdminUser?.displayName || activeAdminUser?.email || 'Support Admin'
+                                );
+                              } catch (err) {
+                                console.error('Failed to send admin reply:', err);
+                              } finally {
+                                setIsSendingReply(false);
+                              }
+                            }}
+                            style={{
+                              background: '#ffffff',
+                              padding: '12px 18px',
+                              borderTop: '1px solid #e2e8f0',
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '10px'
+                            }}
+                          >
+                            <input
+                              type="text"
+                              placeholder="Type your reply to candidate (Press Enter to send)..."
+                              value={adminReplyText}
+                              onChange={(e) => setAdminReplyText(e.target.value)}
+                              disabled={isSendingReply}
+                              style={{
+                                flex: 1,
+                                padding: '10px 14px',
+                                borderRadius: '8px',
+                                border: '1.5px solid #cbd5e1',
+                                fontSize: '0.86rem',
+                                outline: 'none'
+                              }}
+                              onFocus={(e) => (e.target.style.borderColor = '#0284c7')}
+                              onBlur={(e) => (e.target.style.borderColor = '#cbd5e1')}
+                            />
+                            <button
+                              type="submit"
+                              disabled={!adminReplyText.trim() || isSendingReply}
+                              style={{
+                                background: adminReplyText.trim() && !isSendingReply ? '#0284c7' : '#94a3b8',
+                                color: '#ffffff',
+                                border: 'none',
+                                borderRadius: '8px',
+                                padding: '10px 18px',
+                                fontSize: '0.86rem',
+                                fontWeight: 800,
+                                cursor: adminReplyText.trim() && !isSendingReply ? 'pointer' : 'default',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '6px'
+                              }}
+                            >
+                              <span>Send Reply</span>
+                              <span>✈️</span>
+                            </button>
+                          </form>
+                        </div>
+                      );
+                    })()}
                   </div>
                 </div>
               )}
