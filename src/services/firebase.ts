@@ -45,6 +45,12 @@ export interface UserProfile {
   isAnonymous?: boolean;
   isAdmin?: boolean;
   role?: 'admin' | 'candidate';
+  is_subscribed?: boolean;
+  subscriptionPlan?: string;
+  subscriptionPlanType?: 'single_exam' | 'category_combo' | 'all_exams_pass';
+  subscriptionExpiresAt?: string;
+  subscriptionExamId?: string;
+  subscriptionExamTitle?: string;
   createdAt: string;
 }
 

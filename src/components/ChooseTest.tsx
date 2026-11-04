@@ -16,6 +16,7 @@ interface ChooseTestProps {
   onOpenDashboard?: () => void;
   onOpenAiGenerator?: () => void;
   onOpenAdmin?: () => void;
+  onOpenPayment?: () => void;
   dailyLivePassages?: Passage[];
 }
 
@@ -656,6 +657,7 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
   onOpenDashboard,
   onOpenAiGenerator,
   onOpenAdmin,
+  onOpenPayment,
   dailyLivePassages = []
 }) => {
   // Navigation: 1 (All Exams), 2 (Medium / Mode Selection), 3 (Test Material Grid), or 'classic_form'
@@ -1534,6 +1536,56 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
               >
                 Login / Sign In 🔑
               </button>
+            )}
+
+            {/* Pro Subscription / Pricing Trigger */}
+            {onOpenPayment && (
+              currentUser?.is_subscribed ? (
+                <div
+                  className="testmentor-metric-pill"
+                  onClick={onOpenPayment}
+                  style={{
+                    cursor: 'pointer',
+                    background: '#f0fdf4',
+                    borderColor: '#22c55e',
+                    boxShadow: '0 2px 6px rgba(34, 197, 94, 0.2)'
+                  }}
+                  title={`Pro Member: ${currentUser.subscriptionPlan || 'Active'} • Tap to view plan`}
+                >
+                  <span style={{ fontSize: '1.2rem' }}>👑</span>
+                  <div>
+                    <div className="testmentor-metric-val" style={{ color: '#15803d' }}>
+                      Pro Member
+                    </div>
+                    <div className="testmentor-metric-lbl" style={{ color: '#16a34a' }}>
+                      {currentUser.subscriptionPlan || 'Active Plan'} &bull; Details →
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <button
+                  onClick={onOpenPayment}
+                  style={{
+                    background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
+                    color: '#ffffff',
+                    border: 'none',
+                    padding: '8px 16px',
+                    borderRadius: '10px',
+                    fontWeight: 800,
+                    fontSize: '0.82rem',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    boxShadow: '0 2px 8px rgba(217, 119, 6, 0.35)',
+                    whiteSpace: 'nowrap'
+                  }}
+                  title="Unlock Full 129 Exams, All Mock Tests, and Answer Keys"
+                >
+                  <span>👑</span>
+                  <span>Upgrade to Pro / Plans</span>
+                </button>
+              )
             )}
 
             {/* Classic Date Selector Toggle */}

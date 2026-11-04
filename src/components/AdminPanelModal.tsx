@@ -36,6 +36,15 @@ import {
   saveExamSystemConfig,
   ExamSystemConfig
 } from '../services/adminService';
+import {
+  PaymentSubmission,
+  PromoCode,
+  fetchAllPaymentSubmissions,
+  approvePaymentSubmission,
+  rejectPaymentSubmission,
+  getPromoCodes,
+  savePromoCodes
+} from '../services/paymentService';
 import appLogo from '../assets/logo.png';
 
 interface AdminPanelModalProps {
@@ -71,7 +80,24 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
   const [showPassword, setShowPassword] = useState<boolean>(false);
 
   // Tab State
-  const [activeTab, setActiveTab] = useState<'overview' | 'ai_engine' | 'passages' | 'candidates' | 'settings'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'ai_engine' | 'passages' | 'candidates' | 'payments' | 'settings'>('overview');
+
+  // Payments & Subscriptions State
+  const [paymentsList, setPaymentsList] = useState<PaymentSubmission[]>([]);
+  const [isLoadingPayments, setIsLoadingPayments] = useState<boolean>(false);
+  const [promoCodesList, setPromoCodesList] = useState<PromoCode[]>([]);
+  const [paymentFilterStatus, setPaymentFilterStatus] = useState<'all' | 'pending' | 'approved' | 'rejected'>('all');
+  const [selectedScreenshotUrl, setSelectedScreenshotUrl] = useState<string | null>(null);
+  const [paymentActionLoadingId, setPaymentActionLoadingId] = useState<string | null>(null);
+  const [paymentFeedback, setPaymentFeedback] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
+
+  // New Promo Code Form State
+  const [newPromoCode, setNewPromoCode] = useState<string>('');
+  const [newPromoDiscount, setNewPromoDiscount] = useState<number>(20);
+  const [newPromoType, setNewPromoType] = useState<'percentage' | 'flat'>('percentage');
+  const [newPromoDesc, setNewPromoDesc] = useState<string>('');
+  const [newPromoMinOrder, setNewPromoMinOrder] = useState<number>(0);
+  const [newPromoMaxDiscount, setNewPromoMaxDiscount] = useState<number>(100);
 
   // AI Config State
   const [aiConfig, setAiConfig] = useState<AiConfig>({
@@ -167,6 +193,9 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
 
       // Load Exam Config
       setExamConfig(getExamSystemConfig());
+
+      // Load Payments & Promo Codes
+      loadPaymentsAndPromos();
     }
   }, [isOpen, currentUser]);
 
@@ -260,6 +289,131 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
     } catch (err: any) {
       alert(`Error updating admin role: ${err?.message || 'Failed to update Firestore'}`);
     }
+  };
+
+  // Payments & Subscriptions Handlers
+  const loadPaymentsAndPromos = async () => {
+    setIsLoadingPayments(true);
+    try {
+      const subs = await fetchAllPaymentSubmissions();
+      setPaymentsList(subs);
+      const promos = getPromoCodes();
+      setPromoCodesList(promos);
+    } catch (err) {
+      console.error('Failed to load payments:', err);
+    } finally {
+      setIsLoadingPayments(false);
+    }
+  };
+
+  const pendingPaymentsCount = useMemo(() => {
+    return paymentsList.filter((p) => p.status === 'pending').length;
+  }, [paymentsList]);
+
+  const approvedPaymentsRevenue = useMemo(() => {
+    return paymentsList
+      .filter((p) => p.status === 'approved')
+      .reduce((sum, p) => sum + (p.finalAmount || p.finalAmountPaid || 0), 0);
+  }, [paymentsList]);
+
+  const filteredPayments = useMemo(() => {
+    if (paymentFilterStatus === 'all') return paymentsList;
+    return paymentsList.filter((p) => p.status === paymentFilterStatus);
+  }, [paymentsList, paymentFilterStatus]);
+
+  const handleApprovePayment = async (sub: PaymentSubmission) => {
+    const amount = sub.finalAmount || sub.finalAmountPaid || 0;
+    const examName = sub.selectedExamTitle || sub.examTitle || 'All 129 Exams Combo';
+    const confirmApprove = window.confirm(
+      `Approve ₹${amount} payment from candidate ${sub.userName || sub.userEmail} for ${sub.planName} (${examName})?\n\nThis will immediately activate their Pro subscription!`
+    );
+    if (!confirmApprove) return;
+
+    setPaymentActionLoadingId(sub.id);
+    setPaymentFeedback(null);
+    try {
+      const res = await approvePaymentSubmission(sub.id, activeAdminUser?.email || 'admin@testmentor.in');
+      if (res.success) {
+        setPaymentFeedback({
+          type: 'success',
+          message: `✅ Payment ${sub.id} approved! Pro subscription activated for ${sub.userName || sub.userEmail}.`
+        });
+        await loadPaymentsAndPromos();
+        fetchAllCandidates().then((cands) => setCandidatesList(cands));
+      } else {
+        setPaymentFeedback({ type: 'error', message: `Failed to approve: ${res.message || 'Unknown error'}` });
+      }
+    } catch (err: any) {
+      setPaymentFeedback({ type: 'error', message: err?.message || 'Approval error' });
+    } finally {
+      setPaymentActionLoadingId(null);
+    }
+  };
+
+  const handleRejectPayment = async (sub: PaymentSubmission) => {
+    const reason = window.prompt(
+      `Enter rejection reason for payment from ${sub.userName || sub.userEmail}:`,
+      'Invalid UTR or screenshot verification failed'
+    );
+    if (reason === null) return;
+
+    setPaymentActionLoadingId(sub.id);
+    setPaymentFeedback(null);
+    try {
+      const res = await rejectPaymentSubmission(sub.id, reason, activeAdminUser?.email || 'admin@testmentor.in');
+      if (res.success) {
+        setPaymentFeedback({ type: 'success', message: `Payment ${sub.id} marked as rejected.` });
+        await loadPaymentsAndPromos();
+      } else {
+        setPaymentFeedback({ type: 'error', message: `Failed to reject: ${res.message || 'Unknown error'}` });
+      }
+    } catch (err: any) {
+      setPaymentFeedback({ type: 'error', message: err?.message || 'Rejection error' });
+    } finally {
+      setPaymentActionLoadingId(null);
+    }
+  };
+
+  const handleCreatePromoCode = (e: React.FormEvent) => {
+    e.preventDefault();
+    const code = newPromoCode.trim().toUpperCase();
+    if (!code) return;
+    if (promoCodesList.some((p) => p.code === code)) {
+      alert(`Promo code ${code} already exists!`);
+      return;
+    }
+    const updated: PromoCode[] = [
+      ...promoCodesList,
+      {
+        code,
+        discountType: newPromoType,
+        discountValue: Number(newPromoDiscount),
+        description: newPromoDesc || (newPromoType === 'percentage' ? `${newPromoDiscount}% OFF` : `₹${newPromoDiscount} Flat OFF`),
+        minOrderValue: Number(newPromoMinOrder) || 0,
+        minOrderAmount: Number(newPromoMinOrder) || 0,
+        maxDiscount: newPromoType === 'percentage' ? Number(newPromoMaxDiscount) : undefined,
+        maxDiscountAmount: newPromoType === 'percentage' ? Number(newPromoMaxDiscount) : undefined,
+        isActive: true
+      }
+    ];
+    savePromoCodes(updated);
+    setPromoCodesList(updated);
+    setNewPromoCode('');
+    setNewPromoDesc('');
+    alert(`Promo code ${code} created successfully!`);
+  };
+
+  const handleTogglePromoStatus = (code: string) => {
+    const updated = promoCodesList.map((p) => (p.code === code ? { ...p, isActive: !p.isActive } : p));
+    savePromoCodes(updated);
+    setPromoCodesList(updated);
+  };
+
+  const handleDeletePromoCode = (code: string) => {
+    if (!window.confirm(`Delete promo code ${code}?`)) return;
+    const updated = promoCodesList.filter((p) => p.code !== code);
+    savePromoCodes(updated);
+    setPromoCodesList(updated);
   };
 
   // AI Handlers
@@ -973,6 +1127,10 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                 { id: 'ai_engine', label: '⚡ AI Engine & Daily Generator' },
                 { id: 'passages', label: `📚 Passage Studio (${passages.length})` },
                 { id: 'candidates', label: `👥 Candidates & Firebase Roles (${candidatesList.length})` },
+                {
+                  id: 'payments',
+                  label: `💳 Payments & Subscriptions (${pendingPaymentsCount > 0 ? `🚨 ${pendingPaymentsCount} PENDING` : paymentsList.length})`
+                },
                 { id: 'settings', label: '⚙️ Governance & Security' }
               ].map((tab) => (
                 <button
@@ -1919,6 +2077,870 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                         })}
                       </tbody>
                     </table>
+                  </div>
+                </div>
+              )}
+
+              {/* --------------------------------------------------
+                  TAB: PAYMENTS & SUBSCRIPTIONS
+                  -------------------------------------------------- */}
+              {activeTab === 'payments' && (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+                  {/* Feedback Notification */}
+                  {paymentFeedback && (
+                    <div
+                      style={{
+                        padding: '12px 16px',
+                        borderRadius: '10px',
+                        background: paymentFeedback.type === 'success' ? '#f0fdf4' : '#fef2f2',
+                        border: `1px solid ${paymentFeedback.type === 'success' ? '#86efac' : '#fecaca'}`,
+                        color: paymentFeedback.type === 'success' ? '#166534' : '#991b1b',
+                        fontWeight: 700,
+                        fontSize: '0.88rem',
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center'
+                      }}
+                    >
+                      <span>{paymentFeedback.message}</span>
+                      <button
+                        onClick={() => setPaymentFeedback(null)}
+                        style={{ background: 'transparent', border: 'none', cursor: 'pointer', fontSize: '1rem', color: 'inherit' }}
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  )}
+
+                  {/* Payment KPIs */}
+                  <div
+                    style={{
+                      display: 'grid',
+                      gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+                      gap: '16px'
+                    }}
+                  >
+                    <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '18px' }}>
+                      <div style={{ fontSize: '0.75rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase' }}>
+                        Total Submissions
+                      </div>
+                      <div style={{ fontSize: '1.8rem', fontWeight: 800, color: '#0f172a', margin: '4px 0' }}>
+                        {paymentsList.length}
+                      </div>
+                      <div style={{ fontSize: '0.75rem', color: '#64748b' }}>QR UPI Candidate Transactions</div>
+                    </div>
+
+                    <div
+                      style={{
+                        background: pendingPaymentsCount > 0 ? '#fffbeb' : '#ffffff',
+                        border: pendingPaymentsCount > 0 ? '1.5px solid #f59e0b' : '1px solid #e2e8f0',
+                        borderRadius: '12px',
+                        padding: '18px'
+                      }}
+                    >
+                      <div style={{ fontSize: '0.75rem', fontWeight: 700, color: pendingPaymentsCount > 0 ? '#b45309' : '#64748b', textTransform: 'uppercase' }}>
+                        Pending Approvals
+                      </div>
+                      <div style={{ fontSize: '1.8rem', fontWeight: 800, color: pendingPaymentsCount > 0 ? '#d97706' : '#0f172a', margin: '4px 0' }}>
+                        {pendingPaymentsCount}
+                      </div>
+                      <div style={{ fontSize: '0.75rem', color: pendingPaymentsCount > 0 ? '#b45309' : '#64748b', fontWeight: 600 }}>
+                        {pendingPaymentsCount > 0 ? '🚨 Action Required: Review UTR' : 'All transactions reviewed'}
+                      </div>
+                    </div>
+
+                    <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '18px' }}>
+                      <div style={{ fontSize: '0.75rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase' }}>
+                        Approved Pro Subscriptions
+                      </div>
+                      <div style={{ fontSize: '1.8rem', fontWeight: 800, color: '#16a34a', margin: '4px 0' }}>
+                        {paymentsList.filter((p) => p.status === 'approved').length}
+                      </div>
+                      <div style={{ fontSize: '0.75rem', color: '#15803d', fontWeight: 600 }}>Active Subscribed Candidates</div>
+                    </div>
+
+                    <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '18px' }}>
+                      <div style={{ fontSize: '0.75rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase' }}>
+                        Total Verified Revenue
+                      </div>
+                      <div style={{ fontSize: '1.8rem', fontWeight: 800, color: '#0284c7', margin: '4px 0' }}>
+                        ₹{approvedPaymentsRevenue}
+                      </div>
+                      <div style={{ fontSize: '0.75rem', color: '#0369a1', fontWeight: 600 }}>From Approved QR Payments</div>
+                    </div>
+
+                    <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '18px' }}>
+                      <div style={{ fontSize: '0.75rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase' }}>
+                        Active Promo Codes
+                      </div>
+                      <div style={{ fontSize: '1.8rem', fontWeight: 800, color: '#8b5cf6', margin: '4px 0' }}>
+                        {promoCodesList.filter((p) => p.isActive).length}
+                      </div>
+                      <div style={{ fontSize: '0.75rem', color: '#7c3aed', fontWeight: 600 }}>Discount Coupons Live</div>
+                    </div>
+                  </div>
+
+                  {/* Submissions Management Section */}
+                  <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '20px' }}>
+                    <div
+                      style={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        flexWrap: 'wrap',
+                        gap: '12px',
+                        marginBottom: '16px'
+                      }}
+                    >
+                      <div>
+                        <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 800, color: '#0f172a' }}>
+                          💳 Candidate Payment Submissions & Approvals
+                        </h3>
+                        <p style={{ margin: '4px 0 0 0', fontSize: '0.8rem', color: '#64748b' }}>
+                          Review candidate 12-digit UTR numbers and receipt screenshots to activate Pro exam memberships.
+                        </p>
+                      </div>
+
+                      <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                        {/* Status Filter Pills */}
+                        {(['all', 'pending', 'approved', 'rejected'] as const).map((st) => (
+                          <button
+                            key={st}
+                            onClick={() => setPaymentFilterStatus(st)}
+                            style={{
+                              padding: '6px 12px',
+                              borderRadius: '8px',
+                              border: paymentFilterStatus === st ? '2px solid #0284c7' : '1px solid #cbd5e1',
+                              background: paymentFilterStatus === st ? '#e0f2fe' : '#ffffff',
+                              color: paymentFilterStatus === st ? '#0284c7' : '#475569',
+                              fontSize: '0.75rem',
+                              fontWeight: 700,
+                              cursor: 'pointer',
+                              textTransform: 'uppercase'
+                            }}
+                          >
+                            {st === 'pending' && pendingPaymentsCount > 0 ? `⏳ PENDING (${pendingPaymentsCount})` : st}
+                          </button>
+                        ))}
+
+                        <button
+                          onClick={loadPaymentsAndPromos}
+                          disabled={isLoadingPayments}
+                          style={{
+                            padding: '6px 12px',
+                            borderRadius: '8px',
+                            border: '1px solid #cbd5e1',
+                            background: '#f8fafc',
+                            color: '#334155',
+                            fontSize: '0.75rem',
+                            fontWeight: 700,
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '4px'
+                          }}
+                          title="Refresh payment submissions"
+                        >
+                          🔄 Refresh
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Submissions Table */}
+                    <div style={{ overflowX: 'auto' }}>
+                      <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.82rem' }}>
+                        <thead>
+                          <tr style={{ background: '#f8fafc', borderBottom: '2px solid #e2e8f0', textAlign: 'left', color: '#475569' }}>
+                            <th style={{ padding: '10px 12px' }}>Date / Request ID</th>
+                            <th style={{ padding: '10px 12px' }}>Candidate</th>
+                            <th style={{ padding: '10px 12px' }}>Plan & Target Exam</th>
+                            <th style={{ padding: '10px 12px' }}>Amount & Coupon</th>
+                            <th style={{ padding: '10px 12px' }}>UTR / Txn ID</th>
+                            <th style={{ padding: '10px 12px' }}>Payment Screenshot</th>
+                            <th style={{ padding: '10px 12px' }}>Status</th>
+                            <th style={{ padding: '10px 12px', textAlign: 'center' }}>Admin Actions</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {filteredPayments.length === 0 ? (
+                            <tr>
+                              <td colSpan={8} style={{ padding: '36px', textAlign: 'center', color: '#64748b' }}>
+                                <div style={{ fontSize: '2rem', marginBottom: '8px' }}>💳</div>
+                                <div style={{ fontWeight: 700, fontSize: '0.95rem' }}>No payment submissions found</div>
+                                <div style={{ fontSize: '0.8rem', color: '#94a3b8' }}>
+                                  When candidates pay via PhonePe QR code and submit their UTR transaction ID, they will appear here for review.
+                                </div>
+                              </td>
+                            </tr>
+                          ) : (
+                            filteredPayments.map((sub) => {
+                              const isPending = sub.status === 'pending';
+                              const isApproved = sub.status === 'approved';
+                              const isRejected = sub.status === 'rejected';
+                              const isActing = paymentActionLoadingId === sub.id;
+
+                              return (
+                                <tr key={sub.id} style={{ borderBottom: '1px solid #f1f5f9', background: isPending ? '#fffdf7' : 'transparent' }}>
+                                  {/* Date & ID */}
+                                  <td style={{ padding: '10px 12px', whiteSpace: 'nowrap' }}>
+                                    <div style={{ fontWeight: 700, color: '#0f172a' }}>
+                                      {new Date(sub.submittedAt).toLocaleDateString('en-IN', {
+                                        day: '2-digit',
+                                        month: 'short',
+                                        year: 'numeric'
+                                      })}
+                                    </div>
+                                    <div style={{ fontSize: '0.72rem', color: '#64748b' }}>
+                                      {new Date(sub.submittedAt).toLocaleTimeString('en-IN', {
+                                        hour: '2-digit',
+                                        minute: '2-digit'
+                                      })}
+                                    </div>
+                                    <div style={{ fontSize: '0.68rem', color: '#94a3b8', fontFamily: 'monospace' }}>
+                                      #{sub.id.substring(0, 8)}
+                                    </div>
+                                  </td>
+
+                                  {/* Candidate */}
+                                  <td style={{ padding: '10px 12px' }}>
+                                    <div style={{ fontWeight: 700, color: '#0f172a' }}>
+                                      {sub.userName || 'Candidate'}
+                                    </div>
+                                    <div style={{ fontSize: '0.75rem', color: '#0284c7' }}>
+                                      {sub.userEmail}
+                                    </div>
+                                    {sub.userPhone && (
+                                      <div style={{ fontSize: '0.72rem', color: '#64748b' }}>
+                                        📞 {sub.userPhone}
+                                      </div>
+                                    )}
+                                  </td>
+
+                                  {/* Plan & Exam */}
+                                  <td style={{ padding: '10px 12px' }}>
+                                    <div style={{ display: 'inline-block', fontWeight: 800, color: '#4338ca', background: '#e0e7ff', padding: '2px 6px', borderRadius: '4px', fontSize: '0.72rem', marginBottom: '2px' }}>
+                                      {sub.planName}
+                                    </div>
+                                    <div style={{ fontWeight: 600, color: '#334155', fontSize: '0.8rem' }}>
+                                      {sub.selectedExamTitle || sub.examTitle || 'All 129 Exams Combo'}
+                                    </div>
+                                    <div style={{ fontSize: '0.7rem', color: '#64748b' }}>
+                                      Duration: {sub.durationMonths || 1} Month{(sub.durationMonths || 1) > 1 ? 's' : ''}
+                                    </div>
+                                  </td>
+
+                                  {/* Amount */}
+                                  <td style={{ padding: '10px 12px', whiteSpace: 'nowrap' }}>
+                                    <div style={{ fontSize: '1rem', fontWeight: 800, color: '#0f172a' }}>
+                                      ₹{sub.finalAmount || sub.finalAmountPaid || 0}
+                                    </div>
+                                    {sub.discountAmount && sub.discountAmount > 0 ? (
+                                      <div style={{ fontSize: '0.7rem', color: '#16a34a', fontWeight: 700 }}>
+                                        🎟️ {sub.promoCodeApplied || sub.promoCodeUsed} (-₹{sub.discountAmount})
+                                      </div>
+                                    ) : (
+                                      <div style={{ fontSize: '0.7rem', color: '#94a3b8' }}>
+                                        No coupon
+                                      </div>
+                                    )}
+                                  </td>
+
+                                  {/* UTR */}
+                                  <td style={{ padding: '10px 12px' }}>
+                                    <div
+                                      onClick={() => {
+                                        navigator.clipboard.writeText(sub.utrNumber);
+                                        alert(`Copied UTR: ${sub.utrNumber}`);
+                                      }}
+                                      style={{
+                                        fontFamily: 'monospace',
+                                        fontWeight: 800,
+                                        fontSize: '0.85rem',
+                                        color: '#0f172a',
+                                        background: '#f1f5f9',
+                                        padding: '4px 8px',
+                                        borderRadius: '6px',
+                                        cursor: 'pointer',
+                                        display: 'inline-block',
+                                        border: '1px solid #cbd5e1'
+                                      }}
+                                      title="Click to copy UTR"
+                                    >
+                                      {sub.utrNumber} 📋
+                                    </div>
+                                    <div style={{ fontSize: '0.7rem', color: '#64748b', marginTop: '2px' }}>
+                                      PhonePe / UPI Ref
+                                    </div>
+                                  </td>
+
+                                  {/* Screenshot Proof */}
+                                  <td style={{ padding: '10px 12px' }}>
+                                    {sub.screenshotUrl ? (
+                                      <div
+                                        onClick={() => setSelectedScreenshotUrl(sub.screenshotUrl)}
+                                        style={{
+                                          display: 'flex',
+                                          alignItems: 'center',
+                                          gap: '6px',
+                                          cursor: 'pointer'
+                                        }}
+                                        title="Click to zoom screenshot"
+                                      >
+                                        <img
+                                          src={sub.screenshotUrl}
+                                          alt="Payment receipt proof"
+                                          style={{
+                                            width: '42px',
+                                            height: '42px',
+                                            objectFit: 'cover',
+                                            borderRadius: '6px',
+                                            border: '1.5px solid #0284c7',
+                                            boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+                                          }}
+                                        />
+                                        <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#0284c7' }}>
+                                          View 🔍
+                                        </span>
+                                      </div>
+                                    ) : (
+                                      <span style={{ fontSize: '0.75rem', color: '#94a3b8', fontStyle: 'italic' }}>
+                                        No image
+                                      </span>
+                                    )}
+                                  </td>
+
+                                  {/* Status */}
+                                  <td style={{ padding: '10px 12px', whiteSpace: 'nowrap' }}>
+                                    {isPending && (
+                                      <span
+                                        style={{
+                                          padding: '4px 10px',
+                                          borderRadius: '20px',
+                                          background: '#fffbeb',
+                                          color: '#b45309',
+                                          fontWeight: 800,
+                                          fontSize: '0.72rem',
+                                          border: '1px solid #fde68a',
+                                          display: 'inline-block'
+                                        }}
+                                      >
+                                        ⏳ PENDING
+                                      </span>
+                                    )}
+                                    {isApproved && (
+                                      <div>
+                                        <span
+                                          style={{
+                                            padding: '4px 10px',
+                                            borderRadius: '20px',
+                                            background: '#f0fdf4',
+                                            color: '#166534',
+                                            fontWeight: 800,
+                                            fontSize: '0.72rem',
+                                            border: '1px solid #bbf7d0',
+                                            display: 'inline-block'
+                                          }}
+                                        >
+                                          ✅ APPROVED
+                                        </span>
+                                        {(sub.reviewedAt || sub.approvedAt) && (
+                                          <div style={{ fontSize: '0.68rem', color: '#15803d', marginTop: '2px' }}>
+                                            {new Date(sub.reviewedAt || sub.approvedAt!).toLocaleDateString()}
+                                          </div>
+                                        )}
+                                      </div>
+                                    )}
+                                    {isRejected && (
+                                      <div>
+                                        <span
+                                          style={{
+                                            padding: '4px 10px',
+                                            borderRadius: '20px',
+                                            background: '#fef2f2',
+                                            color: '#991b1b',
+                                            fontWeight: 800,
+                                            fontSize: '0.72rem',
+                                            border: '1px solid #fecaca',
+                                            display: 'inline-block'
+                                          }}
+                                        >
+                                          ❌ REJECTED
+                                        </span>
+                                        {sub.rejectionReason && (
+                                          <div style={{ fontSize: '0.68rem', color: '#b91c1c', marginTop: '2px', maxWidth: '120px' }}>
+                                            {sub.rejectionReason}
+                                          </div>
+                                        )}
+                                      </div>
+                                    )}
+                                  </td>
+
+                                  {/* Actions */}
+                                  <td style={{ padding: '10px 12px', textAlign: 'center', whiteSpace: 'nowrap' }}>
+                                    {isPending && (
+                                      <div style={{ display: 'flex', gap: '6px', justifyContent: 'center' }}>
+                                        <button
+                                          onClick={() => handleApprovePayment(sub)}
+                                          disabled={isActing}
+                                          style={{
+                                            background: '#16a34a',
+                                            color: '#ffffff',
+                                            border: 'none',
+                                            padding: '6px 12px',
+                                            borderRadius: '6px',
+                                            fontWeight: 700,
+                                            fontSize: '0.75rem',
+                                            cursor: isActing ? 'not-allowed' : 'pointer'
+                                          }}
+                                          title="Verify payment and activate Pro subscription"
+                                        >
+                                          {isActing ? '...' : '✅ Approve'}
+                                        </button>
+
+                                        <button
+                                          onClick={() => handleRejectPayment(sub)}
+                                          disabled={isActing}
+                                          style={{
+                                            background: '#ef4444',
+                                            color: '#ffffff',
+                                            border: 'none',
+                                            padding: '6px 10px',
+                                            borderRadius: '6px',
+                                            fontWeight: 700,
+                                            fontSize: '0.75rem',
+                                            cursor: isActing ? 'not-allowed' : 'pointer'
+                                          }}
+                                          title="Reject payment submission"
+                                        >
+                                          {isActing ? '...' : '❌ Reject'}
+                                        </button>
+                                      </div>
+                                    )}
+
+                                    {isApproved && (
+                                      <button
+                                        onClick={() => handleRejectPayment(sub)}
+                                        disabled={isActing}
+                                        style={{
+                                          background: 'transparent',
+                                          color: '#dc2626',
+                                          border: '1px solid #fca5a5',
+                                          padding: '4px 8px',
+                                          borderRadius: '6px',
+                                          fontWeight: 600,
+                                          fontSize: '0.7rem',
+                                          cursor: isActing ? 'not-allowed' : 'pointer'
+                                        }}
+                                        title="Revoke Pro subscription"
+                                      >
+                                        Revoke Pro
+                                      </button>
+                                    )}
+
+                                    {isRejected && (
+                                      <button
+                                        onClick={() => handleApprovePayment(sub)}
+                                        disabled={isActing}
+                                        style={{
+                                          background: 'transparent',
+                                          color: '#16a34a',
+                                          border: '1px solid #86efac',
+                                          padding: '4px 8px',
+                                          borderRadius: '6px',
+                                          fontWeight: 600,
+                                          fontSize: '0.7rem',
+                                          cursor: isActing ? 'not-allowed' : 'pointer'
+                                        }}
+                                        title="Re-approve this payment"
+                                      >
+                                        Re-approve
+                                      </button>
+                                    )}
+                                  </td>
+                                </tr>
+                              );
+                            })
+                          )}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+
+                  {/* Promo Codes Management Suite */}
+                  <div
+                    style={{
+                      display: 'grid',
+                      gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))',
+                      gap: '20px'
+                    }}
+                  >
+                    {/* Active Promo Codes List */}
+                    <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '20px' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
+                        <div>
+                          <h3 style={{ margin: 0, fontSize: '1rem', fontWeight: 800, color: '#0f172a' }}>
+                            🎟️ Live Discount Promo Codes ({promoCodesList.length})
+                          </h3>
+                          <div style={{ fontSize: '0.75rem', color: '#64748b' }}>
+                            Candidates enter these codes during payment for instant discounts.
+                          </div>
+                        </div>
+                      </div>
+
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                        {promoCodesList.map((promo) => (
+                          <div
+                            key={promo.code}
+                            style={{
+                              display: 'flex',
+                              justifyContent: 'space-between',
+                              alignItems: 'center',
+                              padding: '10px 14px',
+                              borderRadius: '8px',
+                              background: promo.isActive ? '#f8fafc' : '#f1f5f9',
+                              border: '1px solid #e2e8f0',
+                              opacity: promo.isActive ? 1 : 0.65
+                            }}
+                          >
+                            <div>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                <span
+                                  style={{
+                                    fontFamily: 'monospace',
+                                    fontWeight: 800,
+                                    fontSize: '0.88rem',
+                                    color: '#4338ca',
+                                    background: '#e0e7ff',
+                                    padding: '2px 8px',
+                                    borderRadius: '4px'
+                                  }}
+                                >
+                                  {promo.code}
+                                </span>
+                                <span
+                                  style={{
+                                    fontSize: '0.75rem',
+                                    fontWeight: 700,
+                                    color: promo.discountType === 'percentage' ? '#047857' : '#0369a1',
+                                    background: promo.discountType === 'percentage' ? '#d1fae5' : '#e0f2fe',
+                                    padding: '2px 6px',
+                                    borderRadius: '4px'
+                                  }}
+                                >
+                                  {promo.discountType === 'percentage' ? `${promo.discountValue}% OFF` : `₹${promo.discountValue} FLAT OFF`}
+                                </span>
+                              </div>
+                              <div style={{ fontSize: '0.75rem', color: '#475569', marginTop: '4px' }}>
+                                {promo.description} &bull; Min Order: ₹{promo.minOrderValue || promo.minOrderAmount || 0}
+                                {(promo.maxDiscount || promo.maxDiscountAmount) ? ` &bull; Max: ₹${promo.maxDiscount || promo.maxDiscountAmount}` : ''}
+                              </div>
+                            </div>
+
+                            <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                              <button
+                                onClick={() => handleTogglePromoStatus(promo.code)}
+                                style={{
+                                  padding: '4px 8px',
+                                  borderRadius: '6px',
+                                  border: 'none',
+                                  fontSize: '0.72rem',
+                                  fontWeight: 700,
+                                  cursor: 'pointer',
+                                  background: promo.isActive ? '#dcfce7' : '#fee2e2',
+                                  color: promo.isActive ? '#15803d' : '#991b1b'
+                                }}
+                              >
+                                {promo.isActive ? 'Active' : 'Disabled'}
+                              </button>
+
+                              <button
+                                onClick={() => handleDeletePromoCode(promo.code)}
+                                style={{
+                                  padding: '4px 8px',
+                                  borderRadius: '6px',
+                                  border: '1px solid #fecaca',
+                                  fontSize: '0.72rem',
+                                  fontWeight: 700,
+                                  cursor: 'pointer',
+                                  background: '#ffffff',
+                                  color: '#dc2626'
+                                }}
+                                title="Delete promo code"
+                              >
+                                🗑️
+                              </button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Create New Promo Code Form */}
+                    <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '20px' }}>
+                      <h3 style={{ margin: '0 0 14px 0', fontSize: '1rem', fontWeight: 800, color: '#0f172a' }}>
+                        ➕ Create New Promo Code
+                      </h3>
+
+                      <form onSubmit={handleCreatePromoCode} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                        <div>
+                          <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#475569', marginBottom: '4px' }}>
+                            Promo Code Name (Uppercase):
+                          </label>
+                          <input
+                            type="text"
+                            placeholder="e.g. POLICE2026, SUMMER50"
+                            value={newPromoCode}
+                            onChange={(e) => setNewPromoCode(e.target.value.toUpperCase())}
+                            required
+                            style={{
+                              width: '100%',
+                              padding: '8px 12px',
+                              borderRadius: '8px',
+                              border: '1px solid #cbd5e1',
+                              fontSize: '0.85rem',
+                              fontFamily: 'monospace',
+                              fontWeight: 700
+                            }}
+                          />
+                        </div>
+
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                          <div>
+                            <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#475569', marginBottom: '4px' }}>
+                              Discount Type:
+                            </label>
+                            <select
+                              value={newPromoType}
+                              onChange={(e) => setNewPromoType(e.target.value as any)}
+                              style={{
+                                width: '100%',
+                                padding: '8px 10px',
+                                borderRadius: '8px',
+                                border: '1px solid #cbd5e1',
+                                fontSize: '0.85rem'
+                              }}
+                            >
+                              <option value="percentage">Percentage (%)</option>
+                              <option value="flat">Flat Rupee (₹)</option>
+                            </select>
+                          </div>
+
+                          <div>
+                            <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#475569', marginBottom: '4px' }}>
+                              Discount Value:
+                            </label>
+                            <input
+                              type="number"
+                              min="1"
+                              value={newPromoDiscount}
+                              onChange={(e) => setNewPromoDiscount(Number(e.target.value))}
+                              required
+                              style={{
+                                width: '100%',
+                                padding: '8px 10px',
+                                borderRadius: '8px',
+                                border: '1px solid #cbd5e1',
+                                fontSize: '0.85rem',
+                                fontWeight: 700
+                              }}
+                            />
+                          </div>
+                        </div>
+
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                          <div>
+                            <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#475569', marginBottom: '4px' }}>
+                              Min Order Amount (₹):
+                            </label>
+                            <input
+                              type="number"
+                              min="0"
+                              value={newPromoMinOrder}
+                              onChange={(e) => setNewPromoMinOrder(Number(e.target.value))}
+                              style={{
+                                width: '100%',
+                                padding: '8px 10px',
+                                borderRadius: '8px',
+                                border: '1px solid #cbd5e1',
+                                fontSize: '0.85rem'
+                              }}
+                            />
+                          </div>
+
+                          {newPromoType === 'percentage' && (
+                            <div>
+                              <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#475569', marginBottom: '4px' }}>
+                                Max Discount Cap (₹):
+                              </label>
+                              <input
+                                type="number"
+                                min="1"
+                                value={newPromoMaxDiscount}
+                                onChange={(e) => setNewPromoMaxDiscount(Number(e.target.value))}
+                                style={{
+                                  width: '100%',
+                                  padding: '8px 10px',
+                                  borderRadius: '8px',
+                                  border: '1px solid #cbd5e1',
+                                  fontSize: '0.85rem'
+                                }}
+                              />
+                            </div>
+                          )}
+                        </div>
+
+                        <div>
+                          <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#475569', marginBottom: '4px' }}>
+                            Description:
+                          </label>
+                          <input
+                            type="text"
+                            placeholder="e.g. Special candidate festival discount"
+                            value={newPromoDesc}
+                            onChange={(e) => setNewPromoDesc(e.target.value)}
+                            style={{
+                              width: '100%',
+                              padding: '8px 12px',
+                              borderRadius: '8px',
+                              border: '1px solid #cbd5e1',
+                              fontSize: '0.85rem'
+                            }}
+                          />
+                        </div>
+
+                        <button
+                          type="submit"
+                          style={{
+                            padding: '10px 16px',
+                            background: 'linear-gradient(135deg, #0284c7 0%, #0369a1 100%)',
+                            color: '#ffffff',
+                            border: 'none',
+                            borderRadius: '8px',
+                            fontWeight: 700,
+                            fontSize: '0.85rem',
+                            cursor: 'pointer',
+                            marginTop: '6px'
+                          }}
+                        >
+                          ➕ Create & Publish Promo Code
+                        </button>
+                      </form>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Screenshot Lightbox Modal */}
+              {selectedScreenshotUrl && (
+                <div
+                  style={{
+                    position: 'fixed',
+                    inset: 0,
+                    background: 'rgba(15, 23, 42, 0.85)',
+                    backdropFilter: 'blur(6px)',
+                    zIndex: 100000,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    padding: '20px'
+                  }}
+                  onClick={() => setSelectedScreenshotUrl(null)}
+                >
+                  <div
+                    style={{
+                      background: '#ffffff',
+                      borderRadius: '16px',
+                      maxWidth: '520px',
+                      width: '100%',
+                      maxHeight: '90vh',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      overflow: 'hidden',
+                      boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)'
+                    }}
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <div
+                      style={{
+                        padding: '16px 20px',
+                        background: '#0f172a',
+                        color: '#ffffff',
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center'
+                      }}
+                    >
+                      <div style={{ fontWeight: 800, fontSize: '0.95rem' }}>
+                        🧾 Payment Receipt Proof
+                      </div>
+                      <button
+                        onClick={() => setSelectedScreenshotUrl(null)}
+                        style={{
+                          background: 'transparent',
+                          border: 'none',
+                          color: '#ffffff',
+                          fontSize: '1.2rem',
+                          cursor: 'pointer'
+                        }}
+                      >
+                        ✕
+                      </button>
+                    </div>
+
+                    <div style={{ padding: '16px', flex: 1, overflowY: 'auto', textAlign: 'center', background: '#f8fafc' }}>
+                      <img
+                        src={selectedScreenshotUrl}
+                        alt="Candidate payment screenshot"
+                        style={{
+                          maxWidth: '100%',
+                          maxHeight: '65vh',
+                          objectFit: 'contain',
+                          borderRadius: '8px',
+                          border: '1px solid #cbd5e1'
+                        }}
+                      />
+                    </div>
+
+                    <div
+                      style={{
+                        padding: '14px 20px',
+                        background: '#ffffff',
+                        borderTop: '1px solid #e2e8f0',
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center'
+                      }}
+                    >
+                      <a
+                        href={selectedScreenshotUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                        style={{
+                          fontSize: '0.8rem',
+                          color: '#0284c7',
+                          fontWeight: 700,
+                          textDecoration: 'none'
+                        }}
+                      >
+                        Open Original in New Tab ↗
+                      </a>
+
+                      <button
+                        onClick={() => setSelectedScreenshotUrl(null)}
+                        style={{
+                          padding: '8px 18px',
+                          background: '#0f172a',
+                          color: '#ffffff',
+                          border: 'none',
+                          borderRadius: '8px',
+                          fontWeight: 700,
+                          fontSize: '0.8rem',
+                          cursor: 'pointer'
+                        }}
+                      >
+                        Close Preview
+                      </button>
+                    </div>
                   </div>
                 </div>
               )}
