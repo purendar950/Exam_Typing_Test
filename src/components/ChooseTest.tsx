@@ -125,25 +125,39 @@ const ExamBenchmarkTestCard: React.FC<ExamBenchmarkTestCardProps> = ({
 
   return (
     <div
-      className="testmentor-exam-card exam-card-hover"
+      className="testmentor-exam-card exam-card-hover benchmark-test-card"
       onClick={handleCardClick}
       style={{
         background: isLocked ? '#fffdfa' : '#ffffff',
         border: isLocked ? '1.5px solid #fed7aa' : '1.5px solid #e2e8f0',
         borderRadius: '14px',
-        padding: '18px',
+        padding: '16px',
         display: 'flex',
         flexDirection: 'column',
         justifyContent: 'space-between',
         cursor: 'pointer',
         boxShadow: isLocked ? '0 2px 6px rgba(217, 119, 6, 0.06)' : '0 2px 4px rgba(0,0,0,0.03)',
-        transition: 'all 0.18s ease'
+        transition: 'all 0.18s ease',
+        minWidth: 0,
+        maxWidth: '100%',
+        boxSizing: 'border-box',
+        overflow: 'hidden',
+        textAlign: 'left',
+        alignItems: 'stretch'
       }}
     >
-      <div>
+      <div style={{ minWidth: 0 }}>
         {/* Top Header: Organization/Category on left + Language pill on right */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px', gap: '8px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', minWidth: 0 }}>
+        <div style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'flex-start',
+          flexWrap: 'wrap',
+          marginBottom: '10px',
+          gap: '8px',
+          minWidth: 0
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', minWidth: 0, flexShrink: 1 }}>
             <span style={{ fontSize: '1.25rem', flexShrink: 0 }}>{emblem}</span>
             <span style={{
               fontSize: '0.72rem',
@@ -160,7 +174,14 @@ const ExamBenchmarkTestCard: React.FC<ExamBenchmarkTestCardProps> = ({
             </span>
           </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: '5px', flexShrink: 0 }}>
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '5px',
+            flexWrap: 'wrap',
+            justifyContent: 'flex-end',
+            minWidth: 0
+          }}>
             {isDemo && (
               <span style={{
                 fontSize: '0.7rem',
@@ -197,7 +218,8 @@ const ExamBenchmarkTestCard: React.FC<ExamBenchmarkTestCardProps> = ({
                 borderRadius: '4px',
                 background: extraBadge.bg,
                 color: extraBadge.color,
-                border: extraBadge.border ? `1px solid ${extraBadge.border}` : 'none'
+                border: extraBadge.border ? `1px solid ${extraBadge.border}` : 'none',
+                whiteSpace: 'nowrap'
               }}>
                 {extraBadge.text}
               </span>
@@ -224,13 +246,15 @@ const ExamBenchmarkTestCard: React.FC<ExamBenchmarkTestCardProps> = ({
           color: '#0f172a',
           margin: '0 0 10px 0',
           lineHeight: 1.35,
-          minHeight: '40px'
+          minHeight: '40px',
+          wordBreak: 'break-word',
+          overflowWrap: 'break-word'
         }}>
           {title}
         </h3>
 
         {/* 4 Complete Benchmark Badges */}
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginBottom: '14px', alignItems: 'center' }}>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginBottom: '14px', alignItems: 'center', minWidth: 0 }}>
           <span style={{
             fontSize: '0.75rem',
             fontWeight: 700,
@@ -302,10 +326,14 @@ const ExamBenchmarkTestCard: React.FC<ExamBenchmarkTestCardProps> = ({
             marginBottom: '12px',
             display: 'flex',
             alignItems: 'center',
-            gap: '6px'
+            gap: '6px',
+            flexWrap: 'wrap',
+            minWidth: 0
           }}>
-            <span>🔒</span>
-            <span>Pro Test Series • Tests 1–7 Free Demo • Unlock with Pro Pass</span>
+            <span style={{ flexShrink: 0 }}>🔒</span>
+            <span style={{ minWidth: 0, wordBreak: 'break-word' }}>
+              Pro Test Series • Tests 1–7 Free Demo • Unlock with Pro Pass
+            </span>
           </div>
         )}
 
@@ -322,7 +350,10 @@ const ExamBenchmarkTestCard: React.FC<ExamBenchmarkTestCardProps> = ({
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
-            marginBottom: '12px'
+            marginBottom: '12px',
+            flexWrap: 'wrap',
+            gap: '4px',
+            minWidth: 0
           }}>
             <span>✓ {pastAttempt.isQualified ? 'Qualified' : 'Attempted'} • Best: {pastAttempt.bestSpeed} WPM ({pastAttempt.bestAcc}%)</span>
             <span style={{ fontSize: '0.68rem', opacity: 0.85 }}>{pastAttempt.count} {pastAttempt.count === 1 ? 'try' : 'tries'}</span>
@@ -332,7 +363,14 @@ const ExamBenchmarkTestCard: React.FC<ExamBenchmarkTestCardProps> = ({
 
       {/* Actions */}
       <div
-        style={{ display: 'flex', gap: '8px', borderTop: '1px solid #f1f5f9', paddingTop: '12px' }}
+        style={{
+          display: 'flex',
+          gap: '8px',
+          borderTop: '1px solid #f1f5f9',
+          paddingTop: '12px',
+          flexWrap: 'wrap',
+          minWidth: 0
+        }}
         onClick={(e) => e.stopPropagation()}
       >
         {isLocked ? (
@@ -477,25 +515,39 @@ const ExamTypePostCard: React.FC<{
 
   return (
     <div
-      className="testmentor-exam-card exam-card-hover"
+      className="testmentor-exam-card exam-card-hover benchmark-test-card"
       onClick={() => onEnterExam(post)}
       style={{
         background: '#ffffff',
         border: '1.5px solid #e2e8f0',
         borderRadius: '14px',
-        padding: '18px',
+        padding: '16px',
         display: 'flex',
         flexDirection: 'column',
         justifyContent: 'space-between',
         cursor: 'pointer',
         boxShadow: '0 2px 4px rgba(0,0,0,0.03)',
-        transition: 'all 0.18s ease'
+        transition: 'all 0.18s ease',
+        minWidth: 0,
+        maxWidth: '100%',
+        boxSizing: 'border-box',
+        overflow: 'hidden',
+        textAlign: 'left',
+        alignItems: 'stretch'
       }}
     >
-      <div>
+      <div style={{ minWidth: 0 }}>
         {/* Top Header: Organization & Exam Type Badge */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px', gap: '8px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', minWidth: 0 }}>
+        <div style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'flex-start',
+          flexWrap: 'wrap',
+          marginBottom: '10px',
+          gap: '8px',
+          minWidth: 0
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', minWidth: 0, flexShrink: 1 }}>
             <span style={{ fontSize: '1.4rem', flexShrink: 0 }}>{getEmblemForGroup(post.categoryGroup)}</span>
             <span style={{
               fontSize: '0.72rem',
@@ -521,8 +573,7 @@ const ExamTypePostCard: React.FC<{
             background: badgeStyle.bg,
             color: badgeStyle.color,
             border: `1px solid ${badgeStyle.border}`,
-            whiteSpace: 'nowrap',
-            flexShrink: 0
+            whiteSpace: 'nowrap'
           }}>
             {post.examTypeLabel}
           </span>
@@ -2245,12 +2296,7 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
             </div>
 
             {/* Grid Rendering: Either Exam Posts or All 129 Individual Exam Tests */}
-            <div style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))',
-              gap: '16px',
-              marginBottom: '24px'
-            }}>
+            <div className="exam-grid" style={{ marginBottom: '24px' }}>
               {level1ViewMode === 'posts' ? (
                 filteredUnifiedPosts.slice(0, visibleExamsCount).map((post) => (
                   <ExamTypePostCard
@@ -2709,7 +2755,10 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
                       borderRadius: '16px',
                       padding: '20px 24px',
                       marginBottom: '24px',
-                      boxShadow: '0 4px 15px -3px rgba(22, 101, 52, 0.08)'
+                      boxShadow: '0 4px 15px -3px rgba(22, 101, 52, 0.08)',
+                      overflow: 'hidden',
+                      width: '100%',
+                      boxSizing: 'border-box'
                     }}
                   >
                     <div
@@ -2825,13 +2874,7 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
                       </div>
                     </div>
 
-                    <div
-                      style={{
-                        display: 'grid',
-                        gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
-                        gap: '12px'
-                      }}
-                    >
+                    <div className="live-tests-grid">
                       {displayDailyLiveTests.map(renderLiveTestCard)}
                     </div>
                   </section>
@@ -2846,7 +2889,10 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
                       borderRadius: '16px',
                       padding: '20px 24px',
                       marginBottom: '24px',
-                      boxShadow: '0 4px 15px -3px rgba(29, 78, 216, 0.08)'
+                      boxShadow: '0 4px 15px -3px rgba(29, 78, 216, 0.08)',
+                      overflow: 'hidden',
+                      width: '100%',
+                      boxSizing: 'border-box'
                     }}
                   >
                     <div
@@ -2911,13 +2957,7 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
                       )}
                     </div>
 
-                    <div
-                      style={{
-                        display: 'grid',
-                        gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
-                        gap: '12px'
-                      }}
-                    >
+                    <div className="live-tests-grid">
                       {englishLiveTests.map(renderLiveTestCard)}
                     </div>
                   </section>
@@ -2932,7 +2972,10 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
                       borderRadius: '16px',
                       padding: '20px 24px',
                       marginBottom: '24px',
-                      boxShadow: '0 4px 15px -3px rgba(180, 83, 9, 0.08)'
+                      boxShadow: '0 4px 15px -3px rgba(180, 83, 9, 0.08)',
+                      overflow: 'hidden',
+                      width: '100%',
+                      boxSizing: 'border-box'
                     }}
                   >
                     <div
@@ -2997,13 +3040,7 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
                       )}
                     </div>
 
-                    <div
-                      style={{
-                        display: 'grid',
-                        gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
-                        gap: '12px'
-                      }}
-                    >
+                    <div className="live-tests-grid">
                       {hindiMangalLiveTests.map(renderLiveTestCard)}
                     </div>
                   </section>
@@ -3018,7 +3055,10 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
                       borderRadius: '16px',
                       padding: '20px 24px',
                       marginBottom: '24px',
-                      boxShadow: '0 4px 15px -3px rgba(22, 101, 52, 0.08)'
+                      boxShadow: '0 4px 15px -3px rgba(22, 101, 52, 0.08)',
+                      overflow: 'hidden',
+                      width: '100%',
+                      boxSizing: 'border-box'
                     }}
                   >
                     <div
@@ -3061,13 +3101,7 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
                       </div>
                     </div>
 
-                    <div
-                      style={{
-                        display: 'grid',
-                        gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
-                        gap: '12px'
-                      }}
-                    >
+                    <div className="live-tests-grid">
                       {krutiLiveTests.map(renderLiveTestCard)}
                     </div>
                   </section>
