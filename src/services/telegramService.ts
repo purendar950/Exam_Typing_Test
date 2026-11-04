@@ -20,11 +20,15 @@ export interface TelegramConfig {
 
 const STORAGE_KEY_TELEGRAM_CONFIG = 'up_typing_telegram_config';
 
+// ⚠️  SECURITY: botToken, adminChatId, and approvalSecretToken are intentionally
+// left empty here. They must be configured by the administrator through the Admin
+// Panel → Telegram Settings and are stored exclusively in Firestore
+// (system_settings/telegram_config). They are NEVER shipped in the client bundle.
 export const DEFAULT_TELEGRAM_CONFIG: TelegramConfig = {
-  enabled: true,
-  botToken: '9045092848:AAG2KDa7be_krygGwKjiOu3WXSxo5lij06Y',
-  adminChatId: '702252555',
-  approvalSecretToken: 'adm_purendar_sec950',
+  enabled: false,           // disabled until admin configures credentials
+  botToken: '',             // set via Admin Panel → Telegram Settings
+  adminChatId: '',          // set via Admin Panel → Telegram Settings
+  approvalSecretToken: '',  // set via Admin Panel → Telegram Settings
   communityChannelUrl: 'https://t.me/Exam_Typing_Mentor',
   discussionGroupUrl: 'https://t.me/+Lw-tPbRqO0c2ZTA1',
   supportUsername: 'ExamTypingSupportBot'
