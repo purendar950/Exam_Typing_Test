@@ -828,6 +828,13 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
                         🔒 100% Secure • Admin manually approves and activates plan within 15–30 minutes
                       </div>
 
+                      <div style={{ fontSize: '0.70rem', color: '#94a3b8', textAlign: 'center' }}>
+                        By proceeding, you agree to our{' '}
+                        <a href="#/terms" style={{ color: '#0284c7', textDecoration: 'underline' }}>Terms of Service</a>
+                        {' '}&bull;{' '}
+                        <a href="#/refund" style={{ color: '#0284c7', textDecoration: 'underline' }}>Refund Policy</a>
+                      </div>
+
                       <div
                         style={{
                           background: '#f0f9ff',
