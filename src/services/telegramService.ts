@@ -25,8 +25,8 @@ export const DEFAULT_TELEGRAM_CONFIG: TelegramConfig = {
   botToken: '',
   adminChatId: '',
   approvalSecretToken: 'adm_purendar_sec950',
-  communityChannelUrl: 'https://t.me/SSC_PYQ_COMPILATIONS',
-  discussionGroupUrl: 'https://t.me/SSC_PYQ_COMPILATIONS',
+  communityChannelUrl: 'https://t.me/Exam_Typing_Mentor',
+  discussionGroupUrl: 'https://t.me/+Lw-tPbRqO0c2ZTA1',
   supportUsername: 'ExamTypingSupportBot'
 };
 
@@ -41,6 +41,13 @@ export async function getTelegramConfig(): Promise<TelegramConfig> {
         if (!localConfig.adminChatId) localConfig.adminChatId = DEFAULT_TELEGRAM_CONFIG.adminChatId;
         if (!localConfig.botToken) localConfig.botToken = DEFAULT_TELEGRAM_CONFIG.botToken;
         if (!localConfig.supportUsername) localConfig.supportUsername = DEFAULT_TELEGRAM_CONFIG.supportUsername;
+        // Automatically migrate legacy placeholder to user's real channel & group
+        if (!localConfig.communityChannelUrl || localConfig.communityChannelUrl.includes('SSC_PYQ_COMPILATIONS')) {
+          localConfig.communityChannelUrl = DEFAULT_TELEGRAM_CONFIG.communityChannelUrl;
+        }
+        if (!localConfig.discussionGroupUrl || localConfig.discussionGroupUrl.includes('SSC_PYQ_COMPILATIONS')) {
+          localConfig.discussionGroupUrl = DEFAULT_TELEGRAM_CONFIG.discussionGroupUrl;
+        }
       }
     }
   } catch {
@@ -52,13 +59,20 @@ export async function getTelegramConfig(): Promise<TelegramConfig> {
     const snap = await getDoc(doc(db, 'system_settings', 'telegram_config'));
     if (snap.exists()) {
       const cloud = snap.data() as Partial<TelegramConfig>;
+      const cloudChannel = (cloud.communityChannelUrl && !cloud.communityChannelUrl.includes('SSC_PYQ_COMPILATIONS'))
+        ? cloud.communityChannelUrl
+        : DEFAULT_TELEGRAM_CONFIG.communityChannelUrl;
+      const cloudGroup = (cloud.discussionGroupUrl && !cloud.discussionGroupUrl.includes('SSC_PYQ_COMPILATIONS'))
+        ? cloud.discussionGroupUrl
+        : DEFAULT_TELEGRAM_CONFIG.discussionGroupUrl;
+
       const merged: TelegramConfig = {
         enabled: cloud.enabled ?? localConfig?.enabled ?? DEFAULT_TELEGRAM_CONFIG.enabled,
         botToken: cloud.botToken || localConfig?.botToken || DEFAULT_TELEGRAM_CONFIG.botToken,
         adminChatId: cloud.adminChatId || localConfig?.adminChatId || DEFAULT_TELEGRAM_CONFIG.adminChatId,
         approvalSecretToken: cloud.approvalSecretToken || localConfig?.approvalSecretToken || DEFAULT_TELEGRAM_CONFIG.approvalSecretToken,
-        communityChannelUrl: cloud.communityChannelUrl || localConfig?.communityChannelUrl || DEFAULT_TELEGRAM_CONFIG.communityChannelUrl,
-        discussionGroupUrl: cloud.discussionGroupUrl || localConfig?.discussionGroupUrl || DEFAULT_TELEGRAM_CONFIG.discussionGroupUrl,
+        communityChannelUrl: cloudChannel || localConfig?.communityChannelUrl || DEFAULT_TELEGRAM_CONFIG.communityChannelUrl,
+        discussionGroupUrl: cloudGroup || localConfig?.discussionGroupUrl || DEFAULT_TELEGRAM_CONFIG.discussionGroupUrl,
         supportUsername: cloud.supportUsername || localConfig?.supportUsername || DEFAULT_TELEGRAM_CONFIG.supportUsername
       };
       localStorage.setItem(STORAGE_KEY_TELEGRAM_CONFIG, JSON.stringify(merged));

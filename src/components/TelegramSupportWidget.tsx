@@ -12,9 +12,9 @@ export const TelegramSupportWidget: React.FC<TelegramSupportWidgetProps> = ({
 }) => {
   const [isOpen, setIsOpen] = useState(false);
 
-  const channelUrl = config?.communityChannelUrl || 'https://t.me/SSC_PYQ_COMPILATIONS';
-  const groupUrl = config?.discussionGroupUrl || channelUrl;
-  const rawSupport = config?.supportUsername || 'purendar950';
+  const channelUrl = config?.communityChannelUrl || 'https://t.me/Exam_Typing_Mentor';
+  const groupUrl = config?.discussionGroupUrl || 'https://t.me/+Lw-tPbRqO0c2ZTA1';
+  const rawSupport = config?.supportUsername || 'ExamTypingSupportBot';
   const supportUrl = rawSupport.startsWith('http')
     ? rawSupport
     : `https://t.me/${rawSupport.replace(/^@/, '')}`;
