@@ -3026,7 +3026,7 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                           </label>
                           <input
                             type="text"
-                            placeholder="e.g. https://t.me/UP_Police_Typing_Official"
+                            placeholder="e.g. https://t.me/Exam_Typing_Mentor"
                             value={telegramConfig.communityChannelUrl}
                             onChange={(e) => setTelegramConfig({ ...telegramConfig, communityChannelUrl: e.target.value.trim() })}
                             style={{
@@ -3046,7 +3046,7 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                           </label>
                           <input
                             type="text"
-                            placeholder="e.g. https://t.me/UP_Police_Typing_Aspirants"
+                            placeholder="e.g. https://t.me/+Lw-tPbRqO0c2ZTA1"
                             value={telegramConfig.discussionGroupUrl || ''}
                             onChange={(e) => setTelegramConfig({ ...telegramConfig, discussionGroupUrl: e.target.value.trim() })}
                             style={{
