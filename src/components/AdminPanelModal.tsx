@@ -3019,16 +3019,56 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                           </div>
                         </div>
 
-                        {/* Community Channel URL */}
+                        {/* Community Broadcast Channel URL */}
                         <div>
                           <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#475569', marginBottom: '4px' }}>
-                            Public Telegram Channel Link (for Floating Button):
+                            📢 Official Telegram Broadcast Channel:
                           </label>
                           <input
                             type="text"
-                            placeholder="e.g. https://t.me/your_exam_channel"
+                            placeholder="e.g. https://t.me/UP_Police_Typing_Official"
                             value={telegramConfig.communityChannelUrl}
                             onChange={(e) => setTelegramConfig({ ...telegramConfig, communityChannelUrl: e.target.value.trim() })}
+                            style={{
+                              width: '100%',
+                              padding: '8px 12px',
+                              borderRadius: '8px',
+                              border: '1px solid #cbd5e1',
+                              fontSize: '0.85rem'
+                            }}
+                          />
+                        </div>
+
+                        {/* Discussion Group URL */}
+                        <div>
+                          <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#475569', marginBottom: '4px' }}>
+                            👥 Telegram Aspirants Discussion Group:
+                          </label>
+                          <input
+                            type="text"
+                            placeholder="e.g. https://t.me/UP_Police_Typing_Aspirants"
+                            value={telegramConfig.discussionGroupUrl || ''}
+                            onChange={(e) => setTelegramConfig({ ...telegramConfig, discussionGroupUrl: e.target.value.trim() })}
+                            style={{
+                              width: '100%',
+                              padding: '8px 12px',
+                              borderRadius: '8px',
+                              border: '1px solid #cbd5e1',
+                              fontSize: '0.85rem'
+                            }}
+                          />
+                        </div>
+
+                        {/* Support Username */}
+                        <div>
+                          <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#475569', marginBottom: '4px' }}>
+                            🎧 Help & Support Handle / Direct Bot (without @ or with @):
+                          </label>
+                          <input
+                            type="text"
+                            placeholder="e.g. purendar950 or TypingMentorSupportBot"
+                            value={telegramConfig.supportUsername || ''}
+                            onChange={(e) => setTelegramConfig({ ...telegramConfig, supportUsername: e.target.value.trim().replace(/^@/, '') })}
                             style={{
                               width: '100%',
                               padding: '8px 12px',

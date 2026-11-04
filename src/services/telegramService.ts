@@ -14,6 +14,7 @@ export interface TelegramConfig {
   adminChatId: string;
   approvalSecretToken: string;
   communityChannelUrl: string;
+  discussionGroupUrl: string;
   supportUsername: string;
 }
 
@@ -25,7 +26,8 @@ export const DEFAULT_TELEGRAM_CONFIG: TelegramConfig = {
   adminChatId: '',
   approvalSecretToken: 'adm_' + Math.random().toString(36).substring(2, 12),
   communityChannelUrl: 'https://t.me/SSC_PYQ_COMPILATIONS',
-  supportUsername: ''
+  discussionGroupUrl: 'https://t.me/SSC_PYQ_COMPILATIONS',
+  supportUsername: 'purendar950'
 };
 
 // 1. Get & Save Telegram Configuration
@@ -51,6 +53,7 @@ export async function getTelegramConfig(): Promise<TelegramConfig> {
         adminChatId: cloud.adminChatId || localConfig?.adminChatId || DEFAULT_TELEGRAM_CONFIG.adminChatId,
         approvalSecretToken: cloud.approvalSecretToken || localConfig?.approvalSecretToken || DEFAULT_TELEGRAM_CONFIG.approvalSecretToken,
         communityChannelUrl: cloud.communityChannelUrl || localConfig?.communityChannelUrl || DEFAULT_TELEGRAM_CONFIG.communityChannelUrl,
+        discussionGroupUrl: cloud.discussionGroupUrl || localConfig?.discussionGroupUrl || DEFAULT_TELEGRAM_CONFIG.discussionGroupUrl,
         supportUsername: cloud.supportUsername || localConfig?.supportUsername || DEFAULT_TELEGRAM_CONFIG.supportUsername
       };
       localStorage.setItem(STORAGE_KEY_TELEGRAM_CONFIG, JSON.stringify(merged));
