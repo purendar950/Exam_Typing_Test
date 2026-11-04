@@ -673,8 +673,8 @@ export const App: React.FC = () => {
                       onClick={() => openLegalModal('refund')}
                       style={{ background: 'none', border: 'none', padding: 0, color: '#334155', cursor: 'pointer', fontSize: '0.84rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '6px' }}
                     >
-                      <span>💳</span>
-                      <span style={{ textDecoration: 'underline' }}>Refund & Cancellation Policy</span>
+                      <span>🚫</span>
+                      <span style={{ textDecoration: 'underline' }}>Strict No-Refund Policy</span>
                     </button>
                   </li>
                   <li>
@@ -793,7 +793,7 @@ export const App: React.FC = () => {
               <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
                 <span onClick={() => openLegalModal('terms')} style={{ cursor: 'pointer', textDecoration: 'underline' }}>Terms</span>
                 <span onClick={() => openLegalModal('privacy')} style={{ cursor: 'pointer', textDecoration: 'underline' }}>Privacy</span>
-                <span onClick={() => openLegalModal('refund')} style={{ cursor: 'pointer', textDecoration: 'underline' }}>Refunds</span>
+                <span onClick={() => openLegalModal('refund')} style={{ cursor: 'pointer', textDecoration: 'underline' }}>No Refunds</span>
                 <span onClick={() => openLegalModal('copyright')} style={{ cursor: 'pointer', textDecoration: 'underline' }}>Copyright</span>
                 <span onClick={() => openLegalModal('disclaimer')} style={{ cursor: 'pointer', textDecoration: 'underline' }}>Disclaimer</span>
                 <span onClick={() => openLegalModal('contact')} style={{ cursor: 'pointer', textDecoration: 'underline' }}>Contact</span>
