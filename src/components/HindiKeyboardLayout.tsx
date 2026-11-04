@@ -14,80 +14,88 @@ interface HindiKeyboardLayoutProps {
   onClose?: () => void;
 }
 
-// Keyboard rows definition
-const KEYBOARD_ROWS = [
-  // Row 0
+interface KeyDef {
+  code: string;
+  weight: number;
+  label?: string;
+  isSpecial?: boolean;
+  devanagariDigit?: string;
+}
+
+// Keyboard rows definition with proportional flex weights
+const KEYBOARD_ROWS: KeyDef[][] = [
+  // Row 0 (Total weight: ~14.6)
   [
-    { code: 'Backquote', width: '1fr', devanagariDigit: '' },
-    { code: 'Digit1', width: '1fr', devanagariDigit: '१' },
-    { code: 'Digit2', width: '1fr', devanagariDigit: '२' },
-    { code: 'Digit3', width: '1fr', devanagariDigit: '३' },
-    { code: 'Digit4', width: '1fr', devanagariDigit: '४' },
-    { code: 'Digit5', width: '1fr', devanagariDigit: '५' },
-    { code: 'Digit6', width: '1fr', devanagariDigit: '६' },
-    { code: 'Digit7', width: '1fr', devanagariDigit: '७' },
-    { code: 'Digit8', width: '1fr', devanagariDigit: '८' },
-    { code: 'Digit9', width: '1fr', devanagariDigit: '९' },
-    { code: 'Digit0', width: '1fr', devanagariDigit: '०' },
-    { code: 'Minus', width: '1fr', devanagariDigit: '' },
-    { code: 'Equal', width: '1fr', devanagariDigit: '' },
-    { code: 'Backspace', width: '1.6fr', label: 'Back', isSpecial: true }
+    { code: 'Backquote', weight: 1, devanagariDigit: '' },
+    { code: 'Digit1', weight: 1, devanagariDigit: '१' },
+    { code: 'Digit2', weight: 1, devanagariDigit: '२' },
+    { code: 'Digit3', weight: 1, devanagariDigit: '३' },
+    { code: 'Digit4', weight: 1, devanagariDigit: '४' },
+    { code: 'Digit5', weight: 1, devanagariDigit: '५' },
+    { code: 'Digit6', weight: 1, devanagariDigit: '६' },
+    { code: 'Digit7', weight: 1, devanagariDigit: '७' },
+    { code: 'Digit8', weight: 1, devanagariDigit: '८' },
+    { code: 'Digit9', weight: 1, devanagariDigit: '९' },
+    { code: 'Digit0', weight: 1, devanagariDigit: '०' },
+    { code: 'Minus', weight: 1, devanagariDigit: '' },
+    { code: 'Equal', weight: 1, devanagariDigit: '' },
+    { code: 'Backspace', weight: 1.6, label: 'Backspace', isSpecial: true }
   ],
-  // Row 1
+  // Row 1 (Total weight: ~14.5)
   [
-    { code: 'Tab', width: '1.5fr', label: 'Tab', isSpecial: true },
-    { code: 'KeyQ', width: '1fr' },
-    { code: 'KeyW', width: '1fr' },
-    { code: 'KeyE', width: '1fr' },
-    { code: 'KeyR', width: '1fr' },
-    { code: 'KeyT', width: '1fr' },
-    { code: 'KeyY', width: '1fr' },
-    { code: 'KeyU', width: '1fr' },
-    { code: 'KeyI', width: '1fr' },
-    { code: 'KeyO', width: '1fr' },
-    { code: 'KeyP', width: '1fr' },
-    { code: 'BracketLeft', width: '1fr' },
-    { code: 'BracketRight', width: '1fr' },
-    { code: 'Backslash', width: '1fr' }
+    { code: 'Tab', weight: 1.5, label: 'Tab', isSpecial: true },
+    { code: 'KeyQ', weight: 1 },
+    { code: 'KeyW', weight: 1 },
+    { code: 'KeyE', weight: 1 },
+    { code: 'KeyR', weight: 1 },
+    { code: 'KeyT', weight: 1 },
+    { code: 'KeyY', weight: 1 },
+    { code: 'KeyU', weight: 1 },
+    { code: 'KeyI', weight: 1 },
+    { code: 'KeyO', weight: 1 },
+    { code: 'KeyP', weight: 1 },
+    { code: 'BracketLeft', weight: 1 },
+    { code: 'BracketRight', weight: 1 },
+    { code: 'Backslash', weight: 1 }
   ],
-  // Row 2
+  // Row 2 (Total weight: ~14.55)
   [
-    { code: 'CapsLock', width: '1.75fr', label: 'Caps', isSpecial: true },
-    { code: 'KeyA', width: '1fr' },
-    { code: 'KeyS', width: '1fr' },
-    { code: 'KeyD', width: '1fr' },
-    { code: 'KeyF', width: '1fr' },
-    { code: 'KeyG', width: '1fr' },
-    { code: 'KeyH', width: '1fr' },
-    { code: 'KeyJ', width: '1fr' },
-    { code: 'KeyK', width: '1fr' },
-    { code: 'KeyL', width: '1fr' },
-    { code: 'Semicolon', width: '1fr' },
-    { code: 'Quote', width: '1fr' },
-    { code: 'Enter', width: '1.8fr', label: 'Enter', isSpecial: true }
+    { code: 'CapsLock', weight: 1.75, label: 'Caps Lock', isSpecial: true },
+    { code: 'KeyA', weight: 1 },
+    { code: 'KeyS', weight: 1 },
+    { code: 'KeyD', weight: 1 },
+    { code: 'KeyF', weight: 1 },
+    { code: 'KeyG', weight: 1 },
+    { code: 'KeyH', weight: 1 },
+    { code: 'KeyJ', weight: 1 },
+    { code: 'KeyK', weight: 1 },
+    { code: 'KeyL', weight: 1 },
+    { code: 'Semicolon', weight: 1 },
+    { code: 'Quote', weight: 1 },
+    { code: 'Enter', weight: 1.8, label: 'Enter ↵', isSpecial: true }
   ],
-  // Row 3
+  // Row 3 (Total weight: ~14.6)
   [
-    { code: 'ShiftLeft', width: '2.2fr', label: 'Shift', isSpecial: true },
-    { code: 'KeyZ', width: '1fr' },
-    { code: 'KeyX', width: '1fr' },
-    { code: 'KeyC', width: '1fr' },
-    { code: 'KeyV', width: '1fr' },
-    { code: 'KeyB', width: '1fr' },
-    { code: 'KeyN', width: '1fr' },
-    { code: 'KeyM', width: '1fr' },
-    { code: 'Comma', width: '1fr' },
-    { code: 'Period', width: '1fr' },
-    { code: 'Slash', width: '1fr' },
-    { code: 'ShiftRight', width: '2.4fr', label: 'Shift', isSpecial: true }
+    { code: 'ShiftLeft', weight: 2.2, label: 'Shift ⇧', isSpecial: true },
+    { code: 'KeyZ', weight: 1 },
+    { code: 'KeyX', weight: 1 },
+    { code: 'KeyC', weight: 1 },
+    { code: 'KeyV', weight: 1 },
+    { code: 'KeyB', weight: 1 },
+    { code: 'KeyN', weight: 1 },
+    { code: 'KeyM', weight: 1 },
+    { code: 'Comma', weight: 1 },
+    { code: 'Period', weight: 1 },
+    { code: 'Slash', weight: 1 },
+    { code: 'ShiftRight', weight: 2.4, label: 'Shift ⇧', isSpecial: true }
   ],
-  // Row 4
+  // Row 4 (Total weight: ~14.5)
   [
-    { code: 'ControlLeft', width: '1.4fr', label: 'Ctrl', isSpecial: true },
-    { code: 'AltLeft', width: '1.4fr', label: 'Alt', isSpecial: true },
-    { code: 'Space', width: '6.5fr', label: 'Inscript Keyboard Layout (Space)', isSpecial: false },
-    { code: 'AltRight', width: '1.4fr', label: 'Alt', isSpecial: true },
-    { code: 'ControlRight', width: '1.4fr', label: 'Ctrl', isSpecial: true }
+    { code: 'ControlLeft', weight: 1.5, label: 'Ctrl', isSpecial: true },
+    { code: 'AltLeft', weight: 1.5, label: 'Alt', isSpecial: true },
+    { code: 'Space', weight: 8.5, label: 'Space Bar', isSpecial: false },
+    { code: 'AltRight', weight: 1.5, label: 'Alt', isSpecial: true },
+    { code: 'ControlRight', weight: 1.5, label: 'Ctrl', isSpecial: true }
   ]
 ];
 
@@ -338,9 +346,11 @@ export const HindiKeyboardLayout: React.FC<HindiKeyboardLayoutProps> = ({
           background: '#0f172a',
           padding: '8px',
           borderRadius: '8px',
-          boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.4)'
+          boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.4)',
+          overflowX: 'auto'
         }}
       >
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '5px', width: '100%', minWidth: '650px' }}>
         {KEYBOARD_ROWS.map((row, rowIdx) => (
           <div
             key={rowIdx}
@@ -365,23 +375,60 @@ export const HindiKeyboardLayout: React.FC<HindiKeyboardLayoutProps> = ({
                   <div
                     key={keyDef.code}
                     style={{
-                      flex: keyDef.width,
-                      height: isCompact ? '38px' : '46px',
+                      flex: `${keyDef.weight} 1 0%`,
+                      minWidth: 0,
+                      boxSizing: 'border-box',
+                      height: isCompact ? '40px' : '48px',
                       background: isPressed || isSpecialShift ? '#93c5fd' : '#e2e8f0',
-                      border: '1px solid #94a3b8',
-                      borderRadius: '5px',
+                      border: isPressed || isSpecialShift ? '1.5px solid #2563eb' : '1px solid #94a3b8',
+                      borderRadius: '6px',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
-                      fontSize: '0.75rem',
+                      fontSize: isCompact ? '0.72rem' : '0.8rem',
                       fontWeight: 700,
-                      color: '#1e293b',
+                      color: isPressed || isSpecialShift ? '#1e3a8a' : '#1e293b',
                       boxShadow: isPressed ? 'none' : '0 2px 0 #94a3b8',
                       transform: isPressed ? 'translateY(2px)' : 'none',
-                      transition: 'all 0.08s ease'
+                      transition: 'all 0.08s ease',
+                      userSelect: 'none'
                     }}
                   >
                     {keyDef.label || keyDef.code}
+                  </div>
+                );
+              }
+
+              // Space Bar
+              if (keyDef.code === 'Space') {
+                return (
+                  <div
+                    key={keyDef.code}
+                    onClick={() => handleKeyClick(keyData, keyDef.code)}
+                    style={{
+                      flex: `${keyDef.weight} 1 0%`,
+                      minWidth: 0,
+                      boxSizing: 'border-box',
+                      height: isCompact ? '40px' : '48px',
+                      background: isPressed ? '#bfdbfe' : '#f8fafc',
+                      border: `1.5px solid ${isPressed ? '#2563eb' : '#cbd5e1'}`,
+                      borderRadius: '6px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      cursor: 'pointer',
+                      boxShadow: isPressed ? 'none' : '0 2px 0 #94a3b8',
+                      transform: isPressed ? 'translateY(2px)' : 'none',
+                      transition: 'all 0.06s ease',
+                      fontSize: isCompact ? '0.72rem' : '0.82rem',
+                      fontWeight: 700,
+                      color: '#475569',
+                      letterSpacing: '0.04em',
+                      userSelect: 'none'
+                    }}
+                    title="Space Bar"
+                  >
+                    {activeLayout === 'mangal' ? 'Mangal Inscript Space Bar' : 'Kruti Dev 010 Space Bar'}
                   </div>
                 );
               }
@@ -392,20 +439,24 @@ export const HindiKeyboardLayout: React.FC<HindiKeyboardLayoutProps> = ({
                   key={keyDef.code}
                   onClick={() => handleKeyClick(keyData, keyDef.code)}
                   style={{
-                    flex: keyDef.width,
-                    height: isCompact ? '38px' : '46px',
+                    flex: `${keyDef.weight} 1 0%`,
+                    minWidth: 0,
+                    boxSizing: 'border-box',
+                    height: isCompact ? '40px' : '48px',
                     background: isPressed ? '#bfdbfe' : fingerColor.bg,
-                    border: `1px solid ${isPressed ? '#2563eb' : fingerColor.border}`,
-                    borderRadius: '5px',
+                    border: `1.5px solid ${isPressed ? '#2563eb' : fingerColor.border}`,
+                    borderRadius: '6px',
                     display: 'flex',
                     flexDirection: 'column',
                     justifyContent: 'space-between',
-                    padding: '2px 4px',
+                    padding: '3px 5px',
                     cursor: 'pointer',
                     boxShadow: isPressed ? 'none' : '0 2px 0 #94a3b8',
                     transform: isPressed ? 'translateY(2px)' : 'none',
                     transition: 'all 0.06s ease',
-                    position: 'relative'
+                    position: 'relative',
+                    overflow: 'hidden',
+                    userSelect: 'none'
                   }}
                   title={`English: ${keyData.enNormal} / ${keyData.enShift}\nHindi Normal: ${keyData.normal}\nHindi Shift: ${keyData.shift}`}
                 >
@@ -429,12 +480,12 @@ export const HindiKeyboardLayout: React.FC<HindiKeyboardLayoutProps> = ({
                     </span>
                     <span
                       style={{
-                        fontSize: isCompact ? '0.8rem' : '0.98rem',
+                        fontSize: isCompact ? '0.82rem' : '0.98rem',
                         fontWeight: isShiftActive ? 800 : 700,
                         color: isShiftActive ? '#dc2626' : '#0369a1',
                         backgroundColor: isShiftActive ? '#fef08a' : 'transparent',
                         borderRadius: '2px',
-                        padding: '0 1px'
+                        padding: '0 2px'
                       }}
                     >
                       {keyData.shift}
@@ -463,9 +514,9 @@ export const HindiKeyboardLayout: React.FC<HindiKeyboardLayoutProps> = ({
                     )}
                     <span
                       style={{
-                        fontSize: isCompact ? '0.85rem' : '1.05rem',
+                        fontSize: isCompact ? '0.88rem' : '1.08rem',
                         fontWeight: !isShiftActive ? 800 : 600,
-                        color: !isShiftActive ? '#0f172a' : '#475569'
+                        color: !isShiftActive ? '#0f172a' : '#64748b'
                       }}
                     >
                       {keyData.normal}
@@ -476,6 +527,7 @@ export const HindiKeyboardLayout: React.FC<HindiKeyboardLayoutProps> = ({
             })}
           </div>
         ))}
+        </div>
       </div>
 
       {/* 3. Spacebar Note & Finger Legend */}
