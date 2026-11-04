@@ -47,12 +47,84 @@ const DEFAULT_SETTINGS: TestSettings = {
 };
 
 export const App: React.FC = () => {
-  const [currentView, setCurrentView] = useState<'choose' | 'test' | 'result' | 'learn' | 'book'>('choose');
-  const [activeTab, setActiveTab] = useState<'tests' | 'learn' | 'book'>('tests');
-  const [selectedPassage, setSelectedPassage] = useState<Passage>(PASSAGES[0]);
-  const [selectedDurationMinutes, setSelectedDurationMinutes] = useState<number>(15);
-  const [selectedExamProfile, setSelectedExamProfile] = useState<ExamProfile | null>(null);
-  const [currentResult, setCurrentResult] = useState<EvaluationResult | null>(null);
+  const [currentView, setCurrentView] = useState<'choose' | 'test' | 'result' | 'learn' | 'book'>(() => {
+    if (typeof window !== 'undefined') {
+      const hash = window.location.hash || '';
+      if (hash.startsWith('#/learn')) return 'learn';
+      if (hash.startsWith('#/book')) return 'book';
+      if (hash.startsWith('#/result')) {
+        try {
+          const savedResult = sessionStorage.getItem('up_latest_result');
+          const savedHistory = localStorage.getItem('up_typing_history');
+          if (savedResult || (savedHistory && JSON.parse(savedHistory).length > 0)) {
+            return 'result';
+          }
+        } catch {}
+      }
+      if (hash.startsWith('#/test')) {
+        try {
+          const savedTest = sessionStorage.getItem('up_active_test_session');
+          if (savedTest) return 'test';
+        } catch {}
+      }
+    }
+    return 'choose';
+  });
+
+  const [activeTab, setActiveTab] = useState<'tests' | 'learn' | 'book'>(() => {
+    if (typeof window !== 'undefined') {
+      const hash = window.location.hash || '';
+      if (hash.startsWith('#/learn')) return 'learn';
+      if (hash.startsWith('#/book')) return 'book';
+    }
+    return 'tests';
+  });
+
+  const [selectedPassage, setSelectedPassage] = useState<Passage>(() => {
+    try {
+      const saved = sessionStorage.getItem('up_active_test_session');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed?.passage) return parsed.passage;
+      }
+    } catch {}
+    return PASSAGES[0];
+  });
+
+  const [selectedDurationMinutes, setSelectedDurationMinutes] = useState<number>(() => {
+    try {
+      const saved = sessionStorage.getItem('up_active_test_session');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed?.durationMinutes) return parsed.durationMinutes;
+      }
+    } catch {}
+    return 15;
+  });
+
+  const [selectedExamProfile, setSelectedExamProfile] = useState<ExamProfile | null>(() => {
+    try {
+      const saved = sessionStorage.getItem('up_active_test_session');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed?.examProfile) return parsed.examProfile;
+      }
+    } catch {}
+    return null;
+  });
+
+  const [currentResult, setCurrentResult] = useState<EvaluationResult | null>(() => {
+    try {
+      const saved = sessionStorage.getItem('up_latest_result');
+      if (saved) return JSON.parse(saved);
+      const hist = localStorage.getItem('up_typing_history');
+      if (hist) {
+        const parsed = JSON.parse(hist);
+        if (parsed.length > 0) return parsed[0];
+      }
+    } catch {}
+    return null;
+  });
 
   // Settings (Default autoScroll is OFF)
   const [settings, setSettings] = useState<TestSettings>(() => {
@@ -231,6 +303,55 @@ export const App: React.FC = () => {
     handleUpdateSettings({ soundEnabled: !settings.soundEnabled });
   };
 
+  // Synchronize App view with browser URL hash changes (Back/Forward buttons)
+  useEffect(() => {
+    const handleAppHashChange = () => {
+      const hash = window.location.hash || '';
+      if (hash.startsWith('#/learn')) {
+        setCurrentView('learn');
+        setActiveTab('learn');
+      } else if (hash.startsWith('#/book')) {
+        setCurrentView('book');
+        setActiveTab('book');
+      } else if (hash.startsWith('#/result')) {
+        setCurrentView('result');
+      } else if (hash.startsWith('#/test')) {
+        setCurrentView('test');
+      } else {
+        setCurrentView('choose');
+        setActiveTab('tests');
+      }
+    };
+
+    window.addEventListener('hashchange', handleAppHashChange);
+    return () => window.removeEventListener('hashchange', handleAppHashChange);
+  }, []);
+
+  const returnToExamOrHome = () => {
+    try {
+      sessionStorage.removeItem('up_active_test_session');
+      const savedRoute = sessionStorage.getItem('up_exam_nav_route');
+      if (savedRoute) {
+        const parsed = JSON.parse(savedRoute);
+        if (parsed.level === 3 && parsed.examId && parsed.modeId) {
+          window.location.hash = `#/exam/${parsed.examId}/${parsed.modeId}`;
+        } else if (parsed.level === 2 && parsed.examId) {
+          window.location.hash = `#/exam/${parsed.examId}`;
+        } else if (parsed.level === 'classic_form') {
+          window.location.hash = '#/classic';
+        } else {
+          window.location.hash = '#/';
+        }
+      } else {
+        window.location.hash = '#/';
+      }
+    } catch {
+      window.location.hash = '#/';
+    }
+    setActiveTab('tests');
+    setCurrentView('choose');
+  };
+
   // Start test
   const handleStartTest = (passage: Passage, customDurationMinutes?: number, examProfile?: ExamProfile | null) => {
     // Pro Paywall Guard: First 7 tests of each exam are free demo.
@@ -250,12 +371,29 @@ export const App: React.FC = () => {
     }
     const finalDuration = customDurationMinutes || examProfile?.durationMinutes || passage.duration || 15;
     setSelectedDurationMinutes(finalDuration);
+
+    // Save active test session so page refresh stays right here
+    try {
+      sessionStorage.setItem('up_active_test_session', JSON.stringify({
+        passage,
+        durationMinutes: finalDuration,
+        examProfile: examProfile || null,
+        timestamp: Date.now()
+      }));
+    } catch {}
+
+    window.location.hash = '#/test';
     setCurrentView('test');
   };
 
   // Finish test
   const handleFinishTest = async (result: EvaluationResult) => {
     setCurrentResult(result);
+    try {
+      sessionStorage.setItem('up_latest_result', JSON.stringify(result));
+      sessionStorage.removeItem('up_active_test_session');
+    } catch {}
+    window.location.hash = '#/result';
     setCurrentView('result');
 
     // Save to local history
@@ -282,6 +420,7 @@ export const App: React.FC = () => {
   // Retake
   const handleRetakeTest = () => {
     if (selectedPassage) {
+      window.location.hash = '#/test';
       setCurrentView('test');
     }
   };
@@ -305,6 +444,15 @@ export const App: React.FC = () => {
     };
     setSelectedPassage(drillPassage);
     setSelectedDurationMinutes(2);
+    try {
+      sessionStorage.setItem('up_active_test_session', JSON.stringify({
+        passage: drillPassage,
+        durationMinutes: 2,
+        examProfile: selectedExamProfile,
+        timestamp: Date.now()
+      }));
+    } catch {}
+    window.location.hash = '#/test';
     setCurrentView('test');
   };
 
@@ -326,11 +474,13 @@ export const App: React.FC = () => {
           onSelectTab={(tab) => {
             setActiveTab(tab);
             if (tab === 'learn') {
+              window.location.hash = '#/learn';
               setCurrentView('learn');
             } else if (tab === 'book') {
+              window.location.hash = '#/book';
               setCurrentView('book');
             } else {
-              setCurrentView('choose');
+              returnToExamOrHome();
             }
           }}
           onOpenRules={() => setIsRulesOpen(true)}
@@ -372,7 +522,7 @@ export const App: React.FC = () => {
             settings={settings}
             onUpdateSettings={handleUpdateSettings}
             onFinishTest={handleFinishTest}
-            onCancelTest={() => setCurrentView('choose')}
+            onCancelTest={returnToExamOrHome}
             activeExamProfile={selectedExamProfile}
           />
         )}
@@ -381,7 +531,7 @@ export const App: React.FC = () => {
           <ResultScreen
             result={currentResult}
             onRetakeTest={handleRetakeTest}
-            onChooseAnother={() => setCurrentView('choose')}
+            onChooseAnother={returnToExamOrHome}
             onPracticeWrongWords={handlePracticeWrongWords}
             onOpenDashboard={() => {
               if (currentUser) {
@@ -394,15 +544,12 @@ export const App: React.FC = () => {
         )}
 
         {currentView === 'learn' && (
-          <LearnScreen onBackToTests={() => setCurrentView('choose')} />
+          <LearnScreen onBackToTests={returnToExamOrHome} />
         )}
 
         {currentView === 'book' && (
           <WordDocumentScreen
-            onBackToTests={() => {
-              setActiveTab('tests');
-              setCurrentView('choose');
-            }}
+            onBackToTests={returnToExamOrHome}
           />
         )}
       </main>
