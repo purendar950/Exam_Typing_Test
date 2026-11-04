@@ -112,7 +112,7 @@ export const LegalPolicyModal: React.FC<LegalPolicyModalProps> = ({
           {[
             { id: 'terms', label: '📜 Terms of Service', short: 'Terms' },
             { id: 'privacy', label: '🔒 Privacy Policy', short: 'Privacy' },
-            { id: 'refund', label: '💳 Refund Policy', short: 'Refunds' },
+            { id: 'refund', label: '🚫 Strict No-Refund Policy', short: 'No Refunds' },
             { id: 'copyright', label: '©️ Copyright & IP', short: 'Copyright' },
             { id: 'disclaimer', label: '🛡️ Disclaimer', short: 'Disclaimer' },
             { id: 'contact', label: '📞 Contact & Support', short: 'Contact' }
@@ -189,6 +189,7 @@ export const LegalPolicyModal: React.FC<LegalPolicyModalProps> = ({
               <ul>
                 <li><strong>7 Free Demo Tests:</strong> Every candidate is entitled to take the first 7 mock tests of every exam category completely free of charge to evaluate our system, software interface, keyboard responsiveness, and timer accuracy.</li>
                 <li><strong>Pro Subscription:</strong> Access to Test #08 and beyond requires an active Pro subscription (Single Exam Pass, Category Combo Pass, or All Exams Mega Pass). Subscriptions are valid for the designated validity period (1 Month, 3 Months, 6 Months, or 12 Months) from the approval date.</li>
+                <li><strong>Strict No-Refund Clause:</strong> Once an order is placed and subscription is activated, payments are <strong>strictly non-refundable under any circumstances whatsoever</strong>. All purchases are final.</li>
               </ul>
 
               <h4 style={{ color: '#0f172a', marginTop: '16px', marginBottom: '6px' }}>5. User Conduct & Prohibited Activities</h4>
@@ -259,53 +260,55 @@ export const LegalPolicyModal: React.FC<LegalPolicyModalProps> = ({
             </div>
           )}
 
-          {/* 3. REFUND & CANCELLATION */}
+          {/* 3. STRICT NO-REFUND POLICY */}
           {activeTab === 'refund' && (
             <div>
-              <h3 style={{ fontSize: '1.25rem', fontWeight: 800, color: '#0f172a', marginBottom: '8px' }}>
-                Payment, Refund & Cancellation Policy
+              <h3 style={{ fontSize: '1.25rem', fontWeight: 800, color: '#991b1b', marginBottom: '8px' }}>
+                Strict No-Refund & Cancellation Policy
               </h3>
               <p style={{ fontSize: '0.78rem', color: '#64748b', marginBottom: '16px' }}>
-                Fair, Transparent & Candidate-Friendly Policy
+                Effective Date: Immediate &bull; Mandatory Terms for All Candidates
               </p>
 
-              <div style={{ background: '#fffbeb', borderLeft: '4px solid #f59e0b', padding: '12px 16px', borderRadius: '4px', marginBottom: '18px' }}>
-                <p style={{ margin: 0, fontSize: '0.85rem', color: '#b45309' }}>
-                  <strong>Try Before You Buy:</strong> Every exam series comes with <strong>7 Free Demo Tests</strong>. We strongly advise students to attempt these demo tests on their device before purchasing a Pro pass.
+              <div style={{ background: '#fef2f2', borderLeft: '4px solid #dc2626', padding: '14px 18px', borderRadius: '6px', marginBottom: '18px' }}>
+                <p style={{ margin: 0, fontSize: '0.92rem', color: '#991b1b', fontWeight: 800 }}>
+                  🚨 MANDATORY NOTICE: PAYMENTS ARE STRICTLY NON-REFUNDABLE UNDER ANY CIRCUMSTANCES
+                </p>
+                <p style={{ margin: '6px 0 0', fontSize: '0.85rem', color: '#b91c1c', lineHeight: 1.5 }}>
+                  Once a candidate completes payment and access to the Pro exam test series is granted, <strong>no refunds, cancellations, chargebacks, or reversals will be provided under any circumstances whatsoever</strong>. All sales and subscription fees are final and non-negotiable.
                 </p>
               </div>
 
-              <h4 style={{ color: '#0f172a', marginTop: '16px', marginBottom: '6px' }}>1. Nature of Digital Services</h4>
+              <h4 style={{ color: '#0f172a', marginTop: '16px', marginBottom: '6px' }}>1. Try Before You Buy: 7 Free Demo Tests Guarantee</h4>
               <p>
-                Exam Typing Mentor provides intangible, non-physical digital mock test services. Once a Pro subscription is activated and access to the locked passage banks has been granted, digital services are considered delivered.
+                To ensure 100% transparency, fairness, and student confidence, <strong>Exam Typing Mentor provides the first 7 full-length typing tests of every single exam completely free of charge</strong>.
               </p>
-
-              <h4 style={{ color: '#0f172a', marginTop: '16px', marginBottom: '6px' }}>2. Refund Eligibility</h4>
               <ul>
-                <li>
-                  <strong>Duplicate / Double Payment:</strong> If an amount is debited more than once for the same subscription due to a network glitch or UPI delay, the duplicate transaction will be refunded <strong>100%</strong> without questions within 3 to 5 business days upon providing bank proof/UTR.
-                </li>
-                <li>
-                  <strong>Activation Failure:</strong> If you paid for a subscription and your account was not activated within 24 hours despite providing a valid UTR and screenshot, you are eligible for an immediate full refund or a complimentary extension of your pass.
-                </li>
-                <li>
-                  <strong>Change of Mind:</strong> Because candidate accounts receive immediate access to proprietary passage archives and full test materials, general refund requests after tests have been unlocked and practiced cannot be honored.
-                </li>
+                <li>Candidates have full, unrestricted access to test keyboard compatibility, font rendering (KrutiDev 010, Mangal Inscript, Remington GAIL), auto-scroll behavior, backspace restrictions, and real-time accuracy scoring on their specific device before making any payment.</li>
+                <li>By initiating payment or submitting a transaction UTR, the candidate explicitly certifies that they have attempted the 7 free demo tests, evaluated the platform thoroughly, and found the software completely satisfactory.</li>
               </ul>
 
-              <h4 style={{ color: '#0f172a', marginTop: '16px', marginBottom: '6px' }}>3. How to Request a Refund</h4>
+              <h4 style={{ color: '#0f172a', marginTop: '16px', marginBottom: '6px' }}>2. Absolute No-Refund Scenarios</h4>
               <p>
-                To request a refund for duplicate deduction or payment failure:
+                Refund requests will <strong>NOT</strong> be entertained or granted under any of the following circumstances:
               </p>
-              <ol>
-                <li>Reach out to our 24x7 Helpdesk via Telegram at <strong>@ExamTypingSupportBot</strong>.</li>
-                <li>Provide your registered Email, 12-digit UPI UTR number, and payment receipt.</li>
-                <li>Our finance team will verify the transaction with our bank and initiate the reversal directly to your original UPI account.</li>
-              </ol>
+              <ul>
+                <li><strong>Change of Mind:</strong> Deciding not to practice, lack of personal study time, or changing preparation to a different exam.</li>
+                <li><strong>Exam Rescheduling or Cancellation:</strong> Postponement, delay, cancellation, or pattern changes made by government recruitment boards (UPPRPB, UPSSSC, SSC, High Court, etc.).</li>
+                <li><strong>Accidental Plan Purchase:</strong> Selecting the wrong exam category or pass duration (e.g. buying Single Pass instead of Combo Pass).</li>
+                <li><strong>Hardware or Device Issues:</strong> Third-party hardware faults, broken keyboards, slow personal internet connectivity, or mobile device limitations.</li>
+                <li><strong>Exam Results:</strong> Failure to clear the official typing exam, as our platform is a practice simulator and cannot control candidate performance under exam hall conditions.</li>
+                <li><strong>Account Sharing Violations:</strong> Account suspension or termination resulting from sharing credentials, multiple concurrent IP logins, or scraping.</li>
+              </ul>
 
-              <h4 style={{ color: '#0f172a', marginTop: '16px', marginBottom: '6px' }}>4. Subscription Cancellation</h4>
+              <h4 style={{ color: '#0f172a', marginTop: '16px', marginBottom: '6px' }}>3. Digital Goods & Instant Delivery</h4>
               <p>
-                Our passes are prepaid one-time purchases and <strong>never auto-debit</strong> your bank account or card. Your pass simply expires automatically at the end of the validity period unless you choose to renew it manually.
+                The subscription provides immediate, intangible digital access to our proprietary question banks, passage archives, and AI performance reports. In accordance with digital commerce standards, digital goods cannot be returned or revoked once delivered.
+              </p>
+
+              <h4 style={{ color: '#0f172a', marginTop: '16px', marginBottom: '6px' }}>4. Accidental Duplicate Payment Exception</h4>
+              <p>
+                The sole technical exception is an <strong>accidental duplicate deduction</strong> where a candidate's bank debits twice for the exact same transaction within a few minutes due to a UPI network glitch. In such cases, upon verification of the identical duplicate UTR with our bank, the extra amount will be refunded within 3 to 5 business days. This does not apply to active, intended subscriptions.
               </p>
             </div>
           )}
