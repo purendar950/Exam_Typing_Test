@@ -24,6 +24,7 @@ import {
   getTelegramConfig,
   TelegramConfig
 } from './services/telegramService';
+import { isTestLocked } from './services/paymentService';
 import {
   subscribeToAuth,
   saveTestResultToCloud,
@@ -110,7 +111,13 @@ export const App: React.FC = () => {
   const [isAiGeneratorOpen, setIsAiGeneratorOpen] = useState<boolean>(false);
   const [isAdminOpen, setIsAdminOpen] = useState<boolean>(false);
   const [isPaymentOpen, setIsPaymentOpen] = useState<boolean>(false);
+  const [paymentInitialExamId, setPaymentInitialExamId] = useState<string | undefined>(undefined);
   const [dailyLivePassages, setDailyLivePassages] = useState<Passage[]>([]);
+
+  const handleOpenPayment = (examId?: string) => {
+    setPaymentInitialExamId(examId);
+    setIsPaymentOpen(true);
+  };
   const [customPassages, setCustomPassages] = useState<Passage[]>([]);
   const [telegramConfig, setTelegramConfig] = useState<TelegramConfig | null>(null);
   const [telegramToast, setTelegramToast] = useState<{ success: boolean; message: string } | null>(null);
@@ -225,6 +232,17 @@ export const App: React.FC = () => {
 
   // Start test
   const handleStartTest = (passage: Passage, customDurationMinutes?: number, examProfile?: ExamProfile | null) => {
+    // Pro Paywall Guard: First 7 tests of each exam are free demo.
+    // Tests #8+ require Pro subscription or Admin privileges.
+    const examId = examProfile?.id || passage.examSlug;
+    const catGroup = examProfile?.categoryGroup || passage.categoryGroup;
+    const access = isTestLocked(passage.testNumber, 0, currentUser, examId, catGroup);
+
+    if (access.isLocked) {
+      handleOpenPayment(examId);
+      return;
+    }
+
     setSelectedPassage(passage);
     if (examProfile !== undefined) {
       setSelectedExamProfile(examProfile);
@@ -319,7 +337,7 @@ export const App: React.FC = () => {
           onOpenHindiHelper={() => setIsHindiHelperOpen(true)}
           onOpenAiGenerator={() => setIsAiGeneratorOpen(true)}
           onOpenAdmin={() => setIsAdminOpen(true)}
-          onOpenPayment={() => setIsPaymentOpen(true)}
+          onOpenPayment={() => handleOpenPayment()}
           settings={settings}
           onToggleSound={toggleSound}
           currentUser={currentUser}
@@ -342,7 +360,7 @@ export const App: React.FC = () => {
             onOpenDashboard={() => setIsDashboardOpen(true)}
             onOpenAiGenerator={() => setIsAiGeneratorOpen(true)}
             onOpenAdmin={() => setIsAdminOpen(true)}
-            onOpenPayment={() => setIsPaymentOpen(true)}
+            onOpenPayment={handleOpenPayment}
           />
         )}
 
@@ -514,8 +532,12 @@ export const App: React.FC = () => {
 
       <PaymentModal
         isOpen={isPaymentOpen}
-        onClose={() => setIsPaymentOpen(false)}
+        onClose={() => {
+          setIsPaymentOpen(false);
+          setPaymentInitialExamId(undefined);
+        }}
         currentUser={currentUser}
+        initialSelectedExamId={paymentInitialExamId}
       />
 
       {/* Floating Telegram Alert Toast from 1-Click Link */}
