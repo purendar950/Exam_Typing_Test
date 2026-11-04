@@ -824,15 +824,30 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
                         {isSubmitting ? 'Submitting Verification...' : `Submit Payment Proof (₹${finalPayable}) →`}
                       </button>
 
+                      <div
+                        style={{
+                          background: '#fff1f2',
+                          border: '1.5px solid #fecdd3',
+                          borderRadius: '8px',
+                          padding: '10px 12px',
+                          fontSize: '0.76rem',
+                          color: '#9f1239',
+                          lineHeight: 1.45,
+                          marginTop: '6px'
+                        }}
+                      >
+                        🚫 <strong>Strict No-Refund Policy:</strong> All subscription payments are <strong>strictly non-refundable under any circumstances</strong> once processed. Please ensure you have tested your device & keyboard using our <strong>7 Free Demo Tests</strong> before paying.
+                      </div>
+
                       <div style={{ fontSize: '0.72rem', color: '#64748b', textAlign: 'center', marginTop: '2px' }}>
                         🔒 100% Secure • Admin manually approves and activates plan within 15–30 minutes
                       </div>
 
-                      <div style={{ fontSize: '0.70rem', color: '#94a3b8', textAlign: 'center' }}>
-                        By proceeding, you agree to our{' '}
+                      <div style={{ fontSize: '0.70rem', color: '#64748b', textAlign: 'center' }}>
+                        By proceeding to pay, you agree that <strong>all sales are final & non-refundable under any circumstances</strong> per our{' '}
                         <a href="#/terms" style={{ color: '#0284c7', textDecoration: 'underline' }}>Terms of Service</a>
                         {' '}&bull;{' '}
-                        <a href="#/refund" style={{ color: '#0284c7', textDecoration: 'underline' }}>Refund Policy</a>
+                        <a href="#/refund" style={{ color: '#0284c7', textDecoration: 'underline' }}>No-Refund Policy</a>.
                       </div>
 
                       <div
