@@ -20,6 +20,11 @@ import { audioEngine } from './utils/audioEngine';
 import { fetchDailyLivePassages, triggerAutoDailyGenerationIfDue } from './services/aiGenerator';
 import { fetchAllCustomPassages } from './services/adminService';
 import {
+  handleTelegramApprovalFromUrl,
+  getTelegramConfig,
+  TelegramConfig
+} from './services/telegramService';
+import {
   subscribeToAuth,
   saveTestResultToCloud,
   fetchUserTestAttempts,
@@ -107,8 +112,10 @@ export const App: React.FC = () => {
   const [isPaymentOpen, setIsPaymentOpen] = useState<boolean>(false);
   const [dailyLivePassages, setDailyLivePassages] = useState<Passage[]>([]);
   const [customPassages, setCustomPassages] = useState<Passage[]>([]);
+  const [telegramConfig, setTelegramConfig] = useState<TelegramConfig | null>(null);
+  const [telegramToast, setTelegramToast] = useState<{ success: boolean; message: string } | null>(null);
 
-  // Automatically fetch today's 8 Daily Live Tests and Custom Passages on app load
+  // Automatically fetch today's 8 Daily Live Tests, Custom Passages and handle Telegram 1-click approvals
   useEffect(() => {
     const todayIso = new Date().toISOString().split('T')[0];
     fetchDailyLivePassages(todayIso, PASSAGES).then((tests) => {
@@ -129,6 +136,20 @@ export const App: React.FC = () => {
         setDailyLivePassages(newTests);
       }
     });
+
+    // Check for 1-click tokenized approval links from Telegram bot
+    handleTelegramApprovalFromUrl().then((res) => {
+      if (res.handled) {
+        setTelegramToast({ success: res.success, message: res.message });
+        if (res.action === 'portal' || res.action === 'approve') {
+          setIsAdminOpen(true);
+        }
+        setTimeout(() => setTelegramToast(null), 10000);
+      }
+    });
+
+    // Load Telegram configuration for floating action button
+    getTelegramConfig().then((cfg) => setTelegramConfig(cfg));
   }, []);
 
   // Combined Passages (Custom Passages + Live Tests + Bank)
@@ -496,6 +517,78 @@ export const App: React.FC = () => {
         onClose={() => setIsPaymentOpen(false)}
         currentUser={currentUser}
       />
+
+      {/* Floating Telegram Alert Toast from 1-Click Link */}
+      {telegramToast && (
+        <div
+          style={{
+            position: 'fixed',
+            top: '18px',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            zIndex: 100001,
+            background: telegramToast.success ? '#0f172a' : '#991b1b',
+            color: '#ffffff',
+            padding: '12px 22px',
+            borderRadius: '12px',
+            boxShadow: '0 10px 30px rgba(0,0,0,0.35)',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '12px',
+            fontSize: '0.88rem',
+            fontWeight: 700,
+            border: telegramToast.success ? '1.5px solid #38bdf8' : '1.5px solid #f87171'
+          }}
+        >
+          <span>{telegramToast.success ? '⚡' : '⚠️'}</span>
+          <span>{telegramToast.message}</span>
+          <button
+            onClick={() => setTelegramToast(null)}
+            style={{
+              background: 'transparent',
+              border: 'none',
+              color: '#ffffff',
+              fontSize: '1rem',
+              cursor: 'pointer',
+              marginLeft: '8px'
+            }}
+          >
+            ✕
+          </button>
+        </div>
+      )}
+
+      {/* Floating Telegram Channel Action Button (like MockMatrixHub) */}
+      {currentView !== 'test' && (
+        <a
+          href={telegramConfig?.communityChannelUrl || 'https://t.me/SSC_PYQ_COMPILATIONS'}
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{
+            position: 'fixed',
+            bottom: '24px',
+            right: '20px',
+            width: '48px',
+            height: '48px',
+            borderRadius: '50%',
+            background: 'linear-gradient(135deg, #2aabee 0%, #229ed9 100%)',
+            color: '#ffffff',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            boxShadow: '0 8px 24px rgba(34, 158, 217, 0.45)',
+            zIndex: 999,
+            cursor: 'pointer',
+            textDecoration: 'none',
+            transition: 'transform 0.15s ease'
+          }}
+          title="Join Official Telegram Channel for PYQs, Live Tests & Alerts"
+        >
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/>
+          </svg>
+        </a>
+      )}
 
       <PwaInstallPrompt />
     </div>

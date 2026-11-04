@@ -45,6 +45,13 @@ import {
   getPromoCodes,
   savePromoCodes
 } from '../services/paymentService';
+import {
+  TelegramConfig,
+  getTelegramConfig,
+  saveTelegramConfig,
+  testTelegramPing,
+  DEFAULT_TELEGRAM_CONFIG
+} from '../services/telegramService';
 import appLogo from '../assets/logo.png';
 
 interface AdminPanelModalProps {
@@ -98,6 +105,13 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
   const [newPromoDesc, setNewPromoDesc] = useState<string>('');
   const [newPromoMinOrder, setNewPromoMinOrder] = useState<number>(0);
   const [newPromoMaxDiscount, setNewPromoMaxDiscount] = useState<number>(100);
+
+  // Telegram Bot State
+  const [telegramConfig, setTelegramConfig] = useState<TelegramConfig>(DEFAULT_TELEGRAM_CONFIG);
+  const [telegramStatus, setTelegramStatus] = useState<{ loading: boolean; success?: boolean; message?: string }>({
+    loading: false
+  });
+  const [showTelegramToken, setShowTelegramToken] = useState<boolean>(false);
 
   // AI Config State
   const [aiConfig, setAiConfig] = useState<AiConfig>({
@@ -299,11 +313,29 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
       setPaymentsList(subs);
       const promos = getPromoCodes();
       setPromoCodesList(promos);
+      const tg = await getTelegramConfig();
+      setTelegramConfig(tg);
     } catch (err) {
-      console.error('Failed to load payments:', err);
+      console.error('Failed to load payments or telegram config:', err);
     } finally {
       setIsLoadingPayments(false);
     }
+  };
+
+  const handleSaveTelegramConfig = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      await saveTelegramConfig(telegramConfig);
+      setPaymentFeedback({ type: 'success', message: '✅ Telegram Bot configuration saved to Cloud!' });
+    } catch (err: any) {
+      setPaymentFeedback({ type: 'error', message: err?.message || 'Failed to save Telegram config' });
+    }
+  };
+
+  const handleTestTelegramPing = async () => {
+    setTelegramStatus({ loading: true, message: 'Sending test ping to Telegram...' });
+    const res = await testTelegramPing(telegramConfig);
+    setTelegramStatus({ loading: false, success: res.success, message: res.message });
   };
 
   const pendingPaymentsCount = useMemo(() => {
@@ -2825,6 +2857,242 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                           ➕ Create & Publish Promo Code
                         </button>
                       </form>
+                    </div>
+                  </div>
+
+                  {/* Telegram Bot Integration Suite */}
+                  <div style={{ background: '#ffffff', border: '1.5px solid #38bdf8', borderRadius: '12px', padding: '20px', boxShadow: '0 4px 12px rgba(56, 189, 248, 0.08)' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '12px', marginBottom: '16px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                        <div
+                          style={{
+                            width: '42px',
+                            height: '42px',
+                            borderRadius: '10px',
+                            background: 'linear-gradient(135deg, #2aabee 0%, #229ed9 100%)',
+                            color: '#ffffff',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            fontSize: '1.4rem',
+                            boxShadow: '0 4px 10px rgba(34, 158, 217, 0.35)'
+                          }}
+                        >
+                          ✈️
+                        </div>
+                        <div>
+                          <h3 style={{ margin: 0, fontSize: '1.05rem', fontWeight: 800, color: '#0f172a' }}>
+                            🤖 Telegram Admin Bot & 1-Click Instant Approvals
+                          </h3>
+                          <div style={{ fontSize: '0.78rem', color: '#64748b' }}>
+                            Forward payment receipts, screenshots & UTRs straight to your Telegram phone with instant <b>[✅ Approve Pro Access]</b> buttons.
+                          </div>
+                        </div>
+                      </div>
+
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <label style={{ display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer', fontSize: '0.85rem', fontWeight: 700, color: '#0f172a' }}>
+                          <input
+                            type="checkbox"
+                            checked={telegramConfig.enabled}
+                            onChange={(e) => setTelegramConfig({ ...telegramConfig, enabled: e.target.checked })}
+                          />
+                          <span>Alerts Enabled</span>
+                        </label>
+                      </div>
+                    </div>
+
+                    {telegramStatus.message && (
+                      <div
+                        style={{
+                          padding: '10px 14px',
+                          borderRadius: '8px',
+                          marginBottom: '16px',
+                          background: telegramStatus.success ? '#f0fdf4' : '#fef2f2',
+                          border: `1px solid ${telegramStatus.success ? '#86efac' : '#fecaca'}`,
+                          color: telegramStatus.success ? '#166534' : '#991b1b',
+                          fontSize: '0.85rem',
+                          fontWeight: 700
+                        }}
+                      >
+                        {telegramStatus.message}
+                      </div>
+                    )}
+
+                    <form onSubmit={handleSaveTelegramConfig} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '14px' }}>
+                        {/* Bot Token */}
+                        <div>
+                          <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#475569', marginBottom: '4px' }}>
+                            Telegram Bot Token (from @BotFather):
+                          </label>
+                          <div style={{ display: 'flex', gap: '6px' }}>
+                            <input
+                              type={showTelegramToken ? 'text' : 'password'}
+                              placeholder="e.g. 7123456789:AAHk..."
+                              value={telegramConfig.botToken}
+                              onChange={(e) => setTelegramConfig({ ...telegramConfig, botToken: e.target.value.trim() })}
+                              style={{
+                                flex: 1,
+                                padding: '8px 12px',
+                                borderRadius: '8px',
+                                border: '1px solid #cbd5e1',
+                                fontSize: '0.85rem',
+                                fontFamily: 'monospace'
+                              }}
+                            />
+                            <button
+                              type="button"
+                              onClick={() => setShowTelegramToken(!showTelegramToken)}
+                              style={{
+                                padding: '8px 12px',
+                                borderRadius: '8px',
+                                border: '1px solid #cbd5e1',
+                                background: '#f8fafc',
+                                cursor: 'pointer',
+                                fontSize: '0.8rem'
+                              }}
+                            >
+                              {showTelegramToken ? '🙈' : '👁️'}
+                            </button>
+                          </div>
+                        </div>
+
+                        {/* Admin Chat ID */}
+                        <div>
+                          <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#475569', marginBottom: '4px' }}>
+                            Admin Chat ID / Channel ID (from @userinfobot):
+                          </label>
+                          <input
+                            type="text"
+                            placeholder="e.g. 123456789 or -100123456789"
+                            value={telegramConfig.adminChatId}
+                            onChange={(e) => setTelegramConfig({ ...telegramConfig, adminChatId: e.target.value.trim() })}
+                            style={{
+                              width: '100%',
+                              padding: '8px 12px',
+                              borderRadius: '8px',
+                              border: '1px solid #cbd5e1',
+                              fontSize: '0.85rem',
+                              fontFamily: 'monospace'
+                            }}
+                          />
+                        </div>
+                      </div>
+
+                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '14px' }}>
+                        {/* Approval Secret Token */}
+                        <div>
+                          <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#475569', marginBottom: '4px' }}>
+                            1-Click Approval Security Secret:
+                          </label>
+                          <div style={{ display: 'flex', gap: '6px' }}>
+                            <input
+                              type="text"
+                              value={telegramConfig.approvalSecretToken}
+                              onChange={(e) => setTelegramConfig({ ...telegramConfig, approvalSecretToken: e.target.value.trim() })}
+                              style={{
+                                flex: 1,
+                                padding: '8px 12px',
+                                borderRadius: '8px',
+                                border: '1px solid #cbd5e1',
+                                fontSize: '0.85rem',
+                                fontFamily: 'monospace'
+                              }}
+                            />
+                            <button
+                              type="button"
+                              onClick={() => setTelegramConfig({ ...telegramConfig, approvalSecretToken: 'adm_' + Math.random().toString(36).substring(2, 12) })}
+                              style={{
+                                padding: '8px 12px',
+                                borderRadius: '8px',
+                                border: '1px solid #cbd5e1',
+                                background: '#f8fafc',
+                                cursor: 'pointer',
+                                fontSize: '0.75rem',
+                                fontWeight: 700
+                              }}
+                              title="Generate new secret token"
+                            >
+                              🎲 New
+                            </button>
+                          </div>
+                        </div>
+
+                        {/* Community Channel URL */}
+                        <div>
+                          <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#475569', marginBottom: '4px' }}>
+                            Public Telegram Channel Link (for Floating Button):
+                          </label>
+                          <input
+                            type="text"
+                            placeholder="e.g. https://t.me/your_exam_channel"
+                            value={telegramConfig.communityChannelUrl}
+                            onChange={(e) => setTelegramConfig({ ...telegramConfig, communityChannelUrl: e.target.value.trim() })}
+                            style={{
+                              width: '100%',
+                              padding: '8px 12px',
+                              borderRadius: '8px',
+                              border: '1px solid #cbd5e1',
+                              fontSize: '0.85rem'
+                            }}
+                          />
+                        </div>
+                      </div>
+
+                      <div style={{ display: 'flex', gap: '10px', marginTop: '6px', flexWrap: 'wrap' }}>
+                        <button
+                          type="submit"
+                          style={{
+                            padding: '9px 18px',
+                            background: 'linear-gradient(135deg, #0284c7 0%, #0369a1 100%)',
+                            color: '#ffffff',
+                            border: 'none',
+                            borderRadius: '8px',
+                            fontWeight: 700,
+                            fontSize: '0.85rem',
+                            cursor: 'pointer'
+                          }}
+                        >
+                          💾 Save Telegram Bot Settings
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={handleTestTelegramPing}
+                          disabled={telegramStatus.loading}
+                          style={{
+                            padding: '9px 18px',
+                            background: '#f0fdf4',
+                            color: '#166534',
+                            border: '1.5px solid #86efac',
+                            borderRadius: '8px',
+                            fontWeight: 700,
+                            fontSize: '0.85rem',
+                            cursor: telegramStatus.loading ? 'not-allowed' : 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '6px'
+                          }}
+                        >
+                          <span>⚡</span>
+                          <span>{telegramStatus.loading ? 'Testing...' : 'Test Telegram Ping to My Phone'}</span>
+                        </button>
+                      </div>
+                    </form>
+
+                    {/* Step-by-Step Guide */}
+                    <div style={{ marginTop: '16px', background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '12px 16px' }}>
+                      <div style={{ fontWeight: 800, fontSize: '0.8rem', color: '#0f172a', marginBottom: '6px' }}>
+                        📋 1-Minute Setup Guide for Telegram Alerts:
+                      </div>
+                      <ol style={{ margin: 0, paddingLeft: '18px', fontSize: '0.78rem', color: '#475569', lineHeight: 1.6 }}>
+                        <li>Open Telegram app and search for <code>@BotFather</code>.</li>
+                        <li>Send <code>/newbot</code>, give it a name (e.g. <i>Exam Typing Admin</i>), then copy the <b>HTTP API Token</b> and paste it above.</li>
+                        <li>Open Telegram, search for <code>@userinfobot</code>, tap Start, and copy your numerical <b>Id</b> (Chat ID).</li>
+                        <li>Start a conversation with your new bot by tapping its link and pressing <b>Start</b>.</li>
+                        <li>Paste both above and click <b>"Test Telegram Ping"</b>. Whenever a candidate pays, you get their screenshot and 1-click Approve link right on your phone!</li>
+                      </ol>
                     </div>
                   </div>
                 </div>
