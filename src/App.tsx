@@ -160,6 +160,15 @@ export const App: React.FC = () => {
 
   // Modals
   const [isRulesOpen, setIsRulesOpen] = useState<boolean>(false);
+  const [rulesTargetExamId, setRulesTargetExamId] = useState<string | undefined>(undefined);
+  const [rulesTargetGroup, setRulesTargetGroup] = useState<string | undefined>(undefined);
+
+  const openRulesModal = (examId?: string, categoryGroup?: string) => {
+    setRulesTargetExamId(examId || selectedExamProfile?.id);
+    setRulesTargetGroup(categoryGroup || selectedExamProfile?.categoryGroup);
+    setIsRulesOpen(true);
+  };
+
   const [isHistoryOpen, setIsHistoryOpen] = useState<boolean>(false);
   const [isHindiHelperOpen, setIsHindiHelperOpen] = useState<boolean>(false);
   // Active Authenticated / Candidate User
@@ -538,7 +547,7 @@ export const App: React.FC = () => {
               returnToExamOrHome();
             }
           }}
-          onOpenRules={() => setIsRulesOpen(true)}
+          onOpenRules={() => openRulesModal()}
           onOpenHistory={() => setIsHistoryOpen(true)}
           onOpenHindiHelper={() => setIsHindiHelperOpen(true)}
           onOpenAiGenerator={() => setIsAiGeneratorOpen(true)}
@@ -567,6 +576,7 @@ export const App: React.FC = () => {
             onOpenAiGenerator={() => setIsAiGeneratorOpen(true)}
             onOpenAdmin={() => setIsAdminOpen(true)}
             onOpenPayment={handleOpenPayment}
+            onOpenRules={openRulesModal}
           />
         )}
 
@@ -579,6 +589,7 @@ export const App: React.FC = () => {
             onFinishTest={handleFinishTest}
             onCancelTest={returnToExamOrHome}
             activeExamProfile={selectedExamProfile}
+            onOpenRules={openRulesModal}
           />
         )}
 
@@ -588,6 +599,7 @@ export const App: React.FC = () => {
             onRetakeTest={handleRetakeTest}
             onChooseAnother={returnToExamOrHome}
             onPracticeWrongWords={handlePracticeWrongWords}
+            onOpenRules={openRulesModal}
             onOpenDashboard={() => {
               if (currentUser) {
                 setIsDashboardOpen(true);
@@ -815,7 +827,12 @@ export const App: React.FC = () => {
         </footer>
       )}
 
-      <RulesModal isOpen={isRulesOpen} onClose={() => setIsRulesOpen(false)} />
+      <RulesModal
+        isOpen={isRulesOpen}
+        onClose={() => setIsRulesOpen(false)}
+        initialExamId={rulesTargetExamId || selectedExamProfile?.id}
+        initialCategoryGroup={rulesTargetGroup || selectedExamProfile?.categoryGroup}
+      />
 
       <HistoryModal
         isOpen={isHistoryOpen}

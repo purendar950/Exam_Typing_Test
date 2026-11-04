@@ -18,6 +18,7 @@ interface ChooseTestProps {
   onOpenAiGenerator?: () => void;
   onOpenAdmin?: () => void;
   onOpenPayment?: (examId?: string) => void;
+  onOpenRules?: (examId?: string, categoryGroup?: string) => void;
   dailyLivePassages?: Passage[];
 }
 
@@ -474,7 +475,8 @@ const ExamTypePostCard: React.FC<{
   onQuickMode: (post: UnifiedExamPost, modeId: string, variant: ExamProfile) => void;
   onQuickStart: (post: UnifiedExamPost) => void;
   getEmblemForGroup: (group: string) => string;
-}> = ({ post, onEnterExam, onQuickMode, onQuickStart, getEmblemForGroup }) => {
+  onOpenRules?: (examId?: string, categoryGroup?: string) => void;
+}> = ({ post, onEnterExam, onQuickMode, onQuickStart, getEmblemForGroup, onOpenRules }) => {
   const engVariant = post.variants.find((v) => v.language === 'english');
   const mangalVariant = post.variants.find((v) => v.language.startsWith('hindi'));
   const hasEnglish = Boolean(engVariant);
@@ -565,18 +567,42 @@ const ExamTypePostCard: React.FC<{
             </span>
           </div>
 
-          <span style={{
-            fontSize: '0.72rem',
-            fontWeight: 700,
-            padding: '2px 8px',
-            borderRadius: '4px',
-            background: badgeStyle.bg,
-            color: badgeStyle.color,
-            border: `1px solid ${badgeStyle.border}`,
-            whiteSpace: 'nowrap'
-          }}>
-            {post.examTypeLabel}
-          </span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+            {onOpenRules && (
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onOpenRules(post.id, post.categoryGroup);
+                }}
+                style={{
+                  fontSize: '0.7rem',
+                  fontWeight: 700,
+                  padding: '2px 7px',
+                  borderRadius: '4px',
+                  background: '#f0f9ff',
+                  color: '#0369a1',
+                  border: '1px solid #bae6fd',
+                  cursor: 'pointer'
+                }}
+                title="View official recruitment notification typing speed & instructions"
+              >
+                📋 Rules
+              </button>
+            )}
+            <span style={{
+              fontSize: '0.72rem',
+              fontWeight: 700,
+              padding: '2px 8px',
+              borderRadius: '4px',
+              background: badgeStyle.bg,
+              color: badgeStyle.color,
+              border: `1px solid ${badgeStyle.border}`,
+              whiteSpace: 'nowrap'
+            }}>
+              {post.examTypeLabel}
+            </span>
+          </div>
         </div>
 
         {/* Post Title */}
@@ -865,6 +891,7 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
   onOpenAiGenerator,
   onOpenAdmin,
   onOpenPayment,
+  onOpenRules,
   dailyLivePassages = []
 }) => {
   // Navigation: 1 (All Exams), 2 (Medium / Mode Selection), 3 (Test Material Grid), or 'classic_form'
@@ -2328,6 +2355,7 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
                     onQuickMode={handleQuickMode}
                     onQuickStart={handleQuickStartPost}
                     getEmblemForGroup={getEmblemForGroup}
+                    onOpenRules={onOpenRules}
                   />
                 ))
               ) : (
@@ -2465,13 +2493,38 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
                 </div>
               </div>
 
-              <button
-                className="btn btn-secondary btn-sm"
-                onClick={() => setNavLevel(1)}
-                style={{ fontWeight: 700, borderRadius: '8px', padding: '8px 16px' }}
-              >
-                ← Back to All Exams
-              </button>
+              <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                {onOpenRules && (
+                  <button
+                    className="btn btn-sm"
+                    onClick={() => onOpenRules(activePost.id, activePost.categoryGroup)}
+                    style={{
+                      background: '#0284c7',
+                      color: '#ffffff',
+                      fontWeight: 700,
+                      borderRadius: '8px',
+                      padding: '8px 14px',
+                      border: 'none',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '5px',
+                      cursor: 'pointer',
+                      boxShadow: '0 2px 4px rgba(2, 132, 199, 0.25)'
+                    }}
+                    title="View official recruitment speed cutoff, calculation formula, and exam instructions"
+                  >
+                    <span>📋</span>
+                    <span>Official Instructions & Guidelines</span>
+                  </button>
+                )}
+                <button
+                  className="btn btn-secondary btn-sm"
+                  onClick={() => setNavLevel(1)}
+                  style={{ fontWeight: 700, borderRadius: '8px', padding: '8px 16px' }}
+                >
+                  ← Back to All Exams
+                </button>
+              </div>
             </div>
 
             {/* Modes Header */}
@@ -2592,6 +2645,29 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
               </div>
 
               <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                {onOpenRules && (
+                  <button
+                    onClick={() => onOpenRules(activePost.id, activePost.categoryGroup)}
+                    className="btn btn-sm"
+                    style={{
+                      background: '#0284c7',
+                      color: '#ffffff',
+                      fontWeight: 700,
+                      border: 'none',
+                      borderRadius: '6px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '5px',
+                      cursor: 'pointer',
+                      padding: '6px 12px',
+                      boxShadow: '0 2px 4px rgba(2, 132, 199, 0.25)'
+                    }}
+                    title="View official recruitment notification speed, formulas and exam day instructions"
+                  >
+                    <span>📋</span>
+                    <span>Official Instructions</span>
+                  </button>
+                )}
                 <button
                   onClick={() => setNavLevel(2)}
                   className="btn btn-sm btn-secondary"
