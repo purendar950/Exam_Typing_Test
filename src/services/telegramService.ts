@@ -27,7 +27,7 @@ export const DEFAULT_TELEGRAM_CONFIG: TelegramConfig = {
   approvalSecretToken: 'adm_' + Math.random().toString(36).substring(2, 12),
   communityChannelUrl: 'https://t.me/SSC_PYQ_COMPILATIONS',
   discussionGroupUrl: 'https://t.me/SSC_PYQ_COMPILATIONS',
-  supportUsername: 'purendar950'
+  supportUsername: 'ExamTypingSupportBot'
 };
 
 // 1. Get & Save Telegram Configuration

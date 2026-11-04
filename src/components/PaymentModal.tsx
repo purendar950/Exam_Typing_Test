@@ -845,7 +845,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
                           💬 Need instant payment activation or facing UPI issues?
                         </div>
                         <a
-                          href="https://t.me/purendar950"
+                          href="https://t.me/ExamTypingSupportBot"
                           target="_blank"
                           rel="noopener noreferrer"
                           style={{
