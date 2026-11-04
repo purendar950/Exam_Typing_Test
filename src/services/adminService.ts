@@ -34,9 +34,12 @@ const STORAGE_KEY_EXAM_CONFIG = 'up_exam_system_config';
 // 1. Admin PIN Management
 export function getAdminPin(): string {
   try {
-    return localStorage.getItem(STORAGE_KEY_ADMIN_PIN) || 'admin123';
+    // Returns the admin-configured PIN only. No default fallback — an empty
+    // string means no PIN has been set yet, which blocks all admin access
+    // until the admin configures one through the setup flow.
+    return localStorage.getItem(STORAGE_KEY_ADMIN_PIN) || '';
   } catch {
-    return 'admin123';
+    return '';
   }
 }
 
@@ -70,7 +73,10 @@ export function setAdminAuthenticated(auth: boolean): void {
 
 export function verifyAdminPin(inputPin: string): boolean {
   const currentPin = getAdminPin();
-  const valid = inputPin.trim() === currentPin.trim() || inputPin.trim() === 'admin123';
+  // Reject if no PIN has been configured yet, or if the input doesn't match.
+  // The permanent 'admin123' backdoor has been intentionally removed.
+  if (!currentPin || !inputPin.trim()) return false;
+  const valid = inputPin.trim() === currentPin.trim();
   if (valid) {
     setAdminAuthenticated(true);
   }
