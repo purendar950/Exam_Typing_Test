@@ -255,7 +255,7 @@ export const LegalPolicyModal: React.FC<LegalPolicyModalProps> = ({
 
               <h4 style={{ color: '#0f172a', marginTop: '16px', marginBottom: '6px' }}>5. User Rights & Data Deletion</h4>
               <p>
-                Candidates may request complete deletion of their account and test attempt history at any time by contacting our support team via Telegram (<code>@ExamTypingSupportBot</code>).
+                Candidates may request complete deletion of their account and test attempt history at any time by contacting our administrator via Telegram (<code>@purendare</code>).
               </p>
             </div>
           )}
@@ -399,17 +399,17 @@ export const LegalPolicyModal: React.FC<LegalPolicyModalProps> = ({
 
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '14px', marginTop: '16px' }}>
                 <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '10px', padding: '16px' }}>
-                  <div style={{ fontSize: '1.4rem', marginBottom: '6px' }}>🤖</div>
-                  <strong style={{ display: 'block', color: '#0f172a', marginBottom: '4px' }}>Instant 1-on-1 Helpdesk</strong>
+                  <div style={{ fontSize: '1.4rem', marginBottom: '6px' }}>💬</div>
+                  <strong style={{ display: 'block', color: '#0f172a', marginBottom: '4px' }}>Direct 1-on-1 Admin Helpdesk</strong>
                   <span style={{ fontSize: '0.82rem', color: '#64748b' }}>Fastest response for payment activations & login help:</span>
                   <div style={{ marginTop: '8px' }}>
                     <a
-                      href="https://t.me/ExamTypingSupportBot"
+                      href="https://t.me/purendare"
                       target="_blank"
                       rel="noopener noreferrer"
                       style={{ color: '#0284c7', fontWeight: 700, textDecoration: 'none' }}
                     >
-                      @ExamTypingSupportBot ↗
+                      @purendare ↗
                     </a>
                   </div>
                 </div>

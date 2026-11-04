@@ -14,7 +14,7 @@ export const TelegramSupportWidget: React.FC<TelegramSupportWidgetProps> = ({
 
   const channelUrl = config?.communityChannelUrl || 'https://t.me/Exam_Typing_Mentor';
   const groupUrl = config?.discussionGroupUrl || 'https://t.me/+Lw-tPbRqO0c2ZTA1';
-  const rawSupport = config?.supportUsername || 'ExamTypingSupportBot';
+  const rawSupport = config?.supportUsername || 'purendare';
   const supportUrl = rawSupport.startsWith('http')
     ? rawSupport
     : `https://t.me/${rawSupport.replace(/^@/, '')}`;
@@ -247,17 +247,17 @@ export const TelegramSupportWidget: React.FC<TelegramSupportWidgetProps> = ({
                     flexShrink: 0
                   }}
                 >
-                  🎧
+                  💬
                 </div>
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ fontWeight: 800, fontSize: '0.85rem', color: '#6d28d9' }}>
-                    1-on-1 Telegram Support
+                    1-on-1 Direct Admin Chat
                   </div>
                   <div style={{ fontSize: '0.72rem', color: '#64748b', lineHeight: 1.25 }}>
-                    Instant help with payment UTR, activation & font setup
+                    Chat directly with Admin (@purendare) for instant payment UTR & activation help
                   </div>
                 </div>
-                <span style={{ fontSize: '0.8rem', color: '#8b5cf6', fontWeight: 700 }}>Help →</span>
+                <span style={{ fontSize: '0.8rem', color: '#8b5cf6', fontWeight: 700 }}>Chat →</span>
               </a>
 
               {/* Payment Help Footer Callout */}
