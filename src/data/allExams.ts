@@ -1,6 +1,6 @@
-import { ExamProfile, UnifiedExamPost, SubCategoryFilter } from '../types';
+import { ExamProfile, UnifiedExamPost, SubCategoryFilter, CalculationModel } from '../types';
 
-export { type ExamProfile, type UnifiedExamPost, type SubCategoryFilter };
+export { type ExamProfile, type UnifiedExamPost, type SubCategoryFilter, type CalculationModel };
 
 export interface CategoryGroupInfo {
   id: string;
@@ -283,8 +283,9 @@ export const UNIFIED_EXAM_POSTS: UnifiedExamPost[] = [
         "inputType": "word",
         "inputLimit": 406,
         "isRetyping": false,
-        "limitErrorPercentage": 0.0,
-        "minAccuracy": 85.0
+        "limitErrorPercentage": 0,
+        "minAccuracy": 85,
+        "calculationModel": "upprpb"
       },
       {
         "id": "53",
@@ -297,8 +298,9 @@ export const UNIFIED_EXAM_POSTS: UnifiedExamPost[] = [
         "inputType": "word",
         "inputLimit": 510,
         "isRetyping": false,
-        "limitErrorPercentage": 0.0,
-        "minAccuracy": 85.0
+        "limitErrorPercentage": 0,
+        "minAccuracy": 85,
+        "calculationModel": "upprpb"
       }
     ]
   },
@@ -321,8 +323,9 @@ export const UNIFIED_EXAM_POSTS: UnifiedExamPost[] = [
         "inputType": "word",
         "inputLimit": 350,
         "isRetyping": true,
-        "limitErrorPercentage": 0.0,
-        "minAccuracy": 85.0
+        "limitErrorPercentage": 0,
+        "minAccuracy": 85,
+        "calculationModel": "upprpb"
       },
       {
         "id": "1339",
@@ -335,8 +338,9 @@ export const UNIFIED_EXAM_POSTS: UnifiedExamPost[] = [
         "inputType": "word",
         "inputLimit": 500,
         "isRetyping": true,
-        "limitErrorPercentage": 0.0,
-        "minAccuracy": 85.0
+        "limitErrorPercentage": 0,
+        "minAccuracy": 85,
+        "calculationModel": "upprpb"
       }
     ]
   },
@@ -359,8 +363,9 @@ export const UNIFIED_EXAM_POSTS: UnifiedExamPost[] = [
         "inputType": "word",
         "inputLimit": 250,
         "isRetyping": false,
-        "limitErrorPercentage": 0.0,
-        "minAccuracy": 85.0
+        "limitErrorPercentage": 0,
+        "minAccuracy": 85,
+        "calculationModel": "upprpb"
       }
     ]
   },
@@ -383,8 +388,9 @@ export const UNIFIED_EXAM_POSTS: UnifiedExamPost[] = [
         "inputType": "word",
         "inputLimit": 125,
         "isRetyping": true,
-        "limitErrorPercentage": 0.0,
-        "minAccuracy": 85.0
+        "limitErrorPercentage": 0,
+        "minAccuracy": 85,
+        "calculationModel": "upprpb"
       },
       {
         "id": "71",
@@ -397,8 +403,9 @@ export const UNIFIED_EXAM_POSTS: UnifiedExamPost[] = [
         "inputType": "word",
         "inputLimit": 125,
         "isRetyping": true,
-        "limitErrorPercentage": 0.0,
-        "minAccuracy": 85.0
+        "limitErrorPercentage": 0,
+        "minAccuracy": 85,
+        "calculationModel": "upprpb"
       }
     ]
   },
@@ -421,8 +428,9 @@ export const UNIFIED_EXAM_POSTS: UnifiedExamPost[] = [
         "inputType": "word",
         "inputLimit": 250,
         "isRetyping": true,
-        "limitErrorPercentage": 0.0,
-        "minAccuracy": 85.0
+        "limitErrorPercentage": 0,
+        "minAccuracy": 85,
+        "calculationModel": "upprpb"
       }
     ]
   },
@@ -445,8 +453,9 @@ export const UNIFIED_EXAM_POSTS: UnifiedExamPost[] = [
         "inputType": "character",
         "inputLimit": 1250,
         "isRetyping": false,
-        "limitErrorPercentage": 0.0,
-        "minAccuracy": 85.0
+        "limitErrorPercentage": 0,
+        "minAccuracy": 85,
+        "calculationModel": "upprpb"
       },
       {
         "id": "56",
@@ -459,8 +468,9 @@ export const UNIFIED_EXAM_POSTS: UnifiedExamPost[] = [
         "inputType": "character",
         "inputLimit": 1500,
         "isRetyping": false,
-        "limitErrorPercentage": 0.0,
-        "minAccuracy": 85.0
+        "limitErrorPercentage": 0,
+        "minAccuracy": 85,
+        "calculationModel": "upprpb"
       }
     ]
   },
@@ -483,8 +493,9 @@ export const UNIFIED_EXAM_POSTS: UnifiedExamPost[] = [
         "inputType": "word",
         "inputLimit": 500,
         "isRetyping": false,
-        "limitErrorPercentage": 0.0,
-        "minAccuracy": 85.0
+        "limitErrorPercentage": 0,
+        "minAccuracy": 85,
+        "calculationModel": "court_ahc"
       }
     ]
   },
@@ -507,8 +518,9 @@ export const UNIFIED_EXAM_POSTS: UnifiedExamPost[] = [
         "inputType": "word",
         "inputLimit": 250,
         "isRetyping": false,
-        "limitErrorPercentage": 0.0,
-        "minAccuracy": 85.0
+        "limitErrorPercentage": 0,
+        "minAccuracy": 85,
+        "calculationModel": "court_ahc"
       },
       {
         "id": "319",
@@ -521,8 +533,9 @@ export const UNIFIED_EXAM_POSTS: UnifiedExamPost[] = [
         "inputType": "word",
         "inputLimit": 300,
         "isRetyping": false,
-        "limitErrorPercentage": 0.0,
-        "minAccuracy": 85.0
+        "limitErrorPercentage": 0,
+        "minAccuracy": 85,
+        "calculationModel": "court_ahc"
       }
     ]
   },
@@ -545,8 +558,9 @@ export const UNIFIED_EXAM_POSTS: UnifiedExamPost[] = [
         "inputType": "word",
         "inputLimit": 450,
         "isRetyping": false,
-        "limitErrorPercentage": 0.0,
-        "minAccuracy": 85.0
+        "limitErrorPercentage": 0,
+        "minAccuracy": 85,
+        "calculationModel": "standard"
       }
     ]
   },
@@ -569,8 +583,9 @@ export const UNIFIED_EXAM_POSTS: UnifiedExamPost[] = [
         "inputType": "word",
         "inputLimit": 300,
         "isRetyping": false,
-        "limitErrorPercentage": 0.0,
-        "minAccuracy": 85.0
+        "limitErrorPercentage": 0,
+        "minAccuracy": 85,
+        "calculationModel": "standard"
       },
       {
         "id": "65",
@@ -583,8 +598,9 @@ export const UNIFIED_EXAM_POSTS: UnifiedExamPost[] = [
         "inputType": "word",
         "inputLimit": 400,
         "isRetyping": false,
-        "limitErrorPercentage": 0.0,
-        "minAccuracy": 85.0
+        "limitErrorPercentage": 0,
+        "minAccuracy": 85,
+        "calculationModel": "standard"
       }
     ]
   },
@@ -607,8 +623,9 @@ export const UNIFIED_EXAM_POSTS: UnifiedExamPost[] = [
         "inputType": "word",
         "inputLimit": 400,
         "isRetyping": false,
-        "limitErrorPercentage": 0.0,
-        "minAccuracy": 85.0
+        "limitErrorPercentage": 0,
+        "minAccuracy": 85,
+        "calculationModel": "standard"
       }
     ]
   },
@@ -631,8 +648,9 @@ export const UNIFIED_EXAM_POSTS: UnifiedExamPost[] = [
         "inputType": "word",
         "inputLimit": 500,
         "isRetyping": false,
-        "limitErrorPercentage": 0.0,
-        "minAccuracy": 85.0
+        "limitErrorPercentage": 0,
+        "minAccuracy": 85,
+        "calculationModel": "standard"
       }
     ]
   },
@@ -655,8 +673,9 @@ export const UNIFIED_EXAM_POSTS: UnifiedExamPost[] = [
         "inputType": "word",
         "inputLimit": 250,
         "isRetyping": false,
-        "limitErrorPercentage": 0.0,
-        "minAccuracy": 85.0
+        "limitErrorPercentage": 0,
+        "minAccuracy": 85,
+        "calculationModel": "standard"
       },
       {
         "id": "1207",
@@ -669,8 +688,9 @@ export const UNIFIED_EXAM_POSTS: UnifiedExamPost[] = [
         "inputType": "word",
         "inputLimit": 300,
         "isRetyping": false,
-        "limitErrorPercentage": 0.0,
-        "minAccuracy": 85.0
+        "limitErrorPercentage": 0,
+        "minAccuracy": 85,
+        "calculationModel": "standard"
       }
     ]
   },
@@ -693,8 +713,9 @@ export const UNIFIED_EXAM_POSTS: UnifiedExamPost[] = [
         "inputType": "character",
         "inputLimit": 1800,
         "isRetyping": true,
-        "limitErrorPercentage": 0.0,
-        "minAccuracy": 85.0
+        "limitErrorPercentage": 0,
+        "minAccuracy": 85,
+        "calculationModel": "rrb_eduquity"
       },
       {
         "id": "24",
@@ -707,8 +728,9 @@ export const UNIFIED_EXAM_POSTS: UnifiedExamPost[] = [
         "inputType": "character",
         "inputLimit": 2500,
         "isRetyping": true,
-        "limitErrorPercentage": 0.0,
-        "minAccuracy": 85.0
+        "limitErrorPercentage": 0,
+        "minAccuracy": 85,
+        "calculationModel": "rrb_eduquity"
       }
     ]
   },
@@ -731,8 +753,9 @@ export const UNIFIED_EXAM_POSTS: UnifiedExamPost[] = [
         "inputType": "character",
         "inputLimit": 3500,
         "isRetyping": false,
-        "limitErrorPercentage": 3.0,
-        "minAccuracy": 97.0
+        "limitErrorPercentage": 3,
+        "minAccuracy": 97,
+        "calculationModel": "court_delhi"
       }
     ]
   },
@@ -755,8 +778,9 @@ export const UNIFIED_EXAM_POSTS: UnifiedExamPost[] = [
         "inputType": "word",
         "inputLimit": 100,
         "isRetyping": true,
-        "limitErrorPercentage": 0.0,
-        "minAccuracy": 85.0
+        "limitErrorPercentage": 0,
+        "minAccuracy": 85,
+        "calculationModel": "standard"
       }
     ]
   },
@@ -779,8 +803,9 @@ export const UNIFIED_EXAM_POSTS: UnifiedExamPost[] = [
         "inputType": "word",
         "inputLimit": 300,
         "isRetyping": true,
-        "limitErrorPercentage": 0.0,
-        "minAccuracy": 85.0
+        "limitErrorPercentage": 0,
+        "minAccuracy": 85,
+        "calculationModel": "standard"
       },
       {
         "id": "63",
@@ -793,8 +818,9 @@ export const UNIFIED_EXAM_POSTS: UnifiedExamPost[] = [
         "inputType": "word",
         "inputLimit": 200,
         "isRetyping": true,
-        "limitErrorPercentage": 0.0,
-        "minAccuracy": 85.0
+        "limitErrorPercentage": 0,
+        "minAccuracy": 85,
+        "calculationModel": "standard"
       }
     ]
   },
@@ -817,8 +843,9 @@ export const UNIFIED_EXAM_POSTS: UnifiedExamPost[] = [
         "inputType": "word",
         "inputLimit": 350,
         "isRetyping": false,
-        "limitErrorPercentage": 0.0,
-        "minAccuracy": 85.0
+        "limitErrorPercentage": 0,
+        "minAccuracy": 85,
+        "calculationModel": "standard"
       },
       {
         "id": "317",
@@ -831,8 +858,9 @@ export const UNIFIED_EXAM_POSTS: UnifiedExamPost[] = [
         "inputType": "word",
         "inputLimit": 350,
         "isRetyping": false,
-        "limitErrorPercentage": 0.0,
-        "minAccuracy": 85.0
+        "limitErrorPercentage": 0,
+        "minAccuracy": 85,
+        "calculationModel": "standard"
       }
     ]
   },
@@ -855,8 +883,9 @@ export const UNIFIED_EXAM_POSTS: UnifiedExamPost[] = [
         "inputType": "word",
         "inputLimit": 310,
         "isRetyping": false,
-        "limitErrorPercentage": 85.0,
-        "minAccuracy": 15.0
+        "limitErrorPercentage": 85,
+        "minAccuracy": 15,
+        "calculationModel": "standard"
       },
       {
         "id": "778",
@@ -869,8 +898,9 @@ export const UNIFIED_EXAM_POSTS: UnifiedExamPost[] = [
         "inputType": "word",
         "inputLimit": 420,
         "isRetyping": false,
-        "limitErrorPercentage": 10.0,
-        "minAccuracy": 90.0
+        "limitErrorPercentage": 10,
+        "minAccuracy": 90,
+        "calculationModel": "standard"
       }
     ]
   },
@@ -893,8 +923,9 @@ export const UNIFIED_EXAM_POSTS: UnifiedExamPost[] = [
         "inputType": "word",
         "inputLimit": 600,
         "isRetyping": false,
-        "limitErrorPercentage": 0.0,
-        "minAccuracy": 85.0
+        "limitErrorPercentage": 0,
+        "minAccuracy": 85,
+        "calculationModel": "court_phhc"
       }
     ]
   },
@@ -917,8 +948,9 @@ export const UNIFIED_EXAM_POSTS: UnifiedExamPost[] = [
         "inputType": "character",
         "inputLimit": 2150,
         "isRetyping": true,
-        "limitErrorPercentage": 0.0,
-        "minAccuracy": 85.0
+        "limitErrorPercentage": 0,
+        "minAccuracy": 85,
+        "calculationModel": "standard"
       },
       {
         "id": "580",
@@ -931,8 +963,9 @@ export const UNIFIED_EXAM_POSTS: UnifiedExamPost[] = [
         "inputType": "character",
         "inputLimit": 3000,
         "isRetyping": true,
-        "limitErrorPercentage": 0.0,
-        "minAccuracy": 85.0
+        "limitErrorPercentage": 0,
+        "minAccuracy": 85,
+        "calculationModel": "standard"
       }
     ]
   },
@@ -955,8 +988,9 @@ export const UNIFIED_EXAM_POSTS: UnifiedExamPost[] = [
         "inputType": "character",
         "inputLimit": 1750,
         "isRetyping": false,
-        "limitErrorPercentage": 0.0,
-        "minAccuracy": 85.0
+        "limitErrorPercentage": 0,
+        "minAccuracy": 85,
+        "calculationModel": "court_delhi"
       }
     ]
   },
@@ -979,8 +1013,9 @@ export const UNIFIED_EXAM_POSTS: UnifiedExamPost[] = [
         "inputType": "word",
         "inputLimit": 700,
         "isRetyping": false,
-        "limitErrorPercentage": 45.0,
-        "minAccuracy": 55.0
+        "limitErrorPercentage": 45,
+        "minAccuracy": 55,
+        "calculationModel": "standard"
       }
     ]
   },
@@ -1003,8 +1038,9 @@ export const UNIFIED_EXAM_POSTS: UnifiedExamPost[] = [
         "inputType": "word",
         "inputLimit": 500,
         "isRetyping": false,
-        "limitErrorPercentage": 40.0,
-        "minAccuracy": 60.0
+        "limitErrorPercentage": 40,
+        "minAccuracy": 60,
+        "calculationModel": "standard"
       }
     ]
   },
@@ -1027,8 +1063,9 @@ export const UNIFIED_EXAM_POSTS: UnifiedExamPost[] = [
         "inputType": "character",
         "inputLimit": 2250,
         "isRetyping": false,
-        "limitErrorPercentage": 0.0,
-        "minAccuracy": 85.0
+        "limitErrorPercentage": 0,
+        "minAccuracy": 85,
+        "calculationModel": "standard"
       },
       {
         "id": "67",
@@ -1041,8 +1078,9 @@ export const UNIFIED_EXAM_POSTS: UnifiedExamPost[] = [
         "inputType": "character",
         "inputLimit": 3500,
         "isRetyping": false,
-        "limitErrorPercentage": 0.0,
-        "minAccuracy": 85.0
+        "limitErrorPercentage": 0,
+        "minAccuracy": 85,
+        "calculationModel": "standard"
       }
     ]
   },
@@ -1065,8 +1103,9 @@ export const UNIFIED_EXAM_POSTS: UnifiedExamPost[] = [
         "inputType": "word",
         "inputLimit": 510,
         "isRetyping": false,
-        "limitErrorPercentage": 0.0,
-        "minAccuracy": 85.0
+        "limitErrorPercentage": 0,
+        "minAccuracy": 85,
+        "calculationModel": "standard"
       }
     ]
   },
@@ -1089,8 +1128,9 @@ export const UNIFIED_EXAM_POSTS: UnifiedExamPost[] = [
         "inputType": "character",
         "inputLimit": 4000,
         "isRetyping": false,
-        "limitErrorPercentage": 3.0,
-        "minAccuracy": 97.0
+        "limitErrorPercentage": 3,
+        "minAccuracy": 97,
+        "calculationModel": "court_delhi"
       }
     ]
   },
@@ -1113,8 +1153,9 @@ export const UNIFIED_EXAM_POSTS: UnifiedExamPost[] = [
         "inputType": "word",
         "inputLimit": 400,
         "isRetyping": true,
-        "limitErrorPercentage": 0.0,
-        "minAccuracy": 85.0
+        "limitErrorPercentage": 0,
+        "minAccuracy": 85,
+        "calculationModel": "standard"
       }
     ]
   },
@@ -1137,8 +1178,9 @@ export const UNIFIED_EXAM_POSTS: UnifiedExamPost[] = [
         "inputType": "character",
         "inputLimit": 2100,
         "isRetyping": false,
-        "limitErrorPercentage": 0.0,
-        "minAccuracy": 85.0
+        "limitErrorPercentage": 0,
+        "minAccuracy": 85,
+        "calculationModel": "court_delhi"
       }
     ]
   },
@@ -1161,8 +1203,9 @@ export const UNIFIED_EXAM_POSTS: UnifiedExamPost[] = [
         "inputType": "word",
         "inputLimit": 300,
         "isRetyping": false,
-        "limitErrorPercentage": 0.0,
-        "minAccuracy": 85.0
+        "limitErrorPercentage": 0,
+        "minAccuracy": 85,
+        "calculationModel": "ssc_dest"
       },
       {
         "id": "481",
@@ -1175,8 +1218,9 @@ export const UNIFIED_EXAM_POSTS: UnifiedExamPost[] = [
         "inputType": "word",
         "inputLimit": 300,
         "isRetyping": false,
-        "limitErrorPercentage": 0.0,
-        "minAccuracy": 85.0
+        "limitErrorPercentage": 0,
+        "minAccuracy": 85,
+        "calculationModel": "ssc_dest"
       }
     ]
   },
@@ -1199,8 +1243,9 @@ export const UNIFIED_EXAM_POSTS: UnifiedExamPost[] = [
         "inputType": "word",
         "inputLimit": 500,
         "isRetyping": false,
-        "limitErrorPercentage": 0.0,
-        "minAccuracy": 85.0
+        "limitErrorPercentage": 0,
+        "minAccuracy": 85,
+        "calculationModel": "ssc_dest"
       },
       {
         "id": "415",
@@ -1213,8 +1258,9 @@ export const UNIFIED_EXAM_POSTS: UnifiedExamPost[] = [
         "inputType": "word",
         "inputLimit": 400,
         "isRetyping": false,
-        "limitErrorPercentage": 0.0,
-        "minAccuracy": 85.0
+        "limitErrorPercentage": 0,
+        "minAccuracy": 85,
+        "calculationModel": "ssc_dest"
       }
     ]
   },
@@ -1237,8 +1283,9 @@ export const UNIFIED_EXAM_POSTS: UnifiedExamPost[] = [
         "inputType": "character",
         "inputLimit": 1550,
         "isRetyping": false,
-        "limitErrorPercentage": 7.0,
-        "minAccuracy": 93.0
+        "limitErrorPercentage": 7,
+        "minAccuracy": 93,
+        "calculationModel": "ssc_dest"
       },
       {
         "id": "1",
@@ -1251,8 +1298,9 @@ export const UNIFIED_EXAM_POSTS: UnifiedExamPost[] = [
         "inputType": "character",
         "inputLimit": 1800,
         "isRetyping": false,
-        "limitErrorPercentage": 7.0,
-        "minAccuracy": 93.0
+        "limitErrorPercentage": 7,
+        "minAccuracy": 93,
+        "calculationModel": "ssc_dest"
       }
     ]
   },
@@ -1275,8 +1323,9 @@ export const UNIFIED_EXAM_POSTS: UnifiedExamPost[] = [
         "inputType": "character",
         "inputLimit": 3750,
         "isRetyping": false,
-        "limitErrorPercentage": 20.0,
-        "minAccuracy": 80.0
+        "limitErrorPercentage": 20,
+        "minAccuracy": 80,
+        "calculationModel": "ssc_dest"
       }
     ]
   },
@@ -1299,8 +1348,9 @@ export const UNIFIED_EXAM_POSTS: UnifiedExamPost[] = [
         "inputType": "character",
         "inputLimit": 2200,
         "isRetyping": false,
-        "limitErrorPercentage": 20.0,
-        "minAccuracy": 80.0
+        "limitErrorPercentage": 20,
+        "minAccuracy": 80,
+        "calculationModel": "ssc_dest"
       }
     ]
   },
@@ -1323,8 +1373,9 @@ export const UNIFIED_EXAM_POSTS: UnifiedExamPost[] = [
         "inputType": "character",
         "inputLimit": 4000,
         "isRetyping": false,
-        "limitErrorPercentage": 20.0,
-        "minAccuracy": 80.0
+        "limitErrorPercentage": 20,
+        "minAccuracy": 80,
+        "calculationModel": "ssc_dest"
       }
     ]
   },
@@ -1347,8 +1398,9 @@ export const UNIFIED_EXAM_POSTS: UnifiedExamPost[] = [
         "inputType": "character",
         "inputLimit": 2250,
         "isRetyping": false,
-        "limitErrorPercentage": 0.0,
-        "minAccuracy": 85.0
+        "limitErrorPercentage": 0,
+        "minAccuracy": 85,
+        "calculationModel": "standard"
       },
       {
         "id": "910",
@@ -1361,8 +1413,9 @@ export const UNIFIED_EXAM_POSTS: UnifiedExamPost[] = [
         "inputType": "character",
         "inputLimit": 3250,
         "isRetyping": false,
-        "limitErrorPercentage": 0.0,
-        "minAccuracy": 85.0
+        "limitErrorPercentage": 0,
+        "minAccuracy": 85,
+        "calculationModel": "standard"
       }
     ]
   },
@@ -1385,8 +1438,9 @@ export const UNIFIED_EXAM_POSTS: UnifiedExamPost[] = [
         "inputType": "character",
         "inputLimit": 2750,
         "isRetyping": false,
-        "limitErrorPercentage": 0.0,
-        "minAccuracy": 85.0
+        "limitErrorPercentage": 0,
+        "minAccuracy": 85,
+        "calculationModel": "rrb_eduquity"
       },
       {
         "id": "184",
@@ -1399,8 +1453,9 @@ export const UNIFIED_EXAM_POSTS: UnifiedExamPost[] = [
         "inputType": "character",
         "inputLimit": 3250,
         "isRetyping": false,
-        "limitErrorPercentage": 0.0,
-        "minAccuracy": 85.0
+        "limitErrorPercentage": 0,
+        "minAccuracy": 85,
+        "calculationModel": "rrb_eduquity"
       }
     ]
   },
@@ -1423,8 +1478,9 @@ export const UNIFIED_EXAM_POSTS: UnifiedExamPost[] = [
         "inputType": "character",
         "inputLimit": 2250,
         "isRetyping": false,
-        "limitErrorPercentage": 0.0,
-        "minAccuracy": 85.0
+        "limitErrorPercentage": 0,
+        "minAccuracy": 85,
+        "calculationModel": "rrb_eduquity"
       },
       {
         "id": "217",
@@ -1437,8 +1493,9 @@ export const UNIFIED_EXAM_POSTS: UnifiedExamPost[] = [
         "inputType": "character",
         "inputLimit": 2750,
         "isRetyping": false,
-        "limitErrorPercentage": 0.0,
-        "minAccuracy": 85.0
+        "limitErrorPercentage": 0,
+        "minAccuracy": 85,
+        "calculationModel": "rrb_eduquity"
       }
     ]
   },
@@ -1461,8 +1518,9 @@ export const UNIFIED_EXAM_POSTS: UnifiedExamPost[] = [
         "inputType": "character",
         "inputLimit": 3250,
         "isRetyping": true,
-        "limitErrorPercentage": 0.0,
-        "minAccuracy": 85.0
+        "limitErrorPercentage": 0,
+        "minAccuracy": 85,
+        "calculationModel": "rrb_eduquity"
       },
       {
         "id": "20",
@@ -1475,8 +1533,9 @@ export const UNIFIED_EXAM_POSTS: UnifiedExamPost[] = [
         "inputType": "character",
         "inputLimit": 5000,
         "isRetyping": true,
-        "limitErrorPercentage": 0.0,
-        "minAccuracy": 85.0
+        "limitErrorPercentage": 0,
+        "minAccuracy": 85,
+        "calculationModel": "rrb_eduquity"
       }
     ]
   },
@@ -1499,8 +1558,9 @@ export const UNIFIED_EXAM_POSTS: UnifiedExamPost[] = [
         "inputType": "character",
         "inputLimit": 1800,
         "isRetyping": false,
-        "limitErrorPercentage": 0.0,
-        "minAccuracy": 85.0
+        "limitErrorPercentage": 0,
+        "minAccuracy": 85,
+        "calculationModel": "rrb_eduquity"
       },
       {
         "id": "74",
@@ -1513,8 +1573,9 @@ export const UNIFIED_EXAM_POSTS: UnifiedExamPost[] = [
         "inputType": "character",
         "inputLimit": 2100,
         "isRetyping": false,
-        "limitErrorPercentage": 0.0,
-        "minAccuracy": 85.0
+        "limitErrorPercentage": 0,
+        "minAccuracy": 85,
+        "calculationModel": "rrb_eduquity"
       }
     ]
   },
@@ -1537,8 +1598,9 @@ export const UNIFIED_EXAM_POSTS: UnifiedExamPost[] = [
         "inputType": "character",
         "inputLimit": 2100,
         "isRetyping": true,
-        "limitErrorPercentage": 0.0,
-        "minAccuracy": 85.0
+        "limitErrorPercentage": 0,
+        "minAccuracy": 85,
+        "calculationModel": "rrb_eduquity"
       },
       {
         "id": "22",
@@ -1551,8 +1613,9 @@ export const UNIFIED_EXAM_POSTS: UnifiedExamPost[] = [
         "inputType": "character",
         "inputLimit": 2500,
         "isRetyping": true,
-        "limitErrorPercentage": 0.0,
-        "minAccuracy": 85.0
+        "limitErrorPercentage": 0,
+        "minAccuracy": 85,
+        "calculationModel": "rrb_eduquity"
       }
     ]
   },
@@ -1575,8 +1638,9 @@ export const UNIFIED_EXAM_POSTS: UnifiedExamPost[] = [
         "inputType": "word",
         "inputLimit": 300,
         "isRetyping": false,
-        "limitErrorPercentage": 0.0,
-        "minAccuracy": 85.0
+        "limitErrorPercentage": 0,
+        "minAccuracy": 85,
+        "calculationModel": "rrb_eduquity"
       },
       {
         "id": "81",
@@ -1589,8 +1653,9 @@ export const UNIFIED_EXAM_POSTS: UnifiedExamPost[] = [
         "inputType": "word",
         "inputLimit": 300,
         "isRetyping": false,
-        "limitErrorPercentage": 0.0,
-        "minAccuracy": 85.0
+        "limitErrorPercentage": 0,
+        "minAccuracy": 85,
+        "calculationModel": "rrb_eduquity"
       }
     ]
   },
@@ -1613,8 +1678,9 @@ export const UNIFIED_EXAM_POSTS: UnifiedExamPost[] = [
         "inputType": "character",
         "inputLimit": 2150,
         "isRetyping": false,
-        "limitErrorPercentage": 0.0,
-        "minAccuracy": 85.0
+        "limitErrorPercentage": 0,
+        "minAccuracy": 85,
+        "calculationModel": "rrb_eduquity"
       },
       {
         "id": "85",
@@ -1627,8 +1693,9 @@ export const UNIFIED_EXAM_POSTS: UnifiedExamPost[] = [
         "inputType": "character",
         "inputLimit": 3500,
         "isRetyping": false,
-        "limitErrorPercentage": 0.0,
-        "minAccuracy": 85.0
+        "limitErrorPercentage": 0,
+        "minAccuracy": 85,
+        "calculationModel": "rrb_eduquity"
       }
     ]
   },
@@ -1651,8 +1718,9 @@ export const UNIFIED_EXAM_POSTS: UnifiedExamPost[] = [
         "inputType": "character",
         "inputLimit": 2150,
         "isRetyping": false,
-        "limitErrorPercentage": 5.0,
-        "minAccuracy": 95.0
+        "limitErrorPercentage": 5,
+        "minAccuracy": 95,
+        "calculationModel": "rrb_eduquity"
       },
       {
         "id": "1240",
@@ -1665,8 +1733,9 @@ export const UNIFIED_EXAM_POSTS: UnifiedExamPost[] = [
         "inputType": "character",
         "inputLimit": 3750,
         "isRetyping": false,
-        "limitErrorPercentage": 5.0,
-        "minAccuracy": 95.0
+        "limitErrorPercentage": 5,
+        "minAccuracy": 95,
+        "calculationModel": "rrb_eduquity"
       }
     ]
   },
@@ -1689,8 +1758,9 @@ export const UNIFIED_EXAM_POSTS: UnifiedExamPost[] = [
         "inputType": "character",
         "inputLimit": 1500,
         "isRetyping": false,
-        "limitErrorPercentage": 0.0,
-        "minAccuracy": 85.0
+        "limitErrorPercentage": 0,
+        "minAccuracy": 85,
+        "calculationModel": "standard"
       },
       {
         "id": "151",
@@ -1703,8 +1773,9 @@ export const UNIFIED_EXAM_POSTS: UnifiedExamPost[] = [
         "inputType": "character",
         "inputLimit": 1750,
         "isRetyping": false,
-        "limitErrorPercentage": 0.0,
-        "minAccuracy": 85.0
+        "limitErrorPercentage": 0,
+        "minAccuracy": 85,
+        "calculationModel": "standard"
       }
     ]
   },
@@ -1727,8 +1798,9 @@ export const UNIFIED_EXAM_POSTS: UnifiedExamPost[] = [
         "inputType": "character",
         "inputLimit": 1500,
         "isRetyping": false,
-        "limitErrorPercentage": 0.0,
-        "minAccuracy": 85.0
+        "limitErrorPercentage": 0,
+        "minAccuracy": 85,
+        "calculationModel": "standard"
       }
     ]
   },
@@ -1751,8 +1823,9 @@ export const UNIFIED_EXAM_POSTS: UnifiedExamPost[] = [
         "inputType": "word",
         "inputLimit": 550,
         "isRetyping": false,
-        "limitErrorPercentage": 0.0,
-        "minAccuracy": 85.0
+        "limitErrorPercentage": 0,
+        "minAccuracy": 85,
+        "calculationModel": "rrb_eduquity"
       }
     ]
   },
@@ -1775,8 +1848,9 @@ export const UNIFIED_EXAM_POSTS: UnifiedExamPost[] = [
         "inputType": "word",
         "inputLimit": 400,
         "isRetyping": false,
-        "limitErrorPercentage": 0.0,
-        "minAccuracy": 85.0
+        "limitErrorPercentage": 0,
+        "minAccuracy": 85,
+        "calculationModel": "rrb_eduquity"
       },
       {
         "id": "61",
@@ -1789,8 +1863,9 @@ export const UNIFIED_EXAM_POSTS: UnifiedExamPost[] = [
         "inputType": "word",
         "inputLimit": 500,
         "isRetyping": false,
-        "limitErrorPercentage": 0.0,
-        "minAccuracy": 85.0
+        "limitErrorPercentage": 0,
+        "minAccuracy": 85,
+        "calculationModel": "rrb_eduquity"
       }
     ]
   },
@@ -1813,8 +1888,9 @@ export const UNIFIED_EXAM_POSTS: UnifiedExamPost[] = [
         "inputType": "word",
         "inputLimit": 1250,
         "isRetyping": false,
-        "limitErrorPercentage": 0.0,
-        "minAccuracy": 85.0
+        "limitErrorPercentage": 0,
+        "minAccuracy": 85,
+        "calculationModel": "rrb_eduquity"
       },
       {
         "id": "1009",
@@ -1827,8 +1903,9 @@ export const UNIFIED_EXAM_POSTS: UnifiedExamPost[] = [
         "inputType": "word",
         "inputLimit": 1250,
         "isRetyping": false,
-        "limitErrorPercentage": 0.0,
-        "minAccuracy": 85.0
+        "limitErrorPercentage": 0,
+        "minAccuracy": 85,
+        "calculationModel": "rrb_eduquity"
       }
     ]
   },
@@ -1851,8 +1928,9 @@ export const UNIFIED_EXAM_POSTS: UnifiedExamPost[] = [
         "inputType": "word",
         "inputLimit": 300,
         "isRetyping": false,
-        "limitErrorPercentage": 0.0,
-        "minAccuracy": 85.0
+        "limitErrorPercentage": 0,
+        "minAccuracy": 85,
+        "calculationModel": "ssc_dest"
       },
       {
         "id": "6",
@@ -1865,8 +1943,9 @@ export const UNIFIED_EXAM_POSTS: UnifiedExamPost[] = [
         "inputType": "word",
         "inputLimit": 350,
         "isRetyping": false,
-        "limitErrorPercentage": 0.0,
-        "minAccuracy": 85.0
+        "limitErrorPercentage": 0,
+        "minAccuracy": 85,
+        "calculationModel": "ssc_dest"
       }
     ]
   },
@@ -1890,7 +1969,8 @@ export const UNIFIED_EXAM_POSTS: UnifiedExamPost[] = [
         "inputLimit": 150,
         "isRetyping": false,
         "limitErrorPercentage": 1.5,
-        "minAccuracy": 98.5
+        "minAccuracy": 98.5,
+        "calculationModel": "standard"
       },
       {
         "id": "811",
@@ -1904,7 +1984,8 @@ export const UNIFIED_EXAM_POSTS: UnifiedExamPost[] = [
         "inputLimit": 200,
         "isRetyping": false,
         "limitErrorPercentage": 1.5,
-        "minAccuracy": 98.5
+        "minAccuracy": 98.5,
+        "calculationModel": "standard"
       }
     ]
   },
@@ -1928,7 +2009,8 @@ export const UNIFIED_EXAM_POSTS: UnifiedExamPost[] = [
         "inputLimit": 400,
         "isRetyping": false,
         "limitErrorPercentage": 1.5,
-        "minAccuracy": 98.5
+        "minAccuracy": 98.5,
+        "calculationModel": "standard"
       },
       {
         "id": "19",
@@ -1942,7 +2024,8 @@ export const UNIFIED_EXAM_POSTS: UnifiedExamPost[] = [
         "inputLimit": 400,
         "isRetyping": false,
         "limitErrorPercentage": 1.5,
-        "minAccuracy": 98.5
+        "minAccuracy": 98.5,
+        "calculationModel": "standard"
       }
     ]
   },
@@ -1966,7 +2049,8 @@ export const UNIFIED_EXAM_POSTS: UnifiedExamPost[] = [
         "inputLimit": 400,
         "isRetyping": false,
         "limitErrorPercentage": 1.5,
-        "minAccuracy": 98.5
+        "minAccuracy": 98.5,
+        "calculationModel": "standard"
       },
       {
         "id": "17",
@@ -1980,7 +2064,8 @@ export const UNIFIED_EXAM_POSTS: UnifiedExamPost[] = [
         "inputLimit": 400,
         "isRetyping": false,
         "limitErrorPercentage": 1.5,
-        "minAccuracy": 98.5
+        "minAccuracy": 98.5,
+        "calculationModel": "standard"
       }
     ]
   },
@@ -2003,8 +2088,9 @@ export const UNIFIED_EXAM_POSTS: UnifiedExamPost[] = [
         "inputType": "word",
         "inputLimit": 400,
         "isRetyping": true,
-        "limitErrorPercentage": 0.0,
-        "minAccuracy": 85.0
+        "limitErrorPercentage": 0,
+        "minAccuracy": 85,
+        "calculationModel": "ssc_dest"
       }
     ]
   },
@@ -2027,8 +2113,9 @@ export const UNIFIED_EXAM_POSTS: UnifiedExamPost[] = [
         "inputType": "character",
         "inputLimit": 1500,
         "isRetyping": false,
-        "limitErrorPercentage": 0.0,
-        "minAccuracy": 85.0
+        "limitErrorPercentage": 0,
+        "minAccuracy": 85,
+        "calculationModel": "standard"
       },
       {
         "id": "58",
@@ -2041,8 +2128,9 @@ export const UNIFIED_EXAM_POSTS: UnifiedExamPost[] = [
         "inputType": "character",
         "inputLimit": 2000,
         "isRetyping": false,
-        "limitErrorPercentage": 0.0,
-        "minAccuracy": 85.0
+        "limitErrorPercentage": 0,
+        "minAccuracy": 85,
+        "calculationModel": "standard"
       }
     ]
   },
@@ -2065,8 +2153,9 @@ export const UNIFIED_EXAM_POSTS: UnifiedExamPost[] = [
         "inputType": "character",
         "inputLimit": 2750,
         "isRetyping": false,
-        "limitErrorPercentage": 0.0,
-        "minAccuracy": 85.0
+        "limitErrorPercentage": 0,
+        "minAccuracy": 85,
+        "calculationModel": "rrb_eduquity"
       },
       {
         "id": "548",
@@ -2079,8 +2168,9 @@ export const UNIFIED_EXAM_POSTS: UnifiedExamPost[] = [
         "inputType": "character",
         "inputLimit": 3750,
         "isRetyping": false,
-        "limitErrorPercentage": 0.0,
-        "minAccuracy": 85.0
+        "limitErrorPercentage": 0,
+        "minAccuracy": 85,
+        "calculationModel": "rrb_eduquity"
       }
     ]
   },
@@ -2103,8 +2193,9 @@ export const UNIFIED_EXAM_POSTS: UnifiedExamPost[] = [
         "inputType": "word",
         "inputLimit": 500,
         "isRetyping": false,
-        "limitErrorPercentage": 0.0,
-        "minAccuracy": 85.0
+        "limitErrorPercentage": 0,
+        "minAccuracy": 85,
+        "calculationModel": "standard"
       },
       {
         "id": "746",
@@ -2117,8 +2208,9 @@ export const UNIFIED_EXAM_POSTS: UnifiedExamPost[] = [
         "inputType": "word",
         "inputLimit": 600,
         "isRetyping": false,
-        "limitErrorPercentage": 0.0,
-        "minAccuracy": 85.0
+        "limitErrorPercentage": 0,
+        "minAccuracy": 85,
+        "calculationModel": "standard"
       }
     ]
   },
@@ -2141,8 +2233,9 @@ export const UNIFIED_EXAM_POSTS: UnifiedExamPost[] = [
         "inputType": "character",
         "inputLimit": 2250,
         "isRetyping": true,
-        "limitErrorPercentage": 0.0,
-        "minAccuracy": 85.0
+        "limitErrorPercentage": 0,
+        "minAccuracy": 85,
+        "calculationModel": "rrb_eduquity"
       },
       {
         "id": "514",
@@ -2155,8 +2248,9 @@ export const UNIFIED_EXAM_POSTS: UnifiedExamPost[] = [
         "inputType": "character",
         "inputLimit": 2750,
         "isRetyping": true,
-        "limitErrorPercentage": 0.0,
-        "minAccuracy": 85.0
+        "limitErrorPercentage": 0,
+        "minAccuracy": 85,
+        "calculationModel": "rrb_eduquity"
       }
     ]
   },
@@ -2179,8 +2273,9 @@ export const UNIFIED_EXAM_POSTS: UnifiedExamPost[] = [
         "inputType": "character",
         "inputLimit": 1750,
         "isRetyping": true,
-        "limitErrorPercentage": 0.0,
-        "minAccuracy": 85.0
+        "limitErrorPercentage": 0,
+        "minAccuracy": 85,
+        "calculationModel": "rrb_eduquity"
       },
       {
         "id": "712",
@@ -2193,8 +2288,9 @@ export const UNIFIED_EXAM_POSTS: UnifiedExamPost[] = [
         "inputType": "character",
         "inputLimit": 2750,
         "isRetyping": true,
-        "limitErrorPercentage": 0.0,
-        "minAccuracy": 85.0
+        "limitErrorPercentage": 0,
+        "minAccuracy": 85,
+        "calculationModel": "rrb_eduquity"
       }
     ]
   },
@@ -2217,8 +2313,9 @@ export const UNIFIED_EXAM_POSTS: UnifiedExamPost[] = [
         "inputType": "character",
         "inputLimit": 1750,
         "isRetyping": false,
-        "limitErrorPercentage": 0.0,
-        "minAccuracy": 85.0
+        "limitErrorPercentage": 0,
+        "minAccuracy": 85,
+        "calculationModel": "rrb_eduquity"
       },
       {
         "id": "76",
@@ -2231,8 +2328,9 @@ export const UNIFIED_EXAM_POSTS: UnifiedExamPost[] = [
         "inputType": "character",
         "inputLimit": 2000,
         "isRetyping": false,
-        "limitErrorPercentage": 0.0,
-        "minAccuracy": 85.0
+        "limitErrorPercentage": 0,
+        "minAccuracy": 85,
+        "calculationModel": "rrb_eduquity"
       }
     ]
   },
@@ -2255,8 +2353,9 @@ export const UNIFIED_EXAM_POSTS: UnifiedExamPost[] = [
         "inputType": "character",
         "inputLimit": 1500,
         "isRetyping": false,
-        "limitErrorPercentage": 3.0,
-        "minAccuracy": 97.0
+        "limitErrorPercentage": 3,
+        "minAccuracy": 97,
+        "calculationModel": "standard"
       },
       {
         "id": "1306",
@@ -2269,8 +2368,9 @@ export const UNIFIED_EXAM_POSTS: UnifiedExamPost[] = [
         "inputType": "character",
         "inputLimit": 1750,
         "isRetyping": false,
-        "limitErrorPercentage": 3.0,
-        "minAccuracy": 97.0
+        "limitErrorPercentage": 3,
+        "minAccuracy": 97,
+        "calculationModel": "standard"
       }
     ]
   },
@@ -2293,8 +2393,9 @@ export const UNIFIED_EXAM_POSTS: UnifiedExamPost[] = [
         "inputType": "character",
         "inputLimit": 2500,
         "isRetyping": true,
-        "limitErrorPercentage": 0.0,
-        "minAccuracy": 85.0
+        "limitErrorPercentage": 0,
+        "minAccuracy": 85,
+        "calculationModel": "rrb_eduquity"
       },
       {
         "id": "1108",
@@ -2307,8 +2408,9 @@ export const UNIFIED_EXAM_POSTS: UnifiedExamPost[] = [
         "inputType": "character",
         "inputLimit": 3250,
         "isRetyping": true,
-        "limitErrorPercentage": 0.0,
-        "minAccuracy": 85.0
+        "limitErrorPercentage": 0,
+        "minAccuracy": 85,
+        "calculationModel": "rrb_eduquity"
       }
     ]
   },
@@ -2331,8 +2433,9 @@ export const UNIFIED_EXAM_POSTS: UnifiedExamPost[] = [
         "inputType": "character",
         "inputLimit": 1500,
         "isRetyping": false,
-        "limitErrorPercentage": 0.0,
-        "minAccuracy": 85.0
+        "limitErrorPercentage": 0,
+        "minAccuracy": 85,
+        "calculationModel": "standard"
       },
       {
         "id": "11",
@@ -2345,8 +2448,9 @@ export const UNIFIED_EXAM_POSTS: UnifiedExamPost[] = [
         "inputType": "character",
         "inputLimit": 1750,
         "isRetyping": false,
-        "limitErrorPercentage": 0.0,
-        "minAccuracy": 85.0
+        "limitErrorPercentage": 0,
+        "minAccuracy": 85,
+        "calculationModel": "standard"
       }
     ]
   },
@@ -2369,8 +2473,9 @@ export const UNIFIED_EXAM_POSTS: UnifiedExamPost[] = [
         "inputType": "character",
         "inputLimit": 1750,
         "isRetyping": false,
-        "limitErrorPercentage": 0.0,
-        "minAccuracy": 85.0
+        "limitErrorPercentage": 0,
+        "minAccuracy": 85,
+        "calculationModel": "standard"
       },
       {
         "id": "14",
@@ -2383,8 +2488,9 @@ export const UNIFIED_EXAM_POSTS: UnifiedExamPost[] = [
         "inputType": "character",
         "inputLimit": 2000,
         "isRetyping": false,
-        "limitErrorPercentage": 0.0,
-        "minAccuracy": 85.0
+        "limitErrorPercentage": 0,
+        "minAccuracy": 85,
+        "calculationModel": "standard"
       }
     ]
   },
@@ -2407,8 +2513,9 @@ export const UNIFIED_EXAM_POSTS: UnifiedExamPost[] = [
         "inputType": "character",
         "inputLimit": 1500,
         "isRetyping": false,
-        "limitErrorPercentage": 0.0,
-        "minAccuracy": 85.0
+        "limitErrorPercentage": 0,
+        "minAccuracy": 85,
+        "calculationModel": "standard"
       }
     ]
   },
@@ -2431,8 +2538,9 @@ export const UNIFIED_EXAM_POSTS: UnifiedExamPost[] = [
         "inputType": "character",
         "inputLimit": 1750,
         "isRetyping": false,
-        "limitErrorPercentage": 0.0,
-        "minAccuracy": 85.0
+        "limitErrorPercentage": 0,
+        "minAccuracy": 85,
+        "calculationModel": "standard"
       }
     ]
   },
@@ -2455,8 +2563,9 @@ export const UNIFIED_EXAM_POSTS: UnifiedExamPost[] = [
         "inputType": "character",
         "inputLimit": 2250,
         "isRetyping": false,
-        "limitErrorPercentage": 0.0,
-        "minAccuracy": 85.0
+        "limitErrorPercentage": 0,
+        "minAccuracy": 85,
+        "calculationModel": "standard"
       },
       {
         "id": "69",
@@ -2469,8 +2578,9 @@ export const UNIFIED_EXAM_POSTS: UnifiedExamPost[] = [
         "inputType": "character",
         "inputLimit": 2750,
         "isRetyping": false,
-        "limitErrorPercentage": 0.0,
-        "minAccuracy": 85.0
+        "limitErrorPercentage": 0,
+        "minAccuracy": 85,
+        "calculationModel": "standard"
       }
     ]
   },
@@ -2493,8 +2603,9 @@ export const UNIFIED_EXAM_POSTS: UnifiedExamPost[] = [
         "inputType": "character",
         "inputLimit": 1250,
         "isRetyping": true,
-        "limitErrorPercentage": 0.0,
-        "minAccuracy": 85.0
+        "limitErrorPercentage": 0,
+        "minAccuracy": 85,
+        "calculationModel": "rrb_eduquity"
       },
       {
         "id": "286",
@@ -2507,8 +2618,9 @@ export const UNIFIED_EXAM_POSTS: UnifiedExamPost[] = [
         "inputType": "character",
         "inputLimit": 1500,
         "isRetyping": true,
-        "limitErrorPercentage": 0.0,
-        "minAccuracy": 85.0
+        "limitErrorPercentage": 0,
+        "minAccuracy": 85,
+        "calculationModel": "rrb_eduquity"
       }
     ]
   },
@@ -2531,8 +2643,9 @@ export const UNIFIED_EXAM_POSTS: UnifiedExamPost[] = [
         "inputType": "word",
         "inputLimit": 550,
         "isRetyping": false,
-        "limitErrorPercentage": 0.0,
-        "minAccuracy": 85.0
+        "limitErrorPercentage": 0,
+        "minAccuracy": 85,
+        "calculationModel": "mp_cpct"
       },
       {
         "id": "1141",
@@ -2545,8 +2658,9 @@ export const UNIFIED_EXAM_POSTS: UnifiedExamPost[] = [
         "inputType": "word",
         "inputLimit": 550,
         "isRetyping": false,
-        "limitErrorPercentage": 0.0,
-        "minAccuracy": 85.0
+        "limitErrorPercentage": 0,
+        "minAccuracy": 85,
+        "calculationModel": "mp_cpct"
       }
     ]
   },
@@ -2569,8 +2683,9 @@ export const UNIFIED_EXAM_POSTS: UnifiedExamPost[] = [
         "inputType": "word",
         "inputLimit": 600,
         "isRetyping": false,
-        "limitErrorPercentage": 0.0,
-        "minAccuracy": 85.0
+        "limitErrorPercentage": 0,
+        "minAccuracy": 85,
+        "calculationModel": "standard"
       }
     ]
   },
@@ -2593,8 +2708,9 @@ export const UNIFIED_EXAM_POSTS: UnifiedExamPost[] = [
         "inputType": "character",
         "inputLimit": 1500,
         "isRetyping": false,
-        "limitErrorPercentage": 0.0,
-        "minAccuracy": 85.0
+        "limitErrorPercentage": 0,
+        "minAccuracy": 85,
+        "calculationModel": "standard"
       },
       {
         "id": "680",
@@ -2607,8 +2723,9 @@ export const UNIFIED_EXAM_POSTS: UnifiedExamPost[] = [
         "inputType": "character",
         "inputLimit": 1750,
         "isRetyping": false,
-        "limitErrorPercentage": 0.0,
-        "minAccuracy": 85.0
+        "limitErrorPercentage": 0,
+        "minAccuracy": 85,
+        "calculationModel": "standard"
       }
     ]
   },
@@ -2631,8 +2748,9 @@ export const UNIFIED_EXAM_POSTS: UnifiedExamPost[] = [
         "inputType": "word",
         "inputLimit": 250,
         "isRetyping": false,
-        "limitErrorPercentage": 0.0,
-        "minAccuracy": 85.0
+        "limitErrorPercentage": 0,
+        "minAccuracy": 85,
+        "calculationModel": "ssc_dest"
       }
     ]
   },
@@ -2655,8 +2773,9 @@ export const UNIFIED_EXAM_POSTS: UnifiedExamPost[] = [
         "inputType": "word",
         "inputLimit": 420,
         "isRetyping": false,
-        "limitErrorPercentage": 0.0,
-        "minAccuracy": 85.0
+        "limitErrorPercentage": 0,
+        "minAccuracy": 85,
+        "calculationModel": "standard"
       }
     ]
   },
@@ -2679,8 +2798,9 @@ export const UNIFIED_EXAM_POSTS: UnifiedExamPost[] = [
         "inputType": "word",
         "inputLimit": 300,
         "isRetyping": false,
-        "limitErrorPercentage": 0.0,
-        "minAccuracy": 85.0
+        "limitErrorPercentage": 0,
+        "minAccuracy": 85,
+        "calculationModel": "standard"
       },
       {
         "id": "448",
@@ -2693,8 +2813,9 @@ export const UNIFIED_EXAM_POSTS: UnifiedExamPost[] = [
         "inputType": "word",
         "inputLimit": 400,
         "isRetyping": false,
-        "limitErrorPercentage": 0.0,
-        "minAccuracy": 85.0
+        "limitErrorPercentage": 0,
+        "minAccuracy": 85,
+        "calculationModel": "standard"
       }
     ]
   },
@@ -2717,8 +2838,9 @@ export const UNIFIED_EXAM_POSTS: UnifiedExamPost[] = [
         "inputType": "character",
         "inputLimit": 1575,
         "isRetyping": false,
-        "limitErrorPercentage": 0.0,
-        "minAccuracy": 85.0
+        "limitErrorPercentage": 0,
+        "minAccuracy": 85,
+        "calculationModel": "standard"
       },
       {
         "id": "83",
@@ -2731,8 +2853,9 @@ export const UNIFIED_EXAM_POSTS: UnifiedExamPost[] = [
         "inputType": "character",
         "inputLimit": 2100,
         "isRetyping": false,
-        "limitErrorPercentage": 5.0,
-        "minAccuracy": 95.0
+        "limitErrorPercentage": 5,
+        "minAccuracy": 95,
+        "calculationModel": "standard"
       }
     ]
   },
@@ -2755,8 +2878,9 @@ export const UNIFIED_EXAM_POSTS: UnifiedExamPost[] = [
         "inputType": "character",
         "inputLimit": 1500,
         "isRetyping": false,
-        "limitErrorPercentage": 0.0,
-        "minAccuracy": 85.0
+        "limitErrorPercentage": 0,
+        "minAccuracy": 85,
+        "calculationModel": "ssc_dest"
       },
       {
         "id": "283",
@@ -2769,8 +2893,9 @@ export const UNIFIED_EXAM_POSTS: UnifiedExamPost[] = [
         "inputType": "character",
         "inputLimit": 1750,
         "isRetyping": false,
-        "limitErrorPercentage": 0.0,
-        "minAccuracy": 85.0
+        "limitErrorPercentage": 0,
+        "minAccuracy": 85,
+        "calculationModel": "ssc_dest"
       }
     ]
   },
@@ -2793,8 +2918,9 @@ export const UNIFIED_EXAM_POSTS: UnifiedExamPost[] = [
         "inputType": "character",
         "inputLimit": 2500,
         "isRetyping": false,
-        "limitErrorPercentage": 0.0,
-        "minAccuracy": 85.0
+        "limitErrorPercentage": 0,
+        "minAccuracy": 85,
+        "calculationModel": "standard"
       },
       {
         "id": "8",
@@ -2807,8 +2933,9 @@ export const UNIFIED_EXAM_POSTS: UnifiedExamPost[] = [
         "inputType": "character",
         "inputLimit": 2750,
         "isRetyping": false,
-        "limitErrorPercentage": 0.0,
-        "minAccuracy": 85.0
+        "limitErrorPercentage": 0,
+        "minAccuracy": 85,
+        "calculationModel": "standard"
       }
     ]
   },
@@ -2831,8 +2958,9 @@ export const UNIFIED_EXAM_POSTS: UnifiedExamPost[] = [
         "inputType": "character",
         "inputLimit": 2250,
         "isRetyping": false,
-        "limitErrorPercentage": 0.0,
-        "minAccuracy": 85.0
+        "limitErrorPercentage": 0,
+        "minAccuracy": 85,
+        "calculationModel": "standard"
       },
       {
         "id": "844",
@@ -2845,8 +2973,229 @@ export const UNIFIED_EXAM_POSTS: UnifiedExamPost[] = [
         "inputType": "character",
         "inputLimit": 3750,
         "isRetyping": false,
-        "limitErrorPercentage": 0.0,
-        "minAccuracy": 85.0
+        "limitErrorPercentage": 0,
+        "minAccuracy": 85,
+        "calculationModel": "standard"
+      }
+    ]
+  },
+  {
+    "id": "ncert-ldc",
+    "postTitle": "NCERT LDC Typing Test",
+    "categoryGroup": "central_nta",
+    "examType": "assistant",
+    "examTypeLabel": "Lower Division Clerk",
+    "organization": "NCERT",
+    "variants": [
+      {
+        "id": "ncert-ldc-en",
+        "slug": "ncert-ldc-english-typing-test",
+        "title": "NCERT LDC English Typing Test",
+        "categoryGroup": "central_nta",
+        "language": "english",
+        "targetSpeed": 35,
+        "durationMinutes": 10,
+        "inputType": "word",
+        "inputLimit": 350,
+        "isRetyping": false,
+        "limitErrorPercentage": 5,
+        "minAccuracy": 90,
+        "calculationModel": "rrb_eduquity"
+      },
+      {
+        "id": "ncert-ldc-hi",
+        "slug": "ncert-ldc-hindi-typing-test",
+        "title": "NCERT LDC Hindi Typing Test",
+        "categoryGroup": "central_nta",
+        "language": "hindi_mangal",
+        "targetSpeed": 30,
+        "durationMinutes": 10,
+        "inputType": "word",
+        "inputLimit": 300,
+        "isRetyping": false,
+        "limitErrorPercentage": 5,
+        "minAccuracy": 90,
+        "calculationModel": "rrb_eduquity"
+      }
+    ]
+  },
+  {
+    "id": "skau-typing-test",
+    "postTitle": "SKAU Typing Test",
+    "categoryGroup": "state_exams",
+    "examType": "assistant",
+    "examTypeLabel": "Clerk / Typist",
+    "organization": "SKAU",
+    "variants": [
+      {
+        "id": "skau-en",
+        "slug": "skau-english-typing-test",
+        "title": "SKAU English Typing Test",
+        "categoryGroup": "state_exams",
+        "language": "english",
+        "targetSpeed": 30,
+        "durationMinutes": 10,
+        "inputType": "word",
+        "inputLimit": 350,
+        "isRetyping": false,
+        "limitErrorPercentage": 5,
+        "minAccuracy": 90,
+        "calculationModel": "standard"
+      },
+      {
+        "id": "skau-hi",
+        "slug": "skau-hindi-typing-test",
+        "title": "SKAU Hindi Typing Test",
+        "categoryGroup": "state_exams",
+        "language": "hindi_mangal",
+        "targetSpeed": 25,
+        "durationMinutes": 10,
+        "inputType": "word",
+        "inputLimit": 300,
+        "isRetyping": false,
+        "limitErrorPercentage": 5,
+        "minAccuracy": 90,
+        "calculationModel": "standard"
+      }
+    ]
+  },
+  {
+    "id": "dsssb-5000-keystrokes",
+    "postTitle": "DSSSB Typing Test – 5,000 Keystroke Practice",
+    "categoryGroup": "delhi_govt",
+    "examType": "assistant",
+    "examTypeLabel": "5,000 Keystroke Speed Test",
+    "organization": "DSSSB",
+    "variants": [
+      {
+        "id": "dsssb-5k-en",
+        "slug": "dsssb-typing-test-5000-keystrokes",
+        "title": "DSSSB 5,000 Keystroke Practice (English)",
+        "categoryGroup": "delhi_govt",
+        "language": "english",
+        "targetSpeed": 35,
+        "durationMinutes": 10,
+        "inputType": "character",
+        "inputLimit": 5000,
+        "isRetyping": false,
+        "limitErrorPercentage": 5,
+        "minAccuracy": 90,
+        "calculationModel": "standard"
+      }
+    ]
+  },
+  {
+    "id": "delhi-police-hcm-2500",
+    "postTitle": "Delhi Police HCM – 2,500 Keystroke Practice",
+    "categoryGroup": "delhi_govt",
+    "examType": "asi",
+    "examTypeLabel": "Head Constable Ministerial",
+    "organization": "Delhi Police",
+    "variants": [
+      {
+        "id": "dp-hcm-2500-en",
+        "slug": "dp-hcm-typing-test",
+        "title": "Delhi Police HCM 2,500 Keystrokes (English)",
+        "categoryGroup": "delhi_govt",
+        "language": "english",
+        "targetSpeed": 30,
+        "durationMinutes": 10,
+        "inputType": "character",
+        "inputLimit": 2500,
+        "isRetyping": false,
+        "limitErrorPercentage": 5,
+        "minAccuracy": 90,
+        "calculationModel": "standard"
+      },
+      {
+        "id": "dp-hcm-2500-hi",
+        "slug": "dp-hcm-hindi-typing-test",
+        "title": "Delhi Police HCM 2,000 Keystrokes (Hindi)",
+        "categoryGroup": "delhi_govt",
+        "language": "hindi_mangal",
+        "targetSpeed": 25,
+        "durationMinutes": 10,
+        "inputType": "character",
+        "inputLimit": 2000,
+        "isRetyping": false,
+        "limitErrorPercentage": 5,
+        "minAccuracy": 90,
+        "calculationModel": "standard"
+      }
+    ]
+  },
+  {
+    "id": "ssc-cgl-pwbd",
+    "postTitle": "SSC CGL Typing Test for PwBD (20 Minutes)",
+    "categoryGroup": "ssc",
+    "examType": "deo",
+    "examTypeLabel": "PwBD DEST (20 Min)",
+    "organization": "SSC",
+    "variants": [
+      {
+        "id": "ssc-cgl-pwbd-en",
+        "slug": "ssc-cgl-mock-typing-pwbd",
+        "title": "SSC CGL Mock Typing PwBD (20 Min)",
+        "categoryGroup": "ssc",
+        "language": "english",
+        "targetSpeed": 20,
+        "durationMinutes": 20,
+        "inputType": "character",
+        "inputLimit": 2000,
+        "isRetyping": false,
+        "limitErrorPercentage": 30,
+        "minAccuracy": 70,
+        "calculationModel": "ssc_dest"
+      }
+    ]
+  },
+  {
+    "id": "ssc-chsl-pwbd",
+    "postTitle": "SSC CHSL Typing Test for PwBD (15 Minutes)",
+    "categoryGroup": "ssc",
+    "examType": "assistant",
+    "examTypeLabel": "PwBD LDC/JSA (15 Min)",
+    "organization": "SSC",
+    "variants": [
+      {
+        "id": "ssc-chsl-pwbd-en",
+        "slug": "ssc-chsl-pwbd-typing-test",
+        "title": "SSC CHSL PwBD Typing Test (15 Min)",
+        "categoryGroup": "ssc",
+        "language": "english",
+        "targetSpeed": 25,
+        "durationMinutes": 15,
+        "inputType": "character",
+        "inputLimit": 1750,
+        "isRetyping": false,
+        "limitErrorPercentage": 10,
+        "minAccuracy": 90,
+        "calculationModel": "ssc_dest"
+      }
+    ]
+  },
+  {
+    "id": "ssc-chsl-deo",
+    "postTitle": "SSC CHSL DEO Typing Test (15,000 / 8,000 KDPH)",
+    "categoryGroup": "ssc",
+    "examType": "deo",
+    "examTypeLabel": "Data Entry Operator Grade A",
+    "organization": "SSC",
+    "variants": [
+      {
+        "id": "ssc-chsl-deo-en",
+        "slug": "ssc-chsl-deo-typing-test",
+        "title": "SSC CHSL DEO English Typing Test",
+        "categoryGroup": "ssc",
+        "language": "english",
+        "targetSpeed": 50,
+        "durationMinutes": 15,
+        "inputType": "character",
+        "inputLimit": 3750,
+        "isRetyping": false,
+        "limitErrorPercentage": 5,
+        "minAccuracy": 95,
+        "calculationModel": "ssc_dest"
       }
     ]
   }
@@ -2854,18 +3203,34 @@ export const UNIFIED_EXAM_POSTS: UnifiedExamPost[] = [
 
 export const ALL_EXAMS: ExamProfile[] = [
   {
-    "id": "1372",
-    "slug": "delhi-high-court-pa-spa-english-typing-dhc",
-    "title": "Delhi High Court PA SPA English Typing (DHC)",
-    "categoryGroup": "judiciary",
-    "language": "english",
-    "targetSpeed": 40,
-    "durationMinutes": 10,
-    "inputType": "character",
-    "inputLimit": 4000,
+    "id": "54",
+    "slug": "up-police-si-asi-computer-operator-hindi-typing",
+    "title": "UP Police SI/ASI/Computer Operator Hindi Typing",
+    "categoryGroup": "up_govt",
+    "language": "hindi_mangal",
+    "targetSpeed": 25,
+    "durationMinutes": 15,
+    "inputType": "word",
+    "inputLimit": 406,
     "isRetyping": false,
-    "limitErrorPercentage": 3.0,
-    "minAccuracy": 97.0
+    "limitErrorPercentage": 0,
+    "minAccuracy": 85,
+    "calculationModel": "upprpb"
+  },
+  {
+    "id": "53",
+    "slug": "up-police-si-asi-computer-operator-english-typing",
+    "title": "UP Police SI/ASI/Computer Operator English Typing",
+    "categoryGroup": "up_govt",
+    "language": "english",
+    "targetSpeed": 30,
+    "durationMinutes": 15,
+    "inputType": "word",
+    "inputLimit": 510,
+    "isRetyping": false,
+    "limitErrorPercentage": 0,
+    "minAccuracy": 85,
+    "calculationModel": "upprpb"
   },
   {
     "id": "1340",
@@ -2878,8 +3243,9 @@ export const ALL_EXAMS: ExamProfile[] = [
     "inputType": "word",
     "inputLimit": 350,
     "isRetyping": true,
-    "limitErrorPercentage": 0.0,
-    "minAccuracy": 85.0
+    "limitErrorPercentage": 0,
+    "minAccuracy": 85,
+    "calculationModel": "upprpb"
   },
   {
     "id": "1339",
@@ -2892,218 +3258,9 @@ export const ALL_EXAMS: ExamProfile[] = [
     "inputType": "word",
     "inputLimit": 500,
     "isRetyping": true,
-    "limitErrorPercentage": 0.0,
-    "minAccuracy": 85.0
-  },
-  {
-    "id": "1307",
-    "slug": "jnu-assistants-hindi-typing-skill-test",
-    "title": "JNU Assistants Hindi Typing Skill Test",
-    "categoryGroup": "central_nta",
-    "language": "hindi_mangal",
-    "targetSpeed": 30,
-    "durationMinutes": 10,
-    "inputType": "character",
-    "inputLimit": 1500,
-    "isRetyping": false,
-    "limitErrorPercentage": 3.0,
-    "minAccuracy": 97.0
-  },
-  {
-    "id": "1306",
-    "slug": "jnu-assistants-english-typing-skill-test",
-    "title": "JNU Assistants English Typing Skill Test",
-    "categoryGroup": "central_nta",
-    "language": "english",
-    "targetSpeed": 35,
-    "durationMinutes": 10,
-    "inputType": "character",
-    "inputLimit": 1750,
-    "isRetyping": false,
-    "limitErrorPercentage": 3.0,
-    "minAccuracy": 97.0
-  },
-  {
-    "id": "1273",
-    "slug": "punjab-haryana-high-court-english-typing-phhc",
-    "title": "Punjab & Haryana High Court English Typing (PHHC)",
-    "categoryGroup": "judiciary",
-    "language": "english",
-    "targetSpeed": 30,
-    "durationMinutes": 10,
-    "inputType": "word",
-    "inputLimit": 600,
-    "isRetyping": false,
-    "limitErrorPercentage": 0.0,
-    "minAccuracy": 85.0
-  },
-  {
-    "id": "1241",
-    "slug": "ssb-hcm-hindi-typing-skill-test",
-    "title": "SSB HCM Hindi Typing Skill Test",
-    "categoryGroup": "defense",
-    "language": "hindi_mangal",
-    "targetSpeed": 30,
-    "durationMinutes": 10,
-    "inputType": "character",
-    "inputLimit": 2150,
-    "isRetyping": false,
-    "limitErrorPercentage": 5.0,
-    "minAccuracy": 95.0
-  },
-  {
-    "id": "1240",
-    "slug": "ssb-hcm-english-typing-skill-test",
-    "title": "SSB HCM English Typing Skill Test",
-    "categoryGroup": "defense",
-    "language": "english",
-    "targetSpeed": 35,
-    "durationMinutes": 10,
-    "inputType": "character",
-    "inputLimit": 3750,
-    "isRetyping": false,
-    "limitErrorPercentage": 5.0,
-    "minAccuracy": 95.0
-  },
-  {
-    "id": "1209",
-    "slug": "chhattisgarh-high-court-jja-computer-english-typing-cghc",
-    "title": "Chhattisgarh High Court JJA Computer English Typing (CGHC)",
-    "categoryGroup": "judiciary",
-    "language": "english",
-    "targetSpeed": 25,
-    "durationMinutes": 20,
-    "inputType": "word",
-    "inputLimit": 500,
-    "isRetyping": false,
-    "limitErrorPercentage": 0.0,
-    "minAccuracy": 85.0
-  },
-  {
-    "id": "1208",
-    "slug": "chhattisgarh-high-court-jja-hindi-typing-cghc",
-    "title": "Chhattisgarh High Court JJA Hindi Typing (CGHC)",
-    "categoryGroup": "judiciary",
-    "language": "hindi_mangal",
-    "targetSpeed": 25,
-    "durationMinutes": 10,
-    "inputType": "word",
-    "inputLimit": 250,
-    "isRetyping": false,
-    "limitErrorPercentage": 0.0,
-    "minAccuracy": 85.0
-  },
-  {
-    "id": "1207",
-    "slug": "chhattisgarh-high-court-jja-english-typing-cghc",
-    "title": "Chhattisgarh High Court JJA English Typing (CGHC)",
-    "categoryGroup": "judiciary",
-    "language": "english",
-    "targetSpeed": 30,
-    "durationMinutes": 10,
-    "inputType": "word",
-    "inputLimit": 300,
-    "isRetyping": false,
-    "limitErrorPercentage": 0.0,
-    "minAccuracy": 85.0
-  },
-  {
-    "id": "1174",
-    "slug": "patna-high-court-hindi-typing-test",
-    "title": "Patna High Court Hindi Typing Test",
-    "categoryGroup": "judiciary",
-    "language": "hindi_mangal",
-    "targetSpeed": 30,
-    "durationMinutes": 10,
-    "inputType": "word",
-    "inputLimit": 310,
-    "isRetyping": false,
-    "limitErrorPercentage": 85.0,
-    "minAccuracy": 15.0
-  },
-  {
-    "id": "1142",
-    "slug": "mp-cpct-unicode-hindi-typing-skill-test",
-    "title": "MP CPCT Unicode Hindi Typing Skill Test",
-    "categoryGroup": "state_exams",
-    "language": "hindi_mangal",
-    "targetSpeed": 20,
-    "durationMinutes": 15,
-    "inputType": "word",
-    "inputLimit": 550,
-    "isRetyping": false,
-    "limitErrorPercentage": 0.0,
-    "minAccuracy": 85.0
-  },
-  {
-    "id": "1141",
-    "slug": "mp-cpct-english-typing-skill-test",
-    "title": "MP CPCT English Typing Skill Test",
-    "categoryGroup": "state_exams",
-    "language": "english",
-    "targetSpeed": 30,
-    "durationMinutes": 15,
-    "inputType": "word",
-    "inputLimit": 550,
-    "isRetyping": false,
-    "limitErrorPercentage": 0.0,
-    "minAccuracy": 85.0
-  },
-  {
-    "id": "1109",
-    "slug": "kvs-hindi-typing-skill-test",
-    "title": "KVS Hindi Typing Skill Test",
-    "categoryGroup": "central_nta",
-    "language": "hindi_mangal",
-    "targetSpeed": 30,
-    "durationMinutes": 10,
-    "inputType": "character",
-    "inputLimit": 2500,
-    "isRetyping": true,
-    "limitErrorPercentage": 0.0,
-    "minAccuracy": 85.0
-  },
-  {
-    "id": "1108",
-    "slug": "kvs-english-typing-skill-test",
-    "title": "KVS English Typing Skill Test",
-    "categoryGroup": "central_nta",
-    "language": "english",
-    "targetSpeed": 35,
-    "durationMinutes": 10,
-    "inputType": "character",
-    "inputLimit": 3250,
-    "isRetyping": true,
-    "limitErrorPercentage": 0.0,
-    "minAccuracy": 85.0
-  },
-  {
-    "id": "1075",
-    "slug": "delhi-high-court-jja-english-typing-dhc",
-    "title": "Delhi High Court JJA English Typing (DHC)",
-    "categoryGroup": "judiciary",
-    "language": "english",
-    "targetSpeed": 35,
-    "durationMinutes": 10,
-    "inputType": "character",
-    "inputLimit": 3500,
-    "isRetyping": false,
-    "limitErrorPercentage": 3.0,
-    "minAccuracy": 97.0
-  },
-  {
-    "id": "1043",
-    "slug": "mp-police-asi-ldc-hindi-typing",
-    "title": "MP Police ASI LDC Hindi Typing",
-    "categoryGroup": "state_exams",
-    "language": "hindi_mangal",
-    "targetSpeed": 20,
-    "durationMinutes": 30,
-    "inputType": "word",
-    "inputLimit": 600,
-    "isRetyping": false,
-    "limitErrorPercentage": 0.0,
-    "minAccuracy": 85.0
+    "limitErrorPercentage": 0,
+    "minAccuracy": 85,
+    "calculationModel": "upprpb"
   },
   {
     "id": "1042",
@@ -3116,36 +3273,84 @@ export const ALL_EXAMS: ExamProfile[] = [
     "inputType": "word",
     "inputLimit": 250,
     "isRetyping": false,
-    "limitErrorPercentage": 0.0,
-    "minAccuracy": 85.0
+    "limitErrorPercentage": 0,
+    "minAccuracy": 85,
+    "calculationModel": "upprpb"
   },
   {
-    "id": "1010",
-    "slug": "rssb-nhm-data-entry-operator-hindi-typing-rajasthan",
-    "title": "RSSB NHM Data Entry Operator Hindi Typing (Rajasthan)",
-    "categoryGroup": "defense",
+    "id": "72",
+    "slug": "uppsc-ro-aro-hindi-typing-test",
+    "title": "UPPSC RO ARO Hindi Typing Test",
+    "categoryGroup": "up_govt",
     "language": "hindi_mangal",
-    "targetSpeed": 35,
-    "durationMinutes": 15,
+    "targetSpeed": 25,
+    "durationMinutes": 5,
     "inputType": "word",
-    "inputLimit": 1250,
-    "isRetyping": false,
-    "limitErrorPercentage": 0.0,
-    "minAccuracy": 85.0
+    "inputLimit": 125,
+    "isRetyping": true,
+    "limitErrorPercentage": 0,
+    "minAccuracy": 85,
+    "calculationModel": "upprpb"
   },
   {
-    "id": "1009",
-    "slug": "rssb-nhm-data-entry-operator-english-typing-rajasthan",
-    "title": "RSSB NHM Data Entry Operator English Typing (Rajasthan)",
-    "categoryGroup": "defense",
+    "id": "71",
+    "slug": "uppsc-ro-aro-english-typing-test",
+    "title": "UPPSC RO ARO English Typing Test",
+    "categoryGroup": "up_govt",
     "language": "english",
-    "targetSpeed": 35,
-    "durationMinutes": 15,
+    "targetSpeed": 25,
+    "durationMinutes": 5,
     "inputType": "word",
+    "inputLimit": 125,
+    "isRetyping": true,
+    "limitErrorPercentage": 0,
+    "minAccuracy": 85,
+    "calculationModel": "upprpb"
+  },
+  {
+    "id": "10",
+    "slug": "uppsc-computer-assistant-hindi-typing",
+    "title": "UPPSC Computer Assistant Hindi Typing",
+    "categoryGroup": "up_govt",
+    "language": "hindi_mangal",
+    "targetSpeed": 25,
+    "durationMinutes": 5,
+    "inputType": "word",
+    "inputLimit": 250,
+    "isRetyping": true,
+    "limitErrorPercentage": 0,
+    "minAccuracy": 85,
+    "calculationModel": "upprpb"
+  },
+  {
+    "id": "57",
+    "slug": "upsssc-assistants-hindi-typing-test",
+    "title": "UPSSSC Assistants Hindi Typing Test",
+    "categoryGroup": "up_govt",
+    "language": "hindi_mangal",
+    "targetSpeed": 25,
+    "durationMinutes": 5,
+    "inputType": "character",
     "inputLimit": 1250,
     "isRetyping": false,
-    "limitErrorPercentage": 0.0,
-    "minAccuracy": 85.0
+    "limitErrorPercentage": 0,
+    "minAccuracy": 85,
+    "calculationModel": "upprpb"
+  },
+  {
+    "id": "56",
+    "slug": "upsssc-assistants-english-typing-test",
+    "title": "UPSSSC Assistants English Typing Test",
+    "categoryGroup": "up_govt",
+    "language": "english",
+    "targetSpeed": 30,
+    "durationMinutes": 5,
+    "inputType": "character",
+    "inputLimit": 1500,
+    "isRetyping": false,
+    "limitErrorPercentage": 0,
+    "minAccuracy": 85,
+    "calculationModel": "upprpb"
   },
   {
     "id": "976",
@@ -3158,22 +3363,609 @@ export const ALL_EXAMS: ExamProfile[] = [
     "inputType": "word",
     "inputLimit": 500,
     "isRetyping": false,
-    "limitErrorPercentage": 0.0,
-    "minAccuracy": 85.0
+    "limitErrorPercentage": 0,
+    "minAccuracy": 85,
+    "calculationModel": "court_ahc"
   },
   {
-    "id": "943",
-    "slug": "marathon-hindi-typing-skill-test",
-    "title": "Marathon Hindi Typing Skill Test",
-    "categoryGroup": "state_exams",
+    "id": "318",
+    "slug": "allahabad-high-court-hindi-typing-ahc",
+    "title": "Allahabad High Court Hindi Typing (AHC)",
+    "categoryGroup": "judiciary",
     "language": "hindi_mangal",
     "targetSpeed": 25,
+    "durationMinutes": 10,
+    "inputType": "word",
+    "inputLimit": 250,
+    "isRetyping": false,
+    "limitErrorPercentage": 0,
+    "minAccuracy": 85,
+    "calculationModel": "court_ahc"
+  },
+  {
+    "id": "319",
+    "slug": "allahabad-high-court-english-typing-ahc",
+    "title": "Allahabad High Court English Typing (AHC)",
+    "categoryGroup": "judiciary",
+    "language": "english",
+    "targetSpeed": 30,
+    "durationMinutes": 10,
+    "inputType": "word",
+    "inputLimit": 300,
+    "isRetyping": false,
+    "limitErrorPercentage": 0,
+    "minAccuracy": 85,
+    "calculationModel": "court_ahc"
+  },
+  {
+    "id": "747",
+    "slug": "andhra-pradesh-high-court-english-typing-aphc",
+    "title": "Andhra Pradesh High Court English Typing (APHC)",
+    "categoryGroup": "judiciary",
+    "language": "english",
+    "targetSpeed": 45,
+    "durationMinutes": 10,
+    "inputType": "word",
+    "inputLimit": 450,
+    "isRetyping": false,
+    "limitErrorPercentage": 0,
+    "minAccuracy": 85,
+    "calculationModel": "standard"
+  },
+  {
+    "id": "66",
+    "slug": "bihar-civil-court-hindi-typing-court-reader-cum-deposition-writer",
+    "title": "Bihar Civil Court Hindi Typing Court Reader -cum- Deposition Writer",
+    "categoryGroup": "judiciary",
+    "language": "hindi_mangal",
+    "targetSpeed": 30,
+    "durationMinutes": 10,
+    "inputType": "word",
+    "inputLimit": 300,
+    "isRetyping": false,
+    "limitErrorPercentage": 0,
+    "minAccuracy": 85,
+    "calculationModel": "standard"
+  },
+  {
+    "id": "65",
+    "slug": "bihar-civil-court-english-typing-court-reader-cum-deposition-writer",
+    "title": "Bihar Civil Court English Typing Court Reader -cum- Deposition Writer",
+    "categoryGroup": "judiciary",
+    "language": "english",
+    "targetSpeed": 40,
+    "durationMinutes": 10,
+    "inputType": "word",
+    "inputLimit": 400,
+    "isRetyping": false,
+    "limitErrorPercentage": 0,
+    "minAccuracy": 85,
+    "calculationModel": "standard"
+  },
+  {
+    "id": "382",
+    "slug": "bombay-high-court-english-typing-clerk-bhc",
+    "title": "Bombay High Court Clerk English Typing (BHC)",
+    "categoryGroup": "judiciary",
+    "language": "english",
+    "targetSpeed": 40,
+    "durationMinutes": 10,
+    "inputType": "word",
+    "inputLimit": 400,
+    "isRetyping": false,
+    "limitErrorPercentage": 0,
+    "minAccuracy": 85,
+    "calculationModel": "standard"
+  },
+  {
+    "id": "1209",
+    "slug": "chhattisgarh-high-court-jja-computer-english-typing-cghc",
+    "title": "Chhattisgarh High Court JJA Computer English Typing (CGHC)",
+    "categoryGroup": "judiciary",
+    "language": "english",
+    "targetSpeed": 25,
+    "durationMinutes": 20,
+    "inputType": "word",
+    "inputLimit": 500,
+    "isRetyping": false,
+    "limitErrorPercentage": 0,
+    "minAccuracy": 85,
+    "calculationModel": "standard"
+  },
+  {
+    "id": "1208",
+    "slug": "chhattisgarh-high-court-jja-hindi-typing-cghc",
+    "title": "Chhattisgarh High Court JJA Hindi Typing (CGHC)",
+    "categoryGroup": "judiciary",
+    "language": "hindi_mangal",
+    "targetSpeed": 25,
+    "durationMinutes": 10,
+    "inputType": "word",
+    "inputLimit": 250,
+    "isRetyping": false,
+    "limitErrorPercentage": 0,
+    "minAccuracy": 85,
+    "calculationModel": "standard"
+  },
+  {
+    "id": "1207",
+    "slug": "chhattisgarh-high-court-jja-english-typing-cghc",
+    "title": "Chhattisgarh High Court JJA English Typing (CGHC)",
+    "categoryGroup": "judiciary",
+    "language": "english",
+    "targetSpeed": 30,
+    "durationMinutes": 10,
+    "inputType": "word",
+    "inputLimit": 300,
+    "isRetyping": false,
+    "limitErrorPercentage": 0,
+    "minAccuracy": 85,
+    "calculationModel": "standard"
+  },
+  {
+    "id": "25",
+    "slug": "dsssb-delhi-jja-hindi-typing-session-court",
+    "title": "DSSSB Delhi JJA Hindi Typing Session Court",
+    "categoryGroup": "judiciary",
+    "language": "hindi_mangal",
+    "targetSpeed": 35,
+    "durationMinutes": 10,
+    "inputType": "character",
+    "inputLimit": 1800,
+    "isRetyping": true,
+    "limitErrorPercentage": 0,
+    "minAccuracy": 85,
+    "calculationModel": "rrb_eduquity"
+  },
+  {
+    "id": "24",
+    "slug": "dsssb-delhi-jja-english-typing-session-court",
+    "title": "DSSSB Delhi JJA English Typing Session Court",
+    "categoryGroup": "judiciary",
+    "language": "english",
+    "targetSpeed": 40,
+    "durationMinutes": 10,
+    "inputType": "character",
+    "inputLimit": 2500,
+    "isRetyping": true,
+    "limitErrorPercentage": 0,
+    "minAccuracy": 85,
+    "calculationModel": "rrb_eduquity"
+  },
+  {
+    "id": "1075",
+    "slug": "delhi-high-court-jja-english-typing-dhc",
+    "title": "Delhi High Court JJA English Typing (DHC)",
+    "categoryGroup": "judiciary",
+    "language": "english",
+    "targetSpeed": 35,
+    "durationMinutes": 10,
+    "inputType": "character",
+    "inputLimit": 3500,
+    "isRetyping": false,
+    "limitErrorPercentage": 3,
+    "minAccuracy": 97,
+    "calculationModel": "court_delhi"
+  },
+  {
+    "id": "60",
+    "slug": "jharkhand-high-court-jhc-assistant-clerk-english-hindi-typing",
+    "title": "Jharkhand High Court Assistant English Hindi Typing (JHC)",
+    "categoryGroup": "judiciary",
+    "language": "hindi_mangal",
+    "targetSpeed": 20,
+    "durationMinutes": 5,
+    "inputType": "word",
+    "inputLimit": 100,
+    "isRetyping": true,
+    "limitErrorPercentage": 0,
+    "minAccuracy": 85,
+    "calculationModel": "standard"
+  },
+  {
+    "id": "64",
+    "slug": "jharkhand-high-court-jhc-deposition-writer-typist-hindi-typing",
+    "title": "Jharkhand High Court (JHC) Deposition Writer / Typist Hindi Typing",
+    "categoryGroup": "judiciary",
+    "language": "hindi_mangal",
+    "targetSpeed": 30,
+    "durationMinutes": 10,
+    "inputType": "word",
+    "inputLimit": 300,
+    "isRetyping": true,
+    "limitErrorPercentage": 0,
+    "minAccuracy": 85,
+    "calculationModel": "standard"
+  },
+  {
+    "id": "63",
+    "slug": "jharkhand-high-court-jhc-deposition-writer-typist-english-typing",
+    "title": "Jharkhand High Court (JHC) Deposition Writer / Typist English Typing",
+    "categoryGroup": "judiciary",
+    "language": "english",
+    "targetSpeed": 40,
+    "durationMinutes": 5,
+    "inputType": "word",
+    "inputLimit": 200,
+    "isRetyping": true,
+    "limitErrorPercentage": 0,
+    "minAccuracy": 85,
+    "calculationModel": "standard"
+  },
+  {
+    "id": "316",
+    "slug": "mp-high-court-hindi-typing-jabalpur-mphc",
+    "title": "MP High Court Hindi Typing, Jabalpur",
+    "categoryGroup": "judiciary",
+    "language": "hindi_mangal",
+    "targetSpeed": 35,
+    "durationMinutes": 10,
+    "inputType": "word",
+    "inputLimit": 350,
+    "isRetyping": false,
+    "limitErrorPercentage": 0,
+    "minAccuracy": 85,
+    "calculationModel": "standard"
+  },
+  {
+    "id": "317",
+    "slug": "mp-high-court-english-typing-jabalpur-mphc",
+    "title": "MP High Court English Typing, Jabalpur",
+    "categoryGroup": "judiciary",
+    "language": "english",
+    "targetSpeed": 35,
+    "durationMinutes": 10,
+    "inputType": "word",
+    "inputLimit": 350,
+    "isRetyping": false,
+    "limitErrorPercentage": 0,
+    "minAccuracy": 85,
+    "calculationModel": "standard"
+  },
+  {
+    "id": "1174",
+    "slug": "patna-high-court-hindi-typing-test",
+    "title": "Patna High Court Hindi Typing Test",
+    "categoryGroup": "judiciary",
+    "language": "hindi_mangal",
+    "targetSpeed": 30,
+    "durationMinutes": 10,
+    "inputType": "word",
+    "inputLimit": 310,
+    "isRetyping": false,
+    "limitErrorPercentage": 85,
+    "minAccuracy": 15,
+    "calculationModel": "standard"
+  },
+  {
+    "id": "778",
+    "slug": "patna-high-court-english-typing-test",
+    "title": "Patna High Court English Typing Test",
+    "categoryGroup": "judiciary",
+    "language": "english",
+    "targetSpeed": 40,
+    "durationMinutes": 10,
+    "inputType": "word",
+    "inputLimit": 420,
+    "isRetyping": false,
+    "limitErrorPercentage": 10,
+    "minAccuracy": 90,
+    "calculationModel": "standard"
+  },
+  {
+    "id": "1273",
+    "slug": "punjab-haryana-high-court-english-typing-phhc",
+    "title": "Punjab & Haryana High Court English Typing (PHHC)",
+    "categoryGroup": "judiciary",
+    "language": "english",
+    "targetSpeed": 30,
+    "durationMinutes": 10,
+    "inputType": "word",
+    "inputLimit": 600,
+    "isRetyping": false,
+    "limitErrorPercentage": 0,
+    "minAccuracy": 85,
+    "calculationModel": "court_phhc"
+  },
+  {
+    "id": "55",
+    "slug": "rajasthan-high-court-hindi-typing-hcraj",
+    "title": "Rajasthan High Court Hindi Typing (HCRAJ)",
+    "categoryGroup": "judiciary",
+    "language": "hindi_mangal",
+    "targetSpeed": 30,
+    "durationMinutes": 10,
+    "inputType": "character",
+    "inputLimit": 2150,
+    "isRetyping": true,
+    "limitErrorPercentage": 0,
+    "minAccuracy": 85,
+    "calculationModel": "standard"
+  },
+  {
+    "id": "580",
+    "slug": "rajasthan-high-court-english-typing-hcraj",
+    "title": "Rajasthan High Court English Typing (HCRAJ)",
+    "categoryGroup": "judiciary",
+    "language": "english",
+    "targetSpeed": 30,
+    "durationMinutes": 10,
+    "inputType": "character",
+    "inputLimit": 3000,
+    "isRetyping": true,
+    "limitErrorPercentage": 0,
+    "minAccuracy": 85,
+    "calculationModel": "standard"
+  },
+  {
+    "id": "646",
+    "slug": "supreme-court-of-india-english-typing-sci-jca",
+    "title": "SCI JCA English Typing Skill Test (Supreme Court)",
+    "categoryGroup": "judiciary",
+    "language": "english",
+    "targetSpeed": 35,
+    "durationMinutes": 10,
+    "inputType": "character",
+    "inputLimit": 1750,
+    "isRetyping": false,
+    "limitErrorPercentage": 0,
+    "minAccuracy": 85,
+    "calculationModel": "court_delhi"
+  },
+  {
+    "id": "516",
+    "slug": "telangana-high-court-english-typing-tshc",
+    "title": "Telangana High Court English Typing (TSHC)",
+    "categoryGroup": "judiciary",
+    "language": "english",
+    "targetSpeed": 45,
     "durationMinutes": 15,
+    "inputType": "word",
+    "inputLimit": 700,
+    "isRetyping": false,
+    "limitErrorPercentage": 45,
+    "minAccuracy": 55,
+    "calculationModel": "standard"
+  },
+  {
+    "id": "517",
+    "slug": "telangana-judicial-ministerial-english-typing-tshc",
+    "title": "Telangana Judicial Ministerial English Typing (TSHC)",
+    "categoryGroup": "judiciary",
+    "language": "english",
+    "targetSpeed": 45,
+    "durationMinutes": 10,
+    "inputType": "word",
+    "inputLimit": 500,
+    "isRetyping": false,
+    "limitErrorPercentage": 40,
+    "minAccuracy": 60,
+    "calculationModel": "standard"
+  },
+  {
+    "id": "68",
+    "slug": "ukhcrec-uttarakhand-high-court-hindi-typing",
+    "title": "Uttarakhand High Court Hindi Typing",
+    "categoryGroup": "judiciary",
+    "language": "hindi_mangal",
+    "targetSpeed": 30,
+    "durationMinutes": 10,
     "inputType": "character",
     "inputLimit": 2250,
     "isRetyping": false,
-    "limitErrorPercentage": 0.0,
-    "minAccuracy": 85.0
+    "limitErrorPercentage": 0,
+    "minAccuracy": 85,
+    "calculationModel": "standard"
+  },
+  {
+    "id": "67",
+    "slug": "ukhcrec-uttarakhand-high-court-english-typing",
+    "title": "Uttarakhand High Court English Typing",
+    "categoryGroup": "judiciary",
+    "language": "english",
+    "targetSpeed": 40,
+    "durationMinutes": 10,
+    "inputType": "character",
+    "inputLimit": 3500,
+    "isRetyping": false,
+    "limitErrorPercentage": 0,
+    "minAccuracy": 85,
+    "calculationModel": "standard"
+  },
+  {
+    "id": "613",
+    "slug": "bombay-high-court-english-typing-pa-bhc",
+    "title": "Bombay High Court PA English Typing (BHC)",
+    "categoryGroup": "judiciary",
+    "language": "english",
+    "targetSpeed": 50,
+    "durationMinutes": 10,
+    "inputType": "word",
+    "inputLimit": 510,
+    "isRetyping": false,
+    "limitErrorPercentage": 0,
+    "minAccuracy": 85,
+    "calculationModel": "standard"
+  },
+  {
+    "id": "1372",
+    "slug": "delhi-high-court-pa-spa-english-typing-dhc",
+    "title": "Delhi High Court PA SPA English Typing (DHC)",
+    "categoryGroup": "judiciary",
+    "language": "english",
+    "targetSpeed": 40,
+    "durationMinutes": 10,
+    "inputType": "character",
+    "inputLimit": 4000,
+    "isRetyping": false,
+    "limitErrorPercentage": 3,
+    "minAccuracy": 97,
+    "calculationModel": "court_delhi"
+  },
+  {
+    "id": "80",
+    "slug": "jharkhand-high-court-jhc-stenography-english-typing",
+    "title": "Jharkhand High Court (JHC) Stenography English Typing",
+    "categoryGroup": "judiciary",
+    "language": "english",
+    "targetSpeed": 40,
+    "durationMinutes": 10,
+    "inputType": "word",
+    "inputLimit": 400,
+    "isRetyping": true,
+    "limitErrorPercentage": 0,
+    "minAccuracy": 85,
+    "calculationModel": "standard"
+  },
+  {
+    "id": "349",
+    "slug": "supreme-court-of-india-english-typing-sci-spa-pa-cm",
+    "title": "SCI SPA, PA, CM English Typing Skill Test (Supreme Court)",
+    "categoryGroup": "judiciary",
+    "language": "english",
+    "targetSpeed": 40,
+    "durationMinutes": 10,
+    "inputType": "character",
+    "inputLimit": 2100,
+    "isRetyping": false,
+    "limitErrorPercentage": 0,
+    "minAccuracy": 85,
+    "calculationModel": "court_delhi"
+  },
+  {
+    "id": "482",
+    "slug": "bihar-police-ssc-bpssc-hindi-typing",
+    "title": "Bihar Police SSC (BPSSC) Hindi Typing",
+    "categoryGroup": "ssc",
+    "language": "hindi_mangal",
+    "targetSpeed": 30,
+    "durationMinutes": 10,
+    "inputType": "word",
+    "inputLimit": 300,
+    "isRetyping": false,
+    "limitErrorPercentage": 0,
+    "minAccuracy": 85,
+    "calculationModel": "ssc_dest"
+  },
+  {
+    "id": "481",
+    "slug": "bihar-police-ssc-bpssc-english-typing",
+    "title": "Bihar Police SSC (BPSSC) English Typing",
+    "categoryGroup": "ssc",
+    "language": "english",
+    "targetSpeed": 30,
+    "durationMinutes": 10,
+    "inputType": "word",
+    "inputLimit": 300,
+    "isRetyping": false,
+    "limitErrorPercentage": 0,
+    "minAccuracy": 85,
+    "calculationModel": "ssc_dest"
+  },
+  {
+    "id": "416",
+    "slug": "odisha-ossc-odia-typing",
+    "title": "Odisha OSSC Odia Typing",
+    "categoryGroup": "ssc",
+    "language": "english",
+    "targetSpeed": 16,
+    "durationMinutes": 25,
+    "inputType": "word",
+    "inputLimit": 500,
+    "isRetyping": false,
+    "limitErrorPercentage": 0,
+    "minAccuracy": 85,
+    "calculationModel": "ssc_dest"
+  },
+  {
+    "id": "415",
+    "slug": "odisha-ossc-english-typing",
+    "title": "Odisha OSSC English Typing",
+    "categoryGroup": "ssc",
+    "language": "english",
+    "targetSpeed": 37,
+    "durationMinutes": 10,
+    "inputType": "word",
+    "inputLimit": 400,
+    "isRetyping": false,
+    "limitErrorPercentage": 0,
+    "minAccuracy": 85,
+    "calculationModel": "ssc_dest"
+  },
+  {
+    "id": "2",
+    "slug": "ssc-chsl-jsa-ldc-hindi-typing-test",
+    "title": "SSC CHSL JSA/LDC Hindi Typing Test",
+    "categoryGroup": "ssc",
+    "language": "hindi_mangal",
+    "targetSpeed": 30,
+    "durationMinutes": 10,
+    "inputType": "character",
+    "inputLimit": 1550,
+    "isRetyping": false,
+    "limitErrorPercentage": 7,
+    "minAccuracy": 93,
+    "calculationModel": "ssc_dest"
+  },
+  {
+    "id": "1",
+    "slug": "ssc-chsl-jsa-ldc-english-typing-test",
+    "title": "SSC CHSL JSA/LDC English Typing Test",
+    "categoryGroup": "ssc",
+    "language": "english",
+    "targetSpeed": 35,
+    "durationMinutes": 10,
+    "inputType": "character",
+    "inputLimit": 1800,
+    "isRetyping": false,
+    "limitErrorPercentage": 7,
+    "minAccuracy": 93,
+    "calculationModel": "ssc_dest"
+  },
+  {
+    "id": "3",
+    "slug": "ssc-cgl-deo-english-typing-test",
+    "title": "SSC CGL DEO English Typing Test",
+    "categoryGroup": "ssc",
+    "language": "english",
+    "targetSpeed": 27,
+    "durationMinutes": 15,
+    "inputType": "character",
+    "inputLimit": 3750,
+    "isRetyping": false,
+    "limitErrorPercentage": 20,
+    "minAccuracy": 80,
+    "calculationModel": "ssc_dest"
+  },
+  {
+    "id": "5",
+    "slug": "ssc-dest-min-2000-key-english-typing",
+    "title": "SSC DEST Min. 2000 Key English Typing",
+    "categoryGroup": "ssc",
+    "language": "english",
+    "targetSpeed": 27,
+    "durationMinutes": 15,
+    "inputType": "character",
+    "inputLimit": 2200,
+    "isRetyping": false,
+    "limitErrorPercentage": 20,
+    "minAccuracy": 80,
+    "calculationModel": "ssc_dest"
+  },
+  {
+    "id": "4",
+    "slug": "ssc-dest-min-3750-key-english-typing",
+    "title": "SSC DEST Min. 3750 Key English Typing",
+    "categoryGroup": "ssc",
+    "language": "english",
+    "targetSpeed": 50,
+    "durationMinutes": 15,
+    "inputType": "character",
+    "inputLimit": 4000,
+    "isRetyping": false,
+    "limitErrorPercentage": 20,
+    "minAccuracy": 80,
+    "calculationModel": "ssc_dest"
   },
   {
     "id": "911",
@@ -3186,8 +3978,9 @@ export const ALL_EXAMS: ExamProfile[] = [
     "inputType": "character",
     "inputLimit": 2250,
     "isRetyping": false,
-    "limitErrorPercentage": 0.0,
-    "minAccuracy": 85.0
+    "limitErrorPercentage": 0,
+    "minAccuracy": 85,
+    "calculationModel": "standard"
   },
   {
     "id": "910",
@@ -3200,8 +3993,294 @@ export const ALL_EXAMS: ExamProfile[] = [
     "inputType": "character",
     "inputLimit": 3250,
     "isRetyping": false,
-    "limitErrorPercentage": 0.0,
-    "minAccuracy": 85.0
+    "limitErrorPercentage": 0,
+    "minAccuracy": 85,
+    "calculationModel": "standard"
+  },
+  {
+    "id": "185",
+    "slug": "dda-aso-hindi-typing",
+    "title": "DDA ASO Hindi Typing",
+    "categoryGroup": "delhi_govt",
+    "language": "hindi_mangal",
+    "targetSpeed": 30,
+    "durationMinutes": 15,
+    "inputType": "character",
+    "inputLimit": 2750,
+    "isRetyping": false,
+    "limitErrorPercentage": 0,
+    "minAccuracy": 85,
+    "calculationModel": "rrb_eduquity"
+  },
+  {
+    "id": "184",
+    "slug": "dda-aso-english-typing",
+    "title": "DDA ASO English Typing",
+    "categoryGroup": "delhi_govt",
+    "language": "english",
+    "targetSpeed": 35,
+    "durationMinutes": 15,
+    "inputType": "character",
+    "inputLimit": 3250,
+    "isRetyping": false,
+    "limitErrorPercentage": 0,
+    "minAccuracy": 85,
+    "calculationModel": "rrb_eduquity"
+  },
+  {
+    "id": "218",
+    "slug": "dda-jsa-hindi-typing",
+    "title": "DDA JSA Hindi Typing",
+    "categoryGroup": "delhi_govt",
+    "language": "hindi_mangal",
+    "targetSpeed": 30,
+    "durationMinutes": 10,
+    "inputType": "character",
+    "inputLimit": 2250,
+    "isRetyping": false,
+    "limitErrorPercentage": 0,
+    "minAccuracy": 85,
+    "calculationModel": "rrb_eduquity"
+  },
+  {
+    "id": "217",
+    "slug": "dda-jsa-english-typing",
+    "title": "DDA JSA English Typing",
+    "categoryGroup": "delhi_govt",
+    "language": "english",
+    "targetSpeed": 35,
+    "durationMinutes": 10,
+    "inputType": "character",
+    "inputLimit": 2750,
+    "isRetyping": false,
+    "limitErrorPercentage": 0,
+    "minAccuracy": 85,
+    "calculationModel": "rrb_eduquity"
+  },
+  {
+    "id": "21",
+    "slug": "dsssb-hindi-typing-ldc-junior-assistant-investigator-2024",
+    "title": "DSSSB Hindi Typing LDC, Junior Assistant & Investigator",
+    "categoryGroup": "delhi_govt",
+    "language": "hindi_mangal",
+    "targetSpeed": 30,
+    "durationMinutes": 10,
+    "inputType": "character",
+    "inputLimit": 3250,
+    "isRetyping": true,
+    "limitErrorPercentage": 0,
+    "minAccuracy": 85,
+    "calculationModel": "rrb_eduquity"
+  },
+  {
+    "id": "20",
+    "slug": "dsssb-english-typing-ldc-junior-assistant-investigator-2024",
+    "title": "DSSSB English Typing LDC, Junior Assistant & Investigator",
+    "categoryGroup": "delhi_govt",
+    "language": "english",
+    "targetSpeed": 35,
+    "durationMinutes": 10,
+    "inputType": "character",
+    "inputLimit": 5000,
+    "isRetyping": true,
+    "limitErrorPercentage": 0,
+    "minAccuracy": 85,
+    "calculationModel": "rrb_eduquity"
+  },
+  {
+    "id": "75",
+    "slug": "delhi-jal-board-dsssb-jr-asst-hindi-typing",
+    "title": "Delhi Jal Board Jr. Asst. Hindi Typing",
+    "categoryGroup": "delhi_govt",
+    "language": "hindi_mangal",
+    "targetSpeed": 30,
+    "durationMinutes": 10,
+    "inputType": "character",
+    "inputLimit": 1800,
+    "isRetyping": false,
+    "limitErrorPercentage": 0,
+    "minAccuracy": 85,
+    "calculationModel": "rrb_eduquity"
+  },
+  {
+    "id": "74",
+    "slug": "delhi-jal-board-dsssb-jr-asst-english-typing",
+    "title": "Delhi Jal Board Jr. Asst. English Typing",
+    "categoryGroup": "delhi_govt",
+    "language": "english",
+    "targetSpeed": 35,
+    "durationMinutes": 10,
+    "inputType": "character",
+    "inputLimit": 2100,
+    "isRetyping": false,
+    "limitErrorPercentage": 0,
+    "minAccuracy": 85,
+    "calculationModel": "rrb_eduquity"
+  },
+  {
+    "id": "23",
+    "slug": "dsssb-stenographer-hindi-typing",
+    "title": "DSSSB Stenographer Hindi Typing",
+    "categoryGroup": "delhi_govt",
+    "language": "hindi_mangal",
+    "targetSpeed": 35,
+    "durationMinutes": 10,
+    "inputType": "character",
+    "inputLimit": 2100,
+    "isRetyping": true,
+    "limitErrorPercentage": 0,
+    "minAccuracy": 85,
+    "calculationModel": "rrb_eduquity"
+  },
+  {
+    "id": "22",
+    "slug": "dsssb-stenographer-english-typing",
+    "title": "DSSSB Stenographer English Typing",
+    "categoryGroup": "delhi_govt",
+    "language": "english",
+    "targetSpeed": 40,
+    "durationMinutes": 10,
+    "inputType": "character",
+    "inputLimit": 2500,
+    "isRetyping": true,
+    "limitErrorPercentage": 0,
+    "minAccuracy": 85,
+    "calculationModel": "rrb_eduquity"
+  },
+  {
+    "id": "82",
+    "slug": "rssb-ia-hindi-typing-informatic-assistant-rajasthan",
+    "title": "RSSB IA Hindi Typing (Informatic Assistant, Rajasthan)",
+    "categoryGroup": "defense",
+    "language": "hindi_mangal",
+    "targetSpeed": 20,
+    "durationMinutes": 15,
+    "inputType": "word",
+    "inputLimit": 300,
+    "isRetyping": false,
+    "limitErrorPercentage": 0,
+    "minAccuracy": 85,
+    "calculationModel": "rrb_eduquity"
+  },
+  {
+    "id": "81",
+    "slug": "rssb-ia-english-typing-informatic-assistant-rajasthan",
+    "title": "RSSB IA English Typing (Informatic Assistant, Rajasthan))",
+    "categoryGroup": "defense",
+    "language": "english",
+    "targetSpeed": 20,
+    "durationMinutes": 15,
+    "inputType": "word",
+    "inputLimit": 300,
+    "isRetyping": false,
+    "limitErrorPercentage": 0,
+    "minAccuracy": 85,
+    "calculationModel": "rrb_eduquity"
+  },
+  {
+    "id": "86",
+    "slug": "bsf-hcm-hindi-typing-test",
+    "title": "BSF & All Forces HCM Hindi Typing Test",
+    "categoryGroup": "defense",
+    "language": "hindi_mangal",
+    "targetSpeed": 30,
+    "durationMinutes": 10,
+    "inputType": "character",
+    "inputLimit": 2150,
+    "isRetyping": false,
+    "limitErrorPercentage": 0,
+    "minAccuracy": 85,
+    "calculationModel": "rrb_eduquity"
+  },
+  {
+    "id": "85",
+    "slug": "bsf-hcm-english-typing-test",
+    "title": "BSF & All Forces HCM English Typing Test",
+    "categoryGroup": "defense",
+    "language": "english",
+    "targetSpeed": 35,
+    "durationMinutes": 10,
+    "inputType": "character",
+    "inputLimit": 3500,
+    "isRetyping": false,
+    "limitErrorPercentage": 0,
+    "minAccuracy": 85,
+    "calculationModel": "rrb_eduquity"
+  },
+  {
+    "id": "1241",
+    "slug": "ssb-hcm-hindi-typing-skill-test",
+    "title": "SSB HCM Hindi Typing Skill Test",
+    "categoryGroup": "defense",
+    "language": "hindi_mangal",
+    "targetSpeed": 30,
+    "durationMinutes": 10,
+    "inputType": "character",
+    "inputLimit": 2150,
+    "isRetyping": false,
+    "limitErrorPercentage": 5,
+    "minAccuracy": 95,
+    "calculationModel": "rrb_eduquity"
+  },
+  {
+    "id": "1240",
+    "slug": "ssb-hcm-english-typing-skill-test",
+    "title": "SSB HCM English Typing Skill Test",
+    "categoryGroup": "defense",
+    "language": "english",
+    "targetSpeed": 35,
+    "durationMinutes": 10,
+    "inputType": "character",
+    "inputLimit": 3750,
+    "isRetyping": false,
+    "limitErrorPercentage": 5,
+    "minAccuracy": 95,
+    "calculationModel": "rrb_eduquity"
+  },
+  {
+    "id": "152",
+    "slug": "air-force-group-c-hindi-typing",
+    "title": "Air Force Group C Hindi Typing",
+    "categoryGroup": "defense",
+    "language": "hindi_mangal",
+    "targetSpeed": 30,
+    "durationMinutes": 10,
+    "inputType": "character",
+    "inputLimit": 1500,
+    "isRetyping": false,
+    "limitErrorPercentage": 0,
+    "minAccuracy": 85,
+    "calculationModel": "standard"
+  },
+  {
+    "id": "151",
+    "slug": "air-force-group-c-english-typing",
+    "title": "Air Force Group C English Typing",
+    "categoryGroup": "defense",
+    "language": "english",
+    "targetSpeed": 35,
+    "durationMinutes": 10,
+    "inputType": "character",
+    "inputLimit": 1750,
+    "isRetyping": false,
+    "limitErrorPercentage": 0,
+    "minAccuracy": 85,
+    "calculationModel": "standard"
+  },
+  {
+    "id": "73",
+    "slug": "army-agniveer-ldc-store-keeper-english-typing",
+    "title": "Army Agniveer LDC/ SKT English Typing",
+    "categoryGroup": "defense",
+    "language": "english",
+    "targetSpeed": 30,
+    "durationMinutes": 10,
+    "inputType": "character",
+    "inputLimit": 1500,
+    "isRetyping": false,
+    "limitErrorPercentage": 0,
+    "minAccuracy": 85,
+    "calculationModel": "standard"
   },
   {
     "id": "877",
@@ -3214,22 +4293,99 @@ export const ALL_EXAMS: ExamProfile[] = [
     "inputType": "word",
     "inputLimit": 550,
     "isRetyping": false,
-    "limitErrorPercentage": 0.0,
-    "minAccuracy": 85.0
+    "limitErrorPercentage": 0,
+    "minAccuracy": 85,
+    "calculationModel": "rrb_eduquity"
   },
   {
-    "id": "844",
-    "slug": "marathon-english-typing-skill-test",
-    "title": "Marathon English Typing Skill Test",
-    "categoryGroup": "state_exams",
-    "language": "english",
+    "id": "62",
+    "slug": "rssb-ldc-jr-asst-hindi-typing-rajasthan",
+    "title": "RSSB LDC/Jr. Asst. Hindi Typing (Rajasthan)",
+    "categoryGroup": "defense",
+    "language": "hindi_mangal",
     "targetSpeed": 30,
-    "durationMinutes": 15,
-    "inputType": "character",
-    "inputLimit": 3750,
+    "durationMinutes": 10,
+    "inputType": "word",
+    "inputLimit": 400,
     "isRetyping": false,
-    "limitErrorPercentage": 0.0,
-    "minAccuracy": 85.0
+    "limitErrorPercentage": 0,
+    "minAccuracy": 85,
+    "calculationModel": "rrb_eduquity"
+  },
+  {
+    "id": "61",
+    "slug": "rssb-ldc-jr-asst-english-typing-rajasthan",
+    "title": "RSSB LDC/Jr. Asst. English Typing (Rajasthan)",
+    "categoryGroup": "defense",
+    "language": "english",
+    "targetSpeed": 35,
+    "durationMinutes": 10,
+    "inputType": "word",
+    "inputLimit": 500,
+    "isRetyping": false,
+    "limitErrorPercentage": 0,
+    "minAccuracy": 85,
+    "calculationModel": "rrb_eduquity"
+  },
+  {
+    "id": "1010",
+    "slug": "rssb-nhm-data-entry-operator-hindi-typing-rajasthan",
+    "title": "RSSB NHM Data Entry Operator Hindi Typing (Rajasthan)",
+    "categoryGroup": "defense",
+    "language": "hindi_mangal",
+    "targetSpeed": 35,
+    "durationMinutes": 15,
+    "inputType": "word",
+    "inputLimit": 1250,
+    "isRetyping": false,
+    "limitErrorPercentage": 0,
+    "minAccuracy": 85,
+    "calculationModel": "rrb_eduquity"
+  },
+  {
+    "id": "1009",
+    "slug": "rssb-nhm-data-entry-operator-english-typing-rajasthan",
+    "title": "RSSB NHM Data Entry Operator English Typing (Rajasthan)",
+    "categoryGroup": "defense",
+    "language": "english",
+    "targetSpeed": 35,
+    "durationMinutes": 15,
+    "inputType": "word",
+    "inputLimit": 1250,
+    "isRetyping": false,
+    "limitErrorPercentage": 0,
+    "minAccuracy": 85,
+    "calculationModel": "rrb_eduquity"
+  },
+  {
+    "id": "7",
+    "slug": "bssc-2nd-inter-level-hindi-typing-bihar",
+    "title": "BSSC 2nd Inter Level Hindi Typing (Bihar)",
+    "categoryGroup": "bihar",
+    "language": "hindi_mangal",
+    "targetSpeed": 30,
+    "durationMinutes": 10,
+    "inputType": "word",
+    "inputLimit": 300,
+    "isRetyping": false,
+    "limitErrorPercentage": 0,
+    "minAccuracy": 85,
+    "calculationModel": "ssc_dest"
+  },
+  {
+    "id": "6",
+    "slug": "bssc-2nd-inter-level-english-typing-bihar",
+    "title": "BSSC 2nd Inter Level English Typing (Bihar)",
+    "categoryGroup": "bihar",
+    "language": "english",
+    "targetSpeed": 35,
+    "durationMinutes": 10,
+    "inputType": "word",
+    "inputLimit": 350,
+    "isRetyping": false,
+    "limitErrorPercentage": 0,
+    "minAccuracy": 85,
+    "calculationModel": "ssc_dest"
   },
   {
     "id": "812",
@@ -3243,7 +4399,8 @@ export const ALL_EXAMS: ExamProfile[] = [
     "inputLimit": 150,
     "isRetyping": false,
     "limitErrorPercentage": 1.5,
-    "minAccuracy": 98.5
+    "minAccuracy": 98.5,
+    "calculationModel": "standard"
   },
   {
     "id": "811",
@@ -3257,1155 +4414,8 @@ export const ALL_EXAMS: ExamProfile[] = [
     "inputLimit": 200,
     "isRetyping": false,
     "limitErrorPercentage": 1.5,
-    "minAccuracy": 98.5
-  },
-  {
-    "id": "778",
-    "slug": "patna-high-court-english-typing-test",
-    "title": "Patna High Court English Typing Test",
-    "categoryGroup": "judiciary",
-    "language": "english",
-    "targetSpeed": 40,
-    "durationMinutes": 10,
-    "inputType": "word",
-    "inputLimit": 420,
-    "isRetyping": false,
-    "limitErrorPercentage": 10.0,
-    "minAccuracy": 90.0
-  },
-  {
-    "id": "747",
-    "slug": "andhra-pradesh-high-court-english-typing-aphc",
-    "title": "Andhra Pradesh High Court English Typing (APHC)",
-    "categoryGroup": "judiciary",
-    "language": "english",
-    "targetSpeed": 45,
-    "durationMinutes": 10,
-    "inputType": "word",
-    "inputLimit": 450,
-    "isRetyping": false,
-    "limitErrorPercentage": 0.0,
-    "minAccuracy": 85.0
-  },
-  {
-    "id": "746",
-    "slug": "bhu-junior-clerk-english-typing",
-    "title": "BHU Junior Clerk English Typing",
-    "categoryGroup": "central_nta",
-    "language": "english",
-    "targetSpeed": 30,
-    "durationMinutes": 15,
-    "inputType": "word",
-    "inputLimit": 600,
-    "isRetyping": false,
-    "limitErrorPercentage": 0.0,
-    "minAccuracy": 85.0
-  },
-  {
-    "id": "745",
-    "slug": "bhu-junior-clerk-hindi-typing",
-    "title": "BHU Junior Clerk Hindi Typing",
-    "categoryGroup": "central_nta",
-    "language": "hindi_mangal",
-    "targetSpeed": 25,
-    "durationMinutes": 15,
-    "inputType": "word",
-    "inputLimit": 500,
-    "isRetyping": false,
-    "limitErrorPercentage": 0.0,
-    "minAccuracy": 85.0
-  },
-  {
-    "id": "713",
-    "slug": "csir-jsa-hindi-typing-test",
-    "title": "CSIR JSA Hindi Typing Test",
-    "categoryGroup": "central_nta",
-    "language": "hindi_mangal",
-    "targetSpeed": 30,
-    "durationMinutes": 10,
-    "inputType": "character",
-    "inputLimit": 1750,
-    "isRetyping": true,
-    "limitErrorPercentage": 0.0,
-    "minAccuracy": 85.0
-  },
-  {
-    "id": "712",
-    "slug": "csir-jsa-english-typing-test",
-    "title": "CSIR JSA English Typing Test",
-    "categoryGroup": "central_nta",
-    "language": "english",
-    "targetSpeed": 35,
-    "durationMinutes": 10,
-    "inputType": "character",
-    "inputLimit": 2750,
-    "isRetyping": true,
-    "limitErrorPercentage": 0.0,
-    "minAccuracy": 85.0
-  },
-  {
-    "id": "680",
-    "slug": "ukpsc-ro-aro-english-typing-uttarakhand",
-    "title": "UKPSC RO ARO English Typing (Uttarakhand)",
-    "categoryGroup": "state_exams",
-    "language": "english",
-    "targetSpeed": 30,
-    "durationMinutes": 10,
-    "inputType": "character",
-    "inputLimit": 1750,
-    "isRetyping": false,
-    "limitErrorPercentage": 0.0,
-    "minAccuracy": 85.0
-  },
-  {
-    "id": "679",
-    "slug": "ukpsc-ro-aro-hindi-typing-uttarakhand",
-    "title": "UKPSC RO ARO Hindi Typing (Uttarakhand)",
-    "categoryGroup": "state_exams",
-    "language": "hindi_mangal",
-    "targetSpeed": 25,
-    "durationMinutes": 10,
-    "inputType": "character",
-    "inputLimit": 1500,
-    "isRetyping": false,
-    "limitErrorPercentage": 0.0,
-    "minAccuracy": 85.0
-  },
-  {
-    "id": "646",
-    "slug": "supreme-court-of-india-english-typing-sci-jca",
-    "title": "SCI JCA English Typing Skill Test (Supreme Court)",
-    "categoryGroup": "judiciary",
-    "language": "english",
-    "targetSpeed": 35,
-    "durationMinutes": 10,
-    "inputType": "character",
-    "inputLimit": 1750,
-    "isRetyping": false,
-    "limitErrorPercentage": 0.0,
-    "minAccuracy": 85.0
-  },
-  {
-    "id": "613",
-    "slug": "bombay-high-court-english-typing-pa-bhc",
-    "title": "Bombay High Court PA English Typing (BHC)",
-    "categoryGroup": "judiciary",
-    "language": "english",
-    "targetSpeed": 50,
-    "durationMinutes": 10,
-    "inputType": "word",
-    "inputLimit": 510,
-    "isRetyping": false,
-    "limitErrorPercentage": 0.0,
-    "minAccuracy": 85.0
-  },
-  {
-    "id": "580",
-    "slug": "rajasthan-high-court-english-typing-hcraj",
-    "title": "Rajasthan High Court English Typing (HCRAJ)",
-    "categoryGroup": "judiciary",
-    "language": "english",
-    "targetSpeed": 30,
-    "durationMinutes": 10,
-    "inputType": "character",
-    "inputLimit": 3000,
-    "isRetyping": true,
-    "limitErrorPercentage": 0.0,
-    "minAccuracy": 85.0
-  },
-  {
-    "id": "548",
-    "slug": "aiims-cre-english-typing-skill-test",
-    "title": "AIIMS CRE English Typing Skill Test",
-    "categoryGroup": "central_nta",
-    "language": "english",
-    "targetSpeed": 35,
-    "durationMinutes": 15,
-    "inputType": "character",
-    "inputLimit": 3750,
-    "isRetyping": false,
-    "limitErrorPercentage": 0.0,
-    "minAccuracy": 85.0
-  },
-  {
-    "id": "547",
-    "slug": "aiims-cre-hindi-typing-skill-test",
-    "title": "AIIMS CRE Hindi Typing Skill Test",
-    "categoryGroup": "central_nta",
-    "language": "hindi_mangal",
-    "targetSpeed": 30,
-    "durationMinutes": 15,
-    "inputType": "character",
-    "inputLimit": 2750,
-    "isRetyping": false,
-    "limitErrorPercentage": 0.0,
-    "minAccuracy": 85.0
-  },
-  {
-    "id": "517",
-    "slug": "telangana-judicial-ministerial-english-typing-tshc",
-    "title": "Telangana Judicial Ministerial English Typing (TSHC)",
-    "categoryGroup": "judiciary",
-    "language": "english",
-    "targetSpeed": 45,
-    "durationMinutes": 10,
-    "inputType": "word",
-    "inputLimit": 500,
-    "isRetyping": false,
-    "limitErrorPercentage": 40.0,
-    "minAccuracy": 60.0
-  },
-  {
-    "id": "516",
-    "slug": "telangana-high-court-english-typing-tshc",
-    "title": "Telangana High Court English Typing (TSHC)",
-    "categoryGroup": "judiciary",
-    "language": "english",
-    "targetSpeed": 45,
-    "durationMinutes": 15,
-    "inputType": "word",
-    "inputLimit": 700,
-    "isRetyping": false,
-    "limitErrorPercentage": 45.0,
-    "minAccuracy": 55.0
-  },
-  {
-    "id": "515",
-    "slug": "cbse-hindi-typing-skill-test",
-    "title": "CBSE Hindi Typing Skill Test",
-    "categoryGroup": "central_nta",
-    "language": "hindi_mangal",
-    "targetSpeed": 30,
-    "durationMinutes": 10,
-    "inputType": "character",
-    "inputLimit": 2250,
-    "isRetyping": true,
-    "limitErrorPercentage": 0.0,
-    "minAccuracy": 85.0
-  },
-  {
-    "id": "514",
-    "slug": "cbse-english-typing-skill-test",
-    "title": "CBSE English Typing Skill Test",
-    "categoryGroup": "central_nta",
-    "language": "english",
-    "targetSpeed": 35,
-    "durationMinutes": 10,
-    "inputType": "character",
-    "inputLimit": 2750,
-    "isRetyping": true,
-    "limitErrorPercentage": 0.0,
-    "minAccuracy": 85.0
-  },
-  {
-    "id": "482",
-    "slug": "bihar-police-ssc-bpssc-hindi-typing",
-    "title": "Bihar Police SSC (BPSSC) Hindi Typing",
-    "categoryGroup": "ssc",
-    "language": "hindi_mangal",
-    "targetSpeed": 30,
-    "durationMinutes": 10,
-    "inputType": "word",
-    "inputLimit": 300,
-    "isRetyping": false,
-    "limitErrorPercentage": 0.0,
-    "minAccuracy": 85.0
-  },
-  {
-    "id": "481",
-    "slug": "bihar-police-ssc-bpssc-english-typing",
-    "title": "Bihar Police SSC (BPSSC) English Typing",
-    "categoryGroup": "ssc",
-    "language": "english",
-    "targetSpeed": 30,
-    "durationMinutes": 10,
-    "inputType": "word",
-    "inputLimit": 300,
-    "isRetyping": false,
-    "limitErrorPercentage": 0.0,
-    "minAccuracy": 85.0
-  },
-  {
-    "id": "449",
-    "slug": "mpsc-group-c-marathi-typing",
-    "title": "MPSC Group C Marathi Typing",
-    "categoryGroup": "state_exams",
-    "language": "hindi_mangal",
-    "targetSpeed": 30,
-    "durationMinutes": 10,
-    "inputType": "word",
-    "inputLimit": 300,
-    "isRetyping": false,
-    "limitErrorPercentage": 0.0,
-    "minAccuracy": 85.0
-  },
-  {
-    "id": "448",
-    "slug": "mpsc-group-c-english-typing",
-    "title": "MPSC Group C English Typing",
-    "categoryGroup": "state_exams",
-    "language": "english",
-    "targetSpeed": 35,
-    "durationMinutes": 10,
-    "inputType": "word",
-    "inputLimit": 400,
-    "isRetyping": false,
-    "limitErrorPercentage": 0.0,
-    "minAccuracy": 85.0
-  },
-  {
-    "id": "416",
-    "slug": "odisha-ossc-odia-typing",
-    "title": "Odisha OSSC Odia Typing",
-    "categoryGroup": "ssc",
-    "language": "english",
-    "targetSpeed": 16,
-    "durationMinutes": 25,
-    "inputType": "word",
-    "inputLimit": 500,
-    "isRetyping": false,
-    "limitErrorPercentage": 0.0,
-    "minAccuracy": 85.0
-  },
-  {
-    "id": "415",
-    "slug": "odisha-ossc-english-typing",
-    "title": "Odisha OSSC English Typing",
-    "categoryGroup": "ssc",
-    "language": "english",
-    "targetSpeed": 37,
-    "durationMinutes": 10,
-    "inputType": "word",
-    "inputLimit": 400,
-    "isRetyping": false,
-    "limitErrorPercentage": 0.0,
-    "minAccuracy": 85.0
-  },
-  {
-    "id": "382",
-    "slug": "bombay-high-court-english-typing-clerk-bhc",
-    "title": "Bombay High Court Clerk English Typing (BHC)",
-    "categoryGroup": "judiciary",
-    "language": "english",
-    "targetSpeed": 40,
-    "durationMinutes": 10,
-    "inputType": "word",
-    "inputLimit": 400,
-    "isRetyping": false,
-    "limitErrorPercentage": 0.0,
-    "minAccuracy": 85.0
-  },
-  {
-    "id": "349",
-    "slug": "supreme-court-of-india-english-typing-sci-spa-pa-cm",
-    "title": "SCI SPA, PA, CM English Typing Skill Test (Supreme Court)",
-    "categoryGroup": "judiciary",
-    "language": "english",
-    "targetSpeed": 40,
-    "durationMinutes": 10,
-    "inputType": "character",
-    "inputLimit": 2100,
-    "isRetyping": false,
-    "limitErrorPercentage": 0.0,
-    "minAccuracy": 85.0
-  },
-  {
-    "id": "319",
-    "slug": "allahabad-high-court-english-typing-ahc",
-    "title": "Allahabad High Court English Typing (AHC)",
-    "categoryGroup": "judiciary",
-    "language": "english",
-    "targetSpeed": 30,
-    "durationMinutes": 10,
-    "inputType": "word",
-    "inputLimit": 300,
-    "isRetyping": false,
-    "limitErrorPercentage": 0.0,
-    "minAccuracy": 85.0
-  },
-  {
-    "id": "318",
-    "slug": "allahabad-high-court-hindi-typing-ahc",
-    "title": "Allahabad High Court Hindi Typing (AHC)",
-    "categoryGroup": "judiciary",
-    "language": "hindi_mangal",
-    "targetSpeed": 25,
-    "durationMinutes": 10,
-    "inputType": "word",
-    "inputLimit": 250,
-    "isRetyping": false,
-    "limitErrorPercentage": 0.0,
-    "minAccuracy": 85.0
-  },
-  {
-    "id": "317",
-    "slug": "mp-high-court-english-typing-jabalpur-mphc",
-    "title": "MP High Court English Typing, Jabalpur",
-    "categoryGroup": "judiciary",
-    "language": "english",
-    "targetSpeed": 35,
-    "durationMinutes": 10,
-    "inputType": "word",
-    "inputLimit": 350,
-    "isRetyping": false,
-    "limitErrorPercentage": 0.0,
-    "minAccuracy": 85.0
-  },
-  {
-    "id": "316",
-    "slug": "mp-high-court-hindi-typing-jabalpur-mphc",
-    "title": "MP High Court Hindi Typing, Jabalpur",
-    "categoryGroup": "judiciary",
-    "language": "hindi_mangal",
-    "targetSpeed": 35,
-    "durationMinutes": 10,
-    "inputType": "word",
-    "inputLimit": 350,
-    "isRetyping": false,
-    "limitErrorPercentage": 0.0,
-    "minAccuracy": 85.0
-  },
-  {
-    "id": "286",
-    "slug": "rrb-ntpc-english-typing-skill-test",
-    "title": "RRB NTPC English Typing Skill Test",
-    "categoryGroup": "railways",
-    "language": "english",
-    "targetSpeed": 30,
-    "durationMinutes": 10,
-    "inputType": "character",
-    "inputLimit": 1500,
-    "isRetyping": true,
-    "limitErrorPercentage": 0.0,
-    "minAccuracy": 85.0
-  },
-  {
-    "id": "285",
-    "slug": "rrb-ntpc-hindi-typing-skill-test",
-    "title": "RRB NTPC Hindi Typing Skill Test",
-    "categoryGroup": "railways",
-    "language": "hindi_mangal",
-    "targetSpeed": 25,
-    "durationMinutes": 10,
-    "inputType": "character",
-    "inputLimit": 1250,
-    "isRetyping": true,
-    "limitErrorPercentage": 0.0,
-    "minAccuracy": 85.0
-  },
-  {
-    "id": "284",
-    "slug": "uksssc-hindi-typing-skill-test-uttarakhand",
-    "title": "UKSSSC Hindi Typing Skill Test (Uttarakhand)",
-    "categoryGroup": "state_exams",
-    "language": "hindi_mangal",
-    "targetSpeed": 25,
-    "durationMinutes": 10,
-    "inputType": "character",
-    "inputLimit": 1500,
-    "isRetyping": false,
-    "limitErrorPercentage": 0.0,
-    "minAccuracy": 85.0
-  },
-  {
-    "id": "283",
-    "slug": "uksssc-english-typing-skill-test-uttarakhand",
-    "title": "UKSSSC English Typing Skill Test (Uttarakhand)",
-    "categoryGroup": "state_exams",
-    "language": "english",
-    "targetSpeed": 30,
-    "durationMinutes": 10,
-    "inputType": "character",
-    "inputLimit": 1750,
-    "isRetyping": false,
-    "limitErrorPercentage": 0.0,
-    "minAccuracy": 85.0
-  },
-  {
-    "id": "250",
-    "slug": "jci-english-typing-jute-corporation",
-    "title": "JCI English Typing (Jute Corporation)",
-    "categoryGroup": "state_exams",
-    "language": "english",
-    "targetSpeed": 40,
-    "durationMinutes": 10,
-    "inputType": "word",
-    "inputLimit": 420,
-    "isRetyping": false,
-    "limitErrorPercentage": 0.0,
-    "minAccuracy": 85.0
-  },
-  {
-    "id": "218",
-    "slug": "dda-jsa-hindi-typing",
-    "title": "DDA JSA Hindi Typing",
-    "categoryGroup": "delhi_govt",
-    "language": "hindi_mangal",
-    "targetSpeed": 30,
-    "durationMinutes": 10,
-    "inputType": "character",
-    "inputLimit": 2250,
-    "isRetyping": false,
-    "limitErrorPercentage": 0.0,
-    "minAccuracy": 85.0
-  },
-  {
-    "id": "217",
-    "slug": "dda-jsa-english-typing",
-    "title": "DDA JSA English Typing",
-    "categoryGroup": "delhi_govt",
-    "language": "english",
-    "targetSpeed": 35,
-    "durationMinutes": 10,
-    "inputType": "character",
-    "inputLimit": 2750,
-    "isRetyping": false,
-    "limitErrorPercentage": 0.0,
-    "minAccuracy": 85.0
-  },
-  {
-    "id": "185",
-    "slug": "dda-aso-hindi-typing",
-    "title": "DDA ASO Hindi Typing",
-    "categoryGroup": "delhi_govt",
-    "language": "hindi_mangal",
-    "targetSpeed": 30,
-    "durationMinutes": 15,
-    "inputType": "character",
-    "inputLimit": 2750,
-    "isRetyping": false,
-    "limitErrorPercentage": 0.0,
-    "minAccuracy": 85.0
-  },
-  {
-    "id": "184",
-    "slug": "dda-aso-english-typing",
-    "title": "DDA ASO English Typing",
-    "categoryGroup": "delhi_govt",
-    "language": "english",
-    "targetSpeed": 35,
-    "durationMinutes": 15,
-    "inputType": "character",
-    "inputLimit": 3250,
-    "isRetyping": false,
-    "limitErrorPercentage": 0.0,
-    "minAccuracy": 85.0
-  },
-  {
-    "id": "152",
-    "slug": "air-force-group-c-hindi-typing",
-    "title": "Air Force Group C Hindi Typing",
-    "categoryGroup": "defense",
-    "language": "hindi_mangal",
-    "targetSpeed": 30,
-    "durationMinutes": 10,
-    "inputType": "character",
-    "inputLimit": 1500,
-    "isRetyping": false,
-    "limitErrorPercentage": 0.0,
-    "minAccuracy": 85.0
-  },
-  {
-    "id": "151",
-    "slug": "air-force-group-c-english-typing",
-    "title": "Air Force Group C English Typing",
-    "categoryGroup": "defense",
-    "language": "english",
-    "targetSpeed": 35,
-    "durationMinutes": 10,
-    "inputType": "character",
-    "inputLimit": 1750,
-    "isRetyping": false,
-    "limitErrorPercentage": 0.0,
-    "minAccuracy": 85.0
-  },
-  {
-    "id": "118",
-    "slug": "jsss-inter-level-hindi-typing",
-    "title": "JSSC Inter Level Hindi Typing",
-    "categoryGroup": "state_exams",
-    "language": "hindi_mangal",
-    "targetSpeed": 30,
-    "durationMinutes": 10,
-    "inputType": "word",
-    "inputLimit": 250,
-    "isRetyping": false,
-    "limitErrorPercentage": 0.0,
-    "minAccuracy": 85.0
-  },
-  {
-    "id": "86",
-    "slug": "bsf-hcm-hindi-typing-test",
-    "title": "BSF & All Forces HCM Hindi Typing Test",
-    "categoryGroup": "defense",
-    "language": "hindi_mangal",
-    "targetSpeed": 30,
-    "durationMinutes": 10,
-    "inputType": "character",
-    "inputLimit": 2150,
-    "isRetyping": false,
-    "limitErrorPercentage": 0.0,
-    "minAccuracy": 85.0
-  },
-  {
-    "id": "85",
-    "slug": "bsf-hcm-english-typing-test",
-    "title": "BSF & All Forces HCM English Typing Test",
-    "categoryGroup": "defense",
-    "language": "english",
-    "targetSpeed": 35,
-    "durationMinutes": 10,
-    "inputType": "character",
-    "inputLimit": 3500,
-    "isRetyping": false,
-    "limitErrorPercentage": 0.0,
-    "minAccuracy": 85.0
-  },
-  {
-    "id": "84",
-    "slug": "spmcil-igm-hindi-typing-skill-test",
-    "title": "SPMCIL IGM Hindi Typing Skill Test",
-    "categoryGroup": "state_exams",
-    "language": "hindi_mangal",
-    "targetSpeed": 30,
-    "durationMinutes": 10,
-    "inputType": "character",
-    "inputLimit": 1575,
-    "isRetyping": false,
-    "limitErrorPercentage": 0.0,
-    "minAccuracy": 85.0
-  },
-  {
-    "id": "83",
-    "slug": "spmcil-igm-english-typing-skill-test",
-    "title": "SPMCIL IGM English Typing Skill Test",
-    "categoryGroup": "state_exams",
-    "language": "english",
-    "targetSpeed": 40,
-    "durationMinutes": 10,
-    "inputType": "character",
-    "inputLimit": 2100,
-    "isRetyping": false,
-    "limitErrorPercentage": 5.0,
-    "minAccuracy": 95.0
-  },
-  {
-    "id": "82",
-    "slug": "rssb-ia-hindi-typing-informatic-assistant-rajasthan",
-    "title": "RSSB IA Hindi Typing (Informatic Assistant, Rajasthan)",
-    "categoryGroup": "defense",
-    "language": "hindi_mangal",
-    "targetSpeed": 20,
-    "durationMinutes": 15,
-    "inputType": "word",
-    "inputLimit": 300,
-    "isRetyping": false,
-    "limitErrorPercentage": 0.0,
-    "minAccuracy": 85.0
-  },
-  {
-    "id": "81",
-    "slug": "rssb-ia-english-typing-informatic-assistant-rajasthan",
-    "title": "RSSB IA English Typing (Informatic Assistant, Rajasthan))",
-    "categoryGroup": "defense",
-    "language": "english",
-    "targetSpeed": 20,
-    "durationMinutes": 15,
-    "inputType": "word",
-    "inputLimit": 300,
-    "isRetyping": false,
-    "limitErrorPercentage": 0.0,
-    "minAccuracy": 85.0
-  },
-  {
-    "id": "80",
-    "slug": "jharkhand-high-court-jhc-stenography-english-typing",
-    "title": "Jharkhand High Court (JHC) Stenography English Typing",
-    "categoryGroup": "judiciary",
-    "language": "english",
-    "targetSpeed": 40,
-    "durationMinutes": 10,
-    "inputType": "word",
-    "inputLimit": 400,
-    "isRetyping": true,
-    "limitErrorPercentage": 0.0,
-    "minAccuracy": 85.0
-  },
-  {
-    "id": "79",
-    "slug": "wbssc-clerkship-english-typing-wbpsc",
-    "title": "WBSSC Clerkship English Typing (WBPSC)",
-    "categoryGroup": "bihar",
-    "language": "english",
-    "targetSpeed": 20,
-    "durationMinutes": 10,
-    "inputType": "word",
-    "inputLimit": 400,
-    "isRetyping": true,
-    "limitErrorPercentage": 0.0,
-    "minAccuracy": 85.0
-  },
-  {
-    "id": "78",
-    "slug": "nta-visva-bharati-english-typing",
-    "title": "NTA Visva Bharati English Typing",
-    "categoryGroup": "central_nta",
-    "language": "english",
-    "targetSpeed": 35,
-    "durationMinutes": 10,
-    "inputType": "character",
-    "inputLimit": 1750,
-    "isRetyping": false,
-    "limitErrorPercentage": 0.0,
-    "minAccuracy": 85.0
-  },
-  {
-    "id": "77",
-    "slug": "emrs-jsa-hindi-typing",
-    "title": "EMRS JSA Hindi Typing",
-    "categoryGroup": "central_nta",
-    "language": "hindi_mangal",
-    "targetSpeed": 30,
-    "durationMinutes": 10,
-    "inputType": "character",
-    "inputLimit": 1750,
-    "isRetyping": false,
-    "limitErrorPercentage": 0.0,
-    "minAccuracy": 85.0
-  },
-  {
-    "id": "76",
-    "slug": "emrs-jsa-english-typing",
-    "title": "EMRS JSA English Typing",
-    "categoryGroup": "central_nta",
-    "language": "english",
-    "targetSpeed": 35,
-    "durationMinutes": 10,
-    "inputType": "character",
-    "inputLimit": 2000,
-    "isRetyping": false,
-    "limitErrorPercentage": 0.0,
-    "minAccuracy": 85.0
-  },
-  {
-    "id": "75",
-    "slug": "delhi-jal-board-dsssb-jr-asst-hindi-typing",
-    "title": "Delhi Jal Board Jr. Asst. Hindi Typing",
-    "categoryGroup": "delhi_govt",
-    "language": "hindi_mangal",
-    "targetSpeed": 30,
-    "durationMinutes": 10,
-    "inputType": "character",
-    "inputLimit": 1800,
-    "isRetyping": false,
-    "limitErrorPercentage": 0.0,
-    "minAccuracy": 85.0
-  },
-  {
-    "id": "74",
-    "slug": "delhi-jal-board-dsssb-jr-asst-english-typing",
-    "title": "Delhi Jal Board Jr. Asst. English Typing",
-    "categoryGroup": "delhi_govt",
-    "language": "english",
-    "targetSpeed": 35,
-    "durationMinutes": 10,
-    "inputType": "character",
-    "inputLimit": 2100,
-    "isRetyping": false,
-    "limitErrorPercentage": 0.0,
-    "minAccuracy": 85.0
-  },
-  {
-    "id": "73",
-    "slug": "army-agniveer-ldc-store-keeper-english-typing",
-    "title": "Army Agniveer LDC/ SKT English Typing",
-    "categoryGroup": "defense",
-    "language": "english",
-    "targetSpeed": 30,
-    "durationMinutes": 10,
-    "inputType": "character",
-    "inputLimit": 1500,
-    "isRetyping": false,
-    "limitErrorPercentage": 0.0,
-    "minAccuracy": 85.0
-  },
-  {
-    "id": "72",
-    "slug": "uppsc-ro-aro-hindi-typing-test",
-    "title": "UPPSC RO ARO Hindi Typing Test",
-    "categoryGroup": "up_govt",
-    "language": "hindi_mangal",
-    "targetSpeed": 25,
-    "durationMinutes": 5,
-    "inputType": "word",
-    "inputLimit": 125,
-    "isRetyping": true,
-    "limitErrorPercentage": 0.0,
-    "minAccuracy": 85.0
-  },
-  {
-    "id": "71",
-    "slug": "uppsc-ro-aro-english-typing-test",
-    "title": "UPPSC RO ARO English Typing Test",
-    "categoryGroup": "up_govt",
-    "language": "english",
-    "targetSpeed": 25,
-    "durationMinutes": 5,
-    "inputType": "word",
-    "inputLimit": 125,
-    "isRetyping": true,
-    "limitErrorPercentage": 0.0,
-    "minAccuracy": 85.0
-  },
-  {
-    "id": "70",
-    "slug": "navoday-jnv-jsa-hindi-typing-nvs",
-    "title": "Navoday JNV JSA Hindi Typing (NVS)",
-    "categoryGroup": "central_nta",
-    "language": "hindi_mangal",
-    "targetSpeed": 25,
-    "durationMinutes": 10,
-    "inputType": "character",
-    "inputLimit": 2250,
-    "isRetyping": false,
-    "limitErrorPercentage": 0.0,
-    "minAccuracy": 85.0
-  },
-  {
-    "id": "69",
-    "slug": "navoday-jnv-jsa-english-typing-nvs",
-    "title": "Navoday JNV JSA English Typing (NVS)",
-    "categoryGroup": "central_nta",
-    "language": "english",
-    "targetSpeed": 30,
-    "durationMinutes": 10,
-    "inputType": "character",
-    "inputLimit": 2750,
-    "isRetyping": false,
-    "limitErrorPercentage": 0.0,
-    "minAccuracy": 85.0
-  },
-  {
-    "id": "68",
-    "slug": "ukhcrec-uttarakhand-high-court-hindi-typing",
-    "title": "Uttarakhand High Court Hindi Typing",
-    "categoryGroup": "judiciary",
-    "language": "hindi_mangal",
-    "targetSpeed": 30,
-    "durationMinutes": 10,
-    "inputType": "character",
-    "inputLimit": 2250,
-    "isRetyping": false,
-    "limitErrorPercentage": 0.0,
-    "minAccuracy": 85.0
-  },
-  {
-    "id": "67",
-    "slug": "ukhcrec-uttarakhand-high-court-english-typing",
-    "title": "Uttarakhand High Court English Typing",
-    "categoryGroup": "judiciary",
-    "language": "english",
-    "targetSpeed": 40,
-    "durationMinutes": 10,
-    "inputType": "character",
-    "inputLimit": 3500,
-    "isRetyping": false,
-    "limitErrorPercentage": 0.0,
-    "minAccuracy": 85.0
-  },
-  {
-    "id": "66",
-    "slug": "bihar-civil-court-hindi-typing-court-reader-cum-deposition-writer",
-    "title": "Bihar Civil Court Hindi Typing Court Reader -cum- Deposition Writer",
-    "categoryGroup": "judiciary",
-    "language": "hindi_mangal",
-    "targetSpeed": 30,
-    "durationMinutes": 10,
-    "inputType": "word",
-    "inputLimit": 300,
-    "isRetyping": false,
-    "limitErrorPercentage": 0.0,
-    "minAccuracy": 85.0
-  },
-  {
-    "id": "65",
-    "slug": "bihar-civil-court-english-typing-court-reader-cum-deposition-writer",
-    "title": "Bihar Civil Court English Typing Court Reader -cum- Deposition Writer",
-    "categoryGroup": "judiciary",
-    "language": "english",
-    "targetSpeed": 40,
-    "durationMinutes": 10,
-    "inputType": "word",
-    "inputLimit": 400,
-    "isRetyping": false,
-    "limitErrorPercentage": 0.0,
-    "minAccuracy": 85.0
-  },
-  {
-    "id": "64",
-    "slug": "jharkhand-high-court-jhc-deposition-writer-typist-hindi-typing",
-    "title": "Jharkhand High Court (JHC) Deposition Writer / Typist Hindi Typing",
-    "categoryGroup": "judiciary",
-    "language": "hindi_mangal",
-    "targetSpeed": 30,
-    "durationMinutes": 10,
-    "inputType": "word",
-    "inputLimit": 300,
-    "isRetyping": true,
-    "limitErrorPercentage": 0.0,
-    "minAccuracy": 85.0
-  },
-  {
-    "id": "63",
-    "slug": "jharkhand-high-court-jhc-deposition-writer-typist-english-typing",
-    "title": "Jharkhand High Court (JHC) Deposition Writer / Typist English Typing",
-    "categoryGroup": "judiciary",
-    "language": "english",
-    "targetSpeed": 40,
-    "durationMinutes": 5,
-    "inputType": "word",
-    "inputLimit": 200,
-    "isRetyping": true,
-    "limitErrorPercentage": 0.0,
-    "minAccuracy": 85.0
-  },
-  {
-    "id": "62",
-    "slug": "rssb-ldc-jr-asst-hindi-typing-rajasthan",
-    "title": "RSSB LDC/Jr. Asst. Hindi Typing (Rajasthan)",
-    "categoryGroup": "defense",
-    "language": "hindi_mangal",
-    "targetSpeed": 30,
-    "durationMinutes": 10,
-    "inputType": "word",
-    "inputLimit": 400,
-    "isRetyping": false,
-    "limitErrorPercentage": 0.0,
-    "minAccuracy": 85.0
-  },
-  {
-    "id": "61",
-    "slug": "rssb-ldc-jr-asst-english-typing-rajasthan",
-    "title": "RSSB LDC/Jr. Asst. English Typing (Rajasthan)",
-    "categoryGroup": "defense",
-    "language": "english",
-    "targetSpeed": 35,
-    "durationMinutes": 10,
-    "inputType": "word",
-    "inputLimit": 500,
-    "isRetyping": false,
-    "limitErrorPercentage": 0.0,
-    "minAccuracy": 85.0
-  },
-  {
-    "id": "60",
-    "slug": "jharkhand-high-court-jhc-assistant-clerk-english-hindi-typing",
-    "title": "Jharkhand High Court Assistant English Hindi Typing (JHC)",
-    "categoryGroup": "judiciary",
-    "language": "hindi_mangal",
-    "targetSpeed": 20,
-    "durationMinutes": 5,
-    "inputType": "word",
-    "inputLimit": 100,
-    "isRetyping": true,
-    "limitErrorPercentage": 0.0,
-    "minAccuracy": 85.0
-  },
-  {
-    "id": "59",
-    "slug": "bihar-beltron-deo-hindi-typing-test",
-    "title": "Bihar Beltron DEO Hindi Typing Test",
-    "categoryGroup": "bihar",
-    "language": "hindi_mangal",
-    "targetSpeed": 25,
-    "durationMinutes": 10,
-    "inputType": "character",
-    "inputLimit": 1500,
-    "isRetyping": false,
-    "limitErrorPercentage": 0.0,
-    "minAccuracy": 85.0
-  },
-  {
-    "id": "58",
-    "slug": "bihar-beltron-deo-english-typing-test",
-    "title": "Bihar Beltron DEO English Typing Test",
-    "categoryGroup": "bihar",
-    "language": "english",
-    "targetSpeed": 30,
-    "durationMinutes": 10,
-    "inputType": "character",
-    "inputLimit": 2000,
-    "isRetyping": false,
-    "limitErrorPercentage": 0.0,
-    "minAccuracy": 85.0
-  },
-  {
-    "id": "57",
-    "slug": "upsssc-assistants-hindi-typing-test",
-    "title": "UPSSSC Assistants Hindi Typing Test",
-    "categoryGroup": "up_govt",
-    "language": "hindi_mangal",
-    "targetSpeed": 25,
-    "durationMinutes": 5,
-    "inputType": "character",
-    "inputLimit": 1250,
-    "isRetyping": false,
-    "limitErrorPercentage": 0.0,
-    "minAccuracy": 85.0
-  },
-  {
-    "id": "56",
-    "slug": "upsssc-assistants-english-typing-test",
-    "title": "UPSSSC Assistants English Typing Test",
-    "categoryGroup": "up_govt",
-    "language": "english",
-    "targetSpeed": 30,
-    "durationMinutes": 5,
-    "inputType": "character",
-    "inputLimit": 1500,
-    "isRetyping": false,
-    "limitErrorPercentage": 0.0,
-    "minAccuracy": 85.0
-  },
-  {
-    "id": "55",
-    "slug": "rajasthan-high-court-hindi-typing-hcraj",
-    "title": "Rajasthan High Court Hindi Typing (HCRAJ)",
-    "categoryGroup": "judiciary",
-    "language": "hindi_mangal",
-    "targetSpeed": 30,
-    "durationMinutes": 10,
-    "inputType": "character",
-    "inputLimit": 2150,
-    "isRetyping": true,
-    "limitErrorPercentage": 0.0,
-    "minAccuracy": 85.0
-  },
-  {
-    "id": "54",
-    "slug": "up-police-si-asi-computer-operator-hindi-typing",
-    "title": "UP Police SI/ASI/Computer Operator Hindi Typing",
-    "categoryGroup": "up_govt",
-    "language": "hindi_mangal",
-    "targetSpeed": 25,
-    "durationMinutes": 15,
-    "inputType": "word",
-    "inputLimit": 406,
-    "isRetyping": false,
-    "limitErrorPercentage": 0.0,
-    "minAccuracy": 85.0
-  },
-  {
-    "id": "53",
-    "slug": "up-police-si-asi-computer-operator-english-typing",
-    "title": "UP Police SI/ASI/Computer Operator English Typing",
-    "categoryGroup": "up_govt",
-    "language": "english",
-    "targetSpeed": 30,
-    "durationMinutes": 15,
-    "inputType": "word",
-    "inputLimit": 510,
-    "isRetyping": false,
-    "limitErrorPercentage": 0.0,
-    "minAccuracy": 85.0
-  },
-  {
-    "id": "25",
-    "slug": "dsssb-delhi-jja-hindi-typing-session-court",
-    "title": "DSSSB Delhi JJA Hindi Typing Session Court",
-    "categoryGroup": "judiciary",
-    "language": "hindi_mangal",
-    "targetSpeed": 35,
-    "durationMinutes": 10,
-    "inputType": "character",
-    "inputLimit": 1800,
-    "isRetyping": true,
-    "limitErrorPercentage": 0.0,
-    "minAccuracy": 85.0
-  },
-  {
-    "id": "24",
-    "slug": "dsssb-delhi-jja-english-typing-session-court",
-    "title": "DSSSB Delhi JJA English Typing Session Court",
-    "categoryGroup": "judiciary",
-    "language": "english",
-    "targetSpeed": 40,
-    "durationMinutes": 10,
-    "inputType": "character",
-    "inputLimit": 2500,
-    "isRetyping": true,
-    "limitErrorPercentage": 0.0,
-    "minAccuracy": 85.0
-  },
-  {
-    "id": "23",
-    "slug": "dsssb-stenographer-hindi-typing",
-    "title": "DSSSB Stenographer Hindi Typing",
-    "categoryGroup": "delhi_govt",
-    "language": "hindi_mangal",
-    "targetSpeed": 35,
-    "durationMinutes": 10,
-    "inputType": "character",
-    "inputLimit": 2100,
-    "isRetyping": true,
-    "limitErrorPercentage": 0.0,
-    "minAccuracy": 85.0
-  },
-  {
-    "id": "22",
-    "slug": "dsssb-stenographer-english-typing",
-    "title": "DSSSB Stenographer English Typing",
-    "categoryGroup": "delhi_govt",
-    "language": "english",
-    "targetSpeed": 40,
-    "durationMinutes": 10,
-    "inputType": "character",
-    "inputLimit": 2500,
-    "isRetyping": true,
-    "limitErrorPercentage": 0.0,
-    "minAccuracy": 85.0
-  },
-  {
-    "id": "21",
-    "slug": "dsssb-hindi-typing-ldc-junior-assistant-investigator-2024",
-    "title": "DSSSB Hindi Typing LDC, Junior Assistant & Investigator",
-    "categoryGroup": "delhi_govt",
-    "language": "hindi_mangal",
-    "targetSpeed": 30,
-    "durationMinutes": 10,
-    "inputType": "character",
-    "inputLimit": 3250,
-    "isRetyping": true,
-    "limitErrorPercentage": 0.0,
-    "minAccuracy": 85.0
-  },
-  {
-    "id": "20",
-    "slug": "dsssb-english-typing-ldc-junior-assistant-investigator-2024",
-    "title": "DSSSB English Typing LDC, Junior Assistant & Investigator",
-    "categoryGroup": "delhi_govt",
-    "language": "english",
-    "targetSpeed": 35,
-    "durationMinutes": 10,
-    "inputType": "character",
-    "inputLimit": 5000,
-    "isRetyping": true,
-    "limitErrorPercentage": 0.0,
-    "minAccuracy": 85.0
-  },
-  {
-    "id": "19",
-    "slug": "bihar-vidhan-parishad-english-typing",
-    "title": "Bihar Vidhan Parishad English Typing",
-    "categoryGroup": "bihar",
-    "language": "english",
-    "targetSpeed": 30,
-    "durationMinutes": 10,
-    "inputType": "word",
-    "inputLimit": 400,
-    "isRetyping": false,
-    "limitErrorPercentage": 1.5,
-    "minAccuracy": 98.5
+    "minAccuracy": 98.5,
+    "calculationModel": "standard"
   },
   {
     "id": "18",
@@ -4419,12 +4429,13 @@ export const ALL_EXAMS: ExamProfile[] = [
     "inputLimit": 400,
     "isRetyping": false,
     "limitErrorPercentage": 1.5,
-    "minAccuracy": 98.5
+    "minAccuracy": 98.5,
+    "calculationModel": "standard"
   },
   {
-    "id": "17",
-    "slug": "bihar-vidhan-sabha-english-typing-test",
-    "title": "Bihar Vidhan Sabha English Typing Test",
+    "id": "19",
+    "slug": "bihar-vidhan-parishad-english-typing",
+    "title": "Bihar Vidhan Parishad English Typing",
     "categoryGroup": "bihar",
     "language": "english",
     "targetSpeed": 30,
@@ -4433,7 +4444,8 @@ export const ALL_EXAMS: ExamProfile[] = [
     "inputLimit": 400,
     "isRetyping": false,
     "limitErrorPercentage": 1.5,
-    "minAccuracy": 98.5
+    "minAccuracy": 98.5,
+    "calculationModel": "standard"
   },
   {
     "id": "16",
@@ -4447,49 +4459,278 @@ export const ALL_EXAMS: ExamProfile[] = [
     "inputLimit": 400,
     "isRetyping": false,
     "limitErrorPercentage": 1.5,
-    "minAccuracy": 98.5
+    "minAccuracy": 98.5,
+    "calculationModel": "standard"
   },
   {
-    "id": "15",
-    "slug": "nta-ignou-jat-hindi-typing-test",
-    "title": "NTA IGNOU JAT/Steno Hindi Typing Test",
-    "categoryGroup": "central_nta",
+    "id": "17",
+    "slug": "bihar-vidhan-sabha-english-typing-test",
+    "title": "Bihar Vidhan Sabha English Typing Test",
+    "categoryGroup": "bihar",
+    "language": "english",
+    "targetSpeed": 30,
+    "durationMinutes": 10,
+    "inputType": "word",
+    "inputLimit": 400,
+    "isRetyping": false,
+    "limitErrorPercentage": 1.5,
+    "minAccuracy": 98.5,
+    "calculationModel": "standard"
+  },
+  {
+    "id": "79",
+    "slug": "wbssc-clerkship-english-typing-wbpsc",
+    "title": "WBSSC Clerkship English Typing (WBPSC)",
+    "categoryGroup": "bihar",
+    "language": "english",
+    "targetSpeed": 20,
+    "durationMinutes": 10,
+    "inputType": "word",
+    "inputLimit": 400,
+    "isRetyping": true,
+    "limitErrorPercentage": 0,
+    "minAccuracy": 85,
+    "calculationModel": "ssc_dest"
+  },
+  {
+    "id": "59",
+    "slug": "bihar-beltron-deo-hindi-typing-test",
+    "title": "Bihar Beltron DEO Hindi Typing Test",
+    "categoryGroup": "bihar",
     "language": "hindi_mangal",
-    "targetSpeed": 40,
+    "targetSpeed": 25,
     "durationMinutes": 10,
     "inputType": "character",
-    "inputLimit": 1750,
+    "inputLimit": 1500,
     "isRetyping": false,
-    "limitErrorPercentage": 0.0,
-    "minAccuracy": 85.0
+    "limitErrorPercentage": 0,
+    "minAccuracy": 85,
+    "calculationModel": "standard"
   },
   {
-    "id": "14",
-    "slug": "nta-ignou-jat-english-typing-test",
-    "title": "NTA IGNOU JAT/Steno English Typing Test",
-    "categoryGroup": "central_nta",
+    "id": "58",
+    "slug": "bihar-beltron-deo-english-typing-test",
+    "title": "Bihar Beltron DEO English Typing Test",
+    "categoryGroup": "bihar",
     "language": "english",
-    "targetSpeed": 45,
+    "targetSpeed": 30,
     "durationMinutes": 10,
     "inputType": "character",
     "inputLimit": 2000,
     "isRetyping": false,
-    "limitErrorPercentage": 0.0,
-    "minAccuracy": 85.0
+    "limitErrorPercentage": 0,
+    "minAccuracy": 85,
+    "calculationModel": "standard"
   },
   {
-    "id": "13",
-    "slug": "nta-mgcu-library-assistant-english-typing",
-    "title": "NTA MGCU Library Assistant English Typing",
+    "id": "547",
+    "slug": "aiims-cre-hindi-typing-skill-test",
+    "title": "AIIMS CRE Hindi Typing Skill Test",
+    "categoryGroup": "central_nta",
+    "language": "hindi_mangal",
+    "targetSpeed": 30,
+    "durationMinutes": 15,
+    "inputType": "character",
+    "inputLimit": 2750,
+    "isRetyping": false,
+    "limitErrorPercentage": 0,
+    "minAccuracy": 85,
+    "calculationModel": "rrb_eduquity"
+  },
+  {
+    "id": "548",
+    "slug": "aiims-cre-english-typing-skill-test",
+    "title": "AIIMS CRE English Typing Skill Test",
     "categoryGroup": "central_nta",
     "language": "english",
+    "targetSpeed": 35,
+    "durationMinutes": 15,
+    "inputType": "character",
+    "inputLimit": 3750,
+    "isRetyping": false,
+    "limitErrorPercentage": 0,
+    "minAccuracy": 85,
+    "calculationModel": "rrb_eduquity"
+  },
+  {
+    "id": "745",
+    "slug": "bhu-junior-clerk-hindi-typing",
+    "title": "BHU Junior Clerk Hindi Typing",
+    "categoryGroup": "central_nta",
+    "language": "hindi_mangal",
+    "targetSpeed": 25,
+    "durationMinutes": 15,
+    "inputType": "word",
+    "inputLimit": 500,
+    "isRetyping": false,
+    "limitErrorPercentage": 0,
+    "minAccuracy": 85,
+    "calculationModel": "standard"
+  },
+  {
+    "id": "746",
+    "slug": "bhu-junior-clerk-english-typing",
+    "title": "BHU Junior Clerk English Typing",
+    "categoryGroup": "central_nta",
+    "language": "english",
+    "targetSpeed": 30,
+    "durationMinutes": 15,
+    "inputType": "word",
+    "inputLimit": 600,
+    "isRetyping": false,
+    "limitErrorPercentage": 0,
+    "minAccuracy": 85,
+    "calculationModel": "standard"
+  },
+  {
+    "id": "515",
+    "slug": "cbse-hindi-typing-skill-test",
+    "title": "CBSE Hindi Typing Skill Test",
+    "categoryGroup": "central_nta",
+    "language": "hindi_mangal",
+    "targetSpeed": 30,
+    "durationMinutes": 10,
+    "inputType": "character",
+    "inputLimit": 2250,
+    "isRetyping": true,
+    "limitErrorPercentage": 0,
+    "minAccuracy": 85,
+    "calculationModel": "rrb_eduquity"
+  },
+  {
+    "id": "514",
+    "slug": "cbse-english-typing-skill-test",
+    "title": "CBSE English Typing Skill Test",
+    "categoryGroup": "central_nta",
+    "language": "english",
+    "targetSpeed": 35,
+    "durationMinutes": 10,
+    "inputType": "character",
+    "inputLimit": 2750,
+    "isRetyping": true,
+    "limitErrorPercentage": 0,
+    "minAccuracy": 85,
+    "calculationModel": "rrb_eduquity"
+  },
+  {
+    "id": "713",
+    "slug": "csir-jsa-hindi-typing-test",
+    "title": "CSIR JSA Hindi Typing Test",
+    "categoryGroup": "central_nta",
+    "language": "hindi_mangal",
+    "targetSpeed": 30,
+    "durationMinutes": 10,
+    "inputType": "character",
+    "inputLimit": 1750,
+    "isRetyping": true,
+    "limitErrorPercentage": 0,
+    "minAccuracy": 85,
+    "calculationModel": "rrb_eduquity"
+  },
+  {
+    "id": "712",
+    "slug": "csir-jsa-english-typing-test",
+    "title": "CSIR JSA English Typing Test",
+    "categoryGroup": "central_nta",
+    "language": "english",
+    "targetSpeed": 35,
+    "durationMinutes": 10,
+    "inputType": "character",
+    "inputLimit": 2750,
+    "isRetyping": true,
+    "limitErrorPercentage": 0,
+    "minAccuracy": 85,
+    "calculationModel": "rrb_eduquity"
+  },
+  {
+    "id": "77",
+    "slug": "emrs-jsa-hindi-typing",
+    "title": "EMRS JSA Hindi Typing",
+    "categoryGroup": "central_nta",
+    "language": "hindi_mangal",
+    "targetSpeed": 30,
+    "durationMinutes": 10,
+    "inputType": "character",
+    "inputLimit": 1750,
+    "isRetyping": false,
+    "limitErrorPercentage": 0,
+    "minAccuracy": 85,
+    "calculationModel": "rrb_eduquity"
+  },
+  {
+    "id": "76",
+    "slug": "emrs-jsa-english-typing",
+    "title": "EMRS JSA English Typing",
+    "categoryGroup": "central_nta",
+    "language": "english",
+    "targetSpeed": 35,
+    "durationMinutes": 10,
+    "inputType": "character",
+    "inputLimit": 2000,
+    "isRetyping": false,
+    "limitErrorPercentage": 0,
+    "minAccuracy": 85,
+    "calculationModel": "rrb_eduquity"
+  },
+  {
+    "id": "1307",
+    "slug": "jnu-assistants-hindi-typing-skill-test",
+    "title": "JNU Assistants Hindi Typing Skill Test",
+    "categoryGroup": "central_nta",
+    "language": "hindi_mangal",
     "targetSpeed": 30,
     "durationMinutes": 10,
     "inputType": "character",
     "inputLimit": 1500,
     "isRetyping": false,
-    "limitErrorPercentage": 0.0,
-    "minAccuracy": 85.0
+    "limitErrorPercentage": 3,
+    "minAccuracy": 97,
+    "calculationModel": "standard"
+  },
+  {
+    "id": "1306",
+    "slug": "jnu-assistants-english-typing-skill-test",
+    "title": "JNU Assistants English Typing Skill Test",
+    "categoryGroup": "central_nta",
+    "language": "english",
+    "targetSpeed": 35,
+    "durationMinutes": 10,
+    "inputType": "character",
+    "inputLimit": 1750,
+    "isRetyping": false,
+    "limitErrorPercentage": 3,
+    "minAccuracy": 97,
+    "calculationModel": "standard"
+  },
+  {
+    "id": "1109",
+    "slug": "kvs-hindi-typing-skill-test",
+    "title": "KVS Hindi Typing Skill Test",
+    "categoryGroup": "central_nta",
+    "language": "hindi_mangal",
+    "targetSpeed": 30,
+    "durationMinutes": 10,
+    "inputType": "character",
+    "inputLimit": 2500,
+    "isRetyping": true,
+    "limitErrorPercentage": 0,
+    "minAccuracy": 85,
+    "calculationModel": "rrb_eduquity"
+  },
+  {
+    "id": "1108",
+    "slug": "kvs-english-typing-skill-test",
+    "title": "KVS English Typing Skill Test",
+    "categoryGroup": "central_nta",
+    "language": "english",
+    "targetSpeed": 35,
+    "durationMinutes": 10,
+    "inputType": "character",
+    "inputLimit": 3250,
+    "isRetyping": true,
+    "limitErrorPercentage": 0,
+    "minAccuracy": 85,
+    "calculationModel": "rrb_eduquity"
   },
   {
     "id": "12",
@@ -4502,8 +4743,9 @@ export const ALL_EXAMS: ExamProfile[] = [
     "inputType": "character",
     "inputLimit": 1500,
     "isRetyping": false,
-    "limitErrorPercentage": 0.0,
-    "minAccuracy": 85.0
+    "limitErrorPercentage": 0,
+    "minAccuracy": 85,
+    "calculationModel": "standard"
   },
   {
     "id": "11",
@@ -4516,22 +4758,324 @@ export const ALL_EXAMS: ExamProfile[] = [
     "inputType": "character",
     "inputLimit": 1750,
     "isRetyping": false,
-    "limitErrorPercentage": 0.0,
-    "minAccuracy": 85.0
+    "limitErrorPercentage": 0,
+    "minAccuracy": 85,
+    "calculationModel": "standard"
   },
   {
-    "id": "10",
-    "slug": "uppsc-computer-assistant-hindi-typing",
-    "title": "UPPSC Computer Assistant Hindi Typing",
-    "categoryGroup": "up_govt",
+    "id": "15",
+    "slug": "nta-ignou-jat-hindi-typing-test",
+    "title": "NTA IGNOU JAT/Steno Hindi Typing Test",
+    "categoryGroup": "central_nta",
+    "language": "hindi_mangal",
+    "targetSpeed": 40,
+    "durationMinutes": 10,
+    "inputType": "character",
+    "inputLimit": 1750,
+    "isRetyping": false,
+    "limitErrorPercentage": 0,
+    "minAccuracy": 85,
+    "calculationModel": "standard"
+  },
+  {
+    "id": "14",
+    "slug": "nta-ignou-jat-english-typing-test",
+    "title": "NTA IGNOU JAT/Steno English Typing Test",
+    "categoryGroup": "central_nta",
+    "language": "english",
+    "targetSpeed": 45,
+    "durationMinutes": 10,
+    "inputType": "character",
+    "inputLimit": 2000,
+    "isRetyping": false,
+    "limitErrorPercentage": 0,
+    "minAccuracy": 85,
+    "calculationModel": "standard"
+  },
+  {
+    "id": "13",
+    "slug": "nta-mgcu-library-assistant-english-typing",
+    "title": "NTA MGCU Library Assistant English Typing",
+    "categoryGroup": "central_nta",
+    "language": "english",
+    "targetSpeed": 30,
+    "durationMinutes": 10,
+    "inputType": "character",
+    "inputLimit": 1500,
+    "isRetyping": false,
+    "limitErrorPercentage": 0,
+    "minAccuracy": 85,
+    "calculationModel": "standard"
+  },
+  {
+    "id": "78",
+    "slug": "nta-visva-bharati-english-typing",
+    "title": "NTA Visva Bharati English Typing",
+    "categoryGroup": "central_nta",
+    "language": "english",
+    "targetSpeed": 35,
+    "durationMinutes": 10,
+    "inputType": "character",
+    "inputLimit": 1750,
+    "isRetyping": false,
+    "limitErrorPercentage": 0,
+    "minAccuracy": 85,
+    "calculationModel": "standard"
+  },
+  {
+    "id": "70",
+    "slug": "navoday-jnv-jsa-hindi-typing-nvs",
+    "title": "Navoday JNV JSA Hindi Typing (NVS)",
+    "categoryGroup": "central_nta",
     "language": "hindi_mangal",
     "targetSpeed": 25,
-    "durationMinutes": 5,
+    "durationMinutes": 10,
+    "inputType": "character",
+    "inputLimit": 2250,
+    "isRetyping": false,
+    "limitErrorPercentage": 0,
+    "minAccuracy": 85,
+    "calculationModel": "standard"
+  },
+  {
+    "id": "69",
+    "slug": "navoday-jnv-jsa-english-typing-nvs",
+    "title": "Navoday JNV JSA English Typing (NVS)",
+    "categoryGroup": "central_nta",
+    "language": "english",
+    "targetSpeed": 30,
+    "durationMinutes": 10,
+    "inputType": "character",
+    "inputLimit": 2750,
+    "isRetyping": false,
+    "limitErrorPercentage": 0,
+    "minAccuracy": 85,
+    "calculationModel": "standard"
+  },
+  {
+    "id": "285",
+    "slug": "rrb-ntpc-hindi-typing-skill-test",
+    "title": "RRB NTPC Hindi Typing Skill Test",
+    "categoryGroup": "railways",
+    "language": "hindi_mangal",
+    "targetSpeed": 25,
+    "durationMinutes": 10,
+    "inputType": "character",
+    "inputLimit": 1250,
+    "isRetyping": true,
+    "limitErrorPercentage": 0,
+    "minAccuracy": 85,
+    "calculationModel": "rrb_eduquity"
+  },
+  {
+    "id": "286",
+    "slug": "rrb-ntpc-english-typing-skill-test",
+    "title": "RRB NTPC English Typing Skill Test",
+    "categoryGroup": "railways",
+    "language": "english",
+    "targetSpeed": 30,
+    "durationMinutes": 10,
+    "inputType": "character",
+    "inputLimit": 1500,
+    "isRetyping": true,
+    "limitErrorPercentage": 0,
+    "minAccuracy": 85,
+    "calculationModel": "rrb_eduquity"
+  },
+  {
+    "id": "1142",
+    "slug": "mp-cpct-unicode-hindi-typing-skill-test",
+    "title": "MP CPCT Unicode Hindi Typing Skill Test",
+    "categoryGroup": "state_exams",
+    "language": "hindi_mangal",
+    "targetSpeed": 20,
+    "durationMinutes": 15,
+    "inputType": "word",
+    "inputLimit": 550,
+    "isRetyping": false,
+    "limitErrorPercentage": 0,
+    "minAccuracy": 85,
+    "calculationModel": "mp_cpct"
+  },
+  {
+    "id": "1141",
+    "slug": "mp-cpct-english-typing-skill-test",
+    "title": "MP CPCT English Typing Skill Test",
+    "categoryGroup": "state_exams",
+    "language": "english",
+    "targetSpeed": 30,
+    "durationMinutes": 15,
+    "inputType": "word",
+    "inputLimit": 550,
+    "isRetyping": false,
+    "limitErrorPercentage": 0,
+    "minAccuracy": 85,
+    "calculationModel": "mp_cpct"
+  },
+  {
+    "id": "1043",
+    "slug": "mp-police-asi-ldc-hindi-typing",
+    "title": "MP Police ASI LDC Hindi Typing",
+    "categoryGroup": "state_exams",
+    "language": "hindi_mangal",
+    "targetSpeed": 20,
+    "durationMinutes": 30,
+    "inputType": "word",
+    "inputLimit": 600,
+    "isRetyping": false,
+    "limitErrorPercentage": 0,
+    "minAccuracy": 85,
+    "calculationModel": "standard"
+  },
+  {
+    "id": "679",
+    "slug": "ukpsc-ro-aro-hindi-typing-uttarakhand",
+    "title": "UKPSC RO ARO Hindi Typing (Uttarakhand)",
+    "categoryGroup": "state_exams",
+    "language": "hindi_mangal",
+    "targetSpeed": 25,
+    "durationMinutes": 10,
+    "inputType": "character",
+    "inputLimit": 1500,
+    "isRetyping": false,
+    "limitErrorPercentage": 0,
+    "minAccuracy": 85,
+    "calculationModel": "standard"
+  },
+  {
+    "id": "680",
+    "slug": "ukpsc-ro-aro-english-typing-uttarakhand",
+    "title": "UKPSC RO ARO English Typing (Uttarakhand)",
+    "categoryGroup": "state_exams",
+    "language": "english",
+    "targetSpeed": 30,
+    "durationMinutes": 10,
+    "inputType": "character",
+    "inputLimit": 1750,
+    "isRetyping": false,
+    "limitErrorPercentage": 0,
+    "minAccuracy": 85,
+    "calculationModel": "standard"
+  },
+  {
+    "id": "118",
+    "slug": "jsss-inter-level-hindi-typing",
+    "title": "JSSC Inter Level Hindi Typing",
+    "categoryGroup": "state_exams",
+    "language": "hindi_mangal",
+    "targetSpeed": 30,
+    "durationMinutes": 10,
     "inputType": "word",
     "inputLimit": 250,
-    "isRetyping": true,
-    "limitErrorPercentage": 0.0,
-    "minAccuracy": 85.0
+    "isRetyping": false,
+    "limitErrorPercentage": 0,
+    "minAccuracy": 85,
+    "calculationModel": "ssc_dest"
+  },
+  {
+    "id": "250",
+    "slug": "jci-english-typing-jute-corporation",
+    "title": "JCI English Typing (Jute Corporation)",
+    "categoryGroup": "state_exams",
+    "language": "english",
+    "targetSpeed": 40,
+    "durationMinutes": 10,
+    "inputType": "word",
+    "inputLimit": 420,
+    "isRetyping": false,
+    "limitErrorPercentage": 0,
+    "minAccuracy": 85,
+    "calculationModel": "standard"
+  },
+  {
+    "id": "449",
+    "slug": "mpsc-group-c-marathi-typing",
+    "title": "MPSC Group C Marathi Typing",
+    "categoryGroup": "state_exams",
+    "language": "hindi_mangal",
+    "targetSpeed": 30,
+    "durationMinutes": 10,
+    "inputType": "word",
+    "inputLimit": 300,
+    "isRetyping": false,
+    "limitErrorPercentage": 0,
+    "minAccuracy": 85,
+    "calculationModel": "standard"
+  },
+  {
+    "id": "448",
+    "slug": "mpsc-group-c-english-typing",
+    "title": "MPSC Group C English Typing",
+    "categoryGroup": "state_exams",
+    "language": "english",
+    "targetSpeed": 35,
+    "durationMinutes": 10,
+    "inputType": "word",
+    "inputLimit": 400,
+    "isRetyping": false,
+    "limitErrorPercentage": 0,
+    "minAccuracy": 85,
+    "calculationModel": "standard"
+  },
+  {
+    "id": "84",
+    "slug": "spmcil-igm-hindi-typing-skill-test",
+    "title": "SPMCIL IGM Hindi Typing Skill Test",
+    "categoryGroup": "state_exams",
+    "language": "hindi_mangal",
+    "targetSpeed": 30,
+    "durationMinutes": 10,
+    "inputType": "character",
+    "inputLimit": 1575,
+    "isRetyping": false,
+    "limitErrorPercentage": 0,
+    "minAccuracy": 85,
+    "calculationModel": "standard"
+  },
+  {
+    "id": "83",
+    "slug": "spmcil-igm-english-typing-skill-test",
+    "title": "SPMCIL IGM English Typing Skill Test",
+    "categoryGroup": "state_exams",
+    "language": "english",
+    "targetSpeed": 40,
+    "durationMinutes": 10,
+    "inputType": "character",
+    "inputLimit": 2100,
+    "isRetyping": false,
+    "limitErrorPercentage": 5,
+    "minAccuracy": 95,
+    "calculationModel": "standard"
+  },
+  {
+    "id": "284",
+    "slug": "uksssc-hindi-typing-skill-test-uttarakhand",
+    "title": "UKSSSC Hindi Typing Skill Test (Uttarakhand)",
+    "categoryGroup": "state_exams",
+    "language": "hindi_mangal",
+    "targetSpeed": 25,
+    "durationMinutes": 10,
+    "inputType": "character",
+    "inputLimit": 1500,
+    "isRetyping": false,
+    "limitErrorPercentage": 0,
+    "minAccuracy": 85,
+    "calculationModel": "ssc_dest"
+  },
+  {
+    "id": "283",
+    "slug": "uksssc-english-typing-skill-test-uttarakhand",
+    "title": "UKSSSC English Typing Skill Test (Uttarakhand)",
+    "categoryGroup": "state_exams",
+    "language": "english",
+    "targetSpeed": 30,
+    "durationMinutes": 10,
+    "inputType": "character",
+    "inputLimit": 1750,
+    "isRetyping": false,
+    "limitErrorPercentage": 0,
+    "minAccuracy": 85,
+    "calculationModel": "ssc_dest"
   },
   {
     "id": "9",
@@ -4544,8 +5088,9 @@ export const ALL_EXAMS: ExamProfile[] = [
     "inputType": "character",
     "inputLimit": 2500,
     "isRetyping": false,
-    "limitErrorPercentage": 0.0,
-    "minAccuracy": 85.0
+    "limitErrorPercentage": 0,
+    "minAccuracy": 85,
+    "calculationModel": "standard"
   },
   {
     "id": "8",
@@ -4558,105 +5103,188 @@ export const ALL_EXAMS: ExamProfile[] = [
     "inputType": "character",
     "inputLimit": 2750,
     "isRetyping": false,
-    "limitErrorPercentage": 0.0,
-    "minAccuracy": 85.0
+    "limitErrorPercentage": 0,
+    "minAccuracy": 85,
+    "calculationModel": "standard"
   },
   {
-    "id": "7",
-    "slug": "bssc-2nd-inter-level-hindi-typing-bihar",
-    "title": "BSSC 2nd Inter Level Hindi Typing (Bihar)",
-    "categoryGroup": "bihar",
+    "id": "943",
+    "slug": "marathon-hindi-typing-skill-test",
+    "title": "Marathon Hindi Typing Skill Test",
+    "categoryGroup": "state_exams",
     "language": "hindi_mangal",
-    "targetSpeed": 30,
-    "durationMinutes": 10,
-    "inputType": "word",
-    "inputLimit": 300,
+    "targetSpeed": 25,
+    "durationMinutes": 15,
+    "inputType": "character",
+    "inputLimit": 2250,
     "isRetyping": false,
-    "limitErrorPercentage": 0.0,
-    "minAccuracy": 85.0
+    "limitErrorPercentage": 0,
+    "minAccuracy": 85,
+    "calculationModel": "standard"
   },
   {
-    "id": "6",
-    "slug": "bssc-2nd-inter-level-english-typing-bihar",
-    "title": "BSSC 2nd Inter Level English Typing (Bihar)",
-    "categoryGroup": "bihar",
+    "id": "844",
+    "slug": "marathon-english-typing-skill-test",
+    "title": "Marathon English Typing Skill Test",
+    "categoryGroup": "state_exams",
+    "language": "english",
+    "targetSpeed": 30,
+    "durationMinutes": 15,
+    "inputType": "character",
+    "inputLimit": 3750,
+    "isRetyping": false,
+    "limitErrorPercentage": 0,
+    "minAccuracy": 85,
+    "calculationModel": "standard"
+  },
+  {
+    "id": "ncert-ldc-en",
+    "slug": "ncert-ldc-english-typing-test",
+    "title": "NCERT LDC English Typing Test",
+    "categoryGroup": "central_nta",
     "language": "english",
     "targetSpeed": 35,
     "durationMinutes": 10,
     "inputType": "word",
     "inputLimit": 350,
     "isRetyping": false,
-    "limitErrorPercentage": 0.0,
-    "minAccuracy": 85.0
+    "limitErrorPercentage": 5,
+    "minAccuracy": 90,
+    "calculationModel": "rrb_eduquity"
   },
   {
-    "id": "5",
-    "slug": "ssc-dest-min-2000-key-english-typing",
-    "title": "SSC DEST Min. 2000 Key English Typing",
+    "id": "ncert-ldc-hi",
+    "slug": "ncert-ldc-hindi-typing-test",
+    "title": "NCERT LDC Hindi Typing Test",
+    "categoryGroup": "central_nta",
+    "language": "hindi_mangal",
+    "targetSpeed": 30,
+    "durationMinutes": 10,
+    "inputType": "word",
+    "inputLimit": 300,
+    "isRetyping": false,
+    "limitErrorPercentage": 5,
+    "minAccuracy": 90,
+    "calculationModel": "rrb_eduquity"
+  },
+  {
+    "id": "skau-en",
+    "slug": "skau-english-typing-test",
+    "title": "SKAU English Typing Test",
+    "categoryGroup": "state_exams",
+    "language": "english",
+    "targetSpeed": 30,
+    "durationMinutes": 10,
+    "inputType": "word",
+    "inputLimit": 350,
+    "isRetyping": false,
+    "limitErrorPercentage": 5,
+    "minAccuracy": 90,
+    "calculationModel": "standard"
+  },
+  {
+    "id": "skau-hi",
+    "slug": "skau-hindi-typing-test",
+    "title": "SKAU Hindi Typing Test",
+    "categoryGroup": "state_exams",
+    "language": "hindi_mangal",
+    "targetSpeed": 25,
+    "durationMinutes": 10,
+    "inputType": "word",
+    "inputLimit": 300,
+    "isRetyping": false,
+    "limitErrorPercentage": 5,
+    "minAccuracy": 90,
+    "calculationModel": "standard"
+  },
+  {
+    "id": "dsssb-5k-en",
+    "slug": "dsssb-typing-test-5000-keystrokes",
+    "title": "DSSSB 5,000 Keystroke Practice (English)",
+    "categoryGroup": "delhi_govt",
+    "language": "english",
+    "targetSpeed": 35,
+    "durationMinutes": 10,
+    "inputType": "character",
+    "inputLimit": 5000,
+    "isRetyping": false,
+    "limitErrorPercentage": 5,
+    "minAccuracy": 90,
+    "calculationModel": "standard"
+  },
+  {
+    "id": "dp-hcm-2500-en",
+    "slug": "dp-hcm-typing-test",
+    "title": "Delhi Police HCM 2,500 Keystrokes (English)",
+    "categoryGroup": "delhi_govt",
+    "language": "english",
+    "targetSpeed": 30,
+    "durationMinutes": 10,
+    "inputType": "character",
+    "inputLimit": 2500,
+    "isRetyping": false,
+    "limitErrorPercentage": 5,
+    "minAccuracy": 90,
+    "calculationModel": "standard"
+  },
+  {
+    "id": "dp-hcm-2500-hi",
+    "slug": "dp-hcm-hindi-typing-test",
+    "title": "Delhi Police HCM 2,000 Keystrokes (Hindi)",
+    "categoryGroup": "delhi_govt",
+    "language": "hindi_mangal",
+    "targetSpeed": 25,
+    "durationMinutes": 10,
+    "inputType": "character",
+    "inputLimit": 2000,
+    "isRetyping": false,
+    "limitErrorPercentage": 5,
+    "minAccuracy": 90,
+    "calculationModel": "standard"
+  },
+  {
+    "id": "ssc-cgl-pwbd-en",
+    "slug": "ssc-cgl-mock-typing-pwbd",
+    "title": "SSC CGL Mock Typing PwBD (20 Min)",
     "categoryGroup": "ssc",
     "language": "english",
-    "targetSpeed": 27,
-    "durationMinutes": 15,
+    "targetSpeed": 20,
+    "durationMinutes": 20,
     "inputType": "character",
-    "inputLimit": 2200,
+    "inputLimit": 2000,
     "isRetyping": false,
-    "limitErrorPercentage": 20.0,
-    "minAccuracy": 80.0
+    "limitErrorPercentage": 30,
+    "minAccuracy": 70,
+    "calculationModel": "ssc_dest"
   },
   {
-    "id": "4",
-    "slug": "ssc-dest-min-3750-key-english-typing",
-    "title": "SSC DEST Min. 3750 Key English Typing",
+    "id": "ssc-chsl-pwbd-en",
+    "slug": "ssc-chsl-pwbd-typing-test",
+    "title": "SSC CHSL PwBD Typing Test (15 Min)",
+    "categoryGroup": "ssc",
+    "language": "english",
+    "targetSpeed": 25,
+    "durationMinutes": 15,
+    "inputType": "character",
+    "inputLimit": 1750,
+    "isRetyping": false,
+    "limitErrorPercentage": 10,
+    "minAccuracy": 90,
+    "calculationModel": "ssc_dest"
+  },
+  {
+    "id": "ssc-chsl-deo-en",
+    "slug": "ssc-chsl-deo-typing-test",
+    "title": "SSC CHSL DEO English Typing Test",
     "categoryGroup": "ssc",
     "language": "english",
     "targetSpeed": 50,
     "durationMinutes": 15,
     "inputType": "character",
-    "inputLimit": 4000,
-    "isRetyping": false,
-    "limitErrorPercentage": 20.0,
-    "minAccuracy": 80.0
-  },
-  {
-    "id": "3",
-    "slug": "ssc-cgl-deo-english-typing-test",
-    "title": "SSC CGL DEO English Typing Test",
-    "categoryGroup": "ssc",
-    "language": "english",
-    "targetSpeed": 27,
-    "durationMinutes": 15,
-    "inputType": "character",
     "inputLimit": 3750,
     "isRetyping": false,
-    "limitErrorPercentage": 20.0,
-    "minAccuracy": 80.0
-  },
-  {
-    "id": "2",
-    "slug": "ssc-chsl-jsa-ldc-hindi-typing-test",
-    "title": "SSC CHSL JSA/LDC Hindi Typing Test",
-    "categoryGroup": "ssc",
-    "language": "hindi_mangal",
-    "targetSpeed": 30,
-    "durationMinutes": 10,
-    "inputType": "character",
-    "inputLimit": 1550,
-    "isRetyping": false,
-    "limitErrorPercentage": 7.0,
-    "minAccuracy": 93.0
-  },
-  {
-    "id": "1",
-    "slug": "ssc-chsl-jsa-ldc-english-typing-test",
-    "title": "SSC CHSL JSA/LDC English Typing Test",
-    "categoryGroup": "ssc",
-    "language": "english",
-    "targetSpeed": 35,
-    "durationMinutes": 10,
-    "inputType": "character",
-    "inputLimit": 1800,
-    "isRetyping": false,
-    "limitErrorPercentage": 7.0,
-    "minAccuracy": 93.0
+    "limitErrorPercentage": 5,
+    "minAccuracy": 95,
+    "calculationModel": "ssc_dest"
   }
 ];
