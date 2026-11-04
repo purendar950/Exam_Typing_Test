@@ -776,6 +776,32 @@ const ExamTypePostCard: React.FC<{
   );
 };
 
+export interface RouteInfo {
+  level: 1 | 2 | 3 | 'classic_form';
+  examId: string;
+  modeId: string;
+}
+
+export function parseExamRouteFromHash(): RouteInfo | null {
+  if (typeof window === 'undefined') return null;
+  const hash = window.location.hash || '';
+  if (!hash || hash === '#/' || hash === '#/exams') {
+    return { level: 1, examId: 'up-police-co-asi', modeId: 'english' };
+  }
+  if (hash === '#/classic') {
+    return { level: 'classic_form', examId: 'up-police-co-asi', modeId: 'english' };
+  }
+  const matchMode = hash.match(/^#\/exam\/([^/]+)\/([^/]+)/);
+  if (matchMode) {
+    return { level: 3, examId: matchMode[1], modeId: matchMode[2] };
+  }
+  const matchExam = hash.match(/^#\/exam\/([^/]+)/);
+  if (matchExam) {
+    return { level: 2, examId: matchExam[1], modeId: 'english' };
+  }
+  return null;
+}
+
 export const ChooseTest: React.FC<ChooseTestProps> = ({
   passages,
   onStartTest,
@@ -791,9 +817,102 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
   dailyLivePassages = []
 }) => {
   // Navigation: 1 (All Exams), 2 (Medium / Mode Selection), 3 (Test Material Grid), or 'classic_form'
-  const [navLevel, setNavLevel] = useState<1 | 2 | 3 | 'classic_form'>(1);
-  const [activeExamId, setActiveExamId] = useState<string>('up-police-co-asi');
-  const [activeModeId, setActiveModeId] = useState<string>('english');
+  const initialRoute = parseExamRouteFromHash() || (() => {
+    try {
+      const saved = sessionStorage.getItem('up_exam_nav_route');
+      return saved ? JSON.parse(saved) : null;
+    } catch {
+      return null;
+    }
+  })();
+
+  const [navLevel, setNavLevelState] = useState<1 | 2 | 3 | 'classic_form'>(() => {
+    return initialRoute?.level || 1;
+  });
+  const [activeExamId, setActiveExamId] = useState<string>(() => {
+    return initialRoute?.examId || 'up-police-co-asi';
+  });
+  const [activeModeId, setActiveModeId] = useState<string>(() => {
+    return initialRoute?.modeId || 'english';
+  });
+
+  const [selectedUnifiedPost, setSelectedUnifiedPost] = useState<UnifiedExamPost | null>(() => {
+    const eid = initialRoute?.examId || 'up-police-co-asi';
+    if (initialRoute && (initialRoute.level === 2 || initialRoute.level === 3)) {
+      return UNIFIED_EXAM_POSTS.find((p) => p.id === eid) || UNIFIED_EXAM_POSTS[0];
+    }
+    return null;
+  });
+
+  const [selectedExamProfile, setSelectedExamProfile] = useState<ExamProfile | null>(() => {
+    if (initialRoute && (initialRoute.level === 2 || initialRoute.level === 3)) {
+      const post = UNIFIED_EXAM_POSTS.find((p) => p.id === initialRoute.examId) || UNIFIED_EXAM_POSTS[0];
+      if (initialRoute.level === 3 && initialRoute.modeId) {
+        return post.variants.find((v) => v.language === initialRoute.modeId || v.slug.includes(initialRoute.modeId)) || post.variants[0] || null;
+      }
+      return post.variants[0] || null;
+    }
+    return null;
+  });
+
+  // Central Router for Level 1, 2, 3, and Classic Form
+  const setNavLevel = (target: 1 | 2 | 3 | 'classic_form', optExamId?: string, optModeId?: string) => {
+    const nextExamId = optExamId || activeExamId;
+    const nextModeId = optModeId || activeModeId;
+
+    setNavLevelState(target);
+    if (optExamId) setActiveExamId(optExamId);
+    if (optModeId) setActiveModeId(optModeId);
+
+    let newHash = '#/';
+    if (target === 'classic_form') {
+      newHash = '#/classic';
+    } else if (target === 2) {
+      newHash = `#/exam/${nextExamId}`;
+    } else if (target === 3) {
+      newHash = `#/exam/${nextExamId}/${nextModeId}`;
+    }
+
+    try {
+      sessionStorage.setItem('up_exam_nav_route', JSON.stringify({
+        level: target,
+        examId: nextExamId,
+        modeId: nextModeId
+      }));
+    } catch {}
+
+    if (window.location.hash !== newHash) {
+      window.location.hash = newHash;
+    }
+  };
+
+  // Synchronize browser Back / Forward buttons with Level 1, 2, 3
+  useEffect(() => {
+    const handleHashChange = () => {
+      const route = parseExamRouteFromHash();
+      if (!route) return;
+
+      setNavLevelState(route.level);
+      setActiveExamId(route.examId);
+      setActiveModeId(route.modeId);
+
+      const post = UNIFIED_EXAM_POSTS.find((p) => p.id === route.examId) || UNIFIED_EXAM_POSTS[0];
+      if (route.level === 2) {
+        setSelectedUnifiedPost(post);
+        setSelectedExamProfile(post.variants[0] || null);
+      } else if (route.level === 3) {
+        setSelectedUnifiedPost(post);
+        const variant = post.variants.find((v) => v.language === route.modeId || v.slug.includes(route.modeId)) || post.variants[0] || null;
+        setSelectedExamProfile(variant);
+      } else if (route.level === 1) {
+        setSelectedUnifiedPost(null);
+        setSelectedExamProfile(null);
+      }
+    };
+
+    window.addEventListener('hashchange', handleHashChange);
+    return () => window.removeEventListener('hashchange', handleHashChange);
+  }, []);
 
   // Level 3 Filter states
   const [selectedDifficulty, setSelectedDifficulty] = useState<string>('all');
@@ -817,8 +936,6 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
   const [selectedExamSubFilter, setSelectedExamSubFilter] = useState<string>('all');
   const [examSearchQuery, setExamSearchQuery] = useState<string>('');
   const [selectedExamLanguageFilter, setSelectedExamLanguageFilter] = useState<'all' | 'english' | 'hindi'>('all');
-  const [selectedUnifiedPost, setSelectedUnifiedPost] = useState<UnifiedExamPost | null>(null);
-  const [selectedExamProfile, setSelectedExamProfile] = useState<ExamProfile | null>(null);
   const [visibleExamsCount, setVisibleExamsCount] = useState<number>(24);
 
   const getEmblemForGroup = (group: string) => {
@@ -1017,7 +1134,7 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
     setSelectedUnifiedPost(post);
     setActiveExamId(post.id);
     setSelectedExamProfile(post.variants[0] || null);
-    setNavLevel(2);
+    setNavLevel(2, post.id, post.variants[0]?.language || 'english');
   };
 
   const handleQuickMode = (post: UnifiedExamPost, modeId: string, variant: ExamProfile) => {
@@ -1030,7 +1147,7 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
     } else {
       setSelectedDuration(variant.durationMinutes || 15);
     }
-    setNavLevel(3);
+    setNavLevel(3, post.id, modeId);
   };
 
   const handleQuickStartExam = (exam: ExamProfile) => {
@@ -1049,15 +1166,17 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
   const handleBrowseExamPassages = (exam: ExamProfile) => {
     setSelectedExamProfile(exam);
     setActiveExamId(exam.slug);
+    let mId = 'english';
     if (exam.language === 'english') {
-      setActiveModeId('english');
+      mId = 'english';
     } else if (exam.language === 'hindi_kruti') {
-      setActiveModeId('hindi_kruti');
+      mId = 'hindi_kruti';
     } else {
-      setActiveModeId('hindi_mangal');
+      mId = 'hindi_mangal';
     }
+    setActiveModeId(mId);
     setSelectedDuration(exam.durationMinutes);
-    setNavLevel(3);
+    setNavLevel(3, exam.slug, mId);
   };
 
   // Date converter
@@ -2324,7 +2443,7 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
                       setSelectedExamProfile(activePost.variants[0]);
                       setSelectedDuration(activePost.variants[0]?.durationMinutes || 15);
                     }
-                    setNavLevel(3);
+                    setNavLevel(3, activePost.id, mode.id);
                   }}
                 >
                   <div>
