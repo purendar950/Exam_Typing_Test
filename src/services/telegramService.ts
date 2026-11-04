@@ -22,7 +22,7 @@ const STORAGE_KEY_TELEGRAM_CONFIG = 'up_typing_telegram_config';
 
 export const DEFAULT_TELEGRAM_CONFIG: TelegramConfig = {
   enabled: true,
-  botToken: '',
+  botToken: '9045092848:AAG2KDa7be_krygGwKjiOu3WXSxo5lij06Y',
   adminChatId: '',
   approvalSecretToken: 'adm_' + Math.random().toString(36).substring(2, 12),
   communityChannelUrl: 'https://t.me/SSC_PYQ_COMPILATIONS',
