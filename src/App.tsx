@@ -15,6 +15,7 @@ import { UserDashboardModal } from './components/UserDashboardModal';
 import { AiGeneratorModal } from './components/AiGeneratorModal';
 import { AdminPanelModal } from './components/AdminPanelModal';
 import { PaymentModal } from './components/PaymentModal';
+import { LegalPolicyModal, LegalTab } from './components/LegalPolicyModal';
 import { TelegramSupportWidget } from './components/TelegramSupportWidget';
 import { PwaInstallPrompt } from './components/PwaInstallPrompt';
 import { audioEngine } from './utils/audioEngine';
@@ -183,6 +184,30 @@ export const App: React.FC = () => {
   const [isDashboardOpen, setIsDashboardOpen] = useState<boolean>(false);
   const [isAiGeneratorOpen, setIsAiGeneratorOpen] = useState<boolean>(false);
   const [isAdminOpen, setIsAdminOpen] = useState<boolean>(false);
+  const [isLegalOpen, setIsLegalOpen] = useState<boolean>(() => {
+    if (typeof window !== 'undefined') {
+      const hash = window.location.hash || '';
+      return ['#/terms', '#/privacy', '#/refund', '#/copyright', '#/disclaimer', '#/contact'].some((h) => hash.startsWith(h));
+    }
+    return false;
+  });
+  const [legalInitialTab, setLegalInitialTab] = useState<LegalTab>(() => {
+    if (typeof window !== 'undefined') {
+      const hash = window.location.hash || '';
+      if (hash.startsWith('#/privacy')) return 'privacy';
+      if (hash.startsWith('#/refund')) return 'refund';
+      if (hash.startsWith('#/copyright')) return 'copyright';
+      if (hash.startsWith('#/disclaimer')) return 'disclaimer';
+      if (hash.startsWith('#/contact')) return 'contact';
+    }
+    return 'terms';
+  });
+
+  const openLegalModal = (tab: LegalTab = 'terms') => {
+    setLegalInitialTab(tab);
+    setIsLegalOpen(true);
+    window.location.hash = `#/${tab}`;
+  };
   const [isPaymentOpen, setIsPaymentOpen] = useState<boolean>(false);
   const [paymentInitialExamId, setPaymentInitialExamId] = useState<string | undefined>(undefined);
   const [dailyLivePassages, setDailyLivePassages] = useState<Passage[]>([]);
@@ -307,7 +332,25 @@ export const App: React.FC = () => {
   useEffect(() => {
     const handleAppHashChange = () => {
       const hash = window.location.hash || '';
-      if (hash.startsWith('#/learn')) {
+      if (hash.startsWith('#/privacy')) {
+        setLegalInitialTab('privacy');
+        setIsLegalOpen(true);
+      } else if (hash.startsWith('#/terms')) {
+        setLegalInitialTab('terms');
+        setIsLegalOpen(true);
+      } else if (hash.startsWith('#/refund')) {
+        setLegalInitialTab('refund');
+        setIsLegalOpen(true);
+      } else if (hash.startsWith('#/copyright')) {
+        setLegalInitialTab('copyright');
+        setIsLegalOpen(true);
+      } else if (hash.startsWith('#/disclaimer')) {
+        setLegalInitialTab('disclaimer');
+        setIsLegalOpen(true);
+      } else if (hash.startsWith('#/contact')) {
+        setLegalInitialTab('contact');
+        setIsLegalOpen(true);
+      } else if (hash.startsWith('#/learn')) {
         setCurrentView('learn');
         setActiveTab('learn');
       } else if (hash.startsWith('#/book')) {
@@ -557,39 +600,205 @@ export const App: React.FC = () => {
       {currentView !== 'book' && currentView !== 'test' && (
         <footer
           style={{
-            background: '#ffffff',
-            borderTop: '1px solid var(--border-color)',
-            padding: '20px 0',
-            textAlign: 'center',
-            color: 'var(--text-muted)',
-            fontSize: '0.85rem'
+            background: 'linear-gradient(180deg, #ffffff 0%, #f8fafc 100%)',
+            borderTop: '1px solid #e2e8f0',
+            padding: '40px 0 24px 0',
+            color: '#475569',
+            fontSize: '0.88rem',
+            marginTop: 'auto'
           }}
         >
-          <div className="container">
-            <p>
-              <strong>Uttar Pradesh Police & UPSSSC Computer Operator Typing Mentor</strong> &bull; Based on UPPRPB Official Standards (Hindi 25 WPM Mangal/Kruti, English 30 WPM, 85% Accuracy).
-            </p>
-            {currentUser && isUserAdmin(currentUser) && (
-              <div style={{ marginTop: '8px', display: 'flex', justifyContent: 'center', gap: '16px', alignItems: 'center' }}>
-                <button
-                  onClick={() => setIsAdminOpen(true)}
-                  style={{
-                    background: 'transparent',
-                    border: 'none',
-                    color: '#0284c7',
-                    fontSize: '0.8rem',
-                    fontWeight: 600,
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '4px'
-                  }}
-                >
-                  <span>🛡️</span>
-                  <span>Examination Authority Admin Portal</span>
-                </button>
+          <div className="container" style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 20px' }}>
+            {/* Top Multi-Column Grid */}
+            <div
+              style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
+                gap: '32px',
+                marginBottom: '32px'
+              }}
+            >
+              {/* Col 1: Brand & Gov Standard */}
+              <div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '12px' }}>
+                  <img
+                    src="/logo.png"
+                    alt="Exam Typing Mentor"
+                    style={{ height: '36px', width: 'auto', borderRadius: '6px' }}
+                    onError={(e) => { (e.currentTarget as HTMLElement).style.display = 'none'; }}
+                  />
+                  <div>
+                    <h3 style={{ margin: 0, fontSize: '1.08rem', fontWeight: 800, color: '#0f172a' }}>
+                      Exam Typing Mentor
+                    </h3>
+                    <span style={{ fontSize: '0.74rem', fontWeight: 700, color: '#0284c7' }}>
+                      Official Exam Speed & Accuracy Simulator
+                    </span>
+                  </div>
+                </div>
+                <p style={{ fontSize: '0.82rem', color: '#64748b', lineHeight: 1.6, margin: '0 0 12px 0' }}>
+                  Crafted strictly per official recruitment benchmarks: <strong>UP Police Computer Operator</strong> (Hindi 25 WPM, English 30 WPM, 85% Accuracy), <strong>UP Police ASI</strong>, <strong>UPSSSC Junior Assistant</strong>, <strong>Allahabad High Court</strong>, and <strong>SSC CGL/CHSL</strong>.
+                </p>
+                <div style={{ fontSize: '0.74rem', color: '#94a3b8', lineHeight: 1.45, background: '#f1f5f9', padding: '8px 12px', borderRadius: '6px', borderLeft: '3px solid #cbd5e1' }}>
+                  <strong>Disclaimer:</strong> Independent educational preparation tool. Not affiliated with UPPRPB, UPSSSC, SSC, or any government recruiting board.
+                </div>
               </div>
-            )}
+
+              {/* Col 2: Legal, Trust & Policies */}
+              <div>
+                <h4 style={{ fontSize: '0.92rem', fontWeight: 800, color: '#0f172a', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '14px' }}>
+                  ⚖️ Trust & Policies
+                </h4>
+                <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                  <li>
+                    <button
+                      onClick={() => openLegalModal('terms')}
+                      style={{ background: 'none', border: 'none', padding: 0, color: '#334155', cursor: 'pointer', fontSize: '0.84rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '6px' }}
+                    >
+                      <span>📜</span>
+                      <span style={{ textDecoration: 'underline' }}>Terms & Conditions</span>
+                    </button>
+                  </li>
+                  <li>
+                    <button
+                      onClick={() => openLegalModal('privacy')}
+                      style={{ background: 'none', border: 'none', padding: 0, color: '#334155', cursor: 'pointer', fontSize: '0.84rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '6px' }}
+                    >
+                      <span>🔒</span>
+                      <span style={{ textDecoration: 'underline' }}>Privacy Policy</span>
+                    </button>
+                  </li>
+                  <li>
+                    <button
+                      onClick={() => openLegalModal('refund')}
+                      style={{ background: 'none', border: 'none', padding: 0, color: '#334155', cursor: 'pointer', fontSize: '0.84rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '6px' }}
+                    >
+                      <span>💳</span>
+                      <span style={{ textDecoration: 'underline' }}>Refund & Cancellation Policy</span>
+                    </button>
+                  </li>
+                  <li>
+                    <button
+                      onClick={() => openLegalModal('copyright')}
+                      style={{ background: 'none', border: 'none', padding: 0, color: '#334155', cursor: 'pointer', fontSize: '0.84rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '6px' }}
+                    >
+                      <span>©️</span>
+                      <span style={{ textDecoration: 'underline' }}>Copyright & IP Notice</span>
+                    </button>
+                  </li>
+                  <li>
+                    <button
+                      onClick={() => openLegalModal('disclaimer')}
+                      style={{ background: 'none', border: 'none', padding: 0, color: '#334155', cursor: 'pointer', fontSize: '0.84rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '6px' }}
+                    >
+                      <span>🛡️</span>
+                      <span style={{ textDecoration: 'underline' }}>Non-Affiliation Disclaimer</span>
+                    </button>
+                  </li>
+                </ul>
+              </div>
+
+              {/* Col 3: Community & Support */}
+              <div>
+                <h4 style={{ fontSize: '0.92rem', fontWeight: 800, color: '#0f172a', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '14px' }}>
+                  💬 Community & Support
+                </h4>
+                <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                  <li>
+                    <a
+                      href="https://t.me/Exam_Typing_Mentor"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{ color: '#0284c7', textDecoration: 'none', fontSize: '0.84rem', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+                    >
+                      <span>📢</span>
+                      <span>Official Telegram Channel ↗</span>
+                    </a>
+                  </li>
+                  <li>
+                    <a
+                      href="https://t.me/+Lw-tPbRqO0c2ZTA1"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{ color: '#0284c7', textDecoration: 'none', fontSize: '0.84rem', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+                    >
+                      <span>👥</span>
+                      <span>Aspirants Discussion Group ↗</span>
+                    </a>
+                  </li>
+                  <li>
+                    <a
+                      href="https://t.me/ExamTypingSupportBot"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{ color: '#0284c7', textDecoration: 'none', fontSize: '0.84rem', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+                    >
+                      <span>🤖</span>
+                      <span>24x7 Candidate Support Bot ↗</span>
+                    </a>
+                  </li>
+                  <li>
+                    <button
+                      onClick={() => openLegalModal('contact')}
+                      style={{ background: 'none', border: 'none', padding: 0, color: '#334155', cursor: 'pointer', fontSize: '0.84rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '6px' }}
+                    >
+                      <span>📞</span>
+                      <span style={{ textDecoration: 'underline' }}>Contact & Grievance Redressal</span>
+                    </button>
+                  </li>
+                  {currentUser && isUserAdmin(currentUser) && (
+                    <li style={{ marginTop: '4px' }}>
+                      <button
+                        onClick={() => setIsAdminOpen(true)}
+                        style={{
+                          background: '#0284c7',
+                          color: '#ffffff',
+                          border: 'none',
+                          padding: '6px 12px',
+                          borderRadius: '6px',
+                          fontSize: '0.78rem',
+                          fontWeight: 700,
+                          cursor: 'pointer',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '6px'
+                        }}
+                      >
+                        <span>🛡️</span>
+                        <span>Examination Authority Admin Portal</span>
+                      </button>
+                    </li>
+                  )}
+                </ul>
+              </div>
+            </div>
+
+            {/* Bottom Row: Copyright Bar */}
+            <div
+              style={{
+                borderTop: '1px solid #e2e8f0',
+                paddingTop: '18px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                flexWrap: 'wrap',
+                gap: '12px',
+                fontSize: '0.78rem',
+                color: '#94a3b8'
+              }}
+            >
+              <div>
+                &copy; 2026 <strong>Exam Typing Mentor</strong>. All Rights Reserved.
+              </div>
+              <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
+                <span onClick={() => openLegalModal('terms')} style={{ cursor: 'pointer', textDecoration: 'underline' }}>Terms</span>
+                <span onClick={() => openLegalModal('privacy')} style={{ cursor: 'pointer', textDecoration: 'underline' }}>Privacy</span>
+                <span onClick={() => openLegalModal('refund')} style={{ cursor: 'pointer', textDecoration: 'underline' }}>Refunds</span>
+                <span onClick={() => openLegalModal('copyright')} style={{ cursor: 'pointer', textDecoration: 'underline' }}>Copyright</span>
+                <span onClick={() => openLegalModal('disclaimer')} style={{ cursor: 'pointer', textDecoration: 'underline' }}>Disclaimer</span>
+                <span onClick={() => openLegalModal('contact')} style={{ cursor: 'pointer', textDecoration: 'underline' }}>Contact</span>
+              </div>
+            </div>
           </div>
         </footer>
       )}
@@ -686,6 +895,18 @@ export const App: React.FC = () => {
         }}
         currentUser={currentUser}
         initialSelectedExamId={paymentInitialExamId}
+      />
+
+      <LegalPolicyModal
+        isOpen={isLegalOpen}
+        initialTab={legalInitialTab}
+        onClose={() => {
+          setIsLegalOpen(false);
+          const hash = window.location.hash || '';
+          if (['#/terms', '#/privacy', '#/refund', '#/copyright', '#/disclaimer', '#/contact'].some((h) => hash.startsWith(h))) {
+            returnToExamOrHome();
+          }
+        }}
       />
 
       {/* Floating Telegram Alert Toast from 1-Click Link */}
