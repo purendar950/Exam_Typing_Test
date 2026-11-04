@@ -9,8 +9,7 @@
 > **High-Performance Typing Test Simulation & Assessment Platform for Competitive Government Examinations**  
 > Tailored for UP Police (Computer Operator Grade-A, ASI Clerk/Accounts, SI), UPSSSC Junior Assistant, SSC (CGL, CHSL DEST), RRB NTPC, High Courts, and State Secretariats.
 
-🌐 **Live Demo:** [https://purendar950.github.io/Typing-computer-operator-/](https://purendar950.github.io/Typing-computer-operator-/)  
-*(If renamed to `Exam_Typing_Test`: `https://purendar950.github.io/Exam_Typing_Test/`)*
+🌐 **Live Demo:** [https://purendar950.github.io/Exam_Typing_Test/](https://purendar950.github.io/Exam_Typing_Test/)
 
 ---
 
@@ -89,8 +88,8 @@ No confidential, proprietary, or copyrighted commercial examination question pap
 
 ```bash
 # 1. Clone the repository
-git clone https://github.com/purendar950/Typing-computer-operator-.git
-cd Typing-computer-operator-
+git clone https://github.com/purendar950/Exam_Typing_Test.git
+cd Exam_Typing_Test
 
 # 2. Install dependencies
 pnpm install
