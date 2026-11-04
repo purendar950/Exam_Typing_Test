@@ -75,6 +75,8 @@ body {
   max-width: 1240px;
   margin: 0 auto;
   padding: 0 16px;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 /* Button styles */
@@ -1302,6 +1304,9 @@ body {
   background-color: #f8fafc;
   min-height: calc(100vh - 70px);
   padding: 24px 0 60px;
+  width: 100%;
+  box-sizing: border-box;
+  overflow-x: hidden;
 }
 
 /* Candidate Hero & KPI Overview */
@@ -1558,8 +1563,26 @@ body {
 /* Test Grid & Cards */
 .exam-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-  gap: 20px;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr));
+  gap: 16px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.live-tests-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 1fr));
+  gap: 14px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.exam-test-card,
+.testmentor-exam-card,
+.benchmark-test-card {
+  box-sizing: border-box;
+  min-width: 0;
+  max-width: 100%;
 }
 
 .exam-test-card {
@@ -1754,7 +1777,7 @@ body {
   box-shadow: 0 4px 8px rgba(2, 132, 199, 0.35);
 }
 
-@media (max-width: 768px) {
+@media (max-width: 860px) {
   .exam-kpi-grid {
     grid-template-columns: repeat(2, 1fr);
   }
@@ -1764,8 +1787,26 @@ body {
   .exam-hero-title {
     font-size: 1.15rem;
   }
-  .exam-grid {
-    grid-template-columns: 1fr;
+  .exam-grid,
+  .live-tests-grid {
+    grid-template-columns: 1fr !important;
+    gap: 14px;
+  }
+}
+
+@media (min-width: 861px) and (max-width: 1140px) {
+  .exam-grid,
+  .live-tests-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 16px;
+  }
+}
+
+@media (min-width: 1141px) {
+  .exam-grid,
+  .live-tests-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 18px;
   }
 }
 
