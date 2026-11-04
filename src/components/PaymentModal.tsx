@@ -6,6 +6,7 @@ import {
   submitPaymentRequest,
   getPromoCodes
 } from '../services/paymentService';
+import { sendTelegramPaymentNotification, getTelegramConfig } from '../services/telegramService';
 import { UserProfile } from '../services/firebase';
 import { ALL_EXAMS } from '../data/allExams';
 import phonePeQrImg from '../assets/phonepe-qr.png';
@@ -137,7 +138,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
 
     setIsSubmitting(true);
     try {
-      await submitPaymentRequest({
+      const submission = await submitPaymentRequest({
         userId: currentUser?.uid || `guest_${Date.now()}`,
         userName: candidateName.trim(),
         userEmail: candidateEmail.trim() || currentUser?.email || 'unregistered@candidate.com',
@@ -153,6 +154,11 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
         promoCodeApplied: appliedPromo?.code,
         utrNumber: utrNumber.trim(),
         screenshotUrl: screenshotPreview
+      });
+
+      // Forward screenshot and UTR alert to Admin Telegram Bot
+      sendTelegramPaymentNotification(submission).catch((tErr) => {
+        console.warn('Telegram forward notice:', tErr);
       });
 
       setIsSubmitting(false);
