@@ -1204,12 +1204,24 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
   const handleQuickStartExam = (exam: ExamProfile) => {
     setSelectedExamProfile(exam);
     let matchingPassage: Passage | undefined;
-    if (exam.language === 'english') {
-      matchingPassage = passages.find((p) => p.language === 'english') || passages[0];
-    } else if (exam.language === 'hindi_mangal') {
-      matchingPassage = passages.find((p) => p.language === 'hindi_mangal') || passages[0];
-    } else {
-      matchingPassage = passages.find((p) => p.language === 'hindi_kruti') || passages.find((p) => p.language.startsWith('hindi')) || passages[0];
+
+    // 1. Exact examSlug match
+    matchingPassage = passages.find((p) => p.examSlug === exam.slug && p.language === exam.language);
+
+    // 2. Category group & language match
+    if (!matchingPassage && exam.categoryGroup) {
+      matchingPassage = passages.find((p) => p.categoryGroup === exam.categoryGroup && p.language === exam.language);
+    }
+
+    // 3. Fallback to language match
+    if (!matchingPassage) {
+      if (exam.language === 'english') {
+        matchingPassage = passages.find((p) => p.language === 'english') || passages[0];
+      } else if (exam.language === 'hindi_mangal') {
+        matchingPassage = passages.find((p) => p.language === 'hindi_mangal') || passages[0];
+      } else {
+        matchingPassage = passages.find((p) => p.language === 'hindi_kruti') || passages.find((p) => p.language.startsWith('hindi')) || passages[0];
+      }
     }
     onStartTest(matchingPassage, exam.durationMinutes, exam);
   };
@@ -1632,8 +1644,18 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
       return true;
     });
 
+    let resultList = filtered;
+    if (resultList.length === 0) {
+      resultList = passages.filter((p) => {
+        if (currentMode.languageFilter && currentMode.languageFilter !== 'all') {
+          if (p.language !== currentMode.languageFilter) return false;
+        }
+        return true;
+      });
+    }
+
     // 5. Sort passages by level3SortBy
-    return [...filtered].sort((a, b) => {
+    return [...resultList].sort((a, b) => {
       if (level3SortBy === 'number') {
         const numA = a.testNumber ?? 99999;
         const numB = b.testNumber ?? 99999;

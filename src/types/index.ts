@@ -2,6 +2,16 @@ export type Language = 'hindi_mangal' | 'hindi_kruti' | 'english';
 
 export type ExamCategory = 'up_police_co' | 'up_police_asi' | string;
 
+export type CalculationModel =
+  | 'upprpb'
+  | 'rrb_eduquity'
+  | 'ssc_dest'
+  | 'court_delhi'
+  | 'court_ahc'
+  | 'court_phhc'
+  | 'mp_cpct'
+  | 'standard';
+
 export interface ExamProfile {
   id: string;
   slug: string;
@@ -15,6 +25,7 @@ export interface ExamProfile {
   isRetyping: boolean;
   limitErrorPercentage?: number;
   minAccuracy: number;
+  calculationModel?: CalculationModel;
 }
 
 export interface UnifiedExamPost {
@@ -83,6 +94,13 @@ export interface EvaluationResult {
   excessMistakes: number; // Mistakes beyond 5% allowance
   penaltyWords: number; // Excess Mistakes * 10 penalty words
   eduquityNetWpm: number; // Net WPM calculated under Eduquity model
+  calculationModel?: CalculationModel;
+  inputType?: 'word' | 'character';
+  inputLimit?: number;
+  courtMarks?: number; // Allahabad HC: 50 Marks - 0.1 per error
+  sscErrorPercentage?: number; // SSC DEST error rate
+  rrbNetWpm?: number; // RRB CBTST Net WPM
+  cpctBand?: string; // MP CPCT Qualifying speed tier
   fullMistakes: number;
   halfMistakes: number;
   errorPercentage: number;

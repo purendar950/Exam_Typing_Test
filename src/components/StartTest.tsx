@@ -352,7 +352,11 @@ export const StartTest: React.FC<StartTestProps> = ({
       backspaceCount: backspaceCount,
       targetSpeed: activeExamProfile?.targetSpeed,
       requiredAccuracy: activeExamProfile?.minAccuracy,
-      examProfileTitle: activeExamProfile?.title
+      examProfileTitle: activeExamProfile?.title,
+      calculationModel: activeExamProfile?.calculationModel,
+      inputType: activeExamProfile?.inputType,
+      inputLimit: activeExamProfile?.inputLimit,
+      limitErrorPercentage: activeExamProfile?.limitErrorPercentage
     });
     onFinishTest(result);
   };
@@ -363,6 +367,15 @@ export const StartTest: React.FC<StartTestProps> = ({
     if (passage.language === 'hindi_mangal') return 'Hindi Mangal (Inscript)';
     return 'Hindi Kruti Dev';
   };
+
+  const isCharBased = activeExamProfile?.inputType === 'character';
+  const targetLimit = isCharBased
+    ? (activeExamProfile?.inputLimit || 2000)
+    : (activeExamProfile?.inputLimit || originalWords.length);
+  const currentProgressCount = isCharBased ? typedText.length : typedWords.length;
+  const progressPercent = Math.min(100, Math.round((currentProgressCount / targetLimit) * 100));
+  const isLimitReached = !activeExamProfile?.isRetyping && currentProgressCount >= targetLimit;
+  const requiredPassageWords85 = Math.ceil(targetLimit * 0.85);
 
   return (
     <div className="ar-test-wrapper">
@@ -443,6 +456,49 @@ export const StartTest: React.FC<StartTestProps> = ({
         </div>
       </div>
 
+      {/* Official Exam Pattern & Limit Strip */}
+      <div
+        style={{
+          background: '#f8fafc',
+          borderBottom: '1.5px solid #e2e8f0',
+          padding: '6px 16px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          flexWrap: 'wrap',
+          gap: '8px',
+          fontSize: '0.82rem'
+        }}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+          <span style={{ fontWeight: 800, color: '#1e293b' }}>
+            🏛️ {activeExamProfile?.title || passage.title}
+          </span>
+          <span style={{ background: '#e0f2fe', color: '#0369a1', padding: '1px 8px', borderRadius: '4px', fontWeight: 700 }}>
+            🎯 Target: {activeExamProfile?.targetSpeed || (passage.language.startsWith('hindi') ? 25 : 30)} WPM
+          </span>
+          <span style={{ background: '#fef3c7', color: '#92400e', padding: '1px 8px', borderRadius: '4px', fontWeight: 700 }}>
+            📏 Limit: {isCharBased ? `${targetLimit} Keystrokes` : `${targetLimit} Words`}
+          </span>
+          <span style={{ background: '#f1f5f9', color: '#475569', padding: '1px 8px', borderRadius: '4px', fontWeight: 600 }}>
+            ⏱️ {durationMinutes} Mins
+          </span>
+        </div>
+
+        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+          <span style={{ color: '#64748b', fontWeight: 600 }}>Official Cutoff Rule:</span>
+          <span style={{ color: '#0f766e', fontWeight: 700, background: '#ccfbf1', padding: '1px 8px', borderRadius: '4px' }}>
+            {activeExamProfile?.calculationModel === 'upprpb' ? '85.0% Passage Accuracy Benchmark' :
+             activeExamProfile?.calculationModel === 'rrb_eduquity' ? '5% Error Margin (10 Words/Mistake Cut)' :
+             activeExamProfile?.calculationModel === 'ssc_dest' ? `Max ${activeExamProfile?.limitErrorPercentage || 7}% Errors Allowed` :
+             activeExamProfile?.calculationModel === 'court_delhi' ? 'Max 3.0% Errors Allowed' :
+             activeExamProfile?.calculationModel === 'court_ahc' ? '50 Marks (0.1 Mark Deducted/Error)' :
+             activeExamProfile?.calculationModel === 'mp_cpct' ? 'Net Speed (Correct Words / Time)' :
+             'Official Board Standard'}
+          </span>
+        </div>
+      </div>
+
       <div className="ar-test-container">
         
         {/* 2. SUB-HEADER / STATUS BAR (Screenshot 1) */}
@@ -457,9 +513,36 @@ export const StartTest: React.FC<StartTestProps> = ({
             gap: '8px'
           }}
         >
-          {/* Left: Quick status / title */}
-          <div style={{ minWidth: '110px', fontSize: '0.85rem', color: '#64748b' }}>
-            <span style={{ fontWeight: 600 }}>Words:</span> {typedWords.length} / {originalWords.length}
+          {/* Left: Quick status & live progress tracker */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', minWidth: '180px' }}>
+            <div style={{ fontSize: '0.85rem', color: '#1e293b', fontWeight: 700 }}>
+              {isCharBased ? (
+                <span>Keystrokes: <strong style={{ color: '#0284c7' }}>{typedText.length}</strong> / {targetLimit} ({progressPercent}%)</span>
+              ) : (
+                <span>Words: <strong style={{ color: '#0284c7' }}>{typedWords.length}</strong> / {targetLimit} ({progressPercent}%)</span>
+              )}
+            </div>
+
+            {/* Visual Progress Bar */}
+            <div style={{ width: '100%', maxWidth: '200px', height: '6px', background: '#e2e8f0', borderRadius: '3px', overflow: 'hidden' }}>
+              <div
+                style={{
+                  width: `${progressPercent}%`,
+                  height: '100%',
+                  background: progressPercent >= 85 ? '#16a34a' : progressPercent >= 50 ? '#f59e0b' : '#3b82f6',
+                  transition: 'width 0.2s ease'
+                }}
+              />
+            </div>
+
+            {/* 85% UPPRPB Cutoff Goal Hint */}
+            {(!activeExamProfile || activeExamProfile.calculationModel === 'upprpb') && !isCharBased && (
+              <span style={{ fontSize: '0.72rem', color: typedWords.length >= requiredPassageWords85 ? '#15803d' : '#b45309', fontWeight: 600 }}>
+                {typedWords.length >= requiredPassageWords85
+                  ? '✅ 85% passage benchmark achieved!'
+                  : `Need ${requiredPassageWords85} words for 85% cutoff`}
+              </span>
+            )}
           </div>
 
           {/* Center: Large bold countdown timer (Screenshot 1: "Time left:- 14:55") */}
@@ -612,6 +695,35 @@ export const StartTest: React.FC<StartTestProps> = ({
             );
           })}
         </div>
+
+        {/* Limit Reached Notification */}
+        {isLimitReached && (
+          <div
+            style={{
+              background: '#f0fdf4',
+              border: '1.5px solid #86efac',
+              borderRadius: '8px',
+              padding: '6px 14px',
+              marginBottom: '10px',
+              fontSize: '0.85rem',
+              color: '#166534',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              fontWeight: 600
+            }}
+          >
+            <span>✅ Official passage limit reached ({targetLimit} {isCharBased ? 'keystrokes' : 'words'})! Review your text or click Submit.</span>
+            <button
+              type="button"
+              onClick={() => setShowSubmitModal(true)}
+              className="btn btn-sm btn-primary"
+              style={{ padding: '3px 12px', fontSize: '0.8rem' }}
+            >
+              Submit Now
+            </button>
+          </div>
+        )}
 
         {/* 4. BOTTOM BOX: LIME-GREEN TYPING INPUT BOX (Screenshot 1) */}
         <div className="ar-typing-box">

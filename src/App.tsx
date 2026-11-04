@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Passage, TestSettings, EvaluationResult, ExamProfile } from './types';
 import { PASSAGES } from './data/passages';
+import { ALL_EXAMS } from './data/allExams';
 import { Header } from './components/Header';
 import { ChooseTest } from './components/ChooseTest';
 import { StartTest } from './components/StartTest';
@@ -409,10 +410,21 @@ export const App: React.FC = () => {
     }
 
     setSelectedPassage(passage);
-    if (examProfile !== undefined) {
-      setSelectedExamProfile(examProfile);
+    let resolvedProfile: ExamProfile | null = examProfile || null;
+    if (!resolvedProfile) {
+      if (passage.examSlug) {
+        resolvedProfile = ALL_EXAMS.find((p) => p.slug === passage.examSlug) || null;
+      }
+      if (!resolvedProfile && passage.categoryGroup) {
+        resolvedProfile = ALL_EXAMS.find((p) => p.categoryGroup === passage.categoryGroup && p.language === passage.language) || null;
+      }
+      if (!resolvedProfile && passage.category) {
+        resolvedProfile = ALL_EXAMS.find((p) => (p.slug.includes(passage.category) || p.id === passage.category) && p.language === passage.language) || null;
+      }
     }
-    const finalDuration = customDurationMinutes || examProfile?.durationMinutes || passage.duration || 15;
+    setSelectedExamProfile(resolvedProfile);
+
+    const finalDuration = customDurationMinutes || resolvedProfile?.durationMinutes || passage.duration || 15;
     setSelectedDurationMinutes(finalDuration);
 
     // Save active test session so page refresh stays right here
@@ -420,7 +432,7 @@ export const App: React.FC = () => {
       sessionStorage.setItem('up_active_test_session', JSON.stringify({
         passage,
         durationMinutes: finalDuration,
-        examProfile: examProfile || null,
+        examProfile: resolvedProfile,
         timestamp: Date.now()
       }));
     } catch {}

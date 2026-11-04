@@ -101,8 +101,8 @@ export const ResultScreen: React.FC<ResultScreenProps> = ({
         </div>
       </div>
 
-      {/* Official 85% Passage Benchmark Rule Alert */}
-      {result.completionRate < 85 && (
+      {/* Official 85% Passage Benchmark Rule Alert (UP Police) */}
+      {(!result.calculationModel || result.calculationModel === 'upprpb') && result.completionRate < 85 && (
         <div
           style={{
             background: '#fff1f2',
@@ -127,6 +127,58 @@ export const ResultScreen: React.FC<ResultScreenProps> = ({
         </div>
       )}
 
+      {/* SSC DEST Permissible Error Rule Alert */}
+      {result.calculationModel === 'ssc_dest' && result.sscErrorPercentage !== undefined && result.sscErrorPercentage > (result.qualificationCriteria.examTitle?.includes('CHSL') ? 7 : 20) && (
+        <div
+          style={{
+            background: '#fff1f2',
+            border: '1.5px solid #fecdd3',
+            borderRadius: '12px',
+            padding: '16px 20px',
+            marginBottom: '24px',
+            display: 'flex',
+            alignItems: 'flex-start',
+            gap: '14px'
+          }}
+        >
+          <span style={{ fontSize: '1.6rem', flexShrink: 0 }}>⚠️</span>
+          <div>
+            <strong style={{ color: '#9f1239', fontSize: '1rem', display: 'block', marginBottom: '4px' }}>
+              Official SSC DEST Error Percentage Limit Exceeded
+            </strong>
+            <p style={{ margin: 0, fontSize: '0.88rem', color: '#881337', lineHeight: 1.55 }}>
+              In Staff Selection Commission DEST examinations, candidates are disqualified if total errors exceed the prescribed category cutoff ({result.qualificationCriteria.examTitle?.includes('CHSL') ? '7% for UR' : '20% for UR'}). Your recorded error rate was <strong>{result.sscErrorPercentage}%</strong> ({result.equivalentErrors} mistakes).
+            </p>
+          </div>
+        </div>
+      )}
+
+      {/* Court 3% Error Tolerance Rule Alert */}
+      {result.calculationModel === 'court_delhi' && (result.equivalentErrors / Math.max(1, result.totalTypedWords)) * 100 > 3.0 && (
+        <div
+          style={{
+            background: '#fff1f2',
+            border: '1.5px solid #fecdd3',
+            borderRadius: '12px',
+            padding: '16px 20px',
+            marginBottom: '24px',
+            display: 'flex',
+            alignItems: 'flex-start',
+            gap: '14px'
+          }}
+        >
+          <span style={{ fontSize: '1.6rem', flexShrink: 0 }}>⚠️</span>
+          <div>
+            <strong style={{ color: '#9f1239', fontSize: '1rem', display: 'block', marginBottom: '4px' }}>
+              Official High Court / Supreme Court 3.0% Error Limit Exceeded
+            </strong>
+            <p style={{ margin: 0, fontSize: '0.88rem', color: '#881337', lineHeight: 1.55 }}>
+              In High Court and Supreme Court typing tests, candidates are permitted a maximum of <strong>3.0% errors of typed words</strong>. Your error rate was <strong>{Math.round(((result.equivalentErrors / Math.max(1, result.totalTypedWords)) * 100) * 10) / 10}%</strong> ({result.equivalentErrors} mistakes in {result.totalTypedWords} words).
+            </p>
+          </div>
+        </div>
+      )}
+
       {/* Official Cutoff Verification Table */}
       <div className="card" style={{ marginBottom: '28px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', flexWrap: 'wrap', gap: '8px' }}>
@@ -134,7 +186,11 @@ export const ResultScreen: React.FC<ResultScreenProps> = ({
             Official {result.qualificationCriteria.examTitle || 'Recruitment'} Benchmark Verification
           </h2>
           <span style={{ fontSize: '0.75rem', fontWeight: 700, padding: '3px 10px', borderRadius: '12px', background: '#f1f5f9', color: '#475569', border: '1px solid #e2e8f0' }}>
-            UPPRPB & National Standards
+            {result.calculationModel === 'rrb_eduquity' ? 'RRB CBTST Standards' :
+             result.calculationModel === 'ssc_dest' ? 'SSC DEST Guidelines' :
+             result.calculationModel === 'court_delhi' || result.calculationModel === 'court_ahc' || result.calculationModel === 'court_phhc' ? 'Court & Judicial Rules' :
+             result.calculationModel === 'mp_cpct' ? 'MP CPCT Scoring Model' :
+             'UPPRPB & National Standards'}
           </span>
         </div>
 
@@ -149,17 +205,24 @@ export const ResultScreen: React.FC<ResultScreenProps> = ({
               </tr>
             </thead>
             <tbody>
+              {/* Row 1: Primary Speed Parameter */}
               <tr style={{ borderBottom: '1px solid var(--border-color)' }}>
                 <td style={{ padding: '12px 16px' }}>
-                  <div style={{ fontWeight: 700, color: '#0f172a' }}>Net Typing Speed</div>
-                  <div style={{ fontSize: '0.75rem', color: '#64748b' }}>Board Formula: Gross WPM - (Errors / Time)</div>
+                  <div style={{ fontWeight: 700, color: '#0f172a' }}>
+                    {result.calculationModel === 'rrb_eduquity' ? 'RRB Net CBTST Speed' : 'Net Typing Speed'}
+                  </div>
+                  <div style={{ fontSize: '0.75rem', color: '#64748b' }}>
+                    {result.calculationModel === 'rrb_eduquity' ? '(Typed Words - Penalty Words) / Time' :
+                     result.calculationModel === 'mp_cpct' ? 'Correct Words / Minutes' :
+                     'Board Formula: Gross WPM - (Errors / Time)'}
+                  </div>
                 </td>
                 <td style={{ padding: '12px 16px' }}>&ge; {result.qualificationCriteria.requiredSpeed} WPM</td>
-                <td style={{ padding: '12px 16px', fontWeight: 800, color: result.netWpm >= result.qualificationCriteria.requiredSpeed ? '#16a34a' : '#dc2626' }}>
-                  {result.netWpm} WPM
+                <td style={{ padding: '12px 16px', fontWeight: 800, color: (result.rrbNetWpm || result.netWpm) >= result.qualificationCriteria.requiredSpeed ? '#16a34a' : '#dc2626' }}>
+                  {result.calculationModel === 'rrb_eduquity' ? `${result.rrbNetWpm} WPM` : `${result.netWpm} WPM`}
                 </td>
                 <td style={{ padding: '12px 16px' }}>
-                  {result.netWpm >= result.qualificationCriteria.requiredSpeed ? (
+                  {(result.rrbNetWpm || result.netWpm) >= result.qualificationCriteria.requiredSpeed ? (
                     <span className="badge badge-green">PASSED</span>
                   ) : (
                     <span className="badge badge-red">FAILED</span>
@@ -167,17 +230,40 @@ export const ResultScreen: React.FC<ResultScreenProps> = ({
                 </td>
               </tr>
 
+              {/* Row 2: Accuracy or Error Metric */}
               <tr style={{ borderBottom: '1px solid var(--border-color)' }}>
                 <td style={{ padding: '12px 16px' }}>
-                  <div style={{ fontWeight: 700, color: '#0f172a' }}>Official Passage Accuracy</div>
-                  <div style={{ fontSize: '0.75rem', color: '#64748b' }}>Calculated against total passage ({result.totalOriginalWords} words)</div>
-                </td>
-                <td style={{ padding: '12px 16px' }}>&ge; {result.qualificationCriteria.requiredAccuracy}%</td>
-                <td style={{ padding: '12px 16px', fontWeight: 800, color: result.accuracy >= result.qualificationCriteria.requiredAccuracy ? '#16a34a' : '#dc2626' }}>
-                  {result.accuracy}%
+                  <div style={{ fontWeight: 700, color: '#0f172a' }}>
+                    {result.calculationModel === 'ssc_dest' ? 'DEST Error Percentage' :
+                     result.calculationModel === 'court_delhi' ? 'Court Error Percentage' :
+                     result.calculationModel === 'court_ahc' ? 'Allahabad HC Total Marks' :
+                     result.calculationModel === 'rrb_eduquity' ? '5% Free Error Allowance' :
+                     'Official Passage Accuracy'}
+                  </div>
+                  <div style={{ fontSize: '0.75rem', color: '#64748b' }}>
+                    {result.calculationModel === 'ssc_dest' ? `Total mistakes / Master words (${result.totalOriginalWords})` :
+                     result.calculationModel === 'court_delhi' ? `Total mistakes / Attempted words (${result.totalTypedWords})` :
+                     result.calculationModel === 'court_ahc' ? '50 Marks scale (0.1 mark deducted per mistake)' :
+                     result.calculationModel === 'rrb_eduquity' ? '5% permissible mistake margin on typed words' :
+                     `Calculated against total passage (${result.totalOriginalWords} words)`}
+                  </div>
                 </td>
                 <td style={{ padding: '12px 16px' }}>
-                  {result.accuracy >= result.qualificationCriteria.requiredAccuracy ? (
+                  {result.calculationModel === 'ssc_dest' ? `≤ ${result.qualificationCriteria.examTitle?.includes('CHSL') ? 7 : 20}%` :
+                   result.calculationModel === 'court_delhi' ? '≤ 3.0%' :
+                   result.calculationModel === 'court_ahc' ? '≥ 25.0 / 50 Marks' :
+                   result.calculationModel === 'rrb_eduquity' ? `${result.allowedErrors} Mistakes Allowed` :
+                   `≥ ${result.qualificationCriteria.requiredAccuracy}%`}
+                </td>
+                <td style={{ padding: '12px 16px', fontWeight: 800, color: result.isQualified ? '#16a34a' : '#dc2626' }}>
+                  {result.calculationModel === 'ssc_dest' ? `${result.sscErrorPercentage}%` :
+                   result.calculationModel === 'court_delhi' ? `${Math.round(((result.equivalentErrors / Math.max(1, result.totalTypedWords)) * 100) * 10) / 10}%` :
+                   result.calculationModel === 'court_ahc' ? `${result.courtMarks} / 50.0` :
+                   result.calculationModel === 'rrb_eduquity' ? `${result.equivalentErrors} Mistakes Typed` :
+                   `${result.accuracy}%`}
+                </td>
+                <td style={{ padding: '12px 16px' }}>
+                  {result.isQualified ? (
                     <span className="badge badge-green">PASSED</span>
                   ) : (
                     <span className="badge badge-red">FAILED</span>
@@ -185,38 +271,55 @@ export const ResultScreen: React.FC<ResultScreenProps> = ({
                 </td>
               </tr>
 
+              {/* Row 3: Diagnostic Precision & Keystrokes */}
               <tr style={{ borderBottom: '1px solid var(--border-color)' }}>
                 <td style={{ padding: '12px 16px' }}>
-                  <div style={{ fontWeight: 700, color: '#0f172a' }}>Raw Typing Precision</div>
-                  <div style={{ fontSize: '0.75rem', color: '#64748b' }}>Precision on attempted words ({result.totalTypedWords} words)</div>
+                  <div style={{ fontWeight: 700, color: '#0f172a' }}>
+                    {result.calculationModel === 'ssc_dest' ? 'Total Keystrokes Depressed' : 'Raw Typing Precision'}
+                  </div>
+                  <div style={{ fontSize: '0.75rem', color: '#64748b' }}>
+                    {result.calculationModel === 'ssc_dest' ? `Standard 5 keystrokes = 1 word (${result.totalTypedWords} standard words)` :
+                     `Precision on attempted words (${result.totalTypedWords} words)`}
+                  </div>
                 </td>
-                <td style={{ padding: '12px 16px', color: '#64748b' }}>Diagnostic Metric</td>
-                <td style={{ padding: '12px 16px', fontWeight: 700, color: result.typedAccuracy >= 85 ? '#16a34a' : '#d97706' }}>
-                  {result.typedAccuracy}%
+                <td style={{ padding: '12px 16px', color: '#64748b' }}>
+                  {result.calculationModel === 'ssc_dest' ? '2,000 / 1,750 Target' : 'Diagnostic Metric'}
+                </td>
+                <td style={{ padding: '12px 16px', fontWeight: 700, color: '#0284c7' }}>
+                  {result.calculationModel === 'ssc_dest' ? `${result.totalKeystrokes} Keys` : `${result.typedAccuracy}%`}
                 </td>
                 <td style={{ padding: '12px 16px' }}>
-                  <span className="badge badge-blue">{result.typedAccuracy >= 85 ? 'HIGH PRECISION' : 'NEEDS ACCURACY'}</span>
+                  <span className="badge badge-blue">
+                    {result.calculationModel === 'ssc_dest' ? 'CAPTURED' : (result.typedAccuracy >= 85 ? 'HIGH PRECISION' : 'NEEDS PRACTICE')}
+                  </span>
                 </td>
               </tr>
 
+              {/* Row 4: Completion or CPCT Tier */}
               <tr style={{ borderBottom: '1px solid var(--border-color)' }}>
                 <td style={{ padding: '12px 16px' }}>
-                  <div style={{ fontWeight: 700, color: '#0f172a' }}>Passage Completion Rate</div>
-                  <div style={{ fontSize: '0.75rem', color: '#64748b' }}>{result.totalTypedWords} typed / {result.totalOriginalWords} in passage</div>
-                </td>
-                <td style={{ padding: '12px 16px' }}>&ge; 85.0% Recommended</td>
-                <td style={{ padding: '12px 16px', fontWeight: 700, color: result.completionRate >= 85 ? '#16a34a' : '#dc2626' }}>
-                  {result.completionRate}%
+                  <div style={{ fontWeight: 700, color: '#0f172a' }}>
+                    {result.calculationModel === 'mp_cpct' ? 'CPCT Proficiency Grade' : 'Passage Completion Rate'}
+                  </div>
+                  <div style={{ fontSize: '0.75rem', color: '#64748b' }}>
+                    {result.calculationModel === 'mp_cpct' ? 'Official MPSEDC Certification Tier' :
+                     `${result.totalTypedWords} typed / ${result.totalOriginalWords} in passage`}
+                  </div>
                 </td>
                 <td style={{ padding: '12px 16px' }}>
-                  {result.completionRate >= 85 ? (
-                    <span className="badge badge-green">SUFFICIENT</span>
-                  ) : (
-                    <span className="badge badge-red">INCOMPLETE</span>
-                  )}
+                  {result.calculationModel === 'mp_cpct' ? 'Level 1-4' : '≥ 85.0% Recommended'}
+                </td>
+                <td style={{ padding: '12px 16px', fontWeight: 700, color: result.completionRate >= 85 || result.cpctBand?.includes('Level') ? '#16a34a' : '#d97706' }}>
+                  {result.calculationModel === 'mp_cpct' ? (result.cpctBand || 'Level 4') : `${result.completionRate}%`}
+                </td>
+                <td style={{ padding: '12px 16px' }}>
+                  <span className={`badge ${result.completionRate >= 85 || result.cpctBand?.includes('Level') ? 'badge-green' : 'badge-red'}`}>
+                    {result.calculationModel === 'mp_cpct' ? 'CERTIFIED' : (result.completionRate >= 85 ? 'SUFFICIENT' : 'INCOMPLETE')}
+                  </span>
                 </td>
               </tr>
 
+              {/* Row 5: Duration */}
               <tr>
                 <td style={{ padding: '12px 16px' }}>
                   <div style={{ fontWeight: 700, color: '#0f172a' }}>Duration & Exam Font</div>
@@ -235,15 +338,22 @@ export const ResultScreen: React.FC<ResultScreenProps> = ({
         </div>
       </div>
 
-      {/* Eduquity & Board 5% Error Allowance Scoring Simulator Card */}
+      {/* Official Exam Pattern Breakdown Simulator Card */}
       <div className="card" style={{ marginBottom: '28px', background: '#f8fafc', border: '1.5px solid #e2e8f0' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', flexWrap: 'wrap', gap: '8px' }}>
           <h3 style={{ fontSize: '1.05rem', fontWeight: 800, color: '#0f172a', margin: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
             <span>🧮</span>
-            <span>Eduquity & UPPRPB Error Deduction Engine (5% Free Margin Model)</span>
+            <span>
+              {result.calculationModel === 'rrb_eduquity' ? 'RRB NTPC CBTST & CAPF Error Allowance Model (5% Free Margin)' :
+               result.calculationModel === 'ssc_dest' ? 'Staff Selection Commission DEST Scoring Breakdown' :
+               result.calculationModel === 'court_ahc' ? 'Allahabad High Court 50 Marks Marking Model' :
+               result.calculationModel === 'court_delhi' ? 'High Court & Supreme Court 3% Error Tolerance Model' :
+               result.calculationModel === 'mp_cpct' ? 'MP CPCT Examination Speed & Band Breakdown' :
+               'Eduquity & UPPRPB Error Deduction Engine (5% Free Margin Model)'}
+            </span>
           </h3>
           <span style={{ fontSize: '0.73rem', fontWeight: 700, padding: '3px 10px', borderRadius: '12px', background: '#e0f2fe', color: '#0369a1', border: '1px solid #bae6fd' }}>
-            EzTyping & Eduquity Pattern
+            EzTyping & Official Pattern
           </span>
         </div>
 
@@ -257,36 +367,54 @@ export const ResultScreen: React.FC<ResultScreenProps> = ({
           </div>
 
           <div style={{ background: '#ffffff', padding: '12px 14px', borderRadius: '10px', border: '1px solid #bbf7d0' }}>
-            <div style={{ fontSize: '0.75rem', color: '#166534', fontWeight: 600 }}>5% Free Error Allowance</div>
-            <div style={{ fontSize: '1.3rem', fontWeight: 800, color: '#15803d', marginTop: '2px' }}>
-              {result.allowedErrors} Exempt
+            <div style={{ fontSize: '0.75rem', color: '#166534', fontWeight: 600 }}>
+              {result.calculationModel === 'court_ahc' ? 'Mark Deduction' :
+               result.calculationModel === 'ssc_dest' ? 'Permissible Error Cutoff' :
+               '5% Free Error Allowance'}
             </div>
-            <div style={{ fontSize: '0.72rem', color: '#16a34a' }}>5% permissible margin on typed words</div>
+            <div style={{ fontSize: '1.3rem', fontWeight: 800, color: '#15803d', marginTop: '2px' }}>
+              {result.calculationModel === 'court_ahc' ? `-${Math.round(result.equivalentErrors * 0.1 * 10) / 10} M` :
+               result.calculationModel === 'ssc_dest' ? `${result.qualificationCriteria.examTitle?.includes('CHSL') ? 7 : 20}%` :
+               `${result.allowedErrors} Exempt`}
+            </div>
+            <div style={{ fontSize: '0.72rem', color: '#16a34a' }}>
+              {result.calculationModel === 'court_ahc' ? '0.1 mark per mistake' :
+               result.calculationModel === 'ssc_dest' ? 'Maximum allowed error %' :
+               '5% permissible margin on typed words'}
+            </div>
           </div>
 
           <div style={{ background: '#ffffff', padding: '12px 14px', borderRadius: '10px', border: '1px solid #fed7aa' }}>
-            <div style={{ fontSize: '0.75rem', color: '#9a3412', fontWeight: 600 }}>Excess Mistakes (Penalized)</div>
-            <div style={{ fontSize: '1.3rem', fontWeight: 800, color: result.excessMistakes > 0 ? '#ea580c' : '#16a34a', marginTop: '2px' }}>
-              {result.excessMistakes} Mistakes
+            <div style={{ fontSize: '0.75rem', color: '#9a3412', fontWeight: 600 }}>
+              {result.calculationModel === 'ssc_dest' ? 'Your DEST Error Rate' : 'Excess Mistakes (Penalized)'}
             </div>
-            <div style={{ fontSize: '0.72rem', color: '#c2410c' }}>Max(0, Total Mistakes - 5% Margin)</div>
+            <div style={{ fontSize: '1.3rem', fontWeight: 800, color: result.excessMistakes > 0 || (result.sscErrorPercentage && result.sscErrorPercentage > 7) ? '#ea580c' : '#16a34a', marginTop: '2px' }}>
+              {result.calculationModel === 'ssc_dest' ? `${result.sscErrorPercentage}%` : `${result.excessMistakes} Mistakes`}
+            </div>
+            <div style={{ fontSize: '0.72rem', color: '#c2410c' }}>
+              {result.calculationModel === 'ssc_dest' ? 'Mistakes / Total Words * 100' : 'Max(0, Total Mistakes - 5% Margin)'}
+            </div>
           </div>
 
           <div style={{ background: '#ffffff', padding: '12px 14px', borderRadius: '10px', border: '1px solid #fecaca' }}>
-            <div style={{ fontSize: '0.75rem', color: '#991b1b', fontWeight: 600 }}>Penalty Words Deducted</div>
-            <div style={{ fontSize: '1.3rem', fontWeight: 800, color: result.penaltyWords > 0 ? '#b91c1c' : '#16a34a', marginTop: '2px' }}>
-              -{result.penaltyWords} Words
+            <div style={{ fontSize: '0.75rem', color: '#991b1b', fontWeight: 600 }}>
+              {result.calculationModel === 'court_ahc' ? 'Final Score Obtained' : 'Penalty Words Deducted'}
             </div>
-            <div style={{ fontSize: '0.72rem', color: '#dc2626' }}>Excess Mistakes × 10 Words</div>
+            <div style={{ fontSize: '1.3rem', fontWeight: 800, color: result.penaltyWords > 0 ? '#b91c1c' : '#16a34a', marginTop: '2px' }}>
+              {result.calculationModel === 'court_ahc' ? `${result.courtMarks} / 50` : `-${result.penaltyWords} Words`}
+            </div>
+            <div style={{ fontSize: '0.72rem', color: '#dc2626' }}>
+              {result.calculationModel === 'court_ahc' ? 'Passing marks: 25.0 / 50' : 'Excess Mistakes × 10 Words'}
+            </div>
           </div>
         </div>
 
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#ffffff', padding: '12px 16px', borderRadius: '10px', border: '1px solid #cbd5e1', flexWrap: 'wrap', gap: '8px' }}>
           <div style={{ fontSize: '0.86rem', color: '#334155' }}>
-            <strong>Board Direct Net Speed:</strong> <span style={{ color: '#0284c7', fontWeight: 800 }}>{result.netWpm} WPM</span> &bull; <strong>Eduquity Model Net Speed:</strong> <span style={{ color: '#7c3aed', fontWeight: 800 }}>{result.eduquityNetWpm} WPM</span>
+            <strong>Board Net Speed:</strong> <span style={{ color: '#0284c7', fontWeight: 800 }}>{result.netWpm} WPM</span> &bull; <strong>Eduquity/RRB Net Speed:</strong> <span style={{ color: '#7c3aed', fontWeight: 800 }}>{result.eduquityNetWpm} WPM</span>
           </div>
           <div style={{ fontSize: '0.75rem', color: '#64748b' }}>
-            Dual-verified against official recruitment board algorithms
+            Verified against official recruitment board algorithms
           </div>
         </div>
       </div>
