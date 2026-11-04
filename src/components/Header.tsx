@@ -11,6 +11,7 @@ interface HeaderProps {
   onOpenHindiHelper: () => void;
   onOpenAiGenerator?: () => void;
   onOpenAdmin?: () => void;
+  onOpenPayment?: () => void;
   settings: TestSettings;
   onToggleSound: () => void;
   currentUser: UserProfile | null;
@@ -26,6 +27,7 @@ export const Header: React.FC<HeaderProps> = ({
   onOpenHindiHelper,
   onOpenAiGenerator,
   onOpenAdmin,
+  onOpenPayment,
   settings,
   onToggleSound,
   currentUser,
@@ -83,6 +85,34 @@ export const Header: React.FC<HeaderProps> = ({
               >
                 <span>🛡️</span>
                 <span className="admin-portal-text">Admin Suite</span>
+              </button>
+            )}
+
+            {onOpenPayment && (
+              <button
+                className="nav-btn"
+                onClick={onOpenPayment}
+                style={{
+                  background: currentUser?.is_subscribed
+                    ? 'linear-gradient(135deg, #10b981 0%, #059669 100%)'
+                    : 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
+                  color: '#ffffff',
+                  border: 'none',
+                  fontWeight: 700,
+                  fontSize: '0.8rem',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '5px',
+                  padding: '6px 12px',
+                  borderRadius: '18px',
+                  cursor: 'pointer',
+                  boxShadow: '0 2px 6px rgba(217, 119, 6, 0.3)',
+                  whiteSpace: 'nowrap'
+                }}
+                title={currentUser?.is_subscribed ? 'Pro Member Active • View Subscription' : 'Upgrade to Pro • Single Exam / All 129 Pass'}
+              >
+                <span>👑</span>
+                <span>{currentUser?.is_subscribed ? 'Pro Active' : 'Plans & Pricing'}</span>
               </button>
             )}
 

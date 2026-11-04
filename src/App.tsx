@@ -14,6 +14,7 @@ import { AuthModal } from './components/AuthModal';
 import { UserDashboardModal } from './components/UserDashboardModal';
 import { AiGeneratorModal } from './components/AiGeneratorModal';
 import { AdminPanelModal } from './components/AdminPanelModal';
+import { PaymentModal } from './components/PaymentModal';
 import { PwaInstallPrompt } from './components/PwaInstallPrompt';
 import { audioEngine } from './utils/audioEngine';
 import { fetchDailyLivePassages, triggerAutoDailyGenerationIfDue } from './services/aiGenerator';
@@ -103,6 +104,7 @@ export const App: React.FC = () => {
   const [isDashboardOpen, setIsDashboardOpen] = useState<boolean>(false);
   const [isAiGeneratorOpen, setIsAiGeneratorOpen] = useState<boolean>(false);
   const [isAdminOpen, setIsAdminOpen] = useState<boolean>(false);
+  const [isPaymentOpen, setIsPaymentOpen] = useState<boolean>(false);
   const [dailyLivePassages, setDailyLivePassages] = useState<Passage[]>([]);
   const [customPassages, setCustomPassages] = useState<Passage[]>([]);
 
@@ -296,6 +298,7 @@ export const App: React.FC = () => {
           onOpenHindiHelper={() => setIsHindiHelperOpen(true)}
           onOpenAiGenerator={() => setIsAiGeneratorOpen(true)}
           onOpenAdmin={() => setIsAdminOpen(true)}
+          onOpenPayment={() => setIsPaymentOpen(true)}
           settings={settings}
           onToggleSound={toggleSound}
           currentUser={currentUser}
@@ -318,6 +321,7 @@ export const App: React.FC = () => {
             onOpenDashboard={() => setIsDashboardOpen(true)}
             onOpenAiGenerator={() => setIsAiGeneratorOpen(true)}
             onOpenAdmin={() => setIsAdminOpen(true)}
+            onOpenPayment={() => setIsPaymentOpen(true)}
           />
         )}
 
@@ -485,6 +489,12 @@ export const App: React.FC = () => {
         onLoginSuccess={(user) => {
           setCurrentUser(user);
         }}
+      />
+
+      <PaymentModal
+        isOpen={isPaymentOpen}
+        onClose={() => setIsPaymentOpen(false)}
+        currentUser={currentUser}
       />
 
       <PwaInstallPrompt />
