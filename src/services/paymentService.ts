@@ -467,3 +467,99 @@ export async function rejectPaymentSubmission(
 
   return { success: true, submission: target };
 }
+
+/**
+ * Check if the active user has administrative privileges
+ */
+export function isUserAdmin(user?: UserProfile | null): boolean {
+  if (!user) return false;
+  if (user.isAdmin || user.role === 'admin') return true;
+  if (
+    user.email &&
+    (user.email.toLowerCase().includes('admin') ||
+      user.email.toLowerCase() === 'purendar950@gmail.com')
+  ) {
+    return true;
+  }
+  return false;
+}
+
+/**
+ * Check if a candidate has unlocked Pro access to a specific examination or category
+ */
+export function hasExamProAccess(
+  user: UserProfile | null | undefined,
+  examId?: string,
+  categoryGroup?: string
+): boolean {
+  if (!user) return false;
+  if (isUserAdmin(user)) return true;
+  if (!user.is_subscribed) return false;
+
+  // Check expiration
+  if (user.subscriptionExpiresAt) {
+    const expiry = new Date(user.subscriptionExpiresAt).getTime();
+    if (!isNaN(expiry) && expiry < Date.now()) {
+      return false; // Subscription expired
+    }
+  }
+
+  // 1. All Exams Mega Pass grants access to everything
+  if (user.subscriptionPlanType === 'all_exams_pass') {
+    return true;
+  }
+
+  // 2. Category Combo Pass grants access to all exams in that group
+  if (
+    user.subscriptionPlanType === 'category_combo' &&
+    categoryGroup &&
+    user.subscriptionExamId === categoryGroup
+  ) {
+    return true;
+  }
+
+  // 3. Single Exam Pass grants access to the specific exam
+  if (user.subscriptionPlanType === 'single_exam' && examId) {
+    if (
+      user.subscriptionExamId === examId ||
+      user.subscriptionExamTitle?.toLowerCase() === examId.toLowerCase()
+    ) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+/**
+ * Calculate lock status for a test passage
+ * Rule: First 7 tests of each exam are UNLOCKED for everyone as a free demo.
+ * Tests #8 onwards require a Pro subscription or Admin privileges.
+ */
+export function isTestLocked(
+  testNumber: number | undefined,
+  indexInList: number,
+  user: UserProfile | null | undefined,
+  examId?: string,
+  categoryGroup?: string
+): { isLocked: boolean; isDemo: boolean; testNumber: number } {
+  const testNum = testNumber !== undefined && testNumber > 0 ? testNumber : (indexInList + 1);
+  const isDemo = testNum <= 7;
+
+  // Free Demo: Tests 1 to 7 are unlocked for everyone
+  if (isDemo) {
+    return {
+      isLocked: false,
+      isDemo: true,
+      testNumber: testNum
+    };
+  }
+
+  // Tests 8 onwards: Locked unless user is Admin or has Pro access
+  const hasAccess = hasExamProAccess(user, examId, categoryGroup);
+  return {
+    isLocked: !hasAccess,
+    isDemo: false,
+    testNumber: testNum
+  };
+}

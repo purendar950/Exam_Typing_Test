@@ -2,6 +2,7 @@ import React, { useState, useMemo, useEffect } from 'react';
 import { Passage, Language, ExamCategory, TestSettings, EvaluationResult, UnifiedExamPost } from '../types';
 import { ALL_EXAMS, CATEGORY_GROUPS, CATEGORY_SUB_FILTERS, UNIFIED_EXAM_POSTS, ExamProfile } from '../data/allExams';
 import { UserProfile } from '../services/firebase';
+import { isTestLocked, hasExamProAccess } from '../services/paymentService';
 import { getFallbackDailyPassages } from '../services/aiGenerator';
 import appLogo from '../assets/logo.png';
 
@@ -16,7 +17,7 @@ interface ChooseTestProps {
   onOpenDashboard?: () => void;
   onOpenAiGenerator?: () => void;
   onOpenAdmin?: () => void;
-  onOpenPayment?: () => void;
+  onOpenPayment?: (examId?: string) => void;
   dailyLivePassages?: Passage[];
 }
 
@@ -49,6 +50,7 @@ interface ExamMode {
 
 // Component for an Exam Type Card (shows inside tests: English, Hindi, Live, Drills)
 // Reusable Benchmark Test Card (Exact TestMentor / Photo Design Replica)
+// Reusable Benchmark Test Card (Exact TestMentor / Photo Design Replica)
 interface ExamBenchmarkTestCardProps {
   emblem: string;
   categoryOrOrg: string;
@@ -70,6 +72,9 @@ interface ExamBenchmarkTestCardProps {
   onBrowse?: () => void;
   startBtnText?: string;
   browseBtnText?: string;
+  isLocked?: boolean;
+  isDemo?: boolean;
+  onUnlock?: () => void;
 }
 
 const ExamBenchmarkTestCard: React.FC<ExamBenchmarkTestCardProps> = ({
@@ -87,7 +92,10 @@ const ExamBenchmarkTestCard: React.FC<ExamBenchmarkTestCardProps> = ({
   onStartMock,
   onBrowse,
   startBtnText,
-  browseBtnText = 'Browse'
+  browseBtnText = 'Browse',
+  isLocked = false,
+  isDemo = false,
+  onUnlock
 }) => {
   const getLanguagePill = (lang: string) => {
     if (lang === 'english') {
@@ -107,20 +115,28 @@ const ExamBenchmarkTestCard: React.FC<ExamBenchmarkTestCardProps> = ({
 
   const langStyle = getLanguagePill(language);
 
+  const handleCardClick = () => {
+    if (isLocked) {
+      if (onUnlock) onUnlock();
+    } else {
+      onStartMock();
+    }
+  };
+
   return (
     <div
       className="testmentor-exam-card exam-card-hover"
-      onClick={onStartMock}
+      onClick={handleCardClick}
       style={{
-        background: '#ffffff',
-        border: '1.5px solid #e2e8f0',
+        background: isLocked ? '#fffdfa' : '#ffffff',
+        border: isLocked ? '1.5px solid #fed7aa' : '1.5px solid #e2e8f0',
         borderRadius: '14px',
         padding: '18px',
         display: 'flex',
         flexDirection: 'column',
         justifyContent: 'space-between',
         cursor: 'pointer',
-        boxShadow: '0 2px 4px rgba(0,0,0,0.03)',
+        boxShadow: isLocked ? '0 2px 6px rgba(217, 119, 6, 0.06)' : '0 2px 4px rgba(0,0,0,0.03)',
         transition: 'all 0.18s ease'
       }}
     >
@@ -145,6 +161,34 @@ const ExamBenchmarkTestCard: React.FC<ExamBenchmarkTestCardProps> = ({
           </div>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '5px', flexShrink: 0 }}>
+            {isDemo && (
+              <span style={{
+                fontSize: '0.7rem',
+                fontWeight: 800,
+                padding: '2px 7px',
+                borderRadius: '4px',
+                background: '#dcfce7',
+                color: '#15803d',
+                border: '1px solid #86efac',
+                whiteSpace: 'nowrap'
+              }}>
+                🎁 FREE DEMO
+              </span>
+            )}
+            {isLocked && (
+              <span style={{
+                fontSize: '0.7rem',
+                fontWeight: 800,
+                padding: '2px 7px',
+                borderRadius: '4px',
+                background: '#fef3c7',
+                color: '#b45309',
+                border: '1px solid #fde68a',
+                whiteSpace: 'nowrap'
+              }}>
+                🔒 PRO TEST
+              </span>
+            )}
             {extraBadge && (
               <span style={{
                 fontSize: '0.7rem',
@@ -245,6 +289,26 @@ const ExamBenchmarkTestCard: React.FC<ExamBenchmarkTestCardProps> = ({
           </span>
         </div>
 
+        {/* Pro Lock Notice */}
+        {isLocked && (
+          <div style={{
+            background: '#fffbeb',
+            border: '1px solid #fde68a',
+            borderRadius: '6px',
+            padding: '6px 10px',
+            fontSize: '0.73rem',
+            fontWeight: 700,
+            color: '#92400e',
+            marginBottom: '12px',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '6px'
+          }}>
+            <span>🔒</span>
+            <span>Pro Test Series • Tests 1–7 Free Demo • Unlock with Pro Pass</span>
+          </div>
+        )}
+
         {/* Past Candidate Score if attempted */}
         {pastAttempt ? (
           <div style={{
@@ -271,44 +335,95 @@ const ExamBenchmarkTestCard: React.FC<ExamBenchmarkTestCardProps> = ({
         style={{ display: 'flex', gap: '8px', borderTop: '1px solid #f1f5f9', paddingTop: '12px' }}
         onClick={(e) => e.stopPropagation()}
       >
-        <button
-          onClick={onStartMock}
-          className="btn btn-primary"
-          style={{
-            flex: 1,
-            padding: '8px 12px',
-            fontSize: '0.84rem',
-            fontWeight: 700,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: '5px',
-            cursor: 'pointer'
-          }}
-          title={`Start official ${durationMinutes}-minute test with ${targetSpeed} WPM speed cutoff`}
-        >
-          <span>⚡</span>
-          <span>{startBtnText || `Start Mock (${durationMinutes}m)`}</span>
-        </button>
+        {isLocked ? (
+          <>
+            <button
+              onClick={onUnlock}
+              className="btn btn-warning"
+              style={{
+                flex: 1,
+                padding: '8px 12px',
+                fontSize: '0.84rem',
+                fontWeight: 800,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '6px',
+                cursor: 'pointer',
+                background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
+                color: '#ffffff',
+                border: 'none',
+                borderRadius: '8px',
+                boxShadow: '0 2px 6px rgba(217, 119, 6, 0.25)'
+              }}
+              title="Unlock full official test series with Pro access"
+            >
+              <span>🔒</span>
+              <span>Unlock with Pro</span>
+            </button>
 
-        <button
-          onClick={onBrowse || onStartMock}
-          className="btn btn-secondary"
-          style={{
-            padding: '8px 14px',
-            fontSize: '0.84rem',
-            fontWeight: 600,
-            whiteSpace: 'nowrap',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '4px',
-            cursor: 'pointer'
-          }}
-          title="Browse exam passages"
-        >
-          <span>{browseBtnText}</span>
-          <span>→</span>
-        </button>
+            <button
+              onClick={onUnlock}
+              className="btn btn-secondary"
+              style={{
+                padding: '8px 14px',
+                fontSize: '0.84rem',
+                fontWeight: 700,
+                whiteSpace: 'nowrap',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '4px',
+                cursor: 'pointer',
+                color: '#d97706',
+                borderColor: '#fed7aa'
+              }}
+              title="View pricing & plans"
+            >
+              <span>💎 Plans</span>
+            </button>
+          </>
+        ) : (
+          <>
+            <button
+              onClick={onStartMock}
+              className="btn btn-primary"
+              style={{
+                flex: 1,
+                padding: '8px 12px',
+                fontSize: '0.84rem',
+                fontWeight: 700,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '5px',
+                cursor: 'pointer'
+              }}
+              title={`Start official ${durationMinutes}-minute test with ${targetSpeed} WPM speed cutoff`}
+            >
+              <span>{isDemo ? '🎁' : '⚡'}</span>
+              <span>{startBtnText || (isDemo ? `Start Free Demo (${durationMinutes}m)` : `Start Mock (${durationMinutes}m)`)}</span>
+            </button>
+
+            <button
+              onClick={onBrowse || onStartMock}
+              className="btn btn-secondary"
+              style={{
+                padding: '8px 14px',
+                fontSize: '0.84rem',
+                fontWeight: 600,
+                whiteSpace: 'nowrap',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '4px',
+                cursor: 'pointer'
+              }}
+              title="Browse exam passages"
+            >
+              <span>{browseBtnText}</span>
+              <span>→</span>
+            </button>
+          </>
+        )}
       </div>
     </div>
   );
@@ -483,6 +598,21 @@ const ExamTypePostCard: React.FC<{
           }}>
             📏 {primaryVariant?.inputType === 'character' ? `${primaryVariant.inputLimit} Chars` : `${primaryVariant?.inputLimit || 500} Words`}
           </span>
+
+          <span style={{
+            fontSize: '0.75rem',
+            fontWeight: 700,
+            background: '#ecfdf5',
+            color: '#047857',
+            padding: '3px 8px',
+            borderRadius: '6px',
+            border: '1px solid #a7f3d0',
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '4px'
+          }}>
+            🎁 7 Free Demo Tests
+          </span>
         </div>
 
         {/* Available Tests Inside: English, Hindi, Live, Drills */}
@@ -617,10 +747,10 @@ const ExamTypePostCard: React.FC<{
             gap: '5px',
             cursor: 'pointer'
           }}
-          title={`Start official ${duration}-min mock test`}
+          title={`Start official ${duration}-min free demo test`}
         >
-          <span>⚡</span>
-          <span>Start Mock ({duration}m)</span>
+          <span>🎁</span>
+          <span>Start Free Demo ({duration}m)</span>
         </button>
 
         <button
@@ -636,9 +766,9 @@ const ExamTypePostCard: React.FC<{
             gap: '4px',
             cursor: 'pointer'
           }}
-          title="Explore exam hub & test modes"
+          title="Explore all tests and modes (Tests 1-7 Free Demo)"
         >
-          <span>Browse</span>
+          <span>Browse Tests</span>
           <span>→</span>
         </button>
       </div>
@@ -1413,12 +1543,20 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
     }
   };
 
-  const renderLiveTestCard = (t: Passage) => {
+  const renderLiveTestCard = (t: Passage, index: number = 0) => {
     const isHindi = t.language.startsWith('hindi');
     const isHard = t.difficulty === 'hard';
     const attempt = pastAttemptsMap.get(t.id) || pastAttemptsMap.get(t.title);
     const speed = selectedExamProfile?.targetSpeed || (isHindi ? (mangalVariant?.targetSpeed || 25) : (engVariant?.targetSpeed || 30));
     const acc = selectedExamProfile?.minAccuracy || 85;
+
+    const access = isTestLocked(
+      t.testNumber,
+      index,
+      currentUser,
+      selectedExamProfile?.id || activePost?.id,
+      selectedExamProfile?.categoryGroup || activePost?.categoryGroup
+    );
 
     return (
       <ExamBenchmarkTestCard
@@ -1439,10 +1577,13 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
           border: isHard ? '#fca5a5' : '#86efac'
         }}
         pastAttempt={attempt}
+        isLocked={access.isLocked}
+        isDemo={access.isDemo}
+        onUnlock={() => onOpenPayment?.(selectedExamProfile?.id || activePost?.id)}
         onStartMock={() => onStartTest(t, selectedExamProfile?.durationMinutes || 15, selectedExamProfile)}
         onBrowse={() => onStartTest(t, selectedExamProfile?.durationMinutes || 15, selectedExamProfile)}
-        startBtnText={attempt ? `Retest (${selectedExamProfile?.durationMinutes || 15}m)` : `Start Mock (${selectedExamProfile?.durationMinutes || 15}m)`}
-        browseBtnText="Start Test"
+        startBtnText={access.isDemo ? (attempt ? `Retest Demo (${selectedExamProfile?.durationMinutes || 15}m)` : `Start Demo (${selectedExamProfile?.durationMinutes || 15}m)`) : (attempt ? `Retest (${selectedExamProfile?.durationMinutes || 15}m)` : `Start Mock (${selectedExamProfile?.durationMinutes || 15}m)`)}
+        browseBtnText={access.isDemo ? "Free Demo" : "Start Test"}
       />
     );
   };
@@ -1543,7 +1684,7 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
               currentUser?.is_subscribed ? (
                 <div
                   className="testmentor-metric-pill"
-                  onClick={onOpenPayment}
+                  onClick={() => onOpenPayment()}
                   style={{
                     cursor: 'pointer',
                     background: '#f0fdf4',
@@ -1564,7 +1705,7 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
                 </div>
               ) : (
                 <button
-                  onClick={onOpenPayment}
+                  onClick={() => onOpenPayment()}
                   style={{
                     background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
                     color: '#ffffff',
@@ -2015,10 +2156,11 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
                     minAccuracy={exam.minAccuracy}
                     limitCount={exam.inputLimit}
                     limitType={exam.inputType === 'character' ? 'Chars' : 'Words'}
+                    isDemo={true}
                     onStartMock={() => handleQuickStartExam(exam)}
                     onBrowse={() => handleBrowseExamPassages(exam)}
-                    startBtnText={`Start Mock (${exam.durationMinutes}m)`}
-                    browseBtnText="Browse"
+                    startBtnText={`Start Free Demo (${exam.durationMinutes}m)`}
+                    browseBtnText="Browse (7 Demo)"
                   />
                 ))
               )}
@@ -2942,6 +3084,70 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
                   </div>
                 </div>
 
+                {/* Free Demo & Pro Access Banner */}
+                <div style={{
+                  background: 'linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%)',
+                  border: '1.5px solid #86efac',
+                  borderRadius: '12px',
+                  padding: '14px 18px',
+                  marginBottom: '18px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  flexWrap: 'wrap',
+                  gap: '12px'
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    <div style={{
+                      fontSize: '1.6rem',
+                      background: '#ffffff',
+                      width: '42px',
+                      height: '42px',
+                      borderRadius: '50%',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      boxShadow: '0 2px 4px rgba(0,0,0,0.05)',
+                      flexShrink: 0
+                    }}>
+                      🎁
+                    </div>
+                    <div>
+                      <div style={{ fontWeight: 800, color: '#166534', fontSize: '0.94rem' }}>
+                        Free Demo Unlocked: Tests #01 to #07 are 100% FREE for Everyone
+                      </div>
+                      <div style={{ fontSize: '0.8rem', color: '#15803d', marginTop: '2px' }}>
+                        Practice full exam timer & cutoffs with zero restriction. Tests #08+ are full official exam series unlocked with a Pro Pass.
+                      </div>
+                    </div>
+                  </div>
+
+                  {!hasExamProAccess(currentUser, selectedExamProfile?.id || activePost?.id, selectedExamProfile?.categoryGroup || activePost?.categoryGroup) && (
+                    <button
+                      type="button"
+                      onClick={() => onOpenPayment?.(selectedExamProfile?.id || activePost?.id)}
+                      className="btn btn-warning"
+                      style={{
+                        padding: '8px 18px',
+                        fontSize: '0.86rem',
+                        fontWeight: 800,
+                        background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
+                        color: '#ffffff',
+                        border: 'none',
+                        borderRadius: '8px',
+                        cursor: 'pointer',
+                        boxShadow: '0 2px 6px rgba(217, 119, 6, 0.25)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '6px'
+                      }}
+                    >
+                      <span>💎</span>
+                      <span>Unlock All Tests (Pro)</span>
+                    </button>
+                  )}
+                </div>
+
                 {/* Available Tests Count */}
                 <div
                   style={{
@@ -2989,7 +3195,7 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
                   </div>
                 ) : (
                   <div className="exam-grid">
-                    {filteredLevel3Passages.slice(0, visibleCount).map((passage) => {
+                    {filteredLevel3Passages.slice(0, visibleCount).map((passage, index) => {
                       const past = pastAttemptsMap.get(passage.id) || pastAttemptsMap.get(passage.title);
                       const cardSpeed = selectedExamProfile?.targetSpeed || (passage.language === 'english' ? (engVariant?.targetSpeed || 30) : (mangalVariant?.targetSpeed || 25));
                       const cardAcc = selectedExamProfile?.minAccuracy || (activePost.variants[0]?.minAccuracy || 85);
@@ -3000,9 +3206,17 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
                         : activePost.organization;
                       const cardEmblem = getEmblemForGroup(selectedExamProfile?.categoryGroup || activePost.categoryGroup);
 
+                      const access = isTestLocked(
+                        passage.testNumber,
+                        index,
+                        currentUser,
+                        selectedExamProfile?.id || activePost.id,
+                        selectedExamProfile?.categoryGroup || activePost.categoryGroup
+                      );
+
                       const testNumberStr = passage.testNumber
                         ? `Test #${passage.testNumber < 100 ? String(passage.testNumber).padStart(2, '0') : passage.testNumber}`
-                        : undefined;
+                        : `Test #${String(index + 1).padStart(2, '0')}`;
 
                       return (
                         <ExamBenchmarkTestCard
@@ -3016,17 +3230,20 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
                           minAccuracy={cardAcc}
                           limitCount={cardLimit}
                           limitType={cardLimitType}
-                          extraBadge={testNumberStr ? {
-                            text: testNumberStr,
-                            bg: '#e0f2fe',
-                            color: '#0369a1',
-                            border: '#bae6fd'
-                          } : undefined}
+                          extraBadge={{
+                            text: access.isDemo ? `${testNumberStr} • FREE DEMO` : (access.isLocked ? `${testNumberStr} • 🔒 PRO` : testNumberStr),
+                            bg: access.isDemo ? '#dcfce7' : (access.isLocked ? '#fef3c7' : '#e0f2fe'),
+                            color: access.isDemo ? '#15803d' : (access.isLocked ? '#b45309' : '#0369a1'),
+                            border: access.isDemo ? '#86efac' : (access.isLocked ? '#fde68a' : '#bae6fd')
+                          }}
                           pastAttempt={past}
+                          isLocked={access.isLocked}
+                          isDemo={access.isDemo}
+                          onUnlock={() => onOpenPayment?.(selectedExamProfile?.id || activePost.id)}
                           onStartMock={() => onStartTest(passage, selectedDuration, selectedExamProfile)}
                           onBrowse={() => onStartTest(passage, selectedDuration, selectedExamProfile)}
-                          startBtnText={past ? `Retest (${selectedDuration}m)` : `Start Mock (${selectedDuration}m)`}
-                          browseBtnText="Start Test"
+                          startBtnText={access.isDemo ? (past ? `Retest Demo (${selectedDuration}m)` : `Start Demo Test (${selectedDuration}m)`) : (past ? `Retest (${selectedDuration}m)` : `Start Mock (${selectedDuration}m)`)}
+                          browseBtnText={access.isDemo ? "Free Demo" : "Start Test"}
                         />
                       );
                     })}
@@ -3268,12 +3485,23 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
                           overflowY: 'auto'
                         }}
                       >
-                        {classicActiveList.map((p) => {
+                        {classicActiveList.map((p, idx) => {
                           const badge = getDifficultyBadge(p.difficulty);
+                          const access = isTestLocked(
+                            p.testNumber,
+                            idx,
+                            currentUser,
+                            selectedExamProfile?.id || activePost?.id,
+                            selectedExamProfile?.categoryGroup || activePost?.categoryGroup
+                          );
                           return (
                             <div
                               key={p.id}
                               onClick={() => {
+                                if (access.isLocked) {
+                                  onOpenPayment?.(selectedExamProfile?.id || activePost?.id);
+                                  return;
+                                }
                                 setClassicPassageId(p.id);
                                 setIsClassicDropdownOpen(false);
                               }}
@@ -3284,12 +3512,24 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
                                 display: 'flex',
                                 alignItems: 'center',
                                 justifyContent: 'space-between',
-                                backgroundColor: classicPassageId === p.id ? '#f0f9ff' : 'transparent'
+                                backgroundColor: classicPassageId === p.id ? '#f0f9ff' : (access.isLocked ? '#fffdfa' : 'transparent')
                               }}
                             >
                               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                                 <span className={`ar-badge-difficulty ${badge.cls}`}>{badge.label}</span>
-                                <span style={{ fontWeight: 600, color: '#1e293b' }}>{p.title}</span>
+                                <span style={{ fontWeight: 600, color: access.isLocked ? '#92400e' : '#1e293b' }}>
+                                  {p.title}
+                                </span>
+                                {access.isDemo && (
+                                  <span style={{ fontSize: '0.68rem', fontWeight: 800, padding: '1px 6px', borderRadius: '4px', background: '#dcfce7', color: '#15803d' }}>
+                                    DEMO
+                                  </span>
+                                )}
+                                {access.isLocked && (
+                                  <span style={{ fontSize: '0.68rem', fontWeight: 800, padding: '1px 6px', borderRadius: '4px', background: '#fef3c7', color: '#b45309' }}>
+                                    🔒 PRO
+                                  </span>
+                                )}
                               </div>
                               <span style={{ fontSize: '0.85rem', color: '#64748b' }}>
                                 {p.wordCount} words
@@ -3360,6 +3600,18 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
                     onClick={() => {
                       const passToStart = currentClassicSelectedPassage || classicActiveList[0];
                       if (passToStart) {
+                        const passIdx = classicActiveList.findIndex((p) => p.id === passToStart.id);
+                        const access = isTestLocked(
+                          passToStart.testNumber,
+                          passIdx >= 0 ? passIdx : 0,
+                          currentUser,
+                          selectedExamProfile?.id || activePost?.id,
+                          selectedExamProfile?.categoryGroup || activePost?.categoryGroup
+                        );
+                        if (access.isLocked) {
+                          onOpenPayment?.(selectedExamProfile?.id || activePost?.id);
+                          return;
+                        }
                         onStartTest(passToStart, classicDuration, selectedExamProfile);
                       }
                     }}

@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import {
   PaymentPlan,
   getPaymentPlans,
@@ -41,8 +41,26 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
   // Single exam selection if single_exam plan chosen
   const [selectedExamId, setSelectedExamId] = useState<string>(initialSelectedExamId || '53');
 
+  // Sync when initialSelectedExamId or modal opens
+  useEffect(() => {
+    if (initialSelectedExamId && isOpen) {
+      const match = ALL_EXAMS.find(
+        (e) =>
+          e.id === initialSelectedExamId ||
+          e.slug === initialSelectedExamId ||
+          e.title.toLowerCase().includes(initialSelectedExamId.toLowerCase())
+      );
+      if (match) {
+        setSelectedExamId(match.id);
+      }
+    }
+  }, [initialSelectedExamId, isOpen]);
+
   const selectedExam = useMemo(() => {
-    return ALL_EXAMS.find((e) => e.id === selectedExamId) || ALL_EXAMS[0];
+    return (
+      ALL_EXAMS.find((e) => e.id === selectedExamId || e.slug === selectedExamId) ||
+      ALL_EXAMS[0]
+    );
   }, [selectedExamId]);
 
   // Promo code states
