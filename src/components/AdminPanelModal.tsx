@@ -364,7 +364,7 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
     setPaymentActionLoadingId(sub.id);
     setPaymentFeedback(null);
     try {
-      const res = await approvePaymentSubmission(sub.id, activeAdminUser?.email || 'admin@testmentor.in');
+      const res = await approvePaymentSubmission(sub.id, activeAdminUser?.email || 'admin@examtyping.in');
       if (res.success) {
         setPaymentFeedback({
           type: 'success',
@@ -392,7 +392,7 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
     setPaymentActionLoadingId(sub.id);
     setPaymentFeedback(null);
     try {
-      const res = await rejectPaymentSubmission(sub.id, reason, activeAdminUser?.email || 'admin@testmentor.in');
+      const res = await rejectPaymentSubmission(sub.id, reason, activeAdminUser?.email || 'admin@examtyping.in');
       if (res.success) {
         setPaymentFeedback({ type: 'success', message: `Payment ${sub.id} marked as rejected.` });
         await loadPaymentsAndPromos();

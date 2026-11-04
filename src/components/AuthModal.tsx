@@ -150,7 +150,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onLoginSu
           border: '1px solid #e2e8f0'
         }}
       >
-        {/* Official Header Banner like ARTyping / TestMentor */}
+        {/* Portal Header Banner */}
         <div
           style={{
             background: 'linear-gradient(135deg, #1e3a8a 0%, #0369a1 100%)',

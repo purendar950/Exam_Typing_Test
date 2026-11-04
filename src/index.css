@@ -709,7 +709,7 @@ body {
   color: #64748b;
 }
 
-/* Diff Styling (TestMentor Standard) */
+/* Diff Evaluation Styling */
 .diff-box {
   background: #ffffff;
   border: 1px solid var(--border-color);
@@ -1578,7 +1578,7 @@ body {
 }
 
 .exam-test-card,
-.testmentor-exam-card,
+.examportal-exam-card,
 .benchmark-test-card {
   box-sizing: border-box;
   min-width: 0;
@@ -1811,11 +1811,11 @@ body {
 }
 
 /* ========================================================
-   TESTMENTOR-STYLE 3-LEVEL EXAM PORTAL
+   EXAMINATION PORTAL 3-LEVEL DESIGN
    ======================================================== */
 
-/* Trust & Stat Header Bar (TestMentor top strip) */
-.testmentor-trust-bar {
+/* Trust & Stat Header Bar */
+.examportal-trust-bar {
   background: #ffffff;
   border: 1px solid #e2e8f0;
   border-radius: var(--radius-lg);
@@ -1829,13 +1829,13 @@ body {
   flex-wrap: wrap;
 }
 
-.testmentor-brand-info {
+.examportal-brand-info {
   display: flex;
   align-items: center;
   gap: 14px;
 }
 
-.testmentor-brand-logo {
+.examportal-brand-logo {
   width: 48px;
   height: 48px;
   border-radius: 12px;
@@ -1850,27 +1850,27 @@ body {
   flex-shrink: 0;
 }
 
-.testmentor-brand-title {
+.examportal-brand-title {
   font-size: 1.15rem;
   font-weight: 800;
   color: #0f172a;
   line-height: 1.2;
 }
 
-.testmentor-brand-sub {
+.examportal-brand-sub {
   font-size: 0.8rem;
   color: #64748b;
   font-weight: 500;
 }
 
-.testmentor-metrics-row {
+.examportal-metrics-row {
   display: flex;
   align-items: center;
   gap: 12px;
   flex-wrap: wrap;
 }
 
-.testmentor-metric-pill {
+.examportal-metric-pill {
   background: #f8fafc;
   border: 1px solid #e2e8f0;
   border-radius: 10px;
@@ -1880,21 +1880,21 @@ body {
   gap: 10px;
 }
 
-.testmentor-metric-val {
+.examportal-metric-val {
   font-size: 0.95rem;
   font-weight: 800;
   color: #0f172a;
   line-height: 1.1;
 }
 
-.testmentor-metric-lbl {
+.examportal-metric-lbl {
   font-size: 0.7rem;
   color: #64748b;
   font-weight: 600;
 }
 
 /* Level 1: "All Courses" Heading */
-.testmentor-courses-header {
+.examportal-courses-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -1903,7 +1903,7 @@ body {
   gap: 12px;
 }
 
-.testmentor-courses-title {
+.examportal-courses-title {
   font-size: 1.4rem;
   font-weight: 800;
   color: #0f172a;
@@ -1912,15 +1912,15 @@ body {
   gap: 8px;
 }
 
-/* Level 1: Grid of Exam Cards (TestMentor replica) */
-.testmentor-grid {
+/* Level 1: Grid of Exam Cards */
+.examportal-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
   gap: 16px;
   margin-bottom: 32px;
 }
 
-.testmentor-exam-card {
+.examportal-exam-card {
   background: #ffffff;
   border: 1.5px solid #e2e8f0;
   border-radius: 12px;
@@ -1937,13 +1937,13 @@ body {
   min-height: 185px;
 }
 
-.testmentor-exam-card:hover {
+.examportal-exam-card:hover {
   border-color: #0284c7;
   transform: translateY(-4px);
   box-shadow: 0 10px 22px -4px rgba(2, 132, 199, 0.18);
 }
 
-.testmentor-emblem-wrap {
+.examportal-emblem-wrap {
   width: 56px;
   height: 56px;
   border-radius: 50%;
@@ -1958,13 +1958,13 @@ body {
   transition: transform 0.2s ease;
 }
 
-.testmentor-exam-card:hover .testmentor-emblem-wrap {
+.examportal-exam-card:hover .examportal-emblem-wrap {
   transform: scale(1.08);
   border-color: #93c5fd;
   background: #eff6ff;
 }
 
-.testmentor-exam-title {
+.examportal-exam-title {
   font-size: 0.88rem;
   font-weight: 700;
   color: #1e293b;
@@ -1972,7 +1972,7 @@ body {
   margin-bottom: 10px;
 }
 
-.testmentor-exam-badge {
+.examportal-exam-badge {
   font-size: 0.7rem;
   font-weight: 700;
   color: #0284c7;
@@ -2152,21 +2152,21 @@ body {
 }
 
 @media (max-width: 640px) {
-  .testmentor-grid {
+  .examportal-grid {
     grid-template-columns: repeat(2, 1fr);
     gap: 12px;
   }
-  .testmentor-exam-card {
+  .examportal-exam-card {
     padding: 16px 10px;
     min-height: 165px;
   }
-  .testmentor-emblem-wrap {
+  .examportal-emblem-wrap {
     width: 46px;
     height: 46px;
     font-size: 1.4rem;
     margin-bottom: 8px;
   }
-  .testmentor-exam-title {
+  .examportal-exam-title {
     font-size: 0.8rem;
   }
   .level2-mode-grid {
