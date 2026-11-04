@@ -1,4 +1,4 @@
-import { EvaluationResult, Language, ExamCategory, WeakKeyStat } from '../types';
+import { EvaluationResult, Language, ExamCategory, WeakKeyStat, CalculationModel } from '../types';
 import { normalizeHindiText, MANGAL_INSCRIPT_KEYS, KRUTI_DEV_KEYS } from './hindiEngine';
 
 export interface EvaluateInput {
@@ -14,6 +14,10 @@ export interface EvaluateInput {
   targetSpeed?: number;
   requiredAccuracy?: number;
   examProfileTitle?: string;
+  calculationModel?: CalculationModel;
+  inputType?: 'word' | 'character';
+  inputLimit?: number;
+  limitErrorPercentage?: number;
 }
 
 /**
@@ -394,15 +398,80 @@ export function evaluateTypingTest(input: EvaluateInput): EvaluationResult {
   // 8. Error Percentage: (Equivalent Errors / Passage Words) * 100
   const errorPercentage = Math.round((equivalentErrors / passageBenchmarkDenominator) * 1000) / 10;
 
-  // Official Qualifying Cutoffs:
-  // UP Police Standard: 25 Hindi / 30 English, 85.0% official passage accuracy
+  // Resolve calculation model
+  const model: CalculationModel = input.calculationModel ||
+    (input.category.includes('up_police') || input.category.includes('upsssc') || input.category.includes('uppsc') ? 'upprpb' :
+     input.category.includes('rrb') || input.category.includes('capf') || input.category.includes('bsf') || input.category.includes('ssb') ? 'rrb_eduquity' :
+     input.category.includes('ssc') ? 'ssc_dest' :
+     input.category.includes('court') || input.category.includes('jja') ? 'court_delhi' :
+     input.category.includes('cpct') ? 'mp_cpct' : 'upprpb');
+
+  // Official Qualifying Cutoffs
   const defaultRequiredSpeed = input.language.startsWith('hindi') ? 25 : 30;
   const requiredSpeed = input.targetSpeed && input.targetSpeed > 0 ? input.targetSpeed : defaultRequiredSpeed;
   const requiredAccuracy = input.requiredAccuracy && input.requiredAccuracy > 0 ? input.requiredAccuracy : 85.0;
 
-  // Official Qualification Verdict:
-  // Must fulfill BOTH the Net WPM benchmark AND the 85.0% Passage Accuracy threshold
-  const isQualified = netWpm >= requiredSpeed && accuracy >= requiredAccuracy;
+  // Exam-specific metrics
+  const courtMarks = Math.max(0, Math.round((50.0 - (equivalentErrors * 0.1)) * 10) / 10);
+  const sscErrorPercentage = Math.round((equivalentErrors / Math.max(1, originalWords.length)) * 1000) / 10;
+  const rrbNetWpm = eduquityNetWpm;
+  const cpctNetSpeed = Math.round((correctWords / timeTakenMinutes) * 10) / 10;
+
+  let cpctBand: string | undefined;
+  if (cpctNetSpeed >= 60) {
+    cpctBand = 'Level 1 (80%+ / 60+ WPM)';
+  } else if (cpctNetSpeed >= 50) {
+    cpctBand = 'Level 2 (70-79% / 50-59 WPM)';
+  } else if (cpctNetSpeed >= 40) {
+    cpctBand = 'Level 3 (60-69% / 40-49 WPM)';
+  } else if (cpctNetSpeed >= 30) {
+    cpctBand = 'Level 4 (50-59% / 30-39 WPM)';
+  } else {
+    cpctBand = 'Below Qualifying Standard';
+  }
+
+  // Model-specific qualification verdict
+  let isQualified = false;
+  switch (model) {
+    case 'upprpb':
+      isQualified = netWpm >= requiredSpeed && accuracy >= requiredAccuracy;
+      break;
+
+    case 'rrb_eduquity':
+      isQualified = rrbNetWpm >= requiredSpeed;
+      break;
+
+    case 'ssc_dest': {
+      const permissibleError = input.limitErrorPercentage ?? (input.examProfileTitle?.includes('CHSL') ? 7.0 : 20.0);
+      isQualified = sscErrorPercentage <= permissibleError && netWpm >= (requiredSpeed > 0 ? requiredSpeed : 25);
+      break;
+    }
+
+    case 'court_delhi': {
+      const courtErrorRate = Math.round((equivalentErrors / Math.max(1, typedWords.length)) * 1000) / 10;
+      isQualified = netWpm >= requiredSpeed && courtErrorRate <= 3.0;
+      break;
+    }
+
+    case 'court_ahc':
+      isQualified = netWpm >= requiredSpeed && courtMarks >= 25.0;
+      break;
+
+    case 'court_phhc': {
+      const phhcSpeed = Math.max(0, Math.round(((typedWords.length - equivalentErrors) / timeTakenMinutes) * 10) / 10);
+      isQualified = phhcSpeed >= requiredSpeed;
+      break;
+    }
+
+    case 'mp_cpct':
+      isQualified = cpctNetSpeed >= requiredSpeed;
+      break;
+
+    case 'standard':
+    default:
+      isQualified = netWpm >= requiredSpeed && typedAccuracy >= (requiredAccuracy || 85.0);
+      break;
+  }
 
   const examTitle = input.examProfileTitle || (input.category === 'up_police_asi' ? 'UP Police ASI' : 'UP Police Computer Operator');
 
@@ -412,6 +481,13 @@ export function evaluateTypingTest(input: EvaluateInput): EvaluationResult {
     language: input.language,
     category: input.category,
     examProfileTitle: examTitle,
+    calculationModel: model,
+    inputType: input.inputType,
+    inputLimit: input.inputLimit,
+    courtMarks,
+    sscErrorPercentage,
+    rrbNetWpm,
+    cpctBand,
     timeAllowedMinutes: input.timeAllowedMinutes,
     timeTakenSeconds: input.timeTakenSeconds,
     totalKeystrokes,
@@ -438,8 +514,8 @@ export function evaluateTypingTest(input: EvaluateInput): EvaluationResult {
     qualificationCriteria: {
       requiredSpeed,
       requiredAccuracy,
-      achievedSpeed: netWpm,
-      achievedAccuracy: accuracy,
+      achievedSpeed: model === 'rrb_eduquity' ? rrbNetWpm : (model === 'mp_cpct' ? cpctNetSpeed : netWpm),
+      achievedAccuracy: model === 'ssc_dest' ? (100 - sscErrorPercentage) : accuracy,
       examTitle
     },
     wrongWordsList: Array.from(new Set(wrongWordsList)),
