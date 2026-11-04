@@ -5,6 +5,7 @@ import { UserProfile } from '../services/firebase';
 import { isTestLocked, hasExamProAccess } from '../services/paymentService';
 import { getFallbackDailyPassages } from '../services/aiGenerator';
 import appLogo from '../assets/logo.png';
+import { ExamLogo } from '../utils/examLogos';
 
 interface ChooseTestProps {
   passages: Passage[];
@@ -54,6 +55,8 @@ interface ExamMode {
 // Reusable Benchmark Test Card (Exact TestMentor / Photo Design Replica)
 interface ExamBenchmarkTestCardProps {
   emblem: string;
+  logoIdentifier?: string;
+  categoryGroup?: string;
   categoryOrOrg: string;
   language: string;
   title: string;
@@ -80,6 +83,8 @@ interface ExamBenchmarkTestCardProps {
 
 const ExamBenchmarkTestCard: React.FC<ExamBenchmarkTestCardProps> = ({
   emblem,
+  logoIdentifier,
+  categoryGroup,
   categoryOrOrg,
   language,
   title,
@@ -159,7 +164,11 @@ const ExamBenchmarkTestCard: React.FC<ExamBenchmarkTestCardProps> = ({
           minWidth: 0
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px', minWidth: 0, flexShrink: 1 }}>
-            <span style={{ fontSize: '1.25rem', flexShrink: 0 }}>{emblem}</span>
+            {logoIdentifier ? (
+              <ExamLogo identifier={logoIdentifier} categoryGroup={categoryGroup} size={26} />
+            ) : (
+              <span style={{ fontSize: '1.25rem', flexShrink: 0 }}>{emblem}</span>
+            )}
             <span style={{
               fontSize: '0.72rem',
               fontWeight: 700,
@@ -550,7 +559,7 @@ const ExamTypePostCard: React.FC<{
           minWidth: 0
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', minWidth: 0, flexShrink: 1 }}>
-            <span style={{ fontSize: '1.4rem', flexShrink: 0 }}>{getEmblemForGroup(post.categoryGroup)}</span>
+            <ExamLogo identifier={post.id} categoryGroup={post.categoryGroup} size={32} />
             <span style={{
               fontSize: '0.72rem',
               fontWeight: 700,
@@ -2363,6 +2372,8 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
                   <ExamBenchmarkTestCard
                     key={exam.id}
                     emblem={getEmblemForGroup(exam.categoryGroup)}
+                    logoIdentifier={exam.slug || exam.id}
+                    categoryGroup={exam.categoryGroup}
                     categoryOrOrg={CATEGORY_GROUPS.find((g) => g.id === exam.categoryGroup)?.title || 'Exam'}
                     language={exam.language}
                     title={exam.title}
@@ -2470,8 +2481,8 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
             {/* Exam Hero Card */}
             <div className="level2-hero-card">
               <div className="level2-exam-info">
-                <div className="level2-exam-emblem">
-                  <span>{getEmblemForGroup(activePost.categoryGroup)}</span>
+                <div className="level2-exam-emblem" style={{ background: '#ffffff', borderRadius: '50%', padding: '4px', border: '2px solid #bae6fd', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <ExamLogo identifier={activePost.id} categoryGroup={activePost.categoryGroup} size={50} />
                 </div>
                 <div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
@@ -2630,7 +2641,7 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
               }}
             >
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                <span style={{ fontSize: '1.8rem' }}>{getEmblemForGroup(activePost.categoryGroup)}</span>
+                <ExamLogo identifier={activePost.id} categoryGroup={activePost.categoryGroup} size={42} />
                 <div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                     <strong style={{ color: '#1e40af', fontSize: '1.02rem' }}>{activePost.postTitle}</strong>
@@ -3473,6 +3484,8 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
                         <ExamBenchmarkTestCard
                           key={passage.id}
                           emblem={cardEmblem}
+                          logoIdentifier={selectedExamProfile?.id || activePost.id}
+                          categoryGroup={selectedExamProfile?.categoryGroup || activePost.categoryGroup}
                           categoryOrOrg={cardCategory}
                           language={passage.language}
                           title={passage.title}
