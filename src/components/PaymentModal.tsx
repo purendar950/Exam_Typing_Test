@@ -867,7 +867,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
                           💬 Need instant payment activation or facing UPI issues?
                         </div>
                         <a
-                          href="https://t.me/ExamTypingSupportBot"
+                          href="https://t.me/purendare"
                           target="_blank"
                           rel="noopener noreferrer"
                           style={{
@@ -881,7 +881,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
                             gap: '4px'
                           }}
                         >
-                          Telegram Support ↗
+                          Chat Admin (@purendare) ↗
                         </a>
                       </div>
                     </form>

@@ -3062,11 +3062,11 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                         {/* Support Username */}
                         <div>
                           <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#475569', marginBottom: '4px' }}>
-                            🎧 Help & Support Handle / Direct Bot (without @ or with @):
+                            💬 1-on-1 Direct Support Admin Telegram Username (without @):
                           </label>
                           <input
                             type="text"
-                            placeholder="e.g. purendar950 or TypingMentorSupportBot"
+                            placeholder="e.g. purendare"
                             value={telegramConfig.supportUsername || ''}
                             onChange={(e) => setTelegramConfig({ ...telegramConfig, supportUsername: e.target.value.trim().replace(/^@/, '') })}
                             style={{
