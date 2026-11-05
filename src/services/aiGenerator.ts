@@ -949,128 +949,601 @@ export async function executeFailoverAiCall(
   throw new Error(`All ${activeProviders.length} AI providers failed in failover chain: ${errors.join(' | ')}`);
 }
 
+export interface ExamPromptOptions {
+  category: ExamCategory;
+  categoryGroup?: string;
+  language: Language;
+  difficulty: 'medium' | 'hard';
+  duration?: number;
+  targetWords?: number;
+  topic?: string;
+  examTitle?: string;
+  subType?: string;
+}
+
+export interface CalibratedPrompt {
+  systemPrompt: string;
+  userPrompt: string;
+  defaultTitle: string;
+  targetWords: number;
+  duration: number;
+}
+
+export interface ExamCategoryOption {
+  id: string;
+  label: string;
+  categoryGroup: string;
+  defaultDuration: number;
+  defaultEnglishWords: number;
+  defaultHindiWords: number;
+  platformNotes: string;
+}
+
+export const EXAM_CATEGORY_OPTIONS: ExamCategoryOption[] = [
+  {
+    id: 'up_police_co',
+    label: '👮 UP Police Computer Operator (Grade-A)',
+    categoryGroup: 'up_govt',
+    defaultDuration: 15,
+    defaultEnglishWords: 540,
+    defaultHindiWords: 430,
+    platformNotes: 'UPPRPB Standard: Cyber Forensics, CCTNS, Emergency 112, heavy Sanskritized Hindi with Halant conjuncts & Nuqta.'
+  },
+  {
+    id: 'up_police_asi',
+    label: '📑 UP Police ASI (Clerk & Confidential)',
+    categoryGroup: 'up_govt',
+    defaultDuration: 15,
+    defaultEnglishWords: 520,
+    defaultHindiWords: 420,
+    platformNotes: 'UPPRPB Ministerial: Police administrative orders, service rules, accounts and confidential records.'
+  },
+  {
+    id: 'court_ahc',
+    label: '⚖️ Allahabad High Court RO / ARO',
+    categoryGroup: 'judiciary',
+    defaultDuration: 15,
+    defaultEnglishWords: 520,
+    defaultHindiWords: 430,
+    platformNotes: 'AHC RO/ARO Standard: Appellate Judgments, (SCC/AIR) citations, Latin maxims, Section 482 CrPC, Article 226.'
+  },
+  {
+    id: 'court_delhi',
+    label: '⚖️ Delhi High Court JJA (Judicial Assistant)',
+    categoryGroup: 'judiciary',
+    defaultDuration: 10,
+    defaultEnglishWords: 380,
+    defaultHindiWords: 320,
+    platformNotes: 'Delhi HC Standard: Registry procedures, commercial division filings, civil procedure directives, summary suits.'
+  },
+  {
+    id: 'court_judiciary',
+    label: '🏛️ Supreme Court & Pan-India High Courts',
+    categoryGroup: 'judiciary',
+    defaultDuration: 10,
+    defaultEnglishWords: 380,
+    defaultHindiWords: 320,
+    platformNotes: 'Apex Court Benchmark: Constitutional bench rulings, Article 136 SLP, principles of natural justice.'
+  },
+  {
+    id: 'ssc_dest',
+    label: '📊 SSC CGL / CHSL DEST (Data Entry Skill Test)',
+    categoryGroup: 'ssc',
+    defaultDuration: 15,
+    defaultEnglishWords: 380,
+    defaultHindiWords: 320,
+    platformNotes: 'SSC DEST Benchmark: High alphanumeric & numeric density, ₹ amounts, percentages (%), dates, uppercase Shift-key acronyms.'
+  },
+  {
+    id: 'paramilitary_hcm',
+    label: '🎖️ Defense & Paramilitary HCM (BSF, CISF, CRPF, SSB)',
+    categoryGroup: 'defense',
+    defaultDuration: 10,
+    defaultEnglishWords: 370,
+    defaultHindiWords: 330,
+    platformNotes: 'CAPF HCM Benchmark: Border outpost vigilance, tactical telemetry, Standing Operating Procedures, strict 95% accuracy rule.'
+  },
+  {
+    id: 'bihar_beltron',
+    label: '🌾 Bihar Beltron DEO & BSSC Inter Level',
+    categoryGroup: 'bihar',
+    defaultDuration: 10,
+    defaultEnglishWords: 330,
+    defaultHindiWords: 320,
+    platformNotes: 'Beltron DEO Benchmark: Land revenue digitization (दाखिल-खारिज, खतियान, जमाबंदी), Public Grievance Redressal, 7 Nishchay.'
+  },
+  {
+    id: 'rrb_ntpc',
+    label: '🚆 Railways RRB NTPC (Senior Clerk & JAA)',
+    categoryGroup: 'railways',
+    defaultDuration: 10,
+    defaultEnglishWords: 330,
+    defaultHindiWords: 270,
+    platformNotes: 'Railway Board Benchmark: Dedicated freight corridors (DFCCIL), Kavach collision avoidance, PRS data systems, Eduquity model.'
+  },
+  {
+    id: 'upsssc_ja',
+    label: '📋 UPSSSC Junior Assistant & State Commissions',
+    categoryGroup: 'state_exams',
+    defaultDuration: 5,
+    defaultEnglishWords: 180,
+    defaultHindiWords: 160,
+    platformNotes: 'State Commission Benchmark: Secretariat administration, Right to Public Services, district collectorate e-governance.'
+  },
+  {
+    id: 'all',
+    label: '🌐 General Official & Administrative Editorial',
+    categoryGroup: 'general',
+    defaultDuration: 15,
+    defaultEnglishWords: 520,
+    defaultHindiWords: 420,
+    platformNotes: 'General Benchmark: Balanced administrative prose, socio-economic governance, national policy.'
+  }
+];
+
+export const EXAM_RECOMMENDED_TOPICS: Record<string, string[]> = {
+  up_police_co: [
+    'Cyber Crime & Digital Forensics Investigation',
+    'CCTNS Telemetry & Emergency Dial 112 Infrastructure',
+    'Bharatiya Nagarik Suraksha Sanhita (BNSS) & Hash Integrity',
+    'Women Safety, Mission Shakti & Anti-Human Trafficking',
+    'E-Challan Infrastructure & Traffic Automation Analytics'
+  ],
+  up_police_asi: [
+    'Police Administrative Orders & Confidential Record Keeping',
+    'State Treasury Accounts & Police Welfare Financial Audit',
+    'Personnel Service Records & Departmental Enquiry Rules',
+    'Police Headquarters Circulars & Civil Supplies Logistics'
+  ],
+  court_ahc: [
+    'Constitutional Jurisprudence & High Court Writ Jurisdiction',
+    'Criminal Revision Petitions & Inherent Powers under Section 482 CrPC',
+    'Section 138 Negotiable Instruments Act & Cheque Dishonour Jurisprudence',
+    'Principles of Natural Justice & Administrative Discretion Review',
+    'Specific Relief Act & Commercial Dispute Injunctions'
+  ],
+  court_delhi: [
+    'Civil Procedure Directives & Subordinate Registry Filings',
+    'Arbitration Award Enforcement & Commercial Division Filings',
+    'Statutory Declarations & Affidavits Verification Procedures',
+    'Summary Suits under Order XXXVII CPC & Legal Registry Scrutiny'
+  ],
+  court_judiciary: [
+    'Supreme Court Special Leave Petitions under Article 136',
+    'Constitutional Bench Review & Doctrine of Basic Structure',
+    'Public Interest Litigation & Fundamental Rights Enforcement',
+    'Appellate Criminal Review & Circumstantial Evidence Precedents'
+  ],
+  ssc_dest: [
+    'Union Ministry Financial Allocations & Comptroller Auditor General Disclosures',
+    'NITI Aayog Fiscal Policy & Infrastructure Expenditure Statistics',
+    'Public Financial Management System (PFMS) & Treasury Balances',
+    'Foreign Direct Investment & Export Statistics in Manufacturing Sector'
+  ],
+  paramilitary_hcm: [
+    'Border Security Surveillance Protocols & Tactical Field Telecommunications',
+    'CAPF Standing Operating Procedures & Arms Inventory Management',
+    'Central Civil Services Conduct Rules 1964 & Administrative Directives',
+    'Disaster Management & National Disaster Response Force Deployment'
+  ],
+  bihar_beltron: [
+    'बिहार भूमि दाखिल-खारिज एवं राजस्व अभिलेख कम्प्यूटरीकरण',
+    'बिहार लोक शिकायत निवारण अधिकार अधिनियम 2015',
+    'पंचायत सरकार भवन एवं ग्राम स्वराज प्रशासनिक व्यवस्था',
+    'सात निश्चय योजना एवं सुशासन के कार्यक्रम'
+  ],
+  rrb_ntpc: [
+    'Dedicated Freight Corridors (DFCCIL) & Railway Cargo Logistics',
+    'Kavach Automatic Train Protection System & Signaling Interlocking',
+    'Passenger Reservation System (PRS) & CRIS Data Architecture',
+    'Rolling Stock Modernization & Electrification Milestones'
+  ],
+  upsssc_ja: [
+    'उत्तर प्रदेश अधीनस्थ सेवा एवं सचिवालय कार्यप्रणाली',
+    'नागरिक अधिकार पत्र एवं जनहित गारंटी अधिनियम',
+    'जिला कलेक्ट्रेट प्रशासनिक प्रक्रिया एवं ई-डिस्ट्रिक्ट पोर्टल',
+    'राज्य सार्वजनिक वितरण प्रणाली एवं खाद्यान्न प्रबंधन'
+  ],
+  all: [
+    'Digital Public Infrastructure & E-Governance in India',
+    'Higher Education Transformation & National Education Policy',
+    'National Renewable Energy Transition & Solar Grid Expansion',
+    'Economic Growth Projections & Fiscal Deficit Management'
+  ]
+};
+
+/**
+ * Constructs rigorously calibrated prompts matching AR Typing, EzTyping, and TestMentor standards.
+ * Covers all major Indian competitive typing exams:
+ * - High Courts & Judiciary (Allahabad HC RO/ARO, Delhi HC JJA, Supreme Court JCA)
+ * - SSC CGL & CHSL DEST (Alphanumeric, %, Figures, Shift-Keys)
+ * - UP Police Computer Operator & ASI (Cyber Crime, Forensics, Long Words Hindi Mangal)
+ * - Defense & Paramilitary HCM (BSF, CISF, CRPF, SSB)
+ * - Bihar Beltron DEO & BSSC Inter Level (Revenue & Land Records)
+ * - Railways RRB NTPC (Freight Corridors, Kavach, PRS)
+ * - State Commissions (UPSSSC Junior Assistant, RSSB, MP CPCT)
+ */
+export function getExamCalibratedPrompt(options: ExamPromptOptions): CalibratedPrompt {
+  const cat = (options.category || '').toLowerCase();
+  const group = (options.categoryGroup || '').toLowerCase();
+  const isHindi = options.language.startsWith('hindi');
+  const isKruti = options.language === 'hindi_kruti';
+  const isHard = options.difficulty === 'hard';
+  const subType = options.subType || '';
+
+  const isJudiciary =
+    cat.includes('court') ||
+    cat.includes('judiciary') ||
+    cat.includes('jja') ||
+    cat.includes('ro_aro') ||
+    group === 'judiciary';
+  const isAHC = cat === 'court_ahc' || subType.toLowerCase().includes('allahabad') || subType.toLowerCase().includes('ahc');
+  const isDelhiHC = cat === 'court_delhi' || subType.toLowerCase().includes('delhi');
+  const isSSC = cat.includes('ssc') || group === 'ssc';
+  const isDefense =
+    cat.includes('paramilitary') ||
+    cat.includes('defense') ||
+    cat.includes('bsf') ||
+    cat.includes('cisf') ||
+    cat.includes('crpf') ||
+    cat.includes('ssb') ||
+    cat.includes('itbp') ||
+    group === 'defense';
+  const isBihar = cat.includes('bihar') || cat.includes('beltron') || cat.includes('bssc') || group === 'bihar';
+  const isRailways = cat.includes('rrb') || cat.includes('ntpc') || cat.includes('railway') || group === 'railways';
+  const isStateExams = cat.includes('upsssc') || cat.includes('rssb') || cat.includes('cpct') || group === 'state_exams';
+  const isUPPolice = cat.includes('up_police') || group === 'up_govt';
+
+  // Duration
+  let duration = options.duration;
+  if (!duration) {
+    if (isAHC || (isUPPolice && !isHindi)) duration = 15;
+    else if (isDelhiHC || isDefense || isBihar || isRailways) duration = 10;
+    else if (cat === 'upsssc_ja') duration = 5;
+    else duration = 15;
+  }
+
+  // Target Words
+  let targetWords = options.targetWords;
+  if (!targetWords) {
+    if (duration === 5) {
+      targetWords = isHindi ? 160 : 180;
+    } else if (duration === 10) {
+      if (isSSC) targetWords = isHindi ? 320 : 380;
+      else if (isDefense) targetWords = isHindi ? 330 : 370;
+      else if (isBihar) targetWords = 320;
+      else if (isRailways) targetWords = isHindi ? 270 : 330;
+      else targetWords = isHindi ? 320 : 380;
+    } else {
+      if (isUPPolice) targetWords = isHindi ? 430 : 540;
+      else if (isAHC) targetWords = isHindi ? 430 : 520;
+      else if (isSSC) targetWords = isHindi ? 340 : 400;
+      else targetWords = isHindi ? (isHard ? 440 : 420) : (isHard ? 550 : 520);
+    }
+  }
+
+  // Topic default
+  let topic = (options.topic || '').trim();
+  if (!topic || topic === 'General' || topic === 'Default') {
+    if (isAHC) {
+      topic = 'Constitutional Jurisprudence, High Court Writ Jurisdiction, Evidentiary Proportionality & Criminal Appellate Review';
+    } else if (isDelhiHC) {
+      topic = 'Civil Procedure Directives, Subordinate Registry Filings & Statutory Declarations';
+    } else if (isJudiciary) {
+      topic = 'Appellate Review, Principles of Natural Justice and Judicial Discretion';
+    } else if (isSSC) {
+      topic = isHindi
+        ? 'केंद्रीय सतर्कता आयोग, राजकोषीय अनुशासन, आर्थिक नीतियां एवं बजट प्रबंधन'
+        : 'Union Ministry Financial Allocation, Audit Disclosures, Public Accounts & Expenditure Statistics';
+    } else if (isDefense) {
+      topic = isHindi
+        ? 'आंतरिक सुरक्षा प्रबंधन, अग्रिम रक्षा चौकियां एवं सीमा सुरक्षा बल प्रशासनिक नियमावली'
+        : 'Border Security Surveillance Protocols, Tactical Field Telecommunications & Central Armed Police Orders';
+    } else if (isBihar) {
+      topic = 'बिहार भूमि राजस्व अभिलेख, लोक शिकायत निवारण अधिकार एवं पंचायती राज प्रशासन';
+    } else if (isRailways) {
+      topic = isHindi
+        ? 'भारतीय रेल समर्पित माल गलियारा, सिग्नलिंग एवं इलेक्ट्रॉनिक इंटरलॉकिंग तथा यात्री आरक्षण'
+        : 'Indian Railways Dedicated Freight Corridors, Telemetry Signaling & Passenger Traffic Management';
+    } else if (isStateExams) {
+      topic = isHindi
+        ? 'राज्य सचिवालय कार्यप्रणाली, लोक सेवा गारंटी अधिकार एवं जिला कलेक्ट्रेट प्रशासनिक प्रक्रिया'
+        : 'State Secretariat Administration, Public Service Guarantee Directives & District E-Governance';
+    } else if (isUPPolice) {
+      topic = isHindi
+        ? 'साइबर अपराध जांच, डिजिटल साक्ष्य प्रमाणीकरण, उत्तरदायित्व एवं पुलिस प्रशासनिक चुनौतियाँ'
+        : 'Digital India, E-Governance & Police Automation Data Infrastructure';
+    } else {
+      topic = isHindi
+        ? 'राष्ट्रीय ई-गवर्नेंस अवसंरचना, डिजिटल प्रशासनिक सुधार एवं नागरिक सेवाएं'
+        : 'National Public Infrastructure, Digital Governance Architecture and Administrative Efficiency';
+    }
+  }
+
+  const defaultTitle = options.examTitle || (isHindi ? `आधिकारिक टंकण परीक्षा: ${topic.slice(0, 40)}` : `Official Test: ${topic.slice(0, 40)}`);
+
+  let systemPrompt = '';
+  let userPrompt = '';
+
+  if (!isHindi) {
+    // ══════════════════════════════════════════════════════════════════════
+    // ENGLISH PASSAGES
+    // ══════════════════════════════════════════════════════════════════════
+    if (isJudiciary) {
+      systemPrompt =
+        'You are the Chief Examination Controller and Senior Legal Registrar preparing official typing test passages for High Court and Supreme Court typing examinations (Allahabad High Court RO/ARO, Delhi High Court JJA, Supreme Court JCA, Punjab & Haryana High Court Clerk) as calibrated by AR Typing, EzTyping, and TestMentor standards.';
+      userPrompt = `Generate an authentic High Court competitive examination typing passage in legal English on '${topic}'.
+Target Word Count: Exactly ${targetWords} words (between ${targetWords - 20} and ${targetWords + 20} words for a ${duration}-minute test).
+
+CRITICAL HIGH COURT & JUDICIARY EXAM REQUIREMENTS (AR TYPING / TESTMENTOR BENCHMARK):
+1. Authentic Case Citations & Statutes: Naturally include realistic statutory provisions and Supreme Court / High Court citations (e.g. "(2022) 5 SCC 312", "AIR 2021 SC 1421", "Section 482 of Cr.P.C.", "Article 226(2) of the Constitution of India", "Section 138 of the Negotiable Instruments Act, 1881", "Order VII Rule 11 of C.P.C.", "Section 34 of the Arbitration and Conciliation Act, 1996").
+2. Latin Maxims & Legal Terms: Use authentic Latin legal terms naturally in context (e.g. "inter alia", "suo motu", "res judicata", "ultra vires", "prima facie", "status quo", "ratio decidendi", "ad interim", "bona fide", "locus standi", "sub judice", "in limine").
+3. Judicial Syntactical Rhythm: Long, multi-clause compound-complex sentences (30 to 50 words per sentence), paired double quotation marks ("...") citing precedent, semicolons (;), parentheses, and legal abbreviations ("Ltd.", "Govt.", "v.", "Anr.", "Ors.", "Hon'ble Mr. Justice").
+4. High Average Word Length (AWL >= 7.2 letters/word): Words like "constitutionalism", "jurisprudence", "maintainability", "inadmissibility", "disproportionality", "apprehension", "superintendence", "quashment".
+5. Format: Exactly 3 continuous formal paragraphs with smooth transitions. Absolutely NO bullet points, NO numbered lists, NO markdown headers.
+
+Return ONLY valid JSON:
+{
+  "title": "${defaultTitle}",
+  "text": "The complete legal judgment passage text here..."
+}`;
+    } else if (isSSC) {
+      systemPrompt =
+        'You are the Staff Selection Commission (SSC) Examination Director preparing official Data Entry Skill Test (DEST) typing passages for SSC CGL DEO and CHSL LDC/JSA calibrated to AR Typing and TestMentor DEST modules.';
+      userPrompt = `Generate an official SSC DEST competitive examination typing passage in standard English on '${topic}'.
+Target Word Count: Exactly ${targetWords} words (calibrated for ${duration} minutes, ~${targetWords * 5} key depressions).
+
+CRITICAL SSC DEST REQUIREMENTS (KEYSTROKE & SHIFT-KEY STRESS BENCHMARK):
+1. Alphanumeric & Numeric Density (10-15% of keystrokes): Realistic monetary amounts (e.g. "₹24,850.50 crore", "Rs. 1,45,000/-"), exact percentages ("12.85%", "48.60%"), dates ("26.11.2008", "15th August 1947", "1st April 2024"), fiscal years ("2024-25", "2021-22"), and reference codes ("Ref: F.No. 14/02/2024-Coord").
+2. Shift-Key Intensity (Uppercase Acronyms): High frequency of capitalized abbreviations forcing rapid Shift-key hand switching (e.g. "NITI Aayog", "CAG", "GSTN", "UIDAI", "AIIMS", "CBI", "MoF", "FY 2024-25", "CSIR", "BHEL", "MSME", "NSO", "PFMS").
+3. Hyphenated & Technical Units: "public-private", "capacity-building", "socio-economic", "semi-autonomous", "macro-economic".
+4. Vocabulary & Context: Union budget allocations, public accounts, fiscal policy, economic surveys, audit reports.
+5. Format: Exactly 3 continuous formal paragraphs. Absolutely NO bullet points, NO markdown bolding, NO headings.
+
+Return ONLY valid JSON:
+{
+  "title": "${defaultTitle}",
+  "text": "The complete SSC DEST passage text here..."
+}`;
+    } else if (isDefense) {
+      systemPrompt =
+        'You are the Central Armed Police Forces (CAPF) Board Evaluator creating Head Constable Ministerial (HCM) typing test materials for BSF, CISF, CRPF, SSB, and ITBP calibrated to AR Typing HCM benchmark.';
+      userPrompt = `Generate an official Paramilitary HCM competitive examination typing passage in standard English on '${topic}'.
+Target Word Count: Exactly ${targetWords} words (duration: ${duration} minutes, 35 WPM net speed benchmark, strict 95% accuracy rule).
+
+CRITICAL PARAMILITARY HCM REQUIREMENTS:
+1. Subject Matter: Border Outpost (BOP) security, forward defense locations, tactical field telecommunications, wireless encryption, unmanned aerial vehicles (UAV), logistical convoy operations, arms and ammunition inventory registers, cantonment administrative discipline, Central Civil Services (Conduct) Rules 1964, Standing Operating Procedures (SOP), disaster response operations (NDRF).
+2. High Average Word Length (AWL >= 7.0 letters/word): Words like "reconnaissance", "counter-intelligence", "superintendence", "telecommunications", "interoperability", "infrastructure", "subordination", "demarcation".
+3. Military References: Inspector General, Commandant, Sub-Inspector, Head Constable Ministerial, Company Commander, Battalion HQ, Platoon, SOP, DG CAPF, BSF HQ, CCTV.
+4. Format: Exactly 3 continuous formal paragraphs. Absolutely NO bullet points, NO markdown.
+
+Return ONLY valid JSON:
+{
+  "title": "${defaultTitle}",
+  "text": "The complete Paramilitary HCM passage text here..."
+}`;
+    } else if (isRailways) {
+      systemPrompt =
+        'You are the Railway Recruitment Control Board (RRB) Examination Evaluator for RRB NTPC Senior Clerk cum Typist and Junior Accounts Assistant (JAA) typing skill tests calibrated to Eduquity evaluation formula.';
+      userPrompt = `Generate an official RRB NTPC Senior Clerk cum Typist typing examination passage in standard English on '${topic}'.
+Target Word Count: Exactly ${targetWords} words (duration: ${duration} minutes, 30 WPM Eduquity formula standard).
+
+CRITICAL RAILWAY NTPC REQUIREMENTS:
+1. Subject Matter: Dedicated Freight Corridors (DFCCIL), Kavach automatic train protection system, electronic interlocking and block signaling, Centre for Railway Information Systems (CRIS), Passenger Reservation System (PRS), rolling stock scheduling, track electrification, railway capital expenditure.
+2. Balanced technical and operational prose, standard punctuation, numbers and percentages.
+3. Format: Exactly 3 continuous formal paragraphs. Absolutely NO bullet points, NO markdown.
+
+Return ONLY valid JSON:
+{
+  "title": "${defaultTitle}",
+  "text": "The complete Railways NTPC passage text here..."
+}`;
+    } else if (isStateExams) {
+      systemPrompt =
+        'You are the State Public Service Commission & Subordinate Services Selection Board typing examination controller (UPSSSC, RSSB, MP CPCT).';
+      userPrompt = `Generate an official State Commission competitive typing examination passage in standard English on '${topic}'.
+Target Word Count: Exactly ${targetWords} words (duration: ${duration} minutes).
+
+CRITICAL STATE COMMISSION REQUIREMENTS:
+1. Subject Matter: State secretariat administration, Right to Public Services, district collectorate e-governance, citizen charters, treasury and audit procedures, municipal administration.
+2. ${isHard ? 'HARD LEVEL: High concentration of 8-15 letter administrative words, AWL >= 7.2.' : 'MEDIUM LEVEL: Balanced administrative English.'}
+3. Format: Exactly 3 continuous formal paragraphs, NO bullet points, NO markdown.
+
+Return ONLY valid JSON:
+{
+  "title": "${defaultTitle}",
+  "text": "The complete continuous passage text here..."
+}`;
+    } else {
+      // UP Police & General
+      systemPrompt =
+        'You are the Principal Typing Examination Passage Author for Uttar Pradesh Police Recruitment Board (UPPRPB) calibrated to AR Typing and EzTyping CO/ASI examination standards.';
+      userPrompt = `Generate an official competitive examination typing passage in standard English for ${options.examTitle || 'UP Police Examination'} on '${topic}'.
+Target Word Count: Exactly ${targetWords} words (between ${targetWords - 20} and ${targetWords + 20} words for a ${duration}-minute test).
+
+CRITICAL UP POLICE CO & ASI REQUIREMENTS:
+1. Technical Policing Theme: Cyber crime investigations, Crime and Criminal Tracking Network & Systems (CCTNS), Emergency Dial 112 telemetry, digital forensics, packet capture, SHA-256 hash validation, Information Technology Act 2000 (Section 43, 66C, 66D), Bharatiya Nagarik Suraksha Sanhita (BNSS), biometric identification, mobile tower telemetry.
+2. ${isHard ? 'HARD LEVEL (LONGER WORDS MANDATE): At least 45% of words must be 8-16+ letters long (AWL >= 7.3 letters/word). Use high-syllable administrative words: "institutionalization, telecommunications, constitutionalism, misappropriation, jurisprudence, accountability, interoperability, proportionality, infrastructure, superintendence".' : 'MEDIUM LEVEL: Balanced administrative prose, fluid sentence structure, standard punctuation.'}
+3. Departmental Terminology: Include official terms like "CCTNS", "UPPRPB", "FIR", "IT Act", "CrPC", "IPC", percentages, and statistics.
+4. Format: Exactly 3 continuous formal paragraphs. NO bullet points, NO markdown headers.
+
+Return ONLY valid JSON:
+{
+  "title": "${defaultTitle}",
+  "text": "The complete continuous passage text here..."
+}`;
+    }
+  } else {
+    // ══════════════════════════════════════════════════════════════════════
+    // HINDI PASSAGES (Mangal Inscript / Kruti Dev 010)
+    // ══════════════════════════════════════════════════════════════════════
+    const fontKeyboardDirective = isKruti
+      ? 'कुर्ती देव 010 (Kruti Dev 010) रेमिंगटन कीबोर्ड लेआउट के अनुकूल मानक देवनागरी'
+      : 'मंगल इनस्क्रिप्ट (Mangal Inscript Unicode) कीबोर्ड लेआउट (हलंत हेतु D कुंजी एवं नुक्ता हेतु ] कुंजी)';
+
+    if (isJudiciary) {
+      systemPrompt =
+        'आप उच्च न्यायालय एवं सर्वोच्च न्यायालय के मुख्य विधि टंकण सामग्री नियंत्रक एवं वरिष्ठ हिंदी न्यायिक अनुवादक हैं (इलाहाबाद उच्च न्यायालय, दिल्ली उच्च न्यायालय एवं अधीनस्थ न्यायालय मानक)।';
+      userPrompt = `दिए गए विषय पर उच्च न्यायालय आरओ/एआरओ एवं जेजेए टंकण परीक्षा के लिए ${fontKeyboardDirective} में आधिकारिक गद्यांश तैयार करें।
+विषय: ${topic}
+कठिनाई: ${isHard ? 'कठिन (HARD LEVEL - विधिक शब्दावली, धाराएं एवं जटिल संयुक्ताक्षर)' : 'मध्यम (MEDIUM LEVEL - विधिक अनुवाद मानक)'}
+लक्षित शब्द संख्या: ठीक ${targetWords} शब्द (अवधि: ${duration} मिनट हेतु)।
+
+अनिवार्य उच्च न्यायालय मानक (AR TYPING / EZTYPING BENCHMARK):
+1. विधिक शब्दावली: वादी, प्रतिवादी, अपीलार्थी, प्रत्यर्थी, रिट याचिका, स्थगनादेश, स्वतः संज्ञान, प्रथम दृष्टया, अपीलीय क्षेत्राधिकार, अंतरिम राहत, नैसर्गिक न्याय, संज्ञेय अपराध, गैर-जमानती वारंट, पुनरीक्षण याचिका, साक्ष्य अधिनियम, परिसीमा काल।
+2. वैधानिक धाराएं एवं उद्धरण: संविधान का अनुच्छेद 226, दंड प्रक्रिया संहिता की धारा 482, परक्राम्य लिखत अधिनियम की धारा 138, सिविल प्रक्रिया संहिता का आदेश 7 नियम 11।
+3. ${isHard ? 'दीर्घ एवं सामासिक शब्द: संवैधानिकता, न्यायाधिकरण, क्षेत्राधिकार, उत्तरदायित्व, असंवैधानिकता, अंतर-विभागीय, विशेषज्ञता।' : 'मानक विधिक भाषा एवं परिष्कृत खड़ी बोली।'}
+4. कठिन संयुक्ताक्षर (Halant Conjuncts): द्ध (शुद्ध, बुद्धि), द्व (विद्वान, द्वितीय), द्य (न्यायिक, उद्योग), ष्ट (विशिष्ट, दृष्टिकोण), क्त (अधिवक्ता, संयुक्त), ह्न (चिह्न), हृ (हृदय), त्त (संपत्ति, उत्तरदायित्व), श्र (श्रम, श्रेष्ठ)।
+5. नुक्ता शब्द (Nuqta): फ़ैसला, ज़िला, क़ानून, ख़ारिज (इनस्क्रिप्ट पर ']' कुंजी)।
+6. प्रारूप: ठीक 3 निरंतर पैराग्राफ, कोई बुलेट नहीं, कोई नंबरिंग नहीं, कोई मार्कडाउन नहीं।
+
+केवल शुद्ध JSON दें:
+{
+  "title": "${defaultTitle}",
+  "text": "पूर्ण न्यायिक गद्यांश यहाँ..."
+}`;
+    } else if (isBihar) {
+      systemPrompt =
+        'आप बिहार राज्य इलेक्ट्रॉनिक्स विकास निगम (BELTRON) एवं बिहार कर्मचारी चयन आयोग (BSSC) के मुख्य टंकण सामग्री नियंत्रक हैं (AR Typing एवं EzTyping बेल्ट्रॉन परीक्षा मानक)।';
+      userPrompt = `दिए गए विषय पर बिहार बेल्ट्रॉन डीईओ एवं बीएसएससी इंटर स्तरीय टंकण परीक्षा हेतु ${fontKeyboardDirective} में आधिकारिक 10-मिनट का हिंदी गद्यांश तैयार करें।
+विषय: ${topic}
+लक्षित शब्द संख्या: ठीक ${targetWords} शब्द (30 WPM मानक)।
+
+अनिवार्य बिहार प्रशासनिक मानक (BELTRON BENCHMARK):
+1. बिहार राजस्व एवं लोक प्रशासन संदर्भ: राजस्व एवं भूमि सुधार विभाग, ऑनलाइन दाखिल-खारिज (Mutation), खतियान एवं जमाबंदी पंजी, अंचल अधिकारी (CO), हल्का कर्मचारी, राजस्व निरीक्षक, पंचायत सरकार भवन, बिहार लोक शिकायत निवारण अधिकार अधिनियम 2015, सात निश्चय योजना, मुख्यमंत्री ग्राम संपर्क योजना, जीविका स्वयं सहायता समूह।
+2. मानक शब्दावली: परिमार्जन, लगान रसीद, खाता-खेसरा, लोक सेवा केंद्र, अनुमंडल पदाधिकारी, जिला समाहरणालय।
+3. कठिन संयुक्ताक्षर एवं विराम चिह्न: द्ध, द्व, द्य, ष्ट, क्त, ह्न, त्त, श्र।
+4. प्रारूप: ठीक 3 निरंतर पैराग्राफ, कोई बुलेट नहीं, कोई नंबरिंग नहीं।
+
+केवल शुद्ध JSON दें:
+{
+  "title": "${defaultTitle}",
+  "text": "पूर्ण गद्यांश यहाँ..."
+}`;
+    } else if (isDefense) {
+      systemPrompt =
+        'आप केंद्रीय सशस्त्र पुलिस बल (CAPF) के मुख्य हिंदी टंकण सामग्री परीक्षक हैं (BSF, CISF, CRPF, SSB HCM परीक्षा मानक)।';
+      userPrompt = `अर्धसैनिक बल हेड कांस्टेबल मिनिस्ट्रियल (HCM) परीक्षा हेतु ${fontKeyboardDirective} में कठिन स्तर का आधिकारिक 10-मिनट का हिंदी टंकण गद्यांश तैयार करें।
+विषय: ${topic}
+लक्षित शब्द संख्या: ठीक ${targetWords} शब्द (30 WPM मानक, 95% कठोर सटीकता सीमा)।
+
+अनिवार्य अर्धसैनिक बल मानक:
+1. सामरिक एवं प्रशासनिक शब्दावली: अग्रिम रक्षा चौकी (BOP), आंतरिक सुरक्षा प्रबंधन, सीमा सुरक्षा बल, शस्त्र एवं गोला-बारूद भंडार, महानिदेशक, उपमहानिरीक्षक, अनुशासनिक कार्यवाही, वायरलेस संचार तंत्र, नागरिक सुरक्षा, आकस्मिक तैनाती।
+2. दीर्घ सामासिक शब्द एवं कठिन संयुक्ताक्षर: द्ध, द्व, द्य, ष्ट, क्त, ह्न, त्त, ट्र, क्र।
+3. नुक्ता शब्द: ज़िला, फ़ैसला, अग्रिम चौकी, फ़ाइल।
+4. प्रारूप: ठीक 3 निरंतर पैराग्राफ, कोई बुलेट नहीं।
+
+केवल शुद्ध JSON दें:
+{
+  "title": "${defaultTitle}",
+  "text": "पूर्ण गद्यांश यहाँ..."
+}`;
+    } else if (isSSC) {
+      systemPrompt =
+        'आप कर्मचारी चयन आयोग (SSC) के मुख्य डाटा एंट्री कौशल परीक्षा (DEST) नियंत्रक हैं (1500 Key Depressions मानक)।';
+      userPrompt = `कर्मचारी चयन आयोग (SSC) सीएचएसएल डाटा एंट्री परीक्षा हेतु ${fontKeyboardDirective} में 1500 की-डिप्रेशन्स का मानक हिंदी गद्यांश तैयार करें।
+विषय: ${topic}
+लक्षित शब्द संख्या: ठीक ${targetWords} शब्द (10 मिनट हेतु 30 WPM)।
+
+अनिवार्य एसएससी मानक:
+1. वित्तीय व सांख्यिकीय आंकड़े: प्रतिशत (जैसे 12.5%, 48.2%), वित्तीय वर्ष (2024-25), बजटीय आंकड़े (₹15,400 करोड़), दिनांक।
+2. विषय: केंद्रीय सतर्कता आयोग, राजकोषीय घाटा, आर्थिक सर्वेक्षण, सार्वजनिक उपक्रम, कैग (CAG) लेखापरीक्षा।
+3. कठिन संयुक्ताक्षर एवं मानक विराम चिह्न।
+4. प्रारूप: ठीक 3 निरंतर पैराग्राफ, कोई बुलेट नहीं।
+
+केवल शुद्ध JSON दें:
+{
+  "title": "${defaultTitle}",
+  "text": "पूर्ण गद्यांश यहाँ..."
+}`;
+    } else if (isRailways) {
+      systemPrompt =
+        'आप रेलवे भर्ती नियंत्रण बोर्ड (RRB) के मुख्य टंकण परीक्षा परीक्षक हैं (RRB NTPC Eduquity मानक)।';
+      userPrompt = `रेलवे आरआरबी एनटीपीसी सीनियर क्लर्क टंकण परीक्षा हेतु ${fontKeyboardDirective} में 10-मिनट का आधिकारिक हिंदी गद्यांश तैयार करें।
+विषय: ${topic}
+लक्षित शब्द संख्या: ठीक ${targetWords} शब्द (25 WPM मानक)।
+
+अनिवार्य रेलवे मानक:
+1. रेल प्रशासन व तकनीक: समर्पित माल ढुलाई गलियारा (DFCCIL), कवच टक्कर रोधी प्रणाली, सिग्नलिंग एवं इलेक्ट्रॉनिक इंटरलॉकिंग, यात्री आरक्षण प्रणाली (PRS), रोलिंग स्टॉक, रेल बजट।
+2. 3 निरंतर पैराग्राफ, मानक विराम चिह्न, कोई बुलेट नहीं।
+
+केवल शुद्ध JSON दें:
+{
+  "title": "${defaultTitle}",
+  "text": "पूर्ण गद्यांश यहाँ..."
+}`;
+    } else {
+      // UP Police & General Hindi
+      systemPrompt =
+        'आप उत्तर प्रदेश पुलिस भर्ती एवं प्रोन्नति बोर्ड (UPPRPB) के मुख्य टंकण सामग्री नियंत्रक एवं वरिष्ठ पुलिस प्रशासनिक विशेषज्ञ हैं (AR Typing एवं EzTyping परीक्षा मानक)।';
+      userPrompt = `दिए गए विषय पर '${options.examTitle || 'उत्तर प्रदेश पुलिस कंप्यूटर ऑपरेटर'}' के लिए ${fontKeyboardDirective} में आधिकारिक टंकण सामग्री तैयार करें।
+विषय: ${topic}
+कठिनाई: ${isHard ? 'कठिन (HARD LEVEL - दीर्घ एवं लंबे शब्द, कठिन संयुक्ताक्षर)' : 'मध्यम (MEDIUM LEVEL - संतुलित परीक्षा मानक)'}
+लक्षित शब्द संख्या: ठीक ${targetWords} शब्द (अवधि: ${duration} मिनट हेतु)।
+
+अनिवार्य मानक (AR TYPING & EZTYPING KATHIN BENCHMARK):
+1. ${isHard ? 'दीर्घ एवं सामासिक शब्द (Long Words MANDATE): गद्यांश के 45% से अधिक शब्द 8 से 16 अक्षर/मात्रा वाले भारी-भरकम सामासिक शब्द होने चाहिए (जैसे: संवैधानिकता, उत्तरदायित्व, कार्यप्रणाली, प्रशासनिक, दूरसंचार, न्यायाधिकरण, पुनर्गठन, विभागाध्यक्ष, अंतर-विभागीय, विशेषज्ञता, प्रतिबद्धता, आत्मनिर्भरता, प्रमाणीकरण, कार्यकुशलता, सार्वभौमिकता, परिस्थितिजन्य, सुदृढ़ीकरण, अनुशासनात्मक, आधुनिकीकरण, सर्वसमावेशी)।' : 'संतुलित शब्दावली: मानक खड़ी बोली हिंदी, सामान्य प्रशासनिक व सामान्य ज्ञान शब्दावली।'}
+2. कठिन संयुक्ताक्षर (Halant Conjuncts): प्रचुर मात्रा में कठिन संयुक्त व्यंजन शामिल करें: द्ध (बुद्धि, शुद्ध, पद्धति), द्व (विद्वान, द्वितीय, द्वार), द्य (उद्योग, विद्या, न्यायिक), ष्ट (दृष्टिकोण, विशिष्ट), क्त (अधिवक्ता, शक्ति, संयुक्त), ह्न (चिह्न), हृ (हृदय), त्त (उत्तरदायित्व, संपत्ति), ट्र (ट्रैफिक, राष्ट्रीय), क्र (प्रक्रिया, क्रम), प्र (प्रशासनिक, प्रमाण)।
+3. नुक्ता एवं विराम चिह्न: नुक्ता वाले शब्द (ज़िला, फ़ैसला, क़ानून, ख़ास, फ़ॉरेंसिक) जो इनस्क्रिप्ट कीबोर्ड पर ']' कुंजी से टाइप होते हैं, अल्पविराम (,), पूर्णविराम (।), और उद्धरण चिह्न ("...")।
+4. प्रारूप: ठीक 3 निरंतर पैराग्राफ, कोई बुलेट नहीं, कोई नंबरिंग नहीं, कोई मार्कडाउन नहीं।
+
+केवल शुद्ध JSON दें:
+{
+  "title": "${defaultTitle}",
+  "text": "पूर्ण गद्यांश यहाँ..."
+}`;
+    }
+  }
+
+  return {
+    systemPrompt,
+    userPrompt,
+    defaultTitle,
+    targetWords,
+    duration
+  };
+}
+
 // 6. Generate Single Passage from AI calibrated to exact exam specifications
 async function generateSinglePassage(
   slot: DailySlotPlan,
   dateStr: string,
   config: AiConfig
 ): Promise<Passage> {
-  const isHindi = slot.language.startsWith('hindi');
-  const isHard = slot.difficulty === 'hard';
-  const duration = slot.duration || 15;
-  const targetWords = slot.targetWords || (duration === 5 ? 190 : duration === 10 ? 360 : 540);
-  const catGroup = slot.categoryGroup || 'up_govt';
-
-  let systemPrompt = '';
-  let userPrompt = '';
-
-  if (!isHindi) {
-    // English
-    if (catGroup === 'judiciary') {
-      systemPrompt =
-        'You are the Chief Examination Controller and Senior Legal Registrar preparing official typing test passages for High Court and Supreme Court typing examinations (Allahabad HC RO/ARO, Delhi HC JJA).';
-      userPrompt = `Generate an official High Court competitive examination typing passage in legal English on '${slot.topic}'.
-Target Word Count: Exactly ${targetWords} words (between ${targetWords - 25} and ${targetWords + 25} words for a ${duration}-minute test).
-CRITICAL JUDICIARY EXAM REQUIREMENTS:
-1. High Legal Jurisprudence: Include authentic statutory references and case citations (e.g. "(2022) 5 SCC 312", "Section 482 Cr.P.C.", "Article 226(2) of the Constitution", "Section 138 of the Negotiable Instruments Act").
-2. Latin Maxims & Legal Terms: Use authentic Latin legal terms naturally (e.g. "prima facie", "suo motu", "res judicata", "ultra vires", "inter alia", "ratio decidendi").
-3. Complex Sentence Syntax: Long, multi-clause compound sentences, paired quotation marks ("..."), semicolons, and commas to challenge typographical rhythm.
-4. Average Word Length: AWL must be between 7.0 and 8.5 letters per word.
-5. Format: Exactly 3 continuous formal paragraphs, NO bullet points, NO markdown headers.
-Return ONLY valid JSON:
-{
-  "title": "${slot.examTitle || slot.subType}",
-  "text": "The complete legal passage text here..."
-}`;
-    } else if (catGroup === 'ssc') {
-      systemPrompt =
-        'You are the Staff Selection Commission (SSC) examination director preparing official Data Entry Skill Test (DEST) typing passages for SSC CGL DEO and CHSL LDC/JSA.';
-      userPrompt = `Generate an official SSC DEST competitive examination typing passage in standard English on '${slot.topic}'.
-Target Word Count: Exactly ${targetWords} words (between ${targetWords - 20} and ${targetWords + 20} words for a ${duration}-minute test).
-CRITICAL SSC DEST REQUIREMENTS:
-1. Alphanumeric & Numeric Density: Include realistic monetary amounts (e.g. "₹24,850.50", "Rs. 1,45,000/-"), percentages (e.g. "48.65%"), calendar dates ("26.11.2008", "15th August 1947"), and file references ("Ref: MoF/Exp-2024/09").
-2. Uppercase Acronyms (Shift-Key Strain): High frequency of capitalized institutional abbreviations (e.g. "NITI Aayog", "CAG", "GSTN", "UIDAI", "AIIMS", "CBI", "MoF", "FY 2024-25").
-3. Vocabulary & Syntax: Economic surveys, public accounts, fiscal policy, administrative audits.
-4. Format: Exactly 3 continuous formal paragraphs, NO bullet points, NO markdown bolding.
-Return ONLY valid JSON:
-{
-  "title": "${slot.examTitle || slot.subType}",
-  "text": "The complete SSC DEST passage text here..."
-}`;
-    } else if (catGroup === 'defense') {
-      systemPrompt =
-        'You are the Central Armed Police Forces (CAPF) board evaluator creating Head Constable Ministerial (HCM) typing test materials for BSF, CISF, CRPF, and SSB.';
-      userPrompt = `Generate an official Paramilitary HCM competitive examination typing passage in standard English on '${slot.topic}'.
-Target Word Count: Exactly ${targetWords} words (between ${targetWords - 20} and ${targetWords + 20} words for a ${duration}-minute test).
-CRITICAL PARAMILITARY HCM REQUIREMENTS:
-1. Subject Matter: Border security architecture, tactical surveillance telemetry, logistics supply chains, and central administrative directives.
-2. Discipline & Long Words: Average Word Length >= 7.0 letters/word. Words like "telecommunications", "interoperability", "infrastructure", "counter-intelligence", "superintendence", "reconnaissance".
-3. Military References: "SOP", "DG CAPF", "BSF HQ", "CCTV", "UAV", "Section 144", "Battalion".
-4. Format: Exactly 3 continuous formal paragraphs, NO bullet points, NO markdown.
-Return ONLY valid JSON:
-{
-  "title": "${slot.examTitle || slot.subType}",
-  "text": "The complete Paramilitary HCM passage text here..."
-}`;
-    } else {
-      // UP Police & General
-      systemPrompt =
-        'You are the principal typing examination passage author for Uttar Pradesh Police Recruitment Board (UPPRPB) and state administrative typing examinations.';
-      userPrompt = `Generate an official competitive examination typing passage in standard English for ${slot.examTitle || 'UP Police Examination'} on '${slot.topic}'.
-Target Word Count: Exactly ${targetWords} words (between ${targetWords - 25} and ${targetWords + 25} words for a ${duration}-minute test).
-CRITICAL EXAM REQUIREMENTS:
-1. ${isHard ? 'HARD LEVEL (LONGER WORDS MANDATE): At least 45% of words must be 8-16+ letters long (AWL >= 7.2 letters/word). Use high-syllable administrative words: "institutionalization, telecommunications, constitutionalism, misappropriation, jurisprudence, accountability, interoperability, proportionality".' : 'MEDIUM LEVEL: Balanced administrative prose, fluid sentence structure, standard punctuation.'}
-2. Departmental Terminology: Include official terms like "CCTNS", "UPPRPB", "FIR", "IT Act", "CrPC", "IPC", percentages, and statistics.
-3. Format: Exactly 3 continuous formal paragraphs, NO bullet points, NO markdown headers.
-Return ONLY valid JSON:
-{
-  "title": "${slot.examTitle || slot.subType}",
-  "text": "The complete continuous passage text here..."
-}`;
-    }
-  } else {
-    // Hindi (Mangal Inscript)
-    systemPrompt =
-      'आप विभिन्न सरकारी भर्ती आयोगों (UPPRPB, उच्च न्यायालय, एसएससी, अर्धसैनिक बल) के मुख्य टंकण सामग्री नियंत्रक एवं वरिष्ठ हिंदी परीक्षा विशेषज्ञ हैं।';
-    userPrompt = `दिए गए विषय पर '${slot.examTitle || 'टंकण परीक्षा'}' के लिए मानक देवनागरी यूनिकोड (मंगल इनस्क्रिप्ट) में आधिकारिक टंकण सामग्री तैयार करें।
-विषय: ${slot.topic}
-कठिनाई: ${isHard ? 'कठिन (HARD LEVEL - दीर्घ एवं लंबे शब्द, जटिल संयुक्ताक्षर)' : 'मध्यम (MEDIUM LEVEL - संतुलित परीक्षा मानक)'}
-लक्षित शब्द संख्या: ठीक ${targetWords} शब्द (अवधि: ${duration} मिनट हेतु ${targetWords - 20} से ${targetWords + 20} शब्दों के बीच)।
-
-अनिवार्य मानक:
-1. ${isHard ? 'दीर्घ एवं लंबे शब्द (Long Words): गद्यांश में 8 से 16 अक्षर/मात्रा वाले भारी-भरकम सामासिक शब्दों की प्रचुरता हो (जैसे: संवैधानिकता, उत्तरदायित्व, कार्यप्रणाली, प्रशासनिक, दूरसंचार, न्यायाधिकरण, पुनर्गठन, विभागाध्यक्ष, अंतर-विभागीय, विशेषज्ञता, प्रतिबद्धता, आत्मनिर्भरता, प्रमाणीकरण, कार्यकुशलता, सार्वभौमिकता, परिस्थितिजन्य, सुदृढ़ीकरण)।' : 'संतुलित शब्दावली: मानक खड़ी बोली हिंदी, सामान्य प्रशासनिक व सामान्य ज्ञान शब्दावली।'}
-2. कठिन संयुक्ताक्षर (Halant Conjuncts): ${isHard ? 'प्रचुर मात्रा में कठिन संयुक्त व्यंजन शामिल करें: द्ध (बुद्धि, शुद्ध), द्व (विद्वान, द्वार), द्य (उद्योग, विद्या), ष्ट (दृष्टिकोण, विशिष्ट), क्त (शक्ति, संयुक्त), ह्न (चिह्न), हृ (हृदय), त्त (उत्तरदायित्व), ट्र (ट्रैफिक, राष्ट्रीय), क्र (क्रम, प्रक्रिया), द्द (उद्देश्य)।' : 'सामान्य संयुक्त व्यंजन (प्र, त्र, ज्ञ, श्र, क्ष)।'}
-3. नुक्ता एवं विराम चिह्न: नुक्ता वाले शब्द (ज़िला, फ़ैसला, क़ानून, ख़ास) जो इनस्क्रिप्ट कीबोर्ड पर ']' कुंजी से टाइप होते हैं, अल्पविराम (,), पूर्णविराम (।), और उद्धरण चिह्न।
-4. प्रारूप: ठीक 3 निरंतर पैराग्राफ, कोई बुलेट नहीं, कोई नंबरिंग नहीं, कोई मार्कडाउन नहीं।
-केवल शुद्ध JSON दें:
-{
-  "title": "${slot.examTitle || slot.subType}",
-  "text": "पूर्ण गद्यांश..."
-}`;
-  }
+  const calibrated = getExamCalibratedPrompt({
+    category: slot.category,
+    categoryGroup: slot.categoryGroup,
+    language: slot.language,
+    difficulty: slot.difficulty,
+    duration: slot.duration,
+    targetWords: slot.targetWords,
+    topic: slot.topic,
+    examTitle: slot.examTitle,
+    subType: slot.subType
+  });
 
   const { content } = await executeFailoverAiCall(
     config,
     [
-      { role: 'system', content: systemPrompt },
-      { role: 'user', content: userPrompt }
+      { role: 'system', content: calibrated.systemPrompt },
+      { role: 'user', content: calibrated.userPrompt }
     ],
     0.7,
     3500
   );
 
-  const parsed = extractPassageFromAiResponse(content, slot.examTitle || `Live Exam Test #${slot.slot} (${slot.subType})`);
+  const parsed = extractPassageFromAiResponse(content, slot.examTitle || calibrated.defaultTitle);
   const cleanText = parsed.text;
   const words = cleanText.split(/\s+/).filter(Boolean);
   const wordCount = words.length;
 
   return {
     id: `ar-live-${dateStr}-slot${slot.slot}`,
-    title: parsed.title || slot.examTitle || `Live Exam Test #${slot.slot} (${slot.subType})`,
+    title: parsed.title || slot.examTitle || calibrated.defaultTitle,
     language: slot.language,
     category: slot.category,
     categoryGroup: slot.categoryGroup || 'up_govt',
-    duration,
+    duration: calibrated.duration,
     wordCount,
     difficulty: slot.difficulty,
     date: dateStr,
@@ -1087,66 +1560,44 @@ export async function generateCustomTest(options: {
   topic: string;
   targetWords?: number;
   duration?: number;
+  examTitle?: string;
   config: AiConfig;
 }): Promise<Passage> {
-  const { language, difficulty, category, categoryGroup, topic, targetWords, duration, config } = options;
-  const isHindi = language.startsWith('hindi');
-  const isHard = difficulty === 'hard';
-  const dur = duration || 15;
-  const wordCountTarget = targetWords || (dur === 5 ? 190 : dur === 10 ? 360 : isHard ? 550 : 520);
+  const { language, difficulty, category, categoryGroup, topic, targetWords, duration, examTitle, config } = options;
 
-  let systemPrompt = '';
-  let userPrompt = '';
-
-  if (!isHindi) {
-    systemPrompt =
-      'You are the principal typing examination evaluator and passage author for official competitive examinations across India.';
-    userPrompt = `Generate an official competitive typing examination passage in standard English on '${topic}'.
-Category: ${categoryGroup || category}
-Target Word Count: Exactly ${wordCountTarget} words (between ${wordCountTarget - 20} and ${wordCountTarget + 20} words for a ${dur}-minute test).
-${isHard ? 'CRUCIAL HARD CRITERIA: High Average Word Length (AWL >= 7.2 letters/word). High concentration of 8-16 letter words: telecommunications, institutionalization, counter-intelligence, misappropriation, constitutionalism, jurisprudence, proportionality, interoperability, infrastructure, accountability, administration.' : 'MEDIUM CRITERIA: Balanced editorial and administrative prose.'}
-Continuous 3 paragraphs, standard punctuation, no bullet points, no markdown.
-Return ONLY valid JSON:
-{
-  "title": "Official Title: ${topic}",
-  "text": "Full continuous passage text here..."
-}`;
-  } else {
-    systemPrompt =
-      'आप भारत के विभिन्न सरकारी भर्ती आयोगों के लिए आधिकारिक टंकण परीक्षा गद्यांश निर्माता हैं।';
-    userPrompt = `दिए गए विषय '${topic}' पर आधिकारिक टंकण परीक्षा के लिए 15-मिनट की टंकण सामग्री तैयार करें।
-कठिनाई: ${isHard ? 'कठिन (HARD LEVEL - दीर्घ एवं लंबे शब्द, कठिन संयुक्ताक्षर)' : 'मध्यम (MEDIUM LEVEL)'}
-लक्षित शब्द संख्या: ठीक ${wordCountTarget} शब्द (${dur} मिनट हेतु)।
-${isHard ? 'दीर्घ एवं लंबे शब्द (संवैधानिकता, उत्तरदायित्व, कार्यप्रणाली, प्रशासनिक, दूरसंचार, न्यायाधिकरण), कठिन संयुक्ताक्षर (द्ध, द्व, द्य, ष्ट, क्त, ह्न, हृ, त्त, ट्र, क्र), नुक्ता शब्द (फ़, ज़)।' : 'मानक खड़ी बोली हिंदी, सामान्य प्रशासनिक शब्दावली।'}
-3 निरंतर पैराग्राफ, कोई बुलेट नहीं, केवल शुद्ध JSON दें:
-{
-  "title": "आधिकारिक शीर्षक: ${topic}",
-  "text": "पूर्ण गद्यांश..."
-}`;
-  }
+  const calibrated = getExamCalibratedPrompt({
+    category,
+    categoryGroup,
+    language,
+    difficulty,
+    duration,
+    targetWords,
+    topic,
+    examTitle
+  });
 
   const { content } = await executeFailoverAiCall(
     config,
     [
-      { role: 'system', content: systemPrompt },
-      { role: 'user', content: userPrompt }
+      { role: 'system', content: calibrated.systemPrompt },
+      { role: 'user', content: calibrated.userPrompt }
     ],
     0.7,
     3500
   );
 
-  const parsed = extractPassageFromAiResponse(content, `Custom AI Test: ${topic}`);
+  const parsed = extractPassageFromAiResponse(content, calibrated.defaultTitle);
   const cleanText = parsed.text;
   const wordCount = cleanText.split(/\s+/).filter(Boolean).length;
   const todayStr = new Date().toISOString().split('T')[0];
 
   const newPassage: Passage = {
     id: `custom-ai-${Date.now()}`,
-    title: parsed.title || `Custom AI Test: ${topic}`,
+    title: parsed.title || calibrated.defaultTitle,
     language,
     category,
     categoryGroup: categoryGroup || 'up_govt',
-    duration: dur,
+    duration: calibrated.duration,
     wordCount,
     difficulty,
     date: todayStr,

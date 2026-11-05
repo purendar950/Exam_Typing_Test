@@ -25,7 +25,9 @@ import {
   DAILY_8_SLOTS,
   DAILY_BALANCED_SLOTS,
   AiProviderConfig,
-  getActiveProviders
+  getActiveProviders,
+  EXAM_CATEGORY_OPTIONS,
+  EXAM_RECOMMENDED_TOPICS
 } from '../services/aiGenerator';
 import {
   isAdminAuthenticated,
@@ -170,6 +172,27 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
   const [customTargetWords, setCustomTargetWords] = useState<number>(550);
   const [isGeneratingCustom, setIsGeneratingCustom] = useState<boolean>(false);
   const [customGenMessage, setCustomGenMessage] = useState<string>('');
+
+  const selectedAdminCatOption = EXAM_CATEGORY_OPTIONS.find((opt) => opt.id === customCategory);
+  const adminSuggestedTopics = EXAM_RECOMMENDED_TOPICS[customCategory] || EXAM_RECOMMENDED_TOPICS.all || [];
+
+  const handleAdminCategoryChange = (newCat: string) => {
+    setCustomCategory(newCat as ExamCategory);
+    const meta = EXAM_CATEGORY_OPTIONS.find((opt) => opt.id === newCat);
+    if (meta) {
+      const isHi = customLanguage.startsWith('hindi');
+      setCustomTargetWords(isHi ? meta.defaultHindiWords : meta.defaultEnglishWords);
+    }
+  };
+
+  const handleAdminLanguageChange = (newLang: Language) => {
+    setCustomLanguage(newLang);
+    const meta = EXAM_CATEGORY_OPTIONS.find((opt) => opt.id === customCategory);
+    if (meta) {
+      const isHi = newLang.startsWith('hindi');
+      setCustomTargetWords(isHi ? meta.defaultHindiWords : meta.defaultEnglishWords);
+    }
+  };
 
   // Manual Passage Creator State
   const [isCreatingManual, setIsCreatingManual] = useState<boolean>(false);
@@ -2770,40 +2793,65 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
 
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '12px', marginBottom: '12px' }}>
                       <div>
-                        <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#475569', marginBottom: '4px' }}>Language:</label>
+                        <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#475569', marginBottom: '4px' }}>Language & Layout:</label>
                         <select
                           value={customLanguage}
-                          onChange={(e) => setCustomLanguage(e.target.value as Language)}
+                          onChange={(e) => handleAdminLanguageChange(e.target.value as Language)}
                           style={{ width: '100%', padding: '8px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '0.85rem' }}
                         >
-                          <option value="english">English (QWERTY)</option>
-                          <option value="hindi_mangal">Hindi Mangal (Inscript)</option>
-                          <option value="hindi_kruti">Hindi Kruti Dev 010</option>
+                          <option value="english">🇬🇧 English (QWERTY)</option>
+                          <option value="hindi_mangal">🇮🇳 हिंदी मंगल (Mangal Inscript)</option>
+                          <option value="hindi_kruti">🇮🇳 हिंदी कुर्ती देव (Kruti Dev 010)</option>
                         </select>
                       </div>
 
                       <div>
-                        <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#475569', marginBottom: '4px' }}>Difficulty:</label>
+                        <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#475569', marginBottom: '4px' }}>Difficulty Standard:</label>
                         <select
                           value={customDifficulty}
-                          onChange={(e) => setCustomDifficulty(e.target.value as 'medium' | 'hard')}
+                          onChange={(e) => {
+                            const diff = e.target.value as 'medium' | 'hard';
+                            setCustomDifficulty(diff);
+                            const meta = EXAM_CATEGORY_OPTIONS.find((opt) => opt.id === customCategory);
+                            const base = customLanguage.startsWith('hindi') ? (meta?.defaultHindiWords || 430) : (meta?.defaultEnglishWords || 520);
+                            setCustomTargetWords(diff === 'hard' ? base + 20 : base);
+                          }}
                           style={{ width: '100%', padding: '8px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '0.85rem' }}
                         >
-                          <option value="medium">Medium (Standard 500–540w)</option>
-                          <option value="hard">Hard (Longer Words 8–16+ letters, AWL ≥ 7.0)</option>
+                          <option value="medium">🟡 Medium (Balanced Standard)</option>
+                          <option value="hard">🔴 Hard (AR Typing Kathin: AWL ≥ 7.2)</option>
                         </select>
                       </div>
 
                       <div>
-                        <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#475569', marginBottom: '4px' }}>Category:</label>
+                        <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#475569', marginBottom: '4px' }}>Target Examination Series:</label>
                         <select
                           value={customCategory}
-                          onChange={(e) => setCustomCategory(e.target.value as ExamCategory)}
+                          onChange={(e) => handleAdminCategoryChange(e.target.value)}
                           style={{ width: '100%', padding: '8px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '0.85rem' }}
                         >
-                          <option value="up_police_co">UP Police Computer Operator</option>
-                          <option value="up_police_asi">UP Police ASI / Clerk</option>
+                          {EXAM_CATEGORY_OPTIONS.map((opt) => (
+                            <option key={opt.id} value={opt.id}>
+                              {opt.label}
+                            </option>
+                          ))}
                         </select>
+                        {selectedAdminCatOption && (
+                          <div
+                            style={{
+                              marginTop: '5px',
+                              fontSize: '0.7rem',
+                              lineHeight: '1.3',
+                              color: '#0369a1',
+                              background: '#f0f9ff',
+                              border: '1px solid #bae6fd',
+                              borderRadius: '5px',
+                              padding: '4px 6px'
+                            }}
+                          >
+                            🎯 <strong>Standard:</strong> {selectedAdminCatOption.platformNotes}
+                          </div>
+                        )}
                       </div>
 
                       <div>
@@ -2825,9 +2873,35 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                         type="text"
                         value={customTopic}
                         onChange={(e) => setCustomTopic(e.target.value)}
-                        placeholder="e.g. Cyber Forensics in Uttar Pradesh Police or UPI Payment Architecture"
+                        placeholder="e.g. Cyber Forensics in Uttar Pradesh Police or High Court Writ Jurisdiction..."
                         style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1.5px solid #cbd5e1', fontSize: '0.85rem' }}
                       />
+
+                      {/* Topic Recommendation Chips */}
+                      <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginTop: '8px' }}>
+                        <span style={{ fontSize: '0.72rem', fontWeight: 700, color: '#64748b', alignSelf: 'center' }}>
+                          Suggested:
+                        </span>
+                        {adminSuggestedTopics.map((sugg) => (
+                          <button
+                            key={sugg}
+                            type="button"
+                            onClick={() => setCustomTopic(sugg)}
+                            style={{
+                              background: '#f1f5f9',
+                              border: '1px solid #cbd5e1',
+                              borderRadius: '14px',
+                              padding: '2px 8px',
+                              fontSize: '0.72rem',
+                              fontWeight: 600,
+                              color: '#334155',
+                              cursor: 'pointer'
+                            }}
+                          >
+                            + {sugg}
+                          </button>
+                        ))}
+                      </div>
                     </div>
 
                     {customGenMessage && (

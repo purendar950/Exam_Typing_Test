@@ -10,7 +10,9 @@ import {
   fetchDailyLivePassages,
   DAILY_8_SLOTS,
   DAILY_BALANCED_SLOTS,
-  getActiveProviders
+  getActiveProviders,
+  EXAM_CATEGORY_OPTIONS,
+  EXAM_RECOMMENDED_TOPICS
 } from '../services/aiGenerator';
 import { Passage, Language, ExamCategory } from '../types';
 
@@ -62,6 +64,27 @@ export const AiGeneratorModal: React.FC<AiGeneratorModalProps> = ({
   const [isGeneratingSingle, setIsGeneratingSingle] = useState<boolean>(false);
   const [singleResult, setSingleResult] = useState<Passage | null>(null);
   const [singleMessage, setSingleMessage] = useState<string>('');
+
+  const selectedCatOption = EXAM_CATEGORY_OPTIONS.find((opt) => opt.id === singleCategory);
+  const currentSuggestedTopics = EXAM_RECOMMENDED_TOPICS[singleCategory] || EXAM_RECOMMENDED_TOPICS.all || [];
+
+  const handleSingleCategoryChange = (newCat: string) => {
+    setSingleCategory(newCat as ExamCategory);
+    const meta = EXAM_CATEGORY_OPTIONS.find((opt) => opt.id === newCat);
+    if (meta) {
+      const isHi = singleLanguage.startsWith('hindi');
+      setSingleWords(isHi ? meta.defaultHindiWords : meta.defaultEnglishWords);
+    }
+  };
+
+  const handleSingleLanguageChange = (newLang: Language) => {
+    setSingleLanguage(newLang);
+    const meta = EXAM_CATEGORY_OPTIONS.find((opt) => opt.id === singleCategory);
+    if (meta) {
+      const isHi = newLang.startsWith('hindi');
+      setSingleWords(isHi ? meta.defaultHindiWords : meta.defaultEnglishWords);
+    }
+  };
 
   // Load config on open
   useEffect(() => {
@@ -577,7 +600,7 @@ export const AiGeneratorModal: React.FC<AiGeneratorModalProps> = ({
                   </label>
                   <select
                     value={singleLanguage}
-                    onChange={(e) => setSingleLanguage(e.target.value as Language)}
+                    onChange={(e) => handleSingleLanguageChange(e.target.value as Language)}
                     style={{
                       width: '100%',
                       padding: '9px 12px',
@@ -589,9 +612,9 @@ export const AiGeneratorModal: React.FC<AiGeneratorModalProps> = ({
                       color: '#0f172a'
                     }}
                   >
-                    <option value="english">🇬🇧 English (30 WPM Benchmark)</option>
-                    <option value="hindi_mangal">🇮🇳 हिंदी मंगल (Inscript • 25 WPM)</option>
-                    <option value="hindi_kruti">🇮🇳 हिंदी कुर्ती देव (Kruti Dev 010 • 25 WPM)</option>
+                    <option value="english">🇬🇧 English (QWERTY • 30–35 WPM)</option>
+                    <option value="hindi_mangal">🇮🇳 हिंदी मंगल (Mangal Inscript • 25–30 WPM)</option>
+                    <option value="hindi_kruti">🇮🇳 हिंदी कुर्ती देव (Kruti Dev 010 • 25–30 WPM)</option>
                   </select>
                 </div>
 
@@ -605,7 +628,9 @@ export const AiGeneratorModal: React.FC<AiGeneratorModalProps> = ({
                     onChange={(e) => {
                       const diff = e.target.value as 'medium' | 'hard';
                       setSingleDifficulty(diff);
-                      setSingleWords(diff === 'hard' ? 550 : 520);
+                      const meta = EXAM_CATEGORY_OPTIONS.find((opt) => opt.id === singleCategory);
+                      const base = singleLanguage.startsWith('hindi') ? (meta?.defaultHindiWords || 430) : (meta?.defaultEnglishWords || 520);
+                      setSingleWords(diff === 'hard' ? base + 20 : base);
                     }}
                     style={{
                       width: '100%',
@@ -618,8 +643,8 @@ export const AiGeneratorModal: React.FC<AiGeneratorModalProps> = ({
                       color: singleDifficulty === 'hard' ? '#b91c1c' : '#0f172a'
                     }}
                   >
-                    <option value="medium">🟡 MEDIUM (500–540w • Balanced Editorial)</option>
-                    <option value="hard">🔴 HARD (520–580w • Longer Words 8–16+ letters, AWL ≥ 7.0)</option>
+                    <option value="medium">🟡 MEDIUM (Balanced Official Exam Standard)</option>
+                    <option value="hard">🔴 HARD (AR Typing Kathin: Longer Words 8–16+ letters, AWL ≥ 7.2)</option>
                   </select>
                 </div>
 
@@ -630,7 +655,7 @@ export const AiGeneratorModal: React.FC<AiGeneratorModalProps> = ({
                   </label>
                   <select
                     value={singleCategory}
-                    onChange={(e) => setSingleCategory(e.target.value as ExamCategory)}
+                    onChange={(e) => handleSingleCategoryChange(e.target.value)}
                     style={{
                       width: '100%',
                       padding: '9px 12px',
@@ -642,10 +667,28 @@ export const AiGeneratorModal: React.FC<AiGeneratorModalProps> = ({
                       color: '#0f172a'
                     }}
                   >
-                    <option value="up_police_co">👮 UP Police Computer Operator (Grade-A)</option>
-                    <option value="up_police_asi">📑 UP Police ASI (Clerk & Accounts)</option>
-                    <option value="all">🏛️ General Secretariat & Judiciary</option>
+                    {EXAM_CATEGORY_OPTIONS.map((opt) => (
+                      <option key={opt.id} value={opt.id}>
+                        {opt.label}
+                      </option>
+                    ))}
                   </select>
+                  {selectedCatOption && (
+                    <div
+                      style={{
+                        marginTop: '6px',
+                        fontSize: '0.72rem',
+                        lineHeight: '1.35',
+                        color: '#0369a1',
+                        background: '#f0f9ff',
+                        border: '1px solid #bae6fd',
+                        borderRadius: '6px',
+                        padding: '5px 8px'
+                      }}
+                    >
+                      🎯 <strong>Standard:</strong> {selectedCatOption.platformNotes}
+                    </div>
+                  )}
                 </div>
 
                 {/* Word Count */}
@@ -655,7 +698,7 @@ export const AiGeneratorModal: React.FC<AiGeneratorModalProps> = ({
                   </label>
                   <input
                     type="range"
-                    min={480}
+                    min={150}
                     max={600}
                     step={10}
                     value={singleWords}
@@ -663,8 +706,9 @@ export const AiGeneratorModal: React.FC<AiGeneratorModalProps> = ({
                     style={{ width: '100%', accentColor: '#0284c7', marginTop: '6px' }}
                   />
                   <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.72rem', color: '#64748b' }}>
-                    <span>480w</span>
-                    <span>540w (AR Standard)</span>
+                    <span>150w (5m)</span>
+                    <span>350w (10m)</span>
+                    <span>540w (15m)</span>
                     <span>600w</span>
                   </div>
                 </div>
@@ -677,7 +721,7 @@ export const AiGeneratorModal: React.FC<AiGeneratorModalProps> = ({
                 </label>
                 <input
                   type="text"
-                  placeholder="e.g. Cyber Security, Bharatiya Nyaya Sanhita, Emergency Dial 112, Artificial Intelligence..."
+                  placeholder="e.g. Cyber Security, Bharatiya Nyaya Sanhita, Emergency Dial 112, High Court Judgments..."
                   value={singleTopic}
                   onChange={(e) => setSingleTopic(e.target.value)}
                   style={{
@@ -694,16 +738,9 @@ export const AiGeneratorModal: React.FC<AiGeneratorModalProps> = ({
                 {/* Topic Suggestion Chips */}
                 <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginTop: '8px' }}>
                   <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#64748b', alignSelf: 'center' }}>
-                    Suggested:
+                    Suggested ({selectedCatOption?.label.split(' ')[1] || 'Exam'}):
                   </span>
-                  {[
-                    'Cyber Crime & Digital Forensics',
-                    'Bharatiya Nyaya Sanhita (BNS)',
-                    'Emergency Response & Dial 112',
-                    'E-Governance & Digital India',
-                    'Women Safety & Special Task Forces',
-                    'National Highway Logistics & Safety'
-                  ].map((sugg) => (
+                  {currentSuggestedTopics.map((sugg) => (
                     <button
                       key={sugg}
                       type="button"
