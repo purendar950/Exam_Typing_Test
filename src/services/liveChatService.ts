@@ -22,7 +22,7 @@ import {
   limit
 } from 'firebase/firestore';
 import { db, UserProfile } from './firebase';
-import { getTelegramConfig, TelegramConfig } from './telegramService';
+import { getTelegramConfig, TelegramConfig, getAppBaseUrl } from './telegramService';
 
 export interface ChatMessage {
   id: string;
@@ -383,8 +383,9 @@ export async function notifyAdminViaTelegram(
     return { success: false, message: 'Telegram config incomplete' };
   }
 
-  const siteOrigin = typeof window !== 'undefined' ? window.location.origin : 'https://purendar950.github.io';
-  const replyUrl = `${siteOrigin}/?admin_chat=${encodeURIComponent(sessionId)}`;
+  const appBaseUrl = getAppBaseUrl();
+  const secret = config.approvalSecretToken || '';
+  const replyUrl = `${appBaseUrl}?admin_chat=${encodeURIComponent(sessionId)}&token=${encodeURIComponent(secret)}`;
 
   const caption =
     `⚡ <b>EXAM TYPING • LIVE SUPPORT TICKET</b>\n` +
@@ -397,15 +398,18 @@ export async function notifyAdminViaTelegram(
     `💬 <b>Inquiry:</b>\n` +
     `<blockquote>${messageText.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</blockquote>\n` +
     `━━━━━━━━━━━━━━━━━━━━\n` +
-    `🛡️ <i>Tap below to open conversation & reply directly:</i>`;
+    `🛡️ <i>Tap below to reply to the candidate directly inside Telegram:</i>`;
 
   const inlineKeyboard = {
     inline_keyboard: [
       [
-        { text: '💬 Open Live Chat Thread & Reply', url: replyUrl }
+        {
+          text: '💬 Reply to Candidate (In-App)',
+          web_app: { url: replyUrl }
+        }
       ],
       [
-        { text: '🛡️ Open Admin Suite', url: `${siteOrigin}/?admin_portal=1` }
+        { text: '🛡️ Open Admin Suite', url: `${appBaseUrl}?admin_portal=1` }
       ]
     ]
   };
