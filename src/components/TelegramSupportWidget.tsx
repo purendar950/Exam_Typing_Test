@@ -60,6 +60,36 @@ export const TelegramSupportWidget: React.FC<TelegramSupportWidgetProps> = ({
     }
   }, [isOpen, chatSession?.unreadByUser]);
 
+  // Sync any newly saved admin replies
+  useEffect(() => {
+    if (!chatSession?.id) return;
+    const interval = setInterval(() => {
+      try {
+        const savedKey = `up_ticket_replies_${chatSession.id}`;
+        const savedReplies: ChatMessage[] = JSON.parse(localStorage.getItem(savedKey) || '[]');
+        if (savedReplies.length > 0) {
+          setChatSession((prev) => {
+            if (!prev) return prev;
+            const existingIds = new Set((prev.messages || []).map((m) => m.id));
+            const newReplies = savedReplies.filter((r) => !existingIds.has(r.id));
+            if (newReplies.length > 0) {
+              return {
+                ...prev,
+                messages: [...(prev.messages || []), ...newReplies],
+                lastMessage: newReplies[newReplies.length - 1].text,
+                lastMessageAt: newReplies[newReplies.length - 1].timestamp,
+                unreadByUser: true
+              };
+            }
+            return prev;
+          });
+        }
+      } catch {}
+    }, 2000);
+
+    return () => clearInterval(interval);
+  }, [chatSession?.id]);
+
   // Auto-scroll messages to bottom
   useEffect(() => {
     if (isOpen && activeTab === 'chat') {
