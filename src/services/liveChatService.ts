@@ -3,28 +3,26 @@
  * Enables candidates to chat directly with Administrators through an on-website widget.
  *
  * Architecture:
- * 1. Messages are synced in real-time via Cloud Firestore (support_chats collection).
- * 2. When a candidate sends a message, a notification is instantly dispatched to the
- *    Admin's Telegram bot with candidate details and a 1-click link to open the conversation.
- * 3. Admin replies from the website's Admin Suite (or 1-click link), and the candidate
- *    receives the reply live via Firestore onSnapshot listener.
+ * 1. Dual Persistence: Messages are immediately saved locally in localStorage (offline-first,
+ *    zero UI delay) and synced in real-time to Cloud Firestore (support_chats collection).
+ * 2. Telegram Alert Dispatch: Sends instant notifications with 1-click reply buttons
+ *    to the Admin's Telegram bot independently from Firestore status.
+ * 3. Real-Time Sync: Changes are streamed to candidate & admin via onSnapshot listeners.
  */
 
 import {
   collection,
   doc,
   getDoc,
+  getDocs,
   setDoc,
-  updateDoc,
   onSnapshot,
   query,
   orderBy,
-  limit,
-  arrayUnion,
-  serverTimestamp
+  limit
 } from 'firebase/firestore';
 import { db, UserProfile } from './firebase';
-import { getTelegramConfig } from './telegramService';
+import { getTelegramConfig, TelegramConfig } from './telegramService';
 
 export interface ChatMessage {
   id: string;
@@ -48,41 +46,85 @@ export interface SupportChatSession {
   createdAt: string;
 }
 
-const STORAGE_KEY_CHAT_SESSION = 'up_support_chat_session_id';
+const STORAGE_KEY_SESSION_ID = 'up_support_chat_session_id';
+const STORAGE_KEY_SESSION_DATA = 'up_support_chat_data_v2';
+
+// Helper: Read local cached session
+export function getLocalChatSession(): SupportChatSession | null {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY_SESSION_DATA);
+    if (raw) {
+      return JSON.parse(raw);
+    }
+  } catch {
+    // Ignore
+  }
+  return null;
+}
+
+// Helper: Save local cached session
+export function saveLocalChatSession(session: SupportChatSession): void {
+  try {
+    localStorage.setItem(STORAGE_KEY_SESSION_DATA, JSON.stringify(session));
+    localStorage.setItem(STORAGE_KEY_SESSION_ID, session.id);
+  } catch {
+    // Ignore
+  }
+}
 
 // 1. Get or Create Session for current browser / user
 export async function getOrCreateChatSession(currentUser?: UserProfile | null): Promise<SupportChatSession> {
-  let sessionId = localStorage.getItem(STORAGE_KEY_CHAT_SESSION);
+  // Check local cache first
+  const cached = getLocalChatSession();
+  let sessionId = cached?.id || localStorage.getItem(STORAGE_KEY_SESSION_ID);
 
-  if (sessionId) {
-    try {
-      const snap = await getDoc(doc(db, 'support_chats', sessionId));
-      if (snap.exists()) {
-        const data = snap.data() as SupportChatSession;
-        // Update user profile info if changed
-        if (currentUser && (!data.userId || data.userName === 'Guest Candidate')) {
-          const updatedName = currentUser.displayName || data.userName;
-          const updatedEmail = currentUser.email || data.userEmail;
-          await updateDoc(doc(db, 'support_chats', sessionId), {
-            userId: currentUser.uid,
-            userName: updatedName,
-            userEmail: updatedEmail
-          });
-          data.userId = currentUser.uid;
-          data.userName = updatedName;
-          data.userEmail = updatedEmail;
-        }
-        return data;
-      }
-    } catch (err) {
-      console.warn('Failed to load existing chat session from Firestore:', err);
+  if (cached && sessionId) {
+    if (currentUser && (!cached.userId || cached.userName === 'Candidate')) {
+      cached.userId = currentUser.uid;
+      cached.userName = currentUser.displayName || cached.userName;
+      cached.userEmail = currentUser.email || cached.userEmail;
+      saveLocalChatSession(cached);
+      // Sync user profile to Firestore in background
+      try {
+        await setDoc(doc(db, 'support_chats', sessionId), cached, { merge: true });
+      } catch {}
     }
+
+    // Attempt background cloud sync
+    getDoc(doc(db, 'support_chats', sessionId))
+      .then((snap) => {
+        if (snap.exists()) {
+          const cloud = snap.data() as SupportChatSession;
+          // Merge messages so neither local nor cloud messages are lost
+          const msgMap = new Map<string, ChatMessage>();
+          (cached.messages || []).forEach((m) => msgMap.set(m.id, m));
+          (cloud.messages || []).forEach((m) => msgMap.set(m.id, m));
+          const mergedList = Array.from(msgMap.values()).sort(
+            (a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
+          );
+
+          const mergedSession: SupportChatSession = {
+            ...cloud,
+            ...cached,
+            messages: mergedList,
+            lastMessage: mergedList[mergedList.length - 1]?.text || cached.lastMessage,
+            lastMessageAt: mergedList[mergedList.length - 1]?.timestamp || cached.lastMessageAt
+          };
+          saveLocalChatSession(mergedSession);
+        } else {
+          // Push local session up to Firestore
+          setDoc(doc(db, 'support_chats', sessionId!), cached, { merge: true }).catch(() => {});
+        }
+      })
+      .catch((err) => {
+        console.warn('Live chat background sync warning:', err);
+      });
+
+    return cached;
   }
 
-  // Create new session
+  // Create brand new session
   sessionId = `chat_${Date.now()}_${Math.random().toString(36).substring(2, 8)}`;
-  localStorage.setItem(STORAGE_KEY_CHAT_SESSION, sessionId);
-
   const initialSession: SupportChatSession = {
     id: sessionId,
     userId: currentUser?.uid,
@@ -105,10 +147,13 @@ export async function getOrCreateChatSession(currentUser?: UserProfile | null): 
     createdAt: new Date().toISOString()
   };
 
+  saveLocalChatSession(initialSession);
+
+  // Sync to Firestore with merge: true (never throws document-not-found)
   try {
-    await setDoc(doc(db, 'support_chats', sessionId), initialSession);
+    await setDoc(doc(db, 'support_chats', sessionId), initialSession, { merge: true });
   } catch (err) {
-    console.warn('Failed to save initial chat session to Firestore:', err);
+    console.warn('Initial chat session Firestore sync warning:', err);
   }
 
   return initialSession;
@@ -124,13 +169,30 @@ export function subscribeToChatSession(
       doc(db, 'support_chats', sessionId),
       (snap) => {
         if (snap.exists()) {
-          onUpdate(snap.data() as SupportChatSession);
-        } else {
-          onUpdate(null);
+          const cloudSession = snap.data() as SupportChatSession;
+          // Merge with local cache to avoid overwriting optimistic messages
+          const cached = getLocalChatSession();
+          if (cached && cached.id === sessionId) {
+            const msgMap = new Map<string, ChatMessage>();
+            (cached.messages || []).forEach((m) => msgMap.set(m.id, m));
+            (cloudSession.messages || []).forEach((m) => msgMap.set(m.id, m));
+            const mergedList = Array.from(msgMap.values()).sort(
+              (a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
+            );
+            const fullSession: SupportChatSession = {
+              ...cloudSession,
+              messages: mergedList
+            };
+            saveLocalChatSession(fullSession);
+            onUpdate(fullSession);
+          } else {
+            saveLocalChatSession(cloudSession);
+            onUpdate(cloudSession);
+          }
         }
       },
       (err) => {
-        console.warn('Live chat onSnapshot error:', err);
+        console.warn('Live chat onSnapshot notice:', err);
       }
     );
     return unsub;
@@ -145,11 +207,10 @@ export async function sendUserLiveMessage(
   sessionId: string,
   text: string,
   userName: string,
-  userEmail?: string
-): Promise<boolean> {
+  userEmail?: string,
+  configOverride?: TelegramConfig | null
+): Promise<{ success: boolean; message: ChatMessage }> {
   const cleanText = text.trim();
-  if (!cleanText) return false;
-
   const now = new Date().toISOString();
   const newMessage: ChatMessage = {
     id: `msg_user_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
@@ -159,30 +220,45 @@ export async function sendUserLiveMessage(
     timestamp: now
   };
 
-  try {
-    // 1. Update Firestore
-    const ref = doc(db, 'support_chats', sessionId);
-    await updateDoc(ref, {
-      messages: arrayUnion(newMessage),
+  // 1. Immediately update Local Storage (instant optimistic persistence)
+  let currentSession = getLocalChatSession();
+  if (!currentSession || currentSession.id !== sessionId) {
+    currentSession = {
+      id: sessionId,
+      userName: userName || 'Candidate',
+      userEmail: userEmail || '',
+      status: 'open',
       lastMessage: cleanText,
       lastMessageAt: now,
       unreadByAdmin: true,
       unreadByUser: false,
-      status: 'open',
-      userName: userName || 'Candidate',
-      userEmail: userEmail || ''
-    });
-
-    // 2. Dispatch Telegram Alert to Admin
-    notifyAdminViaTelegram(sessionId, userName, userEmail, cleanText).catch((err) => {
-      console.warn('Failed to dispatch live chat Telegram alert:', err);
-    });
-
-    return true;
-  } catch (err) {
-    console.error('Error sending user message:', err);
-    return false;
+      messages: [newMessage],
+      createdAt: now
+    };
+  } else {
+    currentSession.messages = [...(currentSession.messages || []), newMessage];
+    currentSession.lastMessage = cleanText;
+    currentSession.lastMessageAt = now;
+    currentSession.unreadByAdmin = true;
+    currentSession.userName = userName || currentSession.userName;
+    currentSession.userEmail = userEmail || currentSession.userEmail;
   }
+  saveLocalChatSession(currentSession);
+
+  // 2. Dispatch Telegram Alert in parallel (doesn't wait for Firestore)
+  notifyAdminViaTelegram(sessionId, userName, userEmail, cleanText, configOverride).catch((err) => {
+    console.warn('Telegram live alert dispatch failed:', err);
+  });
+
+  // 3. Sync to Firestore using setDoc with merge: true (never crashes if doc does not exist)
+  try {
+    const ref = doc(db, 'support_chats', sessionId);
+    await setDoc(ref, currentSession, { merge: true });
+  } catch (err) {
+    console.warn('Firestore live chat sync notice (stored locally):', err);
+  }
+
+  return { success: true, message: newMessage };
 }
 
 // 4. Send reply from Admin to Candidate
@@ -205,13 +281,38 @@ export async function sendAdminLiveReply(
 
   try {
     const ref = doc(db, 'support_chats', sessionId);
-    await updateDoc(ref, {
-      messages: arrayUnion(newMessage),
-      lastMessage: cleanText,
-      lastMessageAt: now,
-      unreadByAdmin: false,
-      unreadByUser: true
-    });
+    const snap = await getDoc(ref);
+    if (snap.exists()) {
+      const existing = snap.data() as SupportChatSession;
+      const updatedMessages = [...(existing.messages || []), newMessage];
+      await setDoc(
+        ref,
+        {
+          messages: updatedMessages,
+          lastMessage: cleanText,
+          lastMessageAt: now,
+          unreadByAdmin: false,
+          unreadByUser: true
+        },
+        { merge: true }
+      );
+    } else {
+      await setDoc(
+        ref,
+        {
+          id: sessionId,
+          userName: 'Candidate',
+          status: 'open',
+          messages: [newMessage],
+          lastMessage: cleanText,
+          lastMessageAt: now,
+          unreadByAdmin: false,
+          unreadByUser: true,
+          createdAt: now
+        },
+        { merge: true }
+      );
+    }
     return true;
   } catch (err) {
     console.error('Error sending admin reply:', err);
@@ -235,7 +336,7 @@ export function subscribeToAllLiveChats(
         onUpdate(chats);
       },
       (err) => {
-        console.warn('Admin live chats list listener error:', err);
+        console.warn('Admin live chats list listener notice:', err);
       }
     );
     return unsub;
@@ -248,34 +349,38 @@ export function subscribeToAllLiveChats(
 // 6. Mark chat as read
 export async function markChatReadByAdmin(sessionId: string): Promise<void> {
   try {
-    await updateDoc(doc(db, 'support_chats', sessionId), {
-      unreadByAdmin: false
-    });
+    await setDoc(doc(db, 'support_chats', sessionId), { unreadByAdmin: false }, { merge: true });
   } catch {
     // Ignore
   }
 }
 
 export async function markChatReadByUser(sessionId: string): Promise<void> {
+  const cached = getLocalChatSession();
+  if (cached && cached.id === sessionId) {
+    cached.unreadByUser = false;
+    saveLocalChatSession(cached);
+  }
   try {
-    await updateDoc(doc(db, 'support_chats', sessionId), {
-      unreadByUser: false
-    });
+    await setDoc(doc(db, 'support_chats', sessionId), { unreadByUser: false }, { merge: true });
   } catch {
     // Ignore
   }
 }
 
-// 7. Helper: Forward message to Admin's Telegram bot with 1-click reply URL
-async function notifyAdminViaTelegram(
+// 7. Dispatch Telegram Notification to Admin
+export async function notifyAdminViaTelegram(
   sessionId: string,
   userName: string,
   userEmail: string | undefined,
-  messageText: string
-): Promise<void> {
-  const config = await getTelegramConfig();
-  if (!config.enabled || !config.botToken.trim() || !config.adminChatId.trim()) {
-    return;
+  messageText: string,
+  configOverride?: TelegramConfig | null
+): Promise<{ success: boolean; message: string }> {
+  const config = configOverride || (await getTelegramConfig());
+
+  if (!config || !config.enabled || !config.botToken?.trim() || !config.adminChatId?.trim()) {
+    console.warn('Telegram live chat alert skipped: botToken or adminChatId not yet loaded');
+    return { success: false, message: 'Telegram config incomplete' };
   }
 
   const siteOrigin = typeof window !== 'undefined' ? window.location.origin : 'https://purendar950.github.io';
@@ -306,7 +411,7 @@ async function notifyAdminViaTelegram(
   };
 
   try {
-    await fetch(`https://api.telegram.org/bot${config.botToken.trim()}/sendMessage`, {
+    const res = await fetch(`https://api.telegram.org/bot${config.botToken.trim()}/sendMessage`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -316,7 +421,10 @@ async function notifyAdminViaTelegram(
         reply_markup: inlineKeyboard
       })
     });
-  } catch (err) {
+    const data = await res.json();
+    return { success: Boolean(data.ok), message: data.ok ? 'Alert sent' : data.description };
+  } catch (err: any) {
     console.warn('Failed to send live chat Telegram alert:', err);
+    return { success: false, message: err?.message || 'Network error' };
   }
 }

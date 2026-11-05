@@ -4,7 +4,7 @@
  * instantly to the administrator's Telegram bot/chat, with 1-click inline approval links.
  */
 
-import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { doc, getDoc, setDoc, collection, getDocs } from 'firebase/firestore';
 import { db } from './firebase';
 import { PaymentSubmission, approvePaymentSubmission, rejectPaymentSubmission } from './paymentService';
 
@@ -62,7 +62,24 @@ export async function getTelegramConfig(): Promise<TelegramConfig> {
 
   // Attempt to load from cloud Firestore
   try {
-    const snap = await getDoc(doc(db, 'system_settings', 'telegram_config'));
+    let snap = await getDoc(doc(db, 'system_settings', 'telegram_config'));
+
+    // Fallback: check under admins subcollection in case created under an admin doc
+    if (!snap.exists()) {
+      try {
+        const adminsSnap = await getDocs(collection(db, 'admins'));
+        for (const adminDoc of adminsSnap.docs) {
+          const nested = await getDoc(doc(db, 'admins', adminDoc.id, 'system_settings', 'telegram_config'));
+          if (nested.exists()) {
+            snap = nested;
+            // Mirror to root level for faster future reads
+            setDoc(doc(db, 'system_settings', 'telegram_config'), nested.data(), { merge: true }).catch(() => {});
+            break;
+          }
+        }
+      } catch {}
+    }
+
     if (snap.exists()) {
       const cloud = snap.data() as Partial<TelegramConfig>;
       const cloudChannel = (cloud.communityChannelUrl && !cloud.communityChannelUrl.includes('SSC_PYQ_COMPILATIONS'))

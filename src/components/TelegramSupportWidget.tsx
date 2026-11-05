@@ -3,6 +3,7 @@ import { TelegramConfig } from '../services/telegramService';
 import { UserProfile } from '../services/firebase';
 import {
   SupportChatSession,
+  ChatMessage,
   getOrCreateChatSession,
   subscribeToChatSession,
   sendUserLiveMessage,
@@ -76,12 +77,34 @@ export const TelegramSupportWidget: React.FC<TelegramSupportWidgetProps> = ({
       chatSession.userName ||
       'Candidate';
 
-    setIsSending(true);
     const textToSend = inputText.trim();
+    const now = new Date().toISOString();
+
+    const optimisticMsg: ChatMessage = {
+      id: `msg_user_${Date.now()}`,
+      sender: 'user',
+      senderName: nameToUse,
+      text: textToSend,
+      timestamp: now
+    };
+
+    // 1. Immediately render candidate message bubble in chatbox (zero lag)
+    setChatSession((prev) =>
+      prev
+        ? {
+            ...prev,
+            messages: [...(prev.messages || []), optimisticMsg],
+            lastMessage: textToSend,
+            lastMessageAt: now
+          }
+        : null
+    );
+
+    setIsSending(true);
     setInputText('');
 
     try {
-      await sendUserLiveMessage(chatSession.id, textToSend, nameToUse, currentUser?.email);
+      await sendUserLiveMessage(chatSession.id, textToSend, nameToUse, currentUser?.email, config);
     } catch (err) {
       console.error('Failed to send message:', err);
     } finally {
