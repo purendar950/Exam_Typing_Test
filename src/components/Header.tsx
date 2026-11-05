@@ -12,6 +12,7 @@ interface HeaderProps {
   onOpenAiGenerator?: () => void;
   onOpenAdmin?: () => void;
   onOpenPayment?: () => void;
+  onOpenMyCourses?: () => void;
   settings: TestSettings;
   onToggleSound: () => void;
   currentUser: UserProfile | null;
@@ -28,6 +29,7 @@ export const Header: React.FC<HeaderProps> = ({
   onOpenAiGenerator,
   onOpenAdmin,
   onOpenPayment,
+  onOpenMyCourses,
   settings,
   onToggleSound,
   currentUser,
@@ -113,6 +115,31 @@ export const Header: React.FC<HeaderProps> = ({
               >
                 <span>👑</span>
                 <span>{currentUser?.is_subscribed ? 'Pro Active' : 'Plans & Pricing'}</span>
+              </button>
+            )}
+
+            {currentUser && onOpenMyCourses && (
+              <button
+                className="nav-btn"
+                onClick={onOpenMyCourses}
+                style={{
+                  background: 'linear-gradient(135deg, #7c3aed 0%, #4f46e5 100%)',
+                  color: '#ffffff',
+                  border: 'none',
+                  fontWeight: 700,
+                  fontSize: '0.8rem',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '5px',
+                  padding: '6px 12px',
+                  borderRadius: '18px',
+                  cursor: 'pointer',
+                  whiteSpace: 'nowrap'
+                }}
+                title="My Purchased Courses — View plan status & validity"
+              >
+                <span>🎓</span>
+                <span>My Courses</span>
               </button>
             )}
 

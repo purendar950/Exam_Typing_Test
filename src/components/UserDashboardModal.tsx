@@ -7,6 +7,7 @@ import {
   logoutUser
 } from '../services/firebase';
 import { EvaluationResult } from '../types';
+import { PaymentSubmission, fetchUserPaymentSubmissions } from '../services/paymentService';
 
 interface UserDashboardModalProps {
   isOpen: boolean;
@@ -15,6 +16,7 @@ interface UserDashboardModalProps {
   onLogout: () => void;
   onViewScorecard?: (result: EvaluationResult) => void;
   onPracticeWrongWords?: (words: string[]) => void;
+  onOpenPayment?: () => void;
 }
 
 export const UserDashboardModal: React.FC<UserDashboardModalProps> = ({
@@ -23,12 +25,15 @@ export const UserDashboardModal: React.FC<UserDashboardModalProps> = ({
   user,
   onLogout,
   onViewScorecard,
-  onPracticeWrongWords
+  onPracticeWrongWords,
+  onOpenPayment
 }) => {
   const [attempts, setAttempts] = useState<EvaluationResult[]>([]);
   const [stats, setStats] = useState<UserStats | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
-  const [activeTab, setActiveTab] = useState<'overview' | 'history' | 'admitCard'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'history' | 'courses' | 'admitCard'>('overview');
+  const [courses, setCourses] = useState<PaymentSubmission[]>([]);
+  const [coursesLoading, setCoursesLoading] = useState<boolean>(false);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -50,6 +55,18 @@ export const UserDashboardModal: React.FC<UserDashboardModalProps> = ({
       isMounted = false;
     };
   }, [isOpen, user.uid]);
+
+  // Fetch user's course/payment submissions when courses tab opens
+  useEffect(() => {
+    if (!isOpen || activeTab !== 'courses') return;
+    let isMounted = true;
+    setCoursesLoading(true);
+    fetchUserPaymentSubmissions(user.uid)
+      .then((data) => { if (isMounted) setCourses(data); })
+      .finally(() => { if (isMounted) setCoursesLoading(false); });
+    return () => { isMounted = false; };
+  }, [isOpen, activeTab, user.uid]);
+
 
   if (!isOpen) return null;
 
@@ -207,6 +224,29 @@ export const UserDashboardModal: React.FC<UserDashboardModalProps> = ({
             📜 Test Attempt History ({attempts.length})
           </button>
           <button
+            onClick={() => setActiveTab('courses')}
+            style={{
+              padding: '12px 18px',
+              border: 'none',
+              background: 'transparent',
+              fontWeight: 700,
+              fontSize: '0.88rem',
+              cursor: 'pointer',
+              color: activeTab === 'courses' ? '#7c3aed' : '#64748b',
+              borderBottom: activeTab === 'courses' ? '2.5px solid #7c3aed' : '2.5px solid transparent',
+              position: 'relative'
+            }}
+          >
+            🎓 My Courses
+            {courses.some(c => c.status === 'pending') && (
+              <span style={{
+                position: 'absolute', top: '8px', right: '6px',
+                width: '8px', height: '8px', borderRadius: '50%',
+                background: '#f59e0b', display: 'inline-block'
+              }} />
+            )}
+          </button>
+          <button
             onClick={() => setActiveTab('admitCard')}
             style={{
               padding: '12px 18px',
@@ -222,6 +262,7 @@ export const UserDashboardModal: React.FC<UserDashboardModalProps> = ({
             🎫 Simulated Admit Card
           </button>
         </div>
+
 
         {/* 3. Tab Contents */}
         <div style={{ padding: '20px', overflowY: 'auto', flex: 1 }}>
@@ -472,7 +513,195 @@ export const UserDashboardModal: React.FC<UserDashboardModalProps> = ({
                 </div>
               )}
 
-              {/* TAB 3: ADMIT CARD VIEW */}
+              {/* TAB 3: MY COURSES */}
+              {activeTab === 'courses' && (
+                <div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', flexWrap: 'wrap', gap: '8px' }}>
+                    <div>
+                      <h3 style={{ margin: 0, fontSize: '1.05rem', fontWeight: 800, color: '#0f172a' }}>🎓 My Purchased Courses</h3>
+                      <p style={{ margin: '2px 0 0', fontSize: '0.8rem', color: '#64748b' }}>
+                        All exam plans you have submitted for activation
+                      </p>
+                    </div>
+                    {onOpenPayment && (
+                      <button
+                        onClick={() => { onOpenPayment(); onClose(); }}
+                        style={{
+                          background: 'linear-gradient(135deg, #7c3aed, #4f46e5)',
+                          color: '#ffffff',
+                          border: 'none',
+                          borderRadius: '8px',
+                          padding: '8px 16px',
+                          fontWeight: 700,
+                          fontSize: '0.85rem',
+                          cursor: 'pointer'
+                        }}
+                      >
+                        ➕ Buy New Plan
+                      </button>
+                    )}
+                  </div>
+
+                  {coursesLoading ? (
+                    <div style={{ textAlign: 'center', padding: '40px', color: '#64748b' }}>Loading your courses...</div>
+                  ) : courses.length === 0 ? (
+                    <div style={{
+                      textAlign: 'center',
+                      padding: '48px 24px',
+                      background: '#f8fafc',
+                      border: '2px dashed #e2e8f0',
+                      borderRadius: '12px'
+                    }}>
+                      <div style={{ fontSize: '3rem', marginBottom: '12px' }}>🎓</div>
+                      <div style={{ fontWeight: 800, fontSize: '1.05rem', color: '#0f172a', marginBottom: '6px' }}>
+                        No Courses Purchased Yet
+                      </div>
+                      <div style={{ color: '#64748b', fontSize: '0.88rem', marginBottom: '20px' }}>
+                        Purchase an exam plan to unlock full typing test access, mock tests, and AI-generated passages.
+                      </div>
+                      {onOpenPayment && (
+                        <button
+                          onClick={() => { onOpenPayment(); onClose(); }}
+                          style={{
+                            background: 'linear-gradient(135deg, #7c3aed, #4f46e5)',
+                            color: '#ffffff',
+                            border: 'none',
+                            borderRadius: '8px',
+                            padding: '10px 24px',
+                            fontWeight: 700,
+                            fontSize: '0.9rem',
+                            cursor: 'pointer'
+                          }}
+                        >
+                          🛒 View Plans & Purchase
+                        </button>
+                      )}
+                    </div>
+                  ) : (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+                      {courses.map((course) => {
+                        const statusColor =
+                          course.status === 'approved' ? { bg: '#f0fdf4', border: '#86efac', text: '#15803d', label: '✅ APPROVED' } :
+                          course.status === 'rejected' ? { bg: '#fef2f2', border: '#fca5a5', text: '#dc2626', label: '❌ REJECTED' } :
+                          { bg: '#fffbeb', border: '#fde68a', text: '#92400e', label: '⏳ PENDING APPROVAL' };
+
+                        const submittedDate = new Date(course.submittedAt).toLocaleDateString('en-IN', {
+                          day: '2-digit', month: 'short', year: 'numeric'
+                        });
+                        const reviewedDate = course.reviewedAt
+                          ? new Date(course.reviewedAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })
+                          : null;
+
+                        return (
+                          <div
+                            key={course.id}
+                            style={{
+                              background: statusColor.bg,
+                              border: `1.5px solid ${statusColor.border}`,
+                              borderRadius: '10px',
+                              padding: '16px',
+                              position: 'relative'
+                            }}
+                          >
+                            {/* Status Badge */}
+                            <span style={{
+                              position: 'absolute', top: '12px', right: '14px',
+                              background: statusColor.border,
+                              color: statusColor.text,
+                              padding: '3px 10px',
+                              borderRadius: '20px',
+                              fontSize: '0.72rem',
+                              fontWeight: 800,
+                              letterSpacing: '0.5px'
+                            }}>
+                              {statusColor.label}
+                            </span>
+
+                            {/* Plan Name */}
+                            <div style={{ fontWeight: 800, fontSize: '1rem', color: '#0f172a', marginBottom: '4px', paddingRight: '120px' }}>
+                              {course.planName}
+                            </div>
+
+                            {/* Exam if single exam plan */}
+                            {(course.selectedExamTitle || course.examTitle) && (
+                              <div style={{ fontSize: '0.82rem', color: '#0284c7', fontWeight: 700, marginBottom: '8px' }}>
+                                📚 {course.selectedExamTitle || course.examTitle}
+                              </div>
+                            )}
+
+                            {/* Info Grid */}
+                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '8px', marginTop: '10px' }}>
+                              <div style={{ fontSize: '0.8rem' }}>
+                                <span style={{ color: '#64748b' }}>Amount Paid:</span>{' '}
+                                <strong style={{ color: '#0f172a' }}>₹{course.finalAmount || course.finalAmountPaid || course.originalAmount}</strong>
+                                {course.promoCodeUsed || course.promoCodeApplied
+                                  ? <span style={{ color: '#16a34a', fontSize: '0.72rem', marginLeft: '4px' }}>({course.promoCodeUsed || course.promoCodeApplied})</span>
+                                  : null}
+                              </div>
+                              <div style={{ fontSize: '0.8rem' }}>
+                                <span style={{ color: '#64748b' }}>UTR Number:</span>{' '}
+                                <strong style={{ color: '#0f172a', fontFamily: 'monospace' }}>{course.utrNumber}</strong>
+                              </div>
+                              <div style={{ fontSize: '0.8rem' }}>
+                                <span style={{ color: '#64748b' }}>Submitted:</span>{' '}
+                                <strong style={{ color: '#0f172a' }}>{submittedDate}</strong>
+                              </div>
+                              {reviewedDate && (
+                                <div style={{ fontSize: '0.8rem' }}>
+                                  <span style={{ color: '#64748b' }}>Reviewed:</span>{' '}
+                                  <strong style={{ color: '#0f172a' }}>{reviewedDate}</strong>
+                                </div>
+                              )}
+                            </div>
+
+                            {/* Rejection reason */}
+                            {course.status === 'rejected' && course.rejectionReason && (
+                              <div style={{
+                                marginTop: '10px',
+                                background: '#fef2f2',
+                                border: '1px solid #fca5a5',
+                                borderRadius: '6px',
+                                padding: '8px 12px',
+                                fontSize: '0.8rem',
+                                color: '#dc2626'
+                              }}>
+                                <strong>Rejection Reason:</strong> {course.rejectionReason}
+                                {onOpenPayment && (
+                                  <button
+                                    onClick={() => { onOpenPayment(); onClose(); }}
+                                    style={{
+                                      marginLeft: '10px',
+                                      background: '#dc2626',
+                                      color: '#fff',
+                                      border: 'none',
+                                      borderRadius: '4px',
+                                      padding: '2px 10px',
+                                      fontSize: '0.75rem',
+                                      cursor: 'pointer',
+                                      fontWeight: 700
+                                    }}
+                                  >
+                                    Re-submit
+                                  </button>
+                                )}
+                              </div>
+                            )}
+
+                            {/* Pending message */}
+                            {course.status === 'pending' && (
+                              <div style={{ marginTop: '10px', fontSize: '0.78rem', color: '#92400e' }}>
+                                ⏱️ Admin typically approves within <strong>15–30 minutes</strong> during business hours. You will receive access immediately after approval.
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* TAB 4: ADMIT CARD VIEW */}
               {activeTab === 'admitCard' && (
                 <div style={{ maxWidth: '650px', margin: '0 auto', border: '2px solid #0f172a', borderRadius: '8px', padding: '20px', background: '#ffffff' }}>
                   <div style={{ textAlign: 'center', borderBottom: '2px solid #0f172a', paddingBottom: '12px', marginBottom: '16px' }}>
