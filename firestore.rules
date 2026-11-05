@@ -1,0 +1,25 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isAdmin() {
+      return request.auth != null &&
+        (exists(/databases/$(database)/documents/admins/$(request.auth.uid)) ||
+         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin');
+    }
+
+    // Live support chat. Session ids are random and unguessable
+    // (chat_<timestamp>_<random>); candidates and the Telegram admin sheet
+    // access a single document by id. Only signed-in admins may LIST all chats.
+    match /support_chats/{chatId} {
+      allow get: if true;
+      allow list: if isAdmin();
+      allow create, update: if
+        request.resource.data.keys().hasOnly(
+          ['id','userId','userName','userEmail','status','lastMessage','lastMessageAt',
+           'unreadByAdmin','unreadByUser','messages','createdAt']) &&
+        (!('messages' in request.resource.data) || request.resource.data.messages.size() < 500);
+      allow delete: if isAdmin();
+    }
+  }
+}
