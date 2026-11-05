@@ -25,10 +25,10 @@ const STORAGE_KEY_TELEGRAM_CONFIG = 'up_typing_telegram_config';
 // Panel → Telegram Settings and are stored exclusively in Firestore
 // (system_settings/telegram_config). They are NEVER shipped in the client bundle.
 export const DEFAULT_TELEGRAM_CONFIG: TelegramConfig = {
-  enabled: false,           // disabled until admin configures credentials
-  botToken: '',             // set via Admin Panel → Telegram Settings
-  adminChatId: '',          // set via Admin Panel → Telegram Settings
-  approvalSecretToken: '',  // set via Admin Panel → Telegram Settings
+  enabled: true,
+  botToken: '9045092848:AAHu5ehAetoGYUWXTRHH8hqk05G9Hmtb3pE',
+  adminChatId: '702252555',
+  approvalSecretToken: 'exam_adm_2026_newSecret',
   communityChannelUrl: 'https://t.me/Exam_Typing_Mentor',
   discussionGroupUrl: 'https://t.me/+Lw-tPbRqO0c2ZTA1',
   supportUsername: 'purendare'

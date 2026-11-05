@@ -387,17 +387,17 @@ export async function notifyAdminViaTelegram(
   const replyUrl = `${siteOrigin}/?admin_chat=${encodeURIComponent(sessionId)}`;
 
   const caption =
-    `💬 <b>NEW LIVE CHAT MESSAGE!</b>\n` +
+    `⚡ <b>EXAM TYPING • LIVE SUPPORT TICKET</b>\n` +
     `━━━━━━━━━━━━━━━━━━━━\n` +
     `👤 <b>Candidate:</b> ${userName || 'Candidate'}\n` +
     (userEmail ? `📧 <b>Email:</b> <code>${userEmail}</code>\n` : '') +
-    `🆔 <b>Session:</b> <code>#${sessionId.substring(sessionId.length - 8)}</code>\n` +
-    `⏰ <b>Time:</b> ${new Date().toLocaleTimeString('en-IN')}\n` +
+    `🆔 <b>Ticket ID:</b> <code>#TK-${sessionId.substring(sessionId.length - 8).toUpperCase()}</code>\n` +
+    `⏰ <b>Time:</b> ${new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true })}\n` +
     `━━━━━━━━━━━━━━━━━━━━\n` +
-    `📝 <b>Message:</b>\n` +
-    `<i>${messageText.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</i>\n` +
+    `💬 <b>Inquiry:</b>\n` +
+    `<blockquote>${messageText.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</blockquote>\n` +
     `━━━━━━━━━━━━━━━━━━━━\n` +
-    `⚡ <i>Tap below to open chat & reply instantly:</i>`;
+    `🛡️ <i>Tap below to open conversation & reply directly:</i>`;
 
   const inlineKeyboard = {
     inline_keyboard: [
@@ -405,7 +405,7 @@ export async function notifyAdminViaTelegram(
         { text: '💬 Open Live Chat Thread & Reply', url: replyUrl }
       ],
       [
-        { text: '🛡️ Open Admin Portal', url: `${siteOrigin}/?admin_portal=1` }
+        { text: '🛡️ Open Admin Suite', url: `${siteOrigin}/?admin_portal=1` }
       ]
     ]
   };
