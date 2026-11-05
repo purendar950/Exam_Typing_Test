@@ -392,31 +392,50 @@ export function cleanBaseUrl(url: string): string {
 
 /// Helper to get ordered list of active providers (sorted by priority 1 -> 2 -> 3...)
 export function getActiveProviders(config: AiConfig): { baseUrl: string; apiKey: string; model: string; name: string }[] {
+  const result: { baseUrl: string; apiKey: string; model: string; name: string }[] = [];
+  const seen = new Set<string>();
+
+  // 1. First add primary endpoint if it has an API key
+  const primaryKey = (config.apiKey || '').trim();
+  const primaryUrl = cleanBaseUrl(config.baseUrl);
+  const primaryModel = (config.model || '').trim() || 'gemini-2.0-flash';
+
+  if (primaryKey) {
+    const sig = `${primaryUrl}|${primaryModel}|${primaryKey}`;
+    seen.add(sig);
+    result.push({
+      baseUrl: primaryUrl,
+      apiKey: primaryKey,
+      model: primaryModel,
+      name: `Active Primary (${primaryModel})`
+    });
+  }
+
+  // 2. Add enabled providers from providers list in priority order
   if (Array.isArray(config.providers) && config.providers.length > 0) {
     const enabled = config.providers
       .filter((p) => p.enabled && p.apiKey && p.apiKey.trim())
       .sort((a, b) => (a.priority || 999) - (b.priority || 999));
-    if (enabled.length > 0) {
-      return enabled.map((p) => ({
-        baseUrl: cleanBaseUrl(p.baseUrl),
-        apiKey: p.apiKey.trim(),
-        model: p.model.trim() || 'gemini-2.0-flash',
-        name: p.name || p.id
-      }));
+
+    for (const p of enabled) {
+      const pUrl = cleanBaseUrl(p.baseUrl);
+      const pKey = p.apiKey.trim();
+      const pModel = (p.model || '').trim() || 'gemini-2.0-flash';
+      const sig = `${pUrl}|${pModel}|${pKey}`;
+
+      if (!seen.has(sig)) {
+        seen.add(sig);
+        result.push({
+          baseUrl: pUrl,
+          apiKey: pKey,
+          model: pModel,
+          name: p.name || `Fallback (${pModel})`
+        });
+      }
     }
   }
 
-  // Fallback to primary config if set
-  if (config.apiKey && config.apiKey.trim()) {
-    return [{
-      baseUrl: cleanBaseUrl(config.baseUrl),
-      apiKey: config.apiKey.trim(),
-      model: config.model.trim() || 'gemini-2.0-flash',
-      name: 'Primary Provider'
-    }];
-  }
-
-  return [];
+  return result;
 }
 
 // 1. Fetch AI Configuration (Firestore -> LocalStorage -> Default)
@@ -458,36 +477,58 @@ export async function getAiConfig(): Promise<AiConfig> {
 }
 
 // 2. Save AI Configuration
-export async function saveAiConfig(config: AiConfig, saveToFirestore: boolean = true): Promise<void> {
+export async function saveAiConfig(
+  config: AiConfig,
+  saveToFirestore: boolean = true
+): Promise<{ success: boolean; cloudSaved: boolean; message: string; error?: string }> {
+  const rootBaseUrl = cleanBaseUrl(config.baseUrl);
+  const rootApiKey = (config.apiKey || '').trim();
+  const rootModel = (config.model || '').trim() || 'gemini-2.0-flash';
+
+  const providersList = Array.isArray(config.providers)
+    ? [...config.providers]
+    : [...(DEFAULT_AI_CONFIG.providers || [])];
+
   const sanitized: AiConfig = {
-    baseUrl: cleanBaseUrl(config.baseUrl),
-    apiKey: config.apiKey.trim(),
-    model: config.model.trim() || 'gemini-2.0-flash',
-    autoDaily: !!config.autoDaily,
-    providers: Array.isArray(config.providers)
-      ? config.providers.map((p, idx) => ({
-          id: p.id || `prov_${Date.now()}_${idx}`,
-          name: p.name || `Provider #${idx + 1}`,
-          providerPreset: p.providerPreset || '',
-          baseUrl: cleanBaseUrl(p.baseUrl),
-          apiKey: p.apiKey.trim(),
-          model: p.model.trim() || 'gemini-2.0-flash',
-          enabled: typeof p.enabled === 'boolean' ? p.enabled : true,
-          priority: typeof p.priority === 'number' ? p.priority : idx + 1
-        }))
-      : DEFAULT_AI_CONFIG.providers
+    baseUrl: rootBaseUrl,
+    apiKey: rootApiKey,
+    model: rootModel,
+    autoDaily: typeof config.autoDaily === 'boolean' ? config.autoDaily : true,
+    providers: providersList.map((p, idx) => ({
+      id: p.id || `prov_${Date.now()}_${idx}`,
+      name: p.name || `Provider #${idx + 1}`,
+      providerPreset: p.providerPreset || '',
+      baseUrl: cleanBaseUrl(p.baseUrl),
+      apiKey: (p.apiKey || '').trim(),
+      model: (p.model || '').trim() || 'gemini-2.0-flash',
+      enabled: typeof p.enabled === 'boolean' ? p.enabled : true,
+      priority: typeof p.priority === 'number' ? p.priority : idx + 1
+    }))
   };
 
   localStorage.setItem(STORAGE_KEY_AI_CONFIG, JSON.stringify(sanitized));
+
+  let cloudSaved = false;
+  let cloudError: string | undefined = undefined;
 
   if (saveToFirestore) {
     try {
       const docRef = doc(db, 'system_settings', 'ai_config');
       await setDoc(docRef, { ...sanitized, updatedAt: new Date().toISOString() }, { merge: true });
-    } catch (err) {
+      cloudSaved = true;
+    } catch (err: any) {
       console.warn('Cloud save for AI config skipped (offline or permissions):', err);
+      cloudError = err?.message || 'Permission denied or Firestore offline';
     }
   }
+
+  const message = cloudSaved
+    ? '✅ AI Configuration successfully saved directly to Firebase Firestore & Local Storage!'
+    : cloudError
+    ? `⚠️ Saved to Local Storage. Firebase Cloud: ${cloudError}`
+    : '✅ AI Configuration saved to Local Storage!';
+
+  return { success: true, cloudSaved, message, error: cloudError };
 }
 
 // 3. Test AI Connection (Single or Failover Chain)

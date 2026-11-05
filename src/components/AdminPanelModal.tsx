@@ -668,12 +668,21 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
     }
   };
 
-  const handleTestConnection = async () => {
+  const handleTestActiveModel = async () => {
+    if (!aiConfig.apiKey.trim()) {
+      setAiTestStatus({ loading: false, success: false, message: 'Please enter an API Key first to test active model.' });
+      return;
+    }
     setAiTestStatus({ loading: true });
-    const res = await testAiConnection(aiConfig);
+    const res = await testAiConnection({
+      baseUrl: aiConfig.baseUrl,
+      apiKey: aiConfig.apiKey,
+      model: aiConfig.model,
+      autoDaily: aiConfig.autoDaily
+    });
     setAiTestStatus({ loading: false, success: res.success, message: res.message });
     if (res.success) {
-      setActiveModelVerified({ replying: true, message: `Failover chain verified & ready!` });
+      setActiveModelVerified({ replying: true, message: `Active Model '${aiConfig.model}' is verified and actively replying!` });
       setDetectedModels((prev) =>
         prev.map((m) => (m.id === aiConfig.model ? { ...m, isReplying: true, replyStatus: 'replying' } : m))
       );
@@ -682,10 +691,48 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
     }
   };
 
+  const handleTestConnection = async () => {
+    setAiTestStatus({ loading: true });
+    const res = await testAiConnection(aiConfig);
+    setAiTestStatus({ loading: false, success: res.success, message: res.message });
+    if (res.success) {
+      setActiveModelVerified({ replying: true, message: `Failover chain verified & ready!` });
+    } else {
+      setActiveModelVerified({ replying: false, message: res.message });
+    }
+  };
+
+  const handleAddActiveModelToFailover = () => {
+    if (!aiConfig.apiKey.trim()) {
+      setAiTestStatus({ loading: false, success: false, message: 'Please enter an API Key first before adding to failover chain.' });
+      return;
+    }
+    const current = aiConfig.providers || [];
+    const newProv: AiProviderConfig = {
+      id: `prov_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
+      name: `${aiConfig.model || 'Model'} (Backup #${current.length + 1})`,
+      providerPreset: '',
+      baseUrl: cleanBaseUrl(aiConfig.baseUrl),
+      apiKey: aiConfig.apiKey.trim(),
+      model: aiConfig.model.trim() || 'gemini-2.0-flash',
+      enabled: true,
+      priority: current.length + 1
+    };
+    setAiConfig({ ...aiConfig, providers: [...current, newProv] });
+    setAiSaveStatus(`✅ Added "${newProv.name}" to failover chain! Remember to click "Save AI Configuration" to save in Firebase.`);
+    setTimeout(() => setAiSaveStatus(''), 5000);
+  };
+
   const handleSaveAiConfig = async () => {
-    await saveAiConfig(aiConfig, true);
-    setAiSaveStatus('✅ AI Configuration successfully synchronized to Cloud & Local Storage!');
-    setTimeout(() => setAiSaveStatus(''), 4000);
+    setAiSaveStatus('⏳ Synchronizing AI configuration directly to Firebase Firestore & Local Storage...');
+    try {
+      const res = await saveAiConfig(aiConfig, true);
+      setAiSaveStatus(res.message);
+      setTimeout(() => setAiSaveStatus(''), 6000);
+    } catch (err: any) {
+      setAiSaveStatus(`❌ Save error: ${err?.message || 'Could not save'}`);
+      setTimeout(() => setAiSaveStatus(''), 6000);
+    }
   };
 
   // Generate Daily Balanced Live Tests (10 Multi-Exam Slots)
@@ -1829,15 +1876,397 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                   -------------------------------------------------- */}
               {activeTab === 'ai_engine' && (
                 <div>
-                  {/* Multi-Provider AI Failover Engine */}
+                  {/* SECTION 1: Active AI Provider & Model Discovery (Directly in Admin Panel & Saved to Firebase) */}
+                  <div style={{ background: '#ffffff', border: '1px solid #cbd5e1', borderRadius: '12px', padding: '20px', marginBottom: '24px', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px', marginBottom: '14px' }}>
+                      <div>
+                        <h3 style={{ margin: 0, fontSize: '1.05rem', fontWeight: 800, color: '#0f172a' }}>
+                          ⚡ Primary AI Provider Endpoint &amp; Model Discovery
+                        </h3>
+                        <p style={{ margin: '4px 0 0 0', fontSize: '0.8rem', color: '#64748b' }}>
+                          Directly configure your active AI credentials. Click <b>Auto-Detect</b> or <b>Verify Replying</b> to discover working models, and save directly to Firebase Firestore.
+                        </p>
+                      </div>
+                      <span style={{ fontSize: '0.74rem', background: '#e0f2fe', color: '#0369a1', padding: '3px 8px', borderRadius: '6px', fontWeight: 700 }}>
+                        🔥 Saves to Firebase Cloud
+                      </span>
+                    </div>
+
+                    {/* Presets Grid */}
+                    <div style={{ marginBottom: '16px' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                        <label style={{ fontSize: '0.8rem', fontWeight: 700, color: '#334155' }}>
+                          1-Click AI Provider Presets (Auto-configures Base URL &amp; Default Model):
+                        </label>
+                        <span style={{ fontSize: '0.72rem', color: '#64748b' }}>
+                          {AI_PRESETS.length} Providers Available
+                        </span>
+                      </div>
+                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))', gap: '8px' }}>
+                        {AI_PRESETS.map((p) => {
+                          const isSelected = cleanBaseUrl(aiConfig.baseUrl) === cleanBaseUrl(p.baseUrl);
+                          return (
+                            <button
+                              key={p.id}
+                              type="button"
+                              onClick={() => handleApplyPreset(p)}
+                              style={{
+                                padding: '10px 12px',
+                                textAlign: 'left',
+                                background: isSelected ? '#eff6ff' : '#f8fafc',
+                                border: isSelected ? '1.5px solid #0284c7' : '1px solid #cbd5e1',
+                                borderRadius: '8px',
+                                cursor: 'pointer',
+                                transition: 'all 0.15s ease'
+                              }}
+                            >
+                              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '4px', marginBottom: '2px' }}>
+                                <div style={{ fontSize: '0.82rem', fontWeight: 700, color: '#0f172a' }}>{p.name}</div>
+                                {isSelected && (
+                                  <span style={{ fontSize: '0.68rem', color: '#0284c7', background: '#dbeafe', padding: '1px 6px', borderRadius: '4px', fontWeight: 700 }}>
+                                    Active
+                                  </span>
+                                )}
+                              </div>
+                              <div style={{ fontSize: '0.68rem', color: '#0369a1', fontWeight: 600, marginBottom: '3px' }}>
+                                {p.badge}
+                              </div>
+                              <div style={{ fontSize: '0.68rem', color: '#64748b', fontFamily: 'monospace', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                Default: {p.defaultModel}
+                              </div>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+
+                    {/* Base URL and API Key Inputs */}
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', marginBottom: '16px' }}>
+                      <div>
+                        <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 700, color: '#334155', marginBottom: '4px' }}>
+                          Base URL (OpenAI-compatible Endpoint):
+                        </label>
+                        <input
+                          type="text"
+                          value={aiConfig.baseUrl}
+                          onChange={(e) => setAiConfig({ ...aiConfig, baseUrl: e.target.value })}
+                          placeholder="https://generativelanguage.googleapis.com/v1beta/openai/ or https://api.groq.com/openai/v1"
+                          style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1.5px solid #cbd5e1', fontSize: '0.85rem', fontFamily: 'monospace' }}
+                        />
+                      </div>
+
+                      <div>
+                        <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 700, color: '#334155', marginBottom: '4px' }}>
+                          API Key:
+                        </label>
+                        <div style={{ position: 'relative' }}>
+                          <input
+                            type={showApiKey ? 'text' : 'password'}
+                            value={aiConfig.apiKey}
+                            onChange={(e) => setAiConfig({ ...aiConfig, apiKey: e.target.value })}
+                            placeholder="Enter AI API Key (AIzaSy... or sk-...)"
+                            style={{ width: '100%', padding: '9px 40px 9px 12px', borderRadius: '8px', border: '1.5px solid #cbd5e1', fontSize: '0.85rem', fontFamily: 'monospace' }}
+                          />
+                          <button
+                            type="button"
+                            onClick={() => setShowApiKey(!showApiKey)}
+                            style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', background: 'transparent', border: 'none', cursor: 'pointer' }}
+                          >
+                            {showApiKey ? '🙈' : '👁️'}
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Model Identifier & Auto-Detection Tools */}
+                      <div>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px', marginBottom: '6px' }}>
+                          <label style={{ fontSize: '0.8rem', fontWeight: 700, color: '#334155' }}>
+                            Model Identifier &amp; Auto-Detection:
+                          </label>
+
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                            {/* Filter: All vs Free vs Replying */}
+                            <div style={{ display: 'inline-flex', background: '#e2e8f0', padding: '2px', borderRadius: '6px' }}>
+                              <button
+                                type="button"
+                                onClick={() => setModelFilterType('all')}
+                                style={{
+                                  padding: '4px 10px',
+                                  fontSize: '0.74rem',
+                                  fontWeight: 700,
+                                  borderRadius: '5px',
+                                  border: 'none',
+                                  cursor: 'pointer',
+                                  background: modelFilterType === 'all' ? '#0f172a' : 'transparent',
+                                  color: modelFilterType === 'all' ? '#ffffff' : '#64748b'
+                                }}
+                              >
+                                🌐 All Models
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => setModelFilterType('free')}
+                                style={{
+                                  padding: '4px 10px',
+                                  fontSize: '0.74rem',
+                                  fontWeight: 700,
+                                  borderRadius: '5px',
+                                  border: 'none',
+                                  cursor: 'pointer',
+                                  background: modelFilterType === 'free' ? '#16a34a' : 'transparent',
+                                  color: modelFilterType === 'free' ? '#ffffff' : '#64748b'
+                                }}
+                              >
+                                🎁 Free Only
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => setModelFilterType('replying')}
+                                style={{
+                                  padding: '4px 10px',
+                                  fontSize: '0.74rem',
+                                  fontWeight: 700,
+                                  borderRadius: '5px',
+                                  border: 'none',
+                                  cursor: 'pointer',
+                                  background: modelFilterType === 'replying' ? '#0284c7' : 'transparent',
+                                  color: modelFilterType === 'replying' ? '#ffffff' : '#64748b'
+                                }}
+                              >
+                                ✅ Replying Only
+                              </button>
+                            </div>
+
+                            {/* Auto-Detect Button */}
+                            <button
+                              type="button"
+                              onClick={handleAutoDetectModels}
+                              disabled={isDetectingModels}
+                              style={{
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '5px',
+                                padding: '5px 12px',
+                                background: isDetectingModels ? '#94a3b8' : '#0284c7',
+                                color: '#ffffff',
+                                border: 'none',
+                                borderRadius: '6px',
+                                fontSize: '0.76rem',
+                                fontWeight: 700,
+                                cursor: isDetectingModels ? 'not-allowed' : 'pointer'
+                              }}
+                            >
+                              <span>{isDetectingModels ? '⏳' : '🔍'}</span>
+                              <span>{isDetectingModels ? 'Detecting...' : 'Auto-Detect'}</span>
+                            </button>
+
+                            {/* Verify Replying Models Button */}
+                            <button
+                              type="button"
+                              onClick={handleVerifyReplyingModels}
+                              disabled={isVerifyingModels || !aiConfig.apiKey.trim()}
+                              title={!aiConfig.apiKey.trim() ? 'Enter API Key first' : 'Test which models actively reply'}
+                              style={{
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '5px',
+                                padding: '5px 12px',
+                                background: isVerifyingModels ? '#94a3b8' : (!aiConfig.apiKey.trim() ? '#cbd5e1' : '#059669'),
+                                color: '#ffffff',
+                                border: 'none',
+                                borderRadius: '6px',
+                                fontSize: '0.76rem',
+                                fontWeight: 700,
+                                cursor: isVerifyingModels || !aiConfig.apiKey.trim() ? 'not-allowed' : 'pointer'
+                              }}
+                            >
+                              <span>{isVerifyingModels ? '⏳' : '⚡'}</span>
+                              <span>{isVerifyingModels ? 'Pinging...' : 'Verify Replying'}</span>
+                            </button>
+                          </div>
+                        </div>
+
+                        {/* Detect Status Banner */}
+                        {detectStatus && (
+                          <div
+                            style={{
+                              padding: '8px 12px',
+                              borderRadius: '6px',
+                              fontSize: '0.76rem',
+                              fontWeight: 600,
+                              marginBottom: '8px',
+                              background: detectStatus.startsWith('✅') ? '#f0fdf4' : '#fffbeb',
+                              color: detectStatus.startsWith('✅') ? '#166534' : '#92400e',
+                              border: detectStatus.startsWith('✅') ? '1px solid #bbf7d0' : '1px solid #fde68a'
+                            }}
+                          >
+                            {detectStatus}
+                          </div>
+                        )}
+
+                        {/* Model Dropdown from Auto-Detected / Preset List */}
+                        {displayedModels.length > 0 && (
+                          <div style={{ marginBottom: '8px' }}>
+                            <label style={{ display: 'block', fontSize: '0.72rem', color: '#64748b', fontWeight: 600, marginBottom: '3px' }}>
+                              Choose from {modelFilterType === 'replying' ? '✅ Verified Replying' : (modelFilterType === 'free' ? '🎁 Free-Tier' : 'Available')} Models ({displayedModels.length} available):
+                            </label>
+                            <select
+                              value={displayedModels.some((m) => m.id === aiConfig.model) ? aiConfig.model : ''}
+                              onChange={(e) => {
+                                if (e.target.value) {
+                                  setAiConfig({ ...aiConfig, model: e.target.value });
+                                  const sel = displayedModels.find((m) => m.id === e.target.value);
+                                  if (sel?.isReplying) {
+                                    setActiveModelVerified({ replying: true, message: `Model '${e.target.value}' is verified and replying!` });
+                                  } else {
+                                    setActiveModelVerified(null);
+                                  }
+                                }
+                              }}
+                              style={{
+                                width: '100%',
+                                padding: '9px 12px',
+                                borderRadius: '8px',
+                                border: '1.5px solid #0284c7',
+                                background: '#f8fafc',
+                                fontSize: '0.85rem',
+                                fontWeight: 600,
+                                color: '#0f172a'
+                              }}
+                            >
+                              <option value="">-- Select from {displayedModels.length} {modelFilterType === 'replying' ? 'Replying' : (modelFilterType === 'free' ? 'Free' : 'Detected')} Models --</option>
+                              {displayedModels.map((m) => {
+                                const statusPrefix = m.isReplying
+                                  ? '✅ [REPLYING] '
+                                  : m.replyStatus === 'failed'
+                                  ? '❌ [404/ERR] '
+                                  : m.isFree
+                                  ? '🎁 [FREE] '
+                                  : '⭐ [PRO] ';
+                                return (
+                                  <option key={m.id} value={m.id}>
+                                    {statusPrefix}{m.name || m.id} ({m.id})
+                                  </option>
+                                );
+                              })}
+                            </select>
+                          </div>
+                        )}
+
+                        {/* Active Model Verified Banner */}
+                        {activeModelVerified && (
+                          <div
+                            style={{
+                              padding: '6px 12px',
+                              borderRadius: '6px',
+                              fontSize: '0.75rem',
+                              fontWeight: 700,
+                              marginBottom: '8px',
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '6px',
+                              background: activeModelVerified.replying ? '#ecfdf5' : '#fef2f2',
+                              color: activeModelVerified.replying ? '#047857' : '#b91c1c',
+                              border: activeModelVerified.replying ? '1px solid #a7f3d0' : '1px solid #fecaca'
+                            }}
+                          >
+                            <span>{activeModelVerified.replying ? '✅' : '⚠️'}</span>
+                            <span>{activeModelVerified.message}</span>
+                          </div>
+                        )}
+
+                        {/* Custom / Active Model Input */}
+                        <div>
+                          <label style={{ display: 'block', fontSize: '0.72rem', color: '#64748b', fontWeight: 600, marginBottom: '3px' }}>
+                            Active Model Identifier (Custom or Selected):
+                          </label>
+                          <input
+                            type="text"
+                            value={aiConfig.model}
+                            onChange={(e) => {
+                              setAiConfig({ ...aiConfig, model: e.target.value });
+                              setActiveModelVerified(null);
+                            }}
+                            placeholder="e.g. gemini-2.0-flash, llama-3.3-70b-versatile, or gpt-4o-mini"
+                            style={{
+                              width: '100%',
+                              padding: '9px 12px',
+                              borderRadius: '8px',
+                              border: '1.5px solid #cbd5e1',
+                              fontSize: '0.85rem',
+                              fontFamily: 'monospace'
+                            }}
+                          />
+                        </div>
+                      </div>
+
+                      {/* Primary Actions Row */}
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginTop: '6px' }}>
+                        <button
+                          type="button"
+                          onClick={handleTestActiveModel}
+                          disabled={aiTestStatus.loading}
+                          style={{
+                            padding: '9px 15px',
+                            background: '#f1f5f9',
+                            border: '1.5px solid #cbd5e1',
+                            borderRadius: '8px',
+                            fontWeight: 700,
+                            fontSize: '0.82rem',
+                            cursor: 'pointer'
+                          }}
+                        >
+                          {aiTestStatus.loading ? 'Testing...' : '🔌 Test Active Model'}
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={handleAddActiveModelToFailover}
+                          style={{
+                            padding: '9px 15px',
+                            background: '#eff6ff',
+                            color: '#1d4ed8',
+                            border: '1.5px solid #93c5fd',
+                            borderRadius: '8px',
+                            fontWeight: 700,
+                            fontSize: '0.82rem',
+                            cursor: 'pointer'
+                          }}
+                        >
+                          ➕ Add This Model to Failover Chain
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={handleSaveAiConfig}
+                          style={{
+                            flex: 1,
+                            minWidth: '220px',
+                            padding: '9px 18px',
+                            background: '#0284c7',
+                            color: '#ffffff',
+                            border: 'none',
+                            borderRadius: '8px',
+                            fontWeight: 700,
+                            fontSize: '0.84rem',
+                            cursor: 'pointer'
+                          }}
+                        >
+                          💾 Save Directly to Firebase &amp; LocalStorage
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* SECTION 2: Multi-Model Failover Backup Chain (Automatic Failover if on Fail) */}
                   <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '20px', marginBottom: '24px' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px', marginBottom: '14px' }}>
                       <div>
                         <h3 style={{ margin: 0, fontSize: '1.05rem', fontWeight: 800, color: '#0f172a' }}>
-                          🛡️ Multi-Provider AI Failover Engine & API Keys
+                          🛡️ Multi-Model Failover Backup Chain (Auto-Switch On Failure)
                         </h3>
                         <p style={{ margin: '4px 0 0 0', fontSize: '0.8rem', color: '#64748b' }}>
-                          Configure providers in priority order. If your primary provider hits rate limits (HTTP 429), timeouts, or errors, the engine automatically falls over to the next active provider.
+                          Add fallback AI models using Base URL &amp; API Key. If your primary active model encounters an HTTP 429 rate limit, quota exhaustion, or error, the generator automatically switches to these fallback models in order of priority.
                         </p>
                       </div>
                     </div>
@@ -1847,38 +2276,54 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                       <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#475569', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
                         Active Failover Route:
                       </span>
+                      {/* Active Primary Chip */}
+                      <span
+                        style={{
+                          fontSize: '0.74rem',
+                          fontWeight: 700,
+                          padding: '4px 8px',
+                          borderRadius: '6px',
+                          background: aiConfig.apiKey ? '#dbeafe' : '#f1f5f9',
+                          color: aiConfig.apiKey ? '#1e40af' : '#94a3b8',
+                          border: aiConfig.apiKey ? '1px solid #93c5fd' : '1px dashed #cbd5e1',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '4px'
+                        }}
+                      >
+                        <span>👑</span>
+                        <span>Primary: {aiConfig.model || 'Active Model'}</span>
+                        {!aiConfig.apiKey && <span style={{ fontSize: '0.65rem', color: '#f59e0b' }}>(No Key)</span>}
+                      </span>
+
+                      {/* Fallback Chips */}
                       {(aiConfig.providers || []).map((p, idx) => {
                         const isReady = p.enabled && p.apiKey.trim().length > 0;
                         return (
                           <React.Fragment key={p.id}>
-                            {idx > 0 && <span style={{ color: '#94a3b8', fontSize: '0.8rem', fontWeight: 800 }}>➔</span>}
+                            <span style={{ color: '#94a3b8', fontSize: '0.8rem', fontWeight: 800 }}>➔</span>
                             <span
                               style={{
                                 fontSize: '0.74rem',
                                 fontWeight: 700,
                                 padding: '4px 8px',
                                 borderRadius: '6px',
-                                background: isReady ? (idx === 0 ? '#dbeafe' : '#f0fdf4') : '#f1f5f9',
-                                color: isReady ? (idx === 0 ? '#1e40af' : '#166534') : '#94a3b8',
-                                border: isReady ? (idx === 0 ? '1px solid #93c5fd' : '1px solid #86efac') : '1px dashed #cbd5e1',
+                                background: isReady ? '#f0fdf4' : '#f1f5f9',
+                                color: isReady ? '#166534' : '#94a3b8',
+                                border: isReady ? '1px solid #86efac' : '1px dashed #cbd5e1',
                                 display: 'inline-flex',
                                 alignItems: 'center',
                                 gap: '4px'
                               }}
                             >
-                              <span>{isReady ? (idx === 0 ? '👑' : '🛡️') : '⚪'}</span>
-                              <span>#{idx + 1} {p.name || `Provider ${idx + 1}`}</span>
+                              <span>🛡️</span>
+                              <span>Backup #{idx + 1}: {p.name || p.model}</span>
                               {!p.enabled && <span style={{ fontSize: '0.65rem', color: '#ef4444' }}>(Disabled)</span>}
                               {p.enabled && !p.apiKey.trim() && <span style={{ fontSize: '0.65rem', color: '#f59e0b' }}>(No Key)</span>}
                             </span>
                           </React.Fragment>
                         );
                       })}
-                      {(aiConfig.providers || []).length === 0 && (
-                        <span style={{ fontSize: '0.75rem', color: '#ef4444', fontWeight: 600 }}>
-                          ⚠️ No providers configured. Click &quot;Add Provider&quot; below.
-                        </span>
-                      )}
                     </div>
 
                     {/* Providers List Cards */}
@@ -1889,7 +2334,7 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                             key={p.id}
                             style={{
                               background: p.enabled ? '#ffffff' : '#f8fafc',
-                              border: p.enabled ? (index === 0 ? '2px solid #3b82f6' : '1.5px solid #cbd5e1') : '1.5px dashed #cbd5e1',
+                              border: p.enabled ? '1.5px solid #cbd5e1' : '1.5px dashed #cbd5e1',
                               borderRadius: '10px',
                               padding: '16px',
                               transition: 'all 0.15s ease'
@@ -1900,7 +2345,7 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                                 <span
                                   style={{
-                                    background: index === 0 ? '#1d4ed8' : '#475569',
+                                    background: '#475569',
                                     color: '#ffffff',
                                     fontSize: '0.72rem',
                                     fontWeight: 800,
@@ -1909,13 +2354,13 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                                     letterSpacing: '0.04em'
                                   }}
                                 >
-                                  {index === 0 ? '★ PRIORITY #1 (PRIMARY)' : `PRIORITY #${index + 1} (FALLBACK)`}
+                                  FALLBACK #{index + 1}
                                 </span>
                                 <input
                                   type="text"
                                   value={p.name}
                                   onChange={(e) => handleUpdateProvider(p.id, 'name', e.target.value)}
-                                  placeholder="Provider Name (e.g. Google Gemini)"
+                                  placeholder="Provider Name (e.g. Groq Cloud Llama 3.3)"
                                   style={{
                                     fontWeight: 700,
                                     fontSize: '0.88rem',
@@ -2022,7 +2467,7 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                                   type="text"
                                   value={p.baseUrl}
                                   onChange={(e) => handleUpdateProvider(p.id, 'baseUrl', e.target.value)}
-                                  placeholder="https://generativelanguage.googleapis.com/v1beta/openai/"
+                                  placeholder="https://api.groq.com/openai/v1"
                                   style={{ width: '100%', padding: '7px 10px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '0.8rem', fontFamily: 'monospace' }}
                                 />
                               </div>
@@ -2035,7 +2480,7 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                                   type="text"
                                   value={p.model}
                                   onChange={(e) => handleUpdateProvider(p.id, 'model', e.target.value)}
-                                  placeholder="e.g. gemini-2.0-flash, llama-3.3-70b-versatile"
+                                  placeholder="e.g. llama-3.3-70b-versatile, gemini-2.0-flash"
                                   style={{ width: '100%', padding: '7px 10px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '0.8rem', fontFamily: 'monospace' }}
                                 />
                               </div>
@@ -2049,7 +2494,7 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                                     type={showProviderKeys[p.id] ? 'text' : 'password'}
                                     value={p.apiKey}
                                     onChange={(e) => handleUpdateProvider(p.id, 'apiKey', e.target.value)}
-                                    placeholder="Enter AI API Key (AIzaSy... or sk-...)"
+                                    placeholder="Enter API Key (sk-... or AIzaSy...)"
                                     style={{ width: '100%', padding: '7px 32px 7px 10px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '0.8rem', fontFamily: 'monospace' }}
                                   />
                                   <button
@@ -2075,8 +2520,8 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                                       handleUpdateProvider(p.id, 'providerPreset', pr.id);
                                       handleUpdateProvider(p.id, 'baseUrl', pr.baseUrl);
                                       handleUpdateProvider(p.id, 'model', pr.defaultModel);
-                                      if (!p.name || p.name.includes('Fallback')) {
-                                        handleUpdateProvider(p.id, 'name', `${pr.name} (Priority #${index + 1})`);
+                                      if (!p.name || p.name.includes('Fallback') || p.name.includes('Backup')) {
+                                        handleUpdateProvider(p.id, 'name', `${pr.name} (Backup #${index + 1})`);
                                       }
                                     }
                                   }}
@@ -2121,7 +2566,7 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                                     cursor: testingProviderId === p.id || !p.apiKey.trim() ? 'not-allowed' : 'pointer'
                                   }}
                                 >
-                                  {testingProviderId === p.id ? '⏳ Testing...' : '⚡ Test This Provider'}
+                                  {testingProviderId === p.id ? '⏳ Testing...' : '⚡ Test This Model'}
                                 </button>
                               </div>
                             </div>
@@ -2133,16 +2578,9 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                     {/* Add Provider Preset Bar */}
                     <div style={{ background: '#f8fafc', border: '1.5px dashed #cbd5e1', borderRadius: '10px', padding: '12px 14px', marginBottom: '16px' }}>
                       <div style={{ fontSize: '0.78rem', fontWeight: 700, color: '#334155', marginBottom: '8px' }}>
-                        ➕ Add AI Provider to Failover Chain:
+                        ➕ Add Fallback Model / Endpoint using Base URL &amp; API Key:
                       </div>
                       <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
-                        <button
-                          type="button"
-                          onClick={() => handleAddProvider('gemini')}
-                          style={{ padding: '6px 12px', fontSize: '0.75rem', fontWeight: 700, borderRadius: '6px', border: '1px solid #cbd5e1', background: '#ffffff', color: '#1e293b', cursor: 'pointer' }}
-                        >
-                          + Google Gemini
-                        </button>
                         <button
                           type="button"
                           onClick={() => handleAddProvider('groq')}
@@ -2156,6 +2594,13 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                           style={{ padding: '6px 12px', fontSize: '0.75rem', fontWeight: 700, borderRadius: '6px', border: '1px solid #cbd5e1', background: '#ffffff', color: '#1e293b', cursor: 'pointer' }}
                         >
                           + OpenRouter (Free/Pro)
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleAddProvider('gemini')}
+                          style={{ padding: '6px 12px', fontSize: '0.75rem', fontWeight: 700, borderRadius: '6px', border: '1px solid #cbd5e1', background: '#ffffff', color: '#1e293b', cursor: 'pointer' }}
+                        >
+                          + Google Gemini
                         </button>
                         <button
                           type="button"
@@ -2176,7 +2621,7 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                           onClick={() => handleAddProvider()}
                           style={{ padding: '6px 12px', fontSize: '0.75rem', fontWeight: 700, borderRadius: '6px', border: '1px solid #0284c7', background: '#f0f9ff', color: '#0369a1', cursor: 'pointer' }}
                         >
-                          + Custom Provider
+                          + Custom Endpoint (Base URL + Key)
                         </button>
                       </div>
                     </div>
@@ -2220,7 +2665,7 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                         onClick={handleSaveAiConfig}
                         style={{ flex: 1, padding: '10px 16px', background: '#0284c7', color: '#ffffff', border: 'none', borderRadius: '8px', fontWeight: 700, fontSize: '0.85rem', cursor: 'pointer' }}
                       >
-                        💾 Save Failover Configuration &amp; Cloud Sync
+                        💾 Save All to Firebase Firestore &amp; Cloud Sync
                       </button>
                     </div>
                   </div>
