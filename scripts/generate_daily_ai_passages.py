@@ -428,6 +428,165 @@ Return ONLY valid JSON:
     }
 ]
 
+def build_exam_calibrated_prompt(slot):
+    """
+    Constructs high-precision exam prompt matching AR Typing, EzTyping, and TestMentor standards.
+    Supports all major Indian competitive typing exams.
+    """
+    if "system_prompt" in slot and "user_prompt" in slot and slot["system_prompt"] and slot["user_prompt"]:
+        return slot["system_prompt"], slot["user_prompt"]
+
+    cat = (slot.get("category") or "").lower()
+    group = (slot.get("categoryGroup") or "").lower()
+    lang = slot.get("language", "english")
+    is_hindi = lang.startswith("hindi")
+    is_kruti = lang == "hindi_kruti"
+    is_hard = slot.get("difficulty") == "hard"
+    topic = slot.get("topic", "Official Examination Passage")
+    duration = slot.get("duration", 15)
+    target_words = slot.get("targetWords", 540 if not is_hindi else 430)
+    exam_title = slot.get("examTitle", "Competitive Typing Examination")
+
+    is_judiciary = "court" in cat or "judiciary" in cat or "jja" in cat or group == "judiciary"
+    is_ssc = "ssc" in cat or group == "ssc"
+    is_defense = "paramilitary" in cat or "defense" in cat or "hcm" in cat or group == "defense"
+    is_bihar = "bihar" in cat or "beltron" in cat or "bssc" in cat or group == "bihar"
+    is_railways = "rrb" in cat or "ntpc" in cat or group == "railways"
+
+    if not is_hindi:
+        if is_judiciary:
+            sys_p = "You are the Chief Examination Controller and Senior Legal Registrar preparing official typing test passages for High Court and Supreme Court typing examinations (Allahabad High Court RO/ARO, Delhi High Court JJA, Supreme Court JCA) as calibrated by AR Typing and TestMentor standards."
+            usr_p = f"""Generate an authentic High Court competitive examination typing passage in legal English on '{topic}'.
+Target Word Count: Exactly {target_words} words ({duration}-minute test).
+CRITICAL HIGH COURT & JUDICIARY REQUIREMENTS:
+1. Authentic Case Citations & Statutes: Naturally include realistic statutory provisions and Supreme Court / High Court citations (e.g. "(2022) 5 SCC 312", "AIR 2021 SC 1421", "Section 482 of Cr.P.C.", "Article 226(2) of the Constitution of India", "Section 138 of the Negotiable Instruments Act, 1881", "Order VII Rule 11 of C.P.C.").
+2. Latin Maxims & Legal Terms: Naturally integrate Latin maxims (e.g. "inter alia", "suo motu", "res judicata", "ultra vires", "prima facie", "status quo", "ratio decidendi", "ad interim", "bona fide", "locus standi", "sub judice").
+3. Judicial Syntactical Rhythm: Long, multi-clause compound sentences, paired double quotation marks ("..."), semicolons (;), and legal abbreviations ("Ltd.", "Govt.", "v.", "Anr.", "Ors.").
+4. High Average Word Length (AWL >= 7.2): constitutionalism, jurisprudence, maintainability, inadmissibility, disproportionality, apprehension, superintendence.
+5. Exactly 3 continuous formal paragraphs, NO bullet points, NO markdown.
+Return ONLY valid JSON:
+{{
+  "title": "{exam_title}",
+  "text": "The complete legal judgment passage text here..."
+}}"""
+        elif is_ssc:
+            sys_p = "You are the Staff Selection Commission (SSC) Examination Director preparing official Data Entry Skill Test (DEST) typing passages for SSC CGL DEO and CHSL LDC/JSA calibrated to AR Typing and TestMentor DEST modules."
+            usr_p = f"""Generate an official SSC DEST competitive examination typing passage in standard English on '{topic}'.
+Target Word Count: Exactly {target_words} words ({duration}-minute test, ~{target_words * 5} key depressions).
+CRITICAL SSC DEST REQUIREMENTS:
+1. Alphanumeric & Numeric Density (10-15% of keystrokes): Currency figures (e.g. "₹24,850.50 crore", "Rs. 1,45,000/-"), exact percentages ("12.85%", "48.60%"), dates ("26.11.2008", "15th August 1947"), fiscal years ("2024-25", "2021-22"), and serial codes ("Ref: F.No. 14/02/2024-Coord").
+2. Shift-Key Intensity (Uppercase Acronyms): Capitalized abbreviations forcing rapid Shift-key switching (e.g. "NITI Aayog", "CAG", "GSTN", "UIDAI", "AIIMS", "CBI", "MoF", "FY 2024-25", "CSIR", "BHEL", "MSME", "NSO", "PFMS").
+3. Hyphenated & Technical Units: "public-private", "capacity-building", "socio-economic", "semi-autonomous", "macro-economic".
+4. Exactly 3 continuous formal paragraphs, NO bullet points, NO markdown.
+Return ONLY valid JSON:
+{{
+  "title": "{exam_title}",
+  "text": "The complete SSC DEST passage text here..."
+}}"""
+        elif is_defense:
+            sys_p = "You are the Central Armed Police Forces (CAPF) Board Evaluator creating Head Constable Ministerial (HCM) typing test materials for BSF, CISF, CRPF, SSB, and ITBP calibrated to AR Typing HCM benchmark."
+            usr_p = f"""Generate an official Paramilitary HCM competitive examination typing passage in standard English on '{topic}'.
+Target Word Count: Exactly {target_words} words ({duration}-minute test, 35 WPM benchmark with 95% accuracy rule).
+CRITICAL PARAMILITARY HCM REQUIREMENTS:
+1. Subject Matter: Border Outpost (BOP) vigilance, tactical telecommunications, wireless encryption, UAV drone surveillance, logistical convoy operations, arms & ammunition registers, cantonment discipline, CCS Conduct Rules 1964, Standing Operating Procedures (SOP), NDRF deployment.
+2. High Average Word Length (AWL >= 7.0): reconnaissance, counter-intelligence, superintendence, telecommunications, interoperability, infrastructure, subordination.
+3. Exactly 3 continuous formal paragraphs, NO bullet points, NO markdown.
+Return ONLY valid JSON:
+{{
+  "title": "{exam_title}",
+  "text": "The complete Paramilitary HCM passage text here..."
+}}"""
+        elif is_railways:
+            sys_p = "You are the Railway Recruitment Control Board (RRB) Examination Evaluator for RRB NTPC Senior Clerk cum Typist typing skill tests calibrated to Eduquity formula."
+            usr_p = f"""Generate an official RRB NTPC Senior Clerk cum Typist typing examination passage in standard English on '{topic}'.
+Target Word Count: Exactly {target_words} words ({duration}-minute test, 30 WPM Eduquity formula).
+CRITICAL RAILWAY REQUIREMENTS:
+1. Subject Matter: Dedicated Freight Corridors (DFCCIL), Kavach collision avoidance system, electronic interlocking and block signaling, Centre for Railway Information Systems (CRIS), Passenger Reservation System (PRS), rolling stock scheduling.
+2. Exactly 3 continuous formal paragraphs, NO bullet points, NO markdown.
+Return ONLY valid JSON:
+{{
+  "title": "{exam_title}",
+  "text": "The complete Railways NTPC passage text here..."
+}}"""
+        else:
+            sys_p = "You are the Principal Typing Examination Passage Author for Uttar Pradesh Police Recruitment Board (UPPRPB) calibrated to AR Typing and EzTyping CO/ASI standards."
+            usr_p = f"""Generate an official competitive examination typing passage in standard English for {exam_title} on '{topic}'.
+Target Word Count: Exactly {target_words} words ({duration}-minute test).
+CRITICAL UP POLICE REQUIREMENTS:
+1. Technical Policing Theme: Cyber crime investigations, CCTNS infrastructure, Emergency Dial 112 telemetry, digital forensics, packet capture, SHA-256 hash validation, IT Act 2000 (Section 43, 66C, 66D), BNSS, biometric identification.
+2. {'HARD LEVEL (AWL >= 7.3): At least 45% of words must be 8-16+ letters long: institutionalization, telecommunications, constitutionalism, misappropriation, jurisprudence, accountability, interoperability, proportionality.' if is_hard else 'MEDIUM LEVEL: Balanced administrative prose.'}
+3. Exactly 3 continuous formal paragraphs, NO bullet points, NO markdown.
+Return ONLY valid JSON:
+{{
+  "title": "{exam_title}",
+  "text": "The complete passage text here..."
+}}"""
+    else:
+        # HINDI
+        font_dir = "कुर्ती देव 010 (Kruti Dev 010) रेमिंगटन कीबोर्ड लेआउट" if is_kruti else "मंगल इनस्क्रिप्ट (Mangal Inscript Unicode) कीबोर्ड लेआउट (हलंत: D कुंजी, नुक्ता: ] कुंजी)"
+        if is_judiciary:
+            sys_p = "आप उच्च न्यायालय एवं सर्वोच्च न्यायालय के मुख्य विधि टंकण सामग्री नियंत्रक एवं वरिष्ठ हिंदी न्यायिक अनुवादक हैं।"
+            usr_p = f"""दिए गए विषय पर उच्च न्यायालय आरओ/एआरओ एवं जेजेए टंकण परीक्षा के लिए {font_dir} में आधिकारिक गद्यांश तैयार करें।
+विषय: {topic}
+लक्षित शब्द संख्या: ठीक {target_words} शब्द ({duration} मिनट हेतु)।
+अनिवार्य मानक:
+1. विधिक शब्दावली: वादी, प्रतिवादी, याचिकाकर्ता, प्रत्यर्थी, रिट याचिका, स्थगनादेश, स्वतः संज्ञान, प्रथम दृष्टया, अपीलीय क्षेत्राधिकार, अंतरिम राहत, नैसर्गिक न्याय, संज्ञेय अपराध, गैर-जमानती वारंट, धारा 482, अनुच्छेद 226।
+2. कठिन संयुक्ताक्षर (Halant Conjuncts): द्ध (शुद्ध, बुद्धि), द्व (विद्वान, द्वितीय), द्य (न्यायिक, उद्योग), ष्ट (विशिष्ट, दृष्टिकोण), क्त (अधिवक्ता, संयुक्त), ह्न (चिह्न), हृ (हृदय), त्त (संपत्ति, उत्तरदायित्व)।
+3. नुक्ता शब्द: फ़ैसला, ज़िला, क़ानून, ख़ारिज।
+4. ठीक 3 निरंतर पैराग्राफ, कोई बुलेट नहीं।
+केवल शुद्ध JSON दें:
+{{
+  "title": "{exam_title}",
+  "text": "पूर्ण न्यायिक गद्यांश यहाँ..."
+}}"""
+        elif is_bihar:
+            sys_p = "आप बिहार राज्य इलेक्ट्रॉनिक्स विकास निगम (BELTRON) एवं बिहार कर्मचारी चयन आयोग (BSSC) के मुख्य टंकण सामग्री नियंत्रक हैं।"
+            usr_p = f"""बिहार बेल्ट्रॉन डीईओ एवं बीएसएससी इंटर स्तरीय टंकण परीक्षा हेतु {font_dir} में आधिकारिक 10-मिनट का हिंदी गद्यांश तैयार करें।
+विषय: {topic}
+लक्षित शब्द संख्या: ठीक {target_words} शब्द (30 WPM मानक)।
+अनिवार्य बिहार मानक:
+1. बिहार राजस्व एवं लोक प्रशासन संदर्भ: राजस्व एवं भूमि सुधार विभाग, ऑनलाइन दाखिल-खारिज (Mutation), खतियान एवं जमाबंदी पंजी, अंचल अधिकारी (CO), हल्का कर्मचारी, पंचायत सरकार भवन, बिहार लोक शिकायत निवारण अधिकार अधिनियम 2015, सात निश्चय योजना।
+2. कठिन संयुक्ताक्षर: द्ध, द्व, द्य, ष्ट, क्त, ह्न, त्त।
+3. ठीक 3 निरंतर पैराग्राफ, कोई बुलेट नहीं।
+केवल शुद्ध JSON दें:
+{{
+  "title": "{exam_title}",
+  "text": "पूर्ण गद्यांश यहाँ..."
+}}"""
+        elif is_defense:
+            sys_p = "आप केंद्रीय सशस्त्र पुलिस बल (CAPF) के मुख्य हिंदी टंकण सामग्री परीक्षक हैं।"
+            usr_p = f"""अर्धसैनिक बल हेड कांस्टेबल मिनिस्ट्रियल (HCM) परीक्षा हेतु {font_dir} में कठिन स्तर का आधिकारिक 10-मिनट का हिंदी टंकण गद्यांश तैयार करें।
+विषय: {topic}
+लक्षित शब्द संख्या: ठीक {target_words} शब्द (30 WPM मानक, 95% कठोर सटीकता सीमा)।
+अनिवार्य मानक:
+1. सामरिक एवं प्रशासनिक शब्दावली: अग्रिम रक्षा चौकी (BOP), आंतरिक सुरक्षा प्रबंधन, सीमा सुरक्षा बल, शस्त्र एवं गोला-बारूद भंडार, महानिदेशक, उपमहानिरीक्षक, अनुशासनिक कार्यवाही, वायरलेस संचार तंत्र।
+2. दीर्घ सामासिक शब्द एवं कठिन संयुक्ताक्षर: द्ध, द्व, द्य, ष्ट, क्त, ह्न, त्त, ट्र, क्र।
+3. नुक्ता शब्द: ज़िला, फ़ैसला, अग्रिम चौकी, फ़ाइल।
+4. ठीक 3 निरंतर पैराग्राफ, कोई बुलेट नहीं।
+केवल शुद्ध JSON दें:
+{{
+  "title": "{exam_title}",
+  "text": "पूर्ण गद्यांश यहाँ..."
+}}"""
+        else:
+            sys_p = "आप उत्तर प्रदेश पुलिस भर्ती एवं प्रोन्नति बोर्ड (UPPRPB) के मुख्य टंकण सामग्री नियंत्रक एवं वरिष्ठ पुलिस प्रशासनिक विशेषज्ञ हैं।"
+            usr_p = f"""दिए गए विषय पर '{exam_title}' के लिए {font_dir} में आधिकारिक टंकण सामग्री तैयार करें।
+विषय: {topic}
+कठिनाई: {'कठिन (दीर्घ एवं लंबे शब्द, कठिन संयुक्ताक्षर)' if is_hard else 'मध्यम'}
+लक्षित शब्द संख्या: ठीक {target_words} शब्द ({duration} मिनट हेतु)।
+अनिवार्य मानक (AR TYPING & EZTYPING KATHIN BENCHMARK):
+1. {'दीर्घ एवं सामासिक शब्द MANDATE: 45% से अधिक शब्द 8 से 16 अक्षर/मात्रा वाले भारी-भरकम शब्द होने चाहिए (संवैधानिकता, उत्तरदायित्व, कार्यप्रणाली, प्रशासनिक, दूरसंचार, न्यायाधिकरण, पुनर्गठन, विभागाध्यक्ष, अंतर-विभागीय, विशेषज्ञता, प्रतिबद्धता, आत्मनिर्भरता, प्रमाणीकरण, कार्यकुशलता, सार्वभौमिकता, परिस्थितिजन्य, सुदृढ़ीकरण)।' if is_hard else 'मानक प्रशासनिक शब्दावली।'}
+2. कठिन संयुक्ताक्षर (Halant Conjuncts): द्ध (बुद्धि, शुद्ध), द्व (विद्वान, द्वितीय), द्य (उद्योग, विद्या), ष्ट (दृष्टिकोण, विशिष्ट), क्त (शक्ति, संयुक्त), ह्न (चिह्न), हृ (हृदय), त्त (उत्तरदायित्व, संपत्ति), ट्र (ट्रैफिक), क्र (प्रक्रिया)।
+3. नुक्ता शब्द: फ़ॉरेंसिक, ज़िला, फ़ाइल, फ़ैसला, क़ानून, ख़ास।
+4. ठीक 3 निरंतर पैराग्राफ, कोई बुलेट नहीं।
+केवल शुद्ध JSON दें:
+{{
+  "title": "{exam_title}",
+  "text": "पूर्ण गद्यांश यहाँ..."
+}}"""
+
+    return sys_p, usr_p
+
 def main():
     target_date = sys.argv[1] if len(sys.argv) > 1 else datetime.now().strftime("%Y-%m-%d")
     print(f"[*] 🚀 Running Automated Daily AI Passage Generation for date: {target_date}")
@@ -464,7 +623,8 @@ def main():
 
         print(f"\n[*] 📝 Generating Slot #{slot_num}: {slot['examTitle']} ({slot['language']}, {slot['difficulty']})...")
         try:
-            raw_content, prov_used = call_llm_with_failover(slot["system_prompt"], slot["user_prompt"])
+            sys_prompt, user_prompt = build_exam_calibrated_prompt(slot)
+            raw_content, prov_used = call_llm_with_failover(sys_prompt, user_prompt)
             title, text = extract_passage_json(raw_content, slot["examTitle"])
             words = text.split()
             word_count = len(words)
