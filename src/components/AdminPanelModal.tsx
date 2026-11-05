@@ -10,6 +10,7 @@ import {
 } from '../services/firebase';
 import {
   AiConfig,
+  DEFAULT_AI_CONFIG,
   AI_PRESETS,
   AiProviderPreset,
   DetectedModel,
@@ -21,7 +22,10 @@ import {
   testAiConnection,
   generateAll8DailyLiveTests,
   generateCustomTest,
-  DAILY_8_SLOTS
+  DAILY_8_SLOTS,
+  DAILY_BALANCED_SLOTS,
+  AiProviderConfig,
+  getActiveProviders
 } from '../services/aiGenerator';
 import {
   isAdminAuthenticated,
@@ -131,13 +135,11 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
   const [showTelegramToken, setShowTelegramToken] = useState<boolean>(false);
 
   // AI Config State
-  const [aiConfig, setAiConfig] = useState<AiConfig>({
-    baseUrl: 'https://generativelanguage.googleapis.com/v1beta/openai/',
-    apiKey: '',
-    model: 'gemini-2.5-flash',
-    autoDaily: true
-  });
+  const [aiConfig, setAiConfig] = useState<AiConfig>(DEFAULT_AI_CONFIG);
   const [showApiKey, setShowApiKey] = useState<boolean>(false);
+  const [showProviderKeys, setShowProviderKeys] = useState<Record<string, boolean>>({});
+  const [testingProviderId, setTestingProviderId] = useState<string | null>(null);
+  const [providerTestResults, setProviderTestResults] = useState<Record<string, { success: boolean; message: string }>>({});
   const [aiTestStatus, setAiTestStatus] = useState<{ loading: boolean; success?: boolean; message?: string }>({
     loading: false
   });
@@ -151,12 +153,12 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
   const [activeModelVerified, setActiveModelVerified] = useState<{ replying?: boolean; message?: string } | null>(null);
   const [previewPassage, setPreviewPassage] = useState<Passage | null>(null);
 
-  // Daily Live Generator in Admin
+  // Daily Live Generator in Admin (10 Exam-Calibrated Slots)
   const [selectedDate, setSelectedDate] = useState<string>(() => new Date().toISOString().split('T')[0]);
   const [isGeneratingDaily, setIsGeneratingDaily] = useState<boolean>(false);
   const [dailyProgress, setDailyProgress] = useState<{ completed: number; total: number; message: string }>({
     completed: 0,
-    total: 8,
+    total: 10,
     message: ''
   });
 
@@ -211,7 +213,12 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
       setFbPassword('');
 
       // Load AI Config
-      getAiConfig().then((loaded) => setAiConfig(loaded));
+      getAiConfig().then((loaded) => {
+        if (!loaded.providers || loaded.providers.length === 0) {
+          loaded.providers = DEFAULT_AI_CONFIG.providers;
+        }
+        setAiConfig(loaded);
+      });
 
       // Load Custom Passages
       fetchAllCustomPassages().then((cps) => setCustomPassagesList(cps));
@@ -600,12 +607,73 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
     return list;
   }, [detectedModels, modelFilterType, aiConfig.baseUrl]);
 
+  const handleAddProvider = (presetId?: string) => {
+    const preset = AI_PRESETS.find((p) => p.id === presetId) || AI_PRESETS[0];
+    const newProv: AiProviderConfig = {
+      id: `prov_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
+      name: `${preset.name} (Fallback #${(aiConfig.providers?.length || 0) + 1})`,
+      providerPreset: preset.id,
+      baseUrl: preset.baseUrl,
+      apiKey: '',
+      model: preset.defaultModel,
+      enabled: true,
+      priority: (aiConfig.providers?.length || 0) + 1
+    };
+    const current = aiConfig.providers || [];
+    setAiConfig({ ...aiConfig, providers: [...current, newProv] });
+  };
+
+  const handleRemoveProvider = (id: string) => {
+    const filtered = (aiConfig.providers || []).filter((p) => p.id !== id);
+    const reindexed = filtered.map((p, idx) => ({ ...p, priority: idx + 1 }));
+    setAiConfig({ ...aiConfig, providers: reindexed });
+  };
+
+  const handleMoveProvider = (index: number, direction: 'up' | 'down') => {
+    const list = [...(aiConfig.providers || [])];
+    const targetIdx = direction === 'up' ? index - 1 : index + 1;
+    if (targetIdx < 0 || targetIdx >= list.length) return;
+    const temp = list[index];
+    list[index] = list[targetIdx];
+    list[targetIdx] = temp;
+    const reindexed = list.map((p, idx) => ({ ...p, priority: idx + 1 }));
+    setAiConfig({ ...aiConfig, providers: reindexed });
+  };
+
+  const handleToggleProvider = (id: string) => {
+    const updated = (aiConfig.providers || []).map((p) => (p.id === id ? { ...p, enabled: !p.enabled } : p));
+    setAiConfig({ ...aiConfig, providers: updated });
+  };
+
+  const handleUpdateProvider = (id: string, field: keyof AiProviderConfig, value: any) => {
+    const updated = (aiConfig.providers || []).map((p) => (p.id === id ? { ...p, [field]: value } : p));
+    setAiConfig({ ...aiConfig, providers: updated });
+  };
+
+  const handleTestSingleProvider = async (providerId: string) => {
+    setTestingProviderId(providerId);
+    try {
+      const res = await testAiConnection(aiConfig, providerId);
+      setProviderTestResults((prev) => ({
+        ...prev,
+        [providerId]: { success: res.success, message: res.message }
+      }));
+    } catch (err: any) {
+      setProviderTestResults((prev) => ({
+        ...prev,
+        [providerId]: { success: false, message: err?.message || 'Connection failed' }
+      }));
+    } finally {
+      setTestingProviderId(null);
+    }
+  };
+
   const handleTestConnection = async () => {
     setAiTestStatus({ loading: true });
     const res = await testAiConnection(aiConfig);
     setAiTestStatus({ loading: false, success: res.success, message: res.message });
     if (res.success) {
-      setActiveModelVerified({ replying: true, message: `Active model '${aiConfig.model}' is verified & replying!` });
+      setActiveModelVerified({ replying: true, message: `Failover chain verified & ready!` });
       setDetectedModels((prev) =>
         prev.map((m) => (m.id === aiConfig.model ? { ...m, isReplying: true, replyStatus: 'replying' } : m))
       );
@@ -620,29 +688,36 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
     setTimeout(() => setAiSaveStatus(''), 4000);
   };
 
-  // Generate 8 Live Tests
+  // Generate Daily Balanced Live Tests (10 Multi-Exam Slots)
   const handleGenerateDaily = async () => {
-    if (!aiConfig.apiKey.trim()) {
+    const active = getActiveProviders(aiConfig);
+    if (active.length === 0) {
       setActiveTab('ai_engine');
-      setAiTestStatus({ loading: false, success: false, message: 'Please enter a valid API Key first.' });
+      setAiTestStatus({ loading: false, success: false, message: 'Please enter at least one active API Key in AI Providers.' });
       return;
     }
 
+    const totalSlots = DAILY_BALANCED_SLOTS.length;
     setIsGeneratingDaily(true);
-    setDailyProgress({ completed: 0, total: 8, message: 'Initializing daily live generator...' });
+    setDailyProgress({ completed: 0, total: totalSlots, message: 'Initializing daily live generator with multi-provider failover...' });
 
     try {
       await saveAiConfig(aiConfig, true);
-      const tests = await generateAll8DailyLiveTests(selectedDate, aiConfig, (completed, total, message) => {
-        setDailyProgress({ completed, total, message });
-      });
+      const tests = await generateAll8DailyLiveTests(
+        selectedDate,
+        aiConfig,
+        (completed, total, message) => {
+          setDailyProgress({ completed, total, message });
+        },
+        DAILY_BALANCED_SLOTS
+      );
 
       onDailyLiveGenerated(tests);
-      setDailyProgress({ completed: 8, total: 8, message: '🎉 All 8 Live Tests Generated & Synced!' });
+      setDailyProgress({ completed: totalSlots, total: totalSlots, message: `🎉 All ${totalSlots} Live Tests Generated & Synced!` });
     } catch (err: any) {
       setDailyProgress({
         completed: 0,
-        total: 8,
+        total: totalSlots,
         message: `❌ Generation Error: ${err?.message || 'Failed to complete generation'}`
       });
     } finally {
@@ -1754,372 +1829,411 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                   -------------------------------------------------- */}
               {activeTab === 'ai_engine' && (
                 <div>
+                  {/* Multi-Provider AI Failover Engine */}
                   <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '20px', marginBottom: '24px' }}>
-                    <h3 style={{ margin: '0 0 14px 0', fontSize: '1rem', fontWeight: 800, color: '#0f172a' }}>
-                      ⚡ AI Endpoint & Authentication Credentials
-                    </h3>
-
-                    {/* Presets */}
-                    <div style={{ marginBottom: '16px' }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                        <label style={{ fontSize: '0.8rem', fontWeight: 700, color: '#334155' }}>
-                          1-Click AI Provider Presets (Auto-configures Base URL & Default Model):
-                        </label>
-                        <span style={{ fontSize: '0.72rem', color: '#64748b' }}>
-                          {AI_PRESETS.length} Providers Available
-                        </span>
-                      </div>
-                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))', gap: '8px' }}>
-                        {AI_PRESETS.map((p) => {
-                          const isSelected = cleanBaseUrl(aiConfig.baseUrl) === cleanBaseUrl(p.baseUrl);
-                          return (
-                            <button
-                              key={p.id}
-                              type="button"
-                              onClick={() => handleApplyPreset(p)}
-                              style={{
-                                padding: '10px 12px',
-                                textAlign: 'left',
-                                background: isSelected ? '#eff6ff' : '#f8fafc',
-                                border: isSelected ? '1.5px solid #0284c7' : '1px solid #cbd5e1',
-                                borderRadius: '8px',
-                                cursor: 'pointer',
-                                transition: 'all 0.15s ease'
-                              }}
-                            >
-                              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '4px', marginBottom: '2px' }}>
-                                <div style={{ fontSize: '0.82rem', fontWeight: 700, color: '#0f172a' }}>{p.name}</div>
-                                {isSelected && (
-                                  <span style={{ fontSize: '0.68rem', color: '#0284c7', background: '#dbeafe', padding: '1px 6px', borderRadius: '4px', fontWeight: 700 }}>
-                                    Active
-                                  </span>
-                                )}
-                              </div>
-                              <div style={{ fontSize: '0.68rem', color: '#0369a1', fontWeight: 600, marginBottom: '3px' }}>
-                                {p.badge}
-                              </div>
-                              <div style={{ fontSize: '0.68rem', color: '#64748b', fontFamily: 'monospace', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                                Default: {p.defaultModel}
-                              </div>
-                            </button>
-                          );
-                        })}
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px', marginBottom: '14px' }}>
+                      <div>
+                        <h3 style={{ margin: 0, fontSize: '1.05rem', fontWeight: 800, color: '#0f172a' }}>
+                          🛡️ Multi-Provider AI Failover Engine & API Keys
+                        </h3>
+                        <p style={{ margin: '4px 0 0 0', fontSize: '0.8rem', color: '#64748b' }}>
+                          Configure providers in priority order. If your primary provider hits rate limits (HTTP 429), timeouts, or errors, the engine automatically falls over to the next active provider.
+                        </p>
                       </div>
                     </div>
 
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-                      <div>
-                        <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 700, color: '#334155', marginBottom: '4px' }}>
-                          Base URL (OpenAI-compatible):
-                        </label>
-                        <input
-                          type="text"
-                          value={aiConfig.baseUrl}
-                          onChange={(e) => setAiConfig({ ...aiConfig, baseUrl: e.target.value })}
-                          placeholder="https://generativelanguage.googleapis.com/v1beta/openai/"
-                          style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1.5px solid #cbd5e1', fontSize: '0.85rem' }}
-                        />
-                      </div>
+                    {/* Live Failover Pipeline Breadcrumbs */}
+                    <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '10px 14px', marginBottom: '16px', display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
+                      <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#475569', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                        Active Failover Route:
+                      </span>
+                      {(aiConfig.providers || []).map((p, idx) => {
+                        const isReady = p.enabled && p.apiKey.trim().length > 0;
+                        return (
+                          <React.Fragment key={p.id}>
+                            {idx > 0 && <span style={{ color: '#94a3b8', fontSize: '0.8rem', fontWeight: 800 }}>➔</span>}
+                            <span
+                              style={{
+                                fontSize: '0.74rem',
+                                fontWeight: 700,
+                                padding: '4px 8px',
+                                borderRadius: '6px',
+                                background: isReady ? (idx === 0 ? '#dbeafe' : '#f0fdf4') : '#f1f5f9',
+                                color: isReady ? (idx === 0 ? '#1e40af' : '#166534') : '#94a3b8',
+                                border: isReady ? (idx === 0 ? '1px solid #93c5fd' : '1px solid #86efac') : '1px dashed #cbd5e1',
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '4px'
+                              }}
+                            >
+                              <span>{isReady ? (idx === 0 ? '👑' : '🛡️') : '⚪'}</span>
+                              <span>#{idx + 1} {p.name || `Provider ${idx + 1}`}</span>
+                              {!p.enabled && <span style={{ fontSize: '0.65rem', color: '#ef4444' }}>(Disabled)</span>}
+                              {p.enabled && !p.apiKey.trim() && <span style={{ fontSize: '0.65rem', color: '#f59e0b' }}>(No Key)</span>}
+                            </span>
+                          </React.Fragment>
+                        );
+                      })}
+                      {(aiConfig.providers || []).length === 0 && (
+                        <span style={{ fontSize: '0.75rem', color: '#ef4444', fontWeight: 600 }}>
+                          ⚠️ No providers configured. Click &quot;Add Provider&quot; below.
+                        </span>
+                      )}
+                    </div>
 
-                      <div>
-                        <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 700, color: '#334155', marginBottom: '4px' }}>
-                          API Key:
-                        </label>
-                        <div style={{ position: 'relative' }}>
-                          <input
-                            type={showApiKey ? 'text' : 'password'}
-                            value={aiConfig.apiKey}
-                            onChange={(e) => setAiConfig({ ...aiConfig, apiKey: e.target.value })}
-                            placeholder="Enter AI API Key (AIzaSy... or sk-...)"
-                            style={{ width: '100%', padding: '9px 40px 9px 12px', borderRadius: '8px', border: '1.5px solid #cbd5e1', fontSize: '0.85rem' }}
-                          />
-                          <button
-                            type="button"
-                            onClick={() => setShowApiKey(!showApiKey)}
-                            style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', background: 'transparent', border: 'none', cursor: 'pointer' }}
+                    {/* Providers List Cards */}
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '16px' }}>
+                      {(aiConfig.providers || []).map((p, index) => {
+                        return (
+                          <div
+                            key={p.id}
+                            style={{
+                              background: p.enabled ? '#ffffff' : '#f8fafc',
+                              border: p.enabled ? (index === 0 ? '2px solid #3b82f6' : '1.5px solid #cbd5e1') : '1.5px dashed #cbd5e1',
+                              borderRadius: '10px',
+                              padding: '16px',
+                              transition: 'all 0.15s ease'
+                            }}
                           >
-                            {showApiKey ? '🙈' : '👁️'}
-                          </button>
-                        </div>
-                      </div>
+                            {/* Card Header: Priority, Name, Status, Order buttons, Delete */}
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px', marginBottom: '12px' }}>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                <span
+                                  style={{
+                                    background: index === 0 ? '#1d4ed8' : '#475569',
+                                    color: '#ffffff',
+                                    fontSize: '0.72rem',
+                                    fontWeight: 800,
+                                    padding: '2px 8px',
+                                    borderRadius: '4px',
+                                    letterSpacing: '0.04em'
+                                  }}
+                                >
+                                  {index === 0 ? '★ PRIORITY #1 (PRIMARY)' : `PRIORITY #${index + 1} (FALLBACK)`}
+                                </span>
+                                <input
+                                  type="text"
+                                  value={p.name}
+                                  onChange={(e) => handleUpdateProvider(p.id, 'name', e.target.value)}
+                                  placeholder="Provider Name (e.g. Google Gemini)"
+                                  style={{
+                                    fontWeight: 700,
+                                    fontSize: '0.88rem',
+                                    color: '#0f172a',
+                                    border: '1px solid transparent',
+                                    borderRadius: '4px',
+                                    padding: '2px 6px',
+                                    background: 'transparent'
+                                  }}
+                                />
+                              </div>
 
-                      <div>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px', marginBottom: '6px' }}>
-                          <label style={{ fontSize: '0.8rem', fontWeight: 700, color: '#334155' }}>
-                            Model Identifier & Auto-Detection:
-                          </label>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                {/* Enable / Disable Toggle */}
+                                <button
+                                  type="button"
+                                  onClick={() => handleToggleProvider(p.id)}
+                                  style={{
+                                    padding: '4px 10px',
+                                    fontSize: '0.74rem',
+                                    fontWeight: 700,
+                                    borderRadius: '6px',
+                                    border: 'none',
+                                    cursor: 'pointer',
+                                    background: p.enabled ? '#dcfce7' : '#fee2e2',
+                                    color: p.enabled ? '#15803d' : '#991b1b'
+                                  }}
+                                >
+                                  {p.enabled ? '🟢 Enabled' : '⚪ Disabled'}
+                                </button>
 
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-                            {/* 3-Option Filter Toggle: All vs. Free vs. Replying */}
-                            <div style={{ display: 'inline-flex', background: '#e2e8f0', padding: '2px', borderRadius: '6px' }}>
-                              <button
-                                type="button"
-                                onClick={() => setModelFilterType('all')}
-                                style={{
-                                  padding: '4px 10px',
-                                  fontSize: '0.74rem',
-                                  fontWeight: 700,
-                                  borderRadius: '5px',
-                                  border: 'none',
-                                  cursor: 'pointer',
-                                  background: modelFilterType === 'all' ? '#0f172a' : 'transparent',
-                                  color: modelFilterType === 'all' ? '#ffffff' : '#64748b',
-                                  transition: 'all 0.15s ease'
-                                }}
-                              >
-                                🌐 All Models
-                              </button>
-                              <button
-                                type="button"
-                                onClick={() => setModelFilterType('free')}
-                                style={{
-                                  padding: '4px 10px',
-                                  fontSize: '0.74rem',
-                                  fontWeight: 700,
-                                  borderRadius: '5px',
-                                  border: 'none',
-                                  cursor: 'pointer',
-                                  background: modelFilterType === 'free' ? '#16a34a' : 'transparent',
-                                  color: modelFilterType === 'free' ? '#ffffff' : '#64748b',
-                                  transition: 'all 0.15s ease'
-                                }}
-                              >
-                                🎁 Free Only
-                              </button>
-                              <button
-                                type="button"
-                                onClick={() => setModelFilterType('replying')}
-                                style={{
-                                  padding: '4px 10px',
-                                  fontSize: '0.74rem',
-                                  fontWeight: 700,
-                                  borderRadius: '5px',
-                                  border: 'none',
-                                  cursor: 'pointer',
-                                  background: modelFilterType === 'replying' ? '#0284c7' : 'transparent',
-                                  color: modelFilterType === 'replying' ? '#ffffff' : '#64748b',
-                                  transition: 'all 0.15s ease'
-                                }}
-                              >
-                                ✅ Replying Only
-                              </button>
+                                {/* Move Up */}
+                                <button
+                                  type="button"
+                                  disabled={index === 0}
+                                  onClick={() => handleMoveProvider(index, 'up')}
+                                  title="Move up in priority"
+                                  style={{
+                                    padding: '4px 8px',
+                                    fontSize: '0.74rem',
+                                    fontWeight: 700,
+                                    borderRadius: '6px',
+                                    border: '1px solid #cbd5e1',
+                                    background: index === 0 ? '#f1f5f9' : '#ffffff',
+                                    color: index === 0 ? '#94a3b8' : '#1e293b',
+                                    cursor: index === 0 ? 'not-allowed' : 'pointer'
+                                  }}
+                                >
+                                  ▲
+                                </button>
+
+                                {/* Move Down */}
+                                <button
+                                  type="button"
+                                  disabled={index === (aiConfig.providers?.length || 0) - 1}
+                                  onClick={() => handleMoveProvider(index, 'down')}
+                                  title="Move down in priority"
+                                  style={{
+                                    padding: '4px 8px',
+                                    fontSize: '0.74rem',
+                                    fontWeight: 700,
+                                    borderRadius: '6px',
+                                    border: '1px solid #cbd5e1',
+                                    background: index === (aiConfig.providers?.length || 0) - 1 ? '#f1f5f9' : '#ffffff',
+                                    color: index === (aiConfig.providers?.length || 0) - 1 ? '#94a3b8' : '#1e293b',
+                                    cursor: index === (aiConfig.providers?.length || 0) - 1 ? 'not-allowed' : 'pointer'
+                                  }}
+                                >
+                                  ▼
+                                </button>
+
+                                {/* Remove Provider */}
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    if (window.confirm(`Remove provider "${p.name}" from failover chain?`)) {
+                                      handleRemoveProvider(p.id);
+                                    }
+                                  }}
+                                  title="Delete provider"
+                                  style={{
+                                    padding: '4px 8px',
+                                    fontSize: '0.74rem',
+                                    fontWeight: 700,
+                                    borderRadius: '6px',
+                                    border: '1px solid #fecaca',
+                                    background: '#fff1f2',
+                                    color: '#be123c',
+                                    cursor: 'pointer'
+                                  }}
+                                >
+                                  🗑️
+                                </button>
+                              </div>
                             </div>
 
-                            {/* Auto-Detect Button */}
-                            <button
-                              type="button"
-                              onClick={handleAutoDetectModels}
-                              disabled={isDetectingModels}
-                              style={{
-                                display: 'inline-flex',
-                                alignItems: 'center',
-                                gap: '5px',
-                                padding: '5px 12px',
-                                background: isDetectingModels ? '#94a3b8' : '#0284c7',
-                                color: '#ffffff',
-                                border: 'none',
-                                borderRadius: '6px',
-                                fontSize: '0.76rem',
-                                fontWeight: 700,
-                                cursor: isDetectingModels ? 'not-allowed' : 'pointer'
-                              }}
-                            >
-                              <span>{isDetectingModels ? '⏳' : '🔍'}</span>
-                              <span>{isDetectingModels ? 'Detecting...' : 'Auto-Detect'}</span>
-                            </button>
+                            {/* Card Inputs Grid: Base URL, Model, API Key */}
+                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '10px', marginBottom: '10px' }}>
+                              <div>
+                                <label style={{ display: 'block', fontSize: '0.72rem', fontWeight: 700, color: '#475569', marginBottom: '3px' }}>
+                                  Base URL (OpenAI-compatible):
+                                </label>
+                                <input
+                                  type="text"
+                                  value={p.baseUrl}
+                                  onChange={(e) => handleUpdateProvider(p.id, 'baseUrl', e.target.value)}
+                                  placeholder="https://generativelanguage.googleapis.com/v1beta/openai/"
+                                  style={{ width: '100%', padding: '7px 10px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '0.8rem', fontFamily: 'monospace' }}
+                                />
+                              </div>
 
-                            {/* Verify Replying Models Button */}
-                            <button
-                              type="button"
-                              onClick={handleVerifyReplyingModels}
-                              disabled={isVerifyingModels || !aiConfig.apiKey.trim()}
-                              title={!aiConfig.apiKey.trim() ? 'Enter API Key first' : 'Test which models actively reply'}
-                              style={{
-                                display: 'inline-flex',
-                                alignItems: 'center',
-                                gap: '5px',
-                                padding: '5px 12px',
-                                background: isVerifyingModels ? '#94a3b8' : (!aiConfig.apiKey.trim() ? '#cbd5e1' : '#059669'),
-                                color: '#ffffff',
-                                border: 'none',
-                                borderRadius: '6px',
-                                fontSize: '0.76rem',
-                                fontWeight: 700,
-                                cursor: isVerifyingModels || !aiConfig.apiKey.trim() ? 'not-allowed' : 'pointer'
-                              }}
-                            >
-                              <span>{isVerifyingModels ? '⏳' : '⚡'}</span>
-                              <span>{isVerifyingModels ? 'Pinging...' : 'Verify Replying'}</span>
-                            </button>
+                              <div>
+                                <label style={{ display: 'block', fontSize: '0.72rem', fontWeight: 700, color: '#475569', marginBottom: '3px' }}>
+                                  Model Identifier:
+                                </label>
+                                <input
+                                  type="text"
+                                  value={p.model}
+                                  onChange={(e) => handleUpdateProvider(p.id, 'model', e.target.value)}
+                                  placeholder="e.g. gemini-2.0-flash, llama-3.3-70b-versatile"
+                                  style={{ width: '100%', padding: '7px 10px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '0.8rem', fontFamily: 'monospace' }}
+                                />
+                              </div>
+
+                              <div>
+                                <label style={{ display: 'block', fontSize: '0.72rem', fontWeight: 700, color: '#475569', marginBottom: '3px' }}>
+                                  API Key:
+                                </label>
+                                <div style={{ position: 'relative' }}>
+                                  <input
+                                    type={showProviderKeys[p.id] ? 'text' : 'password'}
+                                    value={p.apiKey}
+                                    onChange={(e) => handleUpdateProvider(p.id, 'apiKey', e.target.value)}
+                                    placeholder="Enter AI API Key (AIzaSy... or sk-...)"
+                                    style={{ width: '100%', padding: '7px 32px 7px 10px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '0.8rem', fontFamily: 'monospace' }}
+                                  />
+                                  <button
+                                    type="button"
+                                    onClick={() => setShowProviderKeys({ ...showProviderKeys, [p.id]: !showProviderKeys[p.id] })}
+                                    style={{ position: 'absolute', right: '6px', top: '50%', transform: 'translateY(-50%)', background: 'transparent', border: 'none', cursor: 'pointer', fontSize: '0.8rem' }}
+                                  >
+                                    {showProviderKeys[p.id] ? '🙈' : '👁️'}
+                                  </button>
+                                </div>
+                              </div>
+                            </div>
+
+                            {/* Card Footer: Preset Selector & Test Single Provider */}
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px', paddingTop: '6px', borderTop: '1px solid #f1f5f9' }}>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                <span style={{ fontSize: '0.7rem', color: '#64748b' }}>Quick Preset:</span>
+                                <select
+                                  value={p.providerPreset || ''}
+                                  onChange={(e) => {
+                                    const pr = AI_PRESETS.find((x) => x.id === e.target.value);
+                                    if (pr) {
+                                      handleUpdateProvider(p.id, 'providerPreset', pr.id);
+                                      handleUpdateProvider(p.id, 'baseUrl', pr.baseUrl);
+                                      handleUpdateProvider(p.id, 'model', pr.defaultModel);
+                                      if (!p.name || p.name.includes('Fallback')) {
+                                        handleUpdateProvider(p.id, 'name', `${pr.name} (Priority #${index + 1})`);
+                                      }
+                                    }
+                                  }}
+                                  style={{ padding: '3px 8px', fontSize: '0.72rem', borderRadius: '4px', border: '1px solid #cbd5e1', background: '#ffffff', color: '#334155' }}
+                                >
+                                  <option value="">-- Apply Preset --</option>
+                                  {AI_PRESETS.map((pr) => (
+                                    <option key={pr.id} value={pr.id}>{pr.name} ({pr.defaultModel})</option>
+                                  ))}
+                                </select>
+                              </div>
+
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                {providerTestResults[p.id] && (
+                                  <span
+                                    style={{
+                                      fontSize: '0.72rem',
+                                      fontWeight: 700,
+                                      padding: '2px 8px',
+                                      borderRadius: '4px',
+                                      background: providerTestResults[p.id].success ? '#ecfdf5' : '#fef2f2',
+                                      color: providerTestResults[p.id].success ? '#047857' : '#b91c1c',
+                                      border: providerTestResults[p.id].success ? '1px solid #a7f3d0' : '1px solid #fecaca'
+                                    }}
+                                  >
+                                    {providerTestResults[p.id].message}
+                                  </span>
+                                )}
+
+                                <button
+                                  type="button"
+                                  disabled={testingProviderId === p.id || !p.apiKey.trim()}
+                                  onClick={() => handleTestSingleProvider(p.id)}
+                                  style={{
+                                    padding: '4px 10px',
+                                    fontSize: '0.74rem',
+                                    fontWeight: 700,
+                                    borderRadius: '5px',
+                                    border: '1px solid #0284c7',
+                                    background: testingProviderId === p.id ? '#94a3b8' : '#f0f9ff',
+                                    color: '#0369a1',
+                                    cursor: testingProviderId === p.id || !p.apiKey.trim() ? 'not-allowed' : 'pointer'
+                                  }}
+                                >
+                                  {testingProviderId === p.id ? '⏳ Testing...' : '⚡ Test This Provider'}
+                                </button>
+                              </div>
+                            </div>
                           </div>
-                        </div>
+                        );
+                      })}
+                    </div>
 
-                        {/* Detect Status Banner */}
-                        {detectStatus && (
-                          <div
-                            style={{
-                              padding: '8px 12px',
-                              borderRadius: '6px',
-                              fontSize: '0.76rem',
-                              fontWeight: 600,
-                              marginBottom: '8px',
-                              background: detectStatus.startsWith('✅') ? '#f0fdf4' : '#fffbeb',
-                              color: detectStatus.startsWith('✅') ? '#166534' : '#92400e',
-                              border: detectStatus.startsWith('✅') ? '1px solid #bbf7d0' : '1px solid #fde68a'
-                            }}
-                          >
-                            {detectStatus}
-                          </div>
-                        )}
-
-                        {/* Model Dropdown from Auto-Detected / Preset List */}
-                        {displayedModels.length > 0 && (
-                          <div style={{ marginBottom: '8px' }}>
-                            <label style={{ display: 'block', fontSize: '0.72rem', color: '#64748b', fontWeight: 600, marginBottom: '3px' }}>
-                              Choose from {modelFilterType === 'replying' ? '✅ Verified Replying' : (modelFilterType === 'free' ? '🎁 Free-Tier' : 'Available')} Models ({displayedModels.length} available):
-                            </label>
-                            <select
-                              value={displayedModels.some((m) => m.id === aiConfig.model) ? aiConfig.model : ''}
-                              onChange={(e) => {
-                                if (e.target.value) {
-                                  setAiConfig({ ...aiConfig, model: e.target.value });
-                                  const sel = displayedModels.find((m) => m.id === e.target.value);
-                                  if (sel?.isReplying) {
-                                    setActiveModelVerified({ replying: true, message: `Model '${e.target.value}' is verified and replying!` });
-                                  } else {
-                                    setActiveModelVerified(null);
-                                  }
-                                }
-                              }}
-                              style={{
-                                width: '100%',
-                                padding: '9px 12px',
-                                borderRadius: '8px',
-                                border: '1.5px solid #0284c7',
-                                background: '#f8fafc',
-                                fontSize: '0.85rem',
-                                fontWeight: 600,
-                                color: '#0f172a'
-                              }}
-                            >
-                              <option value="">-- Select from {displayedModels.length} {modelFilterType === 'replying' ? 'Replying' : (modelFilterType === 'free' ? 'Free' : 'Detected')} Models --</option>
-                              {displayedModels.map((m) => {
-                                const statusPrefix = m.isReplying
-                                  ? '✅ [REPLYING] '
-                                  : m.replyStatus === 'failed'
-                                  ? '❌ [404/ERR] '
-                                  : m.isFree
-                                  ? '🎁 [FREE] '
-                                  : '⭐ [PRO] ';
-                                return (
-                                  <option key={m.id} value={m.id}>
-                                    {statusPrefix}{m.name || m.id} ({m.id})
-                                  </option>
-                                );
-                              })}
-                            </select>
-                          </div>
-                        )}
-
-                        {/* Active Model Verified Tick Mark Banner */}
-                        {activeModelVerified && (
-                          <div
-                            style={{
-                              padding: '6px 12px',
-                              borderRadius: '6px',
-                              fontSize: '0.75rem',
-                              fontWeight: 700,
-                              marginBottom: '8px',
-                              display: 'flex',
-                              alignItems: 'center',
-                              gap: '6px',
-                              background: activeModelVerified.replying ? '#ecfdf5' : '#fef2f2',
-                              color: activeModelVerified.replying ? '#047857' : '#b91c1c',
-                              border: activeModelVerified.replying ? '1px solid #a7f3d0' : '1px solid #fecaca'
-                            }}
-                          >
-                            <span>{activeModelVerified.replying ? '✅' : '⚠️'}</span>
-                            <span>{activeModelVerified.message}</span>
-                          </div>
-                        )}
-
-                        {/* Custom / Active Model Input */}
-                        <div>
-                          <label style={{ display: 'block', fontSize: '0.72rem', color: '#64748b', fontWeight: 600, marginBottom: '3px' }}>
-                            Active Model Identifier (Custom or Selected):
-                          </label>
-                          <input
-                            type="text"
-                            value={aiConfig.model}
-                            onChange={(e) => {
-                              setAiConfig({ ...aiConfig, model: e.target.value });
-                              setActiveModelVerified(null);
-                            }}
-                            placeholder="e.g. llama-3.1-8b-instant, gemini-2.0-flash, or gpt-4o-mini"
-                            style={{
-                              width: '100%',
-                              padding: '9px 12px',
-                              borderRadius: '8px',
-                              border: '1.5px solid #cbd5e1',
-                              fontSize: '0.85rem',
-                              fontFamily: 'monospace'
-                            }}
-                          />
-                        </div>
-                        <div style={{ fontSize: '0.7rem', color: '#64748b', marginTop: '4px' }}>
-                          💡 Tip: Click <b>⚡ Verify Replying</b> to ping models with your API key. Working models get a green tick mark (✅) so you can safely generate tests without 404 errors!
-                        </div>
+                    {/* Add Provider Preset Bar */}
+                    <div style={{ background: '#f8fafc', border: '1.5px dashed #cbd5e1', borderRadius: '10px', padding: '12px 14px', marginBottom: '16px' }}>
+                      <div style={{ fontSize: '0.78rem', fontWeight: 700, color: '#334155', marginBottom: '8px' }}>
+                        ➕ Add AI Provider to Failover Chain:
                       </div>
-
-                      {aiTestStatus.message && (
-                        <div
-                          style={{
-                            padding: '10px 14px',
-                            borderRadius: '8px',
-                            fontSize: '0.82rem',
-                            fontWeight: 600,
-                            background: aiTestStatus.success ? '#dcfce7' : '#fee2e2',
-                            color: aiTestStatus.success ? '#15803d' : '#991b1b',
-                            border: aiTestStatus.success ? '1px solid #86efac' : '1px solid #fca5a5'
-                          }}
-                        >
-                          {aiTestStatus.message}
-                        </div>
-                      )}
-
-                      {aiSaveStatus && (
-                        <div style={{ padding: '10px 14px', borderRadius: '8px', fontSize: '0.82rem', fontWeight: 600, background: '#dcfce7', color: '#15803d' }}>
-                          {aiSaveStatus}
-                        </div>
-                      )}
-
-                      <div style={{ display: 'flex', gap: '10px', marginTop: '6px' }}>
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
                         <button
-                          onClick={handleTestConnection}
-                          disabled={aiTestStatus.loading}
-                          style={{ padding: '10px 16px', background: '#f1f5f9', border: '1.5px solid #cbd5e1', borderRadius: '8px', fontWeight: 700, fontSize: '0.85rem', cursor: 'pointer' }}
+                          type="button"
+                          onClick={() => handleAddProvider('gemini')}
+                          style={{ padding: '6px 12px', fontSize: '0.75rem', fontWeight: 700, borderRadius: '6px', border: '1px solid #cbd5e1', background: '#ffffff', color: '#1e293b', cursor: 'pointer' }}
                         >
-                          {aiTestStatus.loading ? 'Testing...' : '🔌 Test Connection'}
+                          + Google Gemini
                         </button>
                         <button
-                          onClick={handleSaveAiConfig}
-                          style={{ flex: 1, padding: '10px 16px', background: '#0284c7', color: '#ffffff', border: 'none', borderRadius: '8px', fontWeight: 700, fontSize: '0.85rem', cursor: 'pointer' }}
+                          type="button"
+                          onClick={() => handleAddProvider('groq')}
+                          style={{ padding: '6px 12px', fontSize: '0.75rem', fontWeight: 700, borderRadius: '6px', border: '1px solid #cbd5e1', background: '#ffffff', color: '#1e293b', cursor: 'pointer' }}
                         >
-                          💾 Save AI Configuration
+                          + Groq Cloud (Llama 3.3)
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleAddProvider('openrouter')}
+                          style={{ padding: '6px 12px', fontSize: '0.75rem', fontWeight: 700, borderRadius: '6px', border: '1px solid #cbd5e1', background: '#ffffff', color: '#1e293b', cursor: 'pointer' }}
+                        >
+                          + OpenRouter (Free/Pro)
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleAddProvider('openai')}
+                          style={{ padding: '6px 12px', fontSize: '0.75rem', fontWeight: 700, borderRadius: '6px', border: '1px solid #cbd5e1', background: '#ffffff', color: '#1e293b', cursor: 'pointer' }}
+                        >
+                          + OpenAI (GPT-4o)
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleAddProvider('deepseek')}
+                          style={{ padding: '6px 12px', fontSize: '0.75rem', fontWeight: 700, borderRadius: '6px', border: '1px solid #cbd5e1', background: '#ffffff', color: '#1e293b', cursor: 'pointer' }}
+                        >
+                          + DeepSeek AI
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleAddProvider()}
+                          style={{ padding: '6px 12px', fontSize: '0.75rem', fontWeight: 700, borderRadius: '6px', border: '1px solid #0284c7', background: '#f0f9ff', color: '#0369a1', cursor: 'pointer' }}
+                        >
+                          + Custom Provider
                         </button>
                       </div>
+                    </div>
+
+                    {/* Chain Testing and Save Status Banners */}
+                    {aiTestStatus.message && (
+                      <div
+                        style={{
+                          padding: '10px 14px',
+                          borderRadius: '8px',
+                          fontSize: '0.82rem',
+                          fontWeight: 600,
+                          marginBottom: '10px',
+                          background: aiTestStatus.success ? '#dcfce7' : '#fee2e2',
+                          color: aiTestStatus.success ? '#15803d' : '#991b1b',
+                          border: aiTestStatus.success ? '1px solid #86efac' : '1px solid #fca5a5'
+                        }}
+                      >
+                        {aiTestStatus.message}
+                      </div>
+                    )}
+
+                    {aiSaveStatus && (
+                      <div style={{ padding: '10px 14px', borderRadius: '8px', fontSize: '0.82rem', fontWeight: 600, marginBottom: '10px', background: '#dcfce7', color: '#15803d', border: '1px solid #86efac' }}>
+                        {aiSaveStatus}
+                      </div>
+                    )}
+
+                    {/* Master Action Buttons */}
+                    <div style={{ display: 'flex', gap: '10px' }}>
+                      <button
+                        type="button"
+                        onClick={handleTestConnection}
+                        disabled={aiTestStatus.loading}
+                        style={{ padding: '10px 16px', background: '#f1f5f9', border: '1.5px solid #cbd5e1', borderRadius: '8px', fontWeight: 700, fontSize: '0.85rem', cursor: 'pointer' }}
+                      >
+                        {aiTestStatus.loading ? 'Testing Chain...' : '🔌 Test Full Failover Chain'}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={handleSaveAiConfig}
+                        style={{ flex: 1, padding: '10px 16px', background: '#0284c7', color: '#ffffff', border: 'none', borderRadius: '8px', fontWeight: 700, fontSize: '0.85rem', cursor: 'pointer' }}
+                      >
+                        💾 Save Failover Configuration &amp; Cloud Sync
+                      </button>
                     </div>
                   </div>
 
-                  {/* 8 Daily Live Tests Section */}
+                  {/* 10 Daily Balanced Multi-Exam Live Tests Section */}
                   <div style={{ background: '#ffffff', border: '1.5px solid #86efac', borderRadius: '12px', padding: '20px', marginBottom: '24px' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px', marginBottom: '14px' }}>
                       <div>
-                        <h3 style={{ margin: 0, fontSize: '1rem', fontWeight: 800, color: '#14532d' }}>
-                          🔥 Daily 8 Live Tests Generator (AR-Typing Level)
+                        <h3 style={{ margin: 0, fontSize: '1.05rem', fontWeight: 800, color: '#14532d' }}>
+                          🔥 Daily Multi-Exam Live Tests Generator (10 Balanced Slots)
                         </h3>
                         <p style={{ margin: '4px 0 0 0', fontSize: '0.8rem', color: '#166534' }}>
-                          Generates 4 English (2 Med, 2 Hard) + 4 Hindi (2 Med, 2 Hard) passages for all candidates.
+                          Generates 10 exam-calibrated live tests covering UP Police, High Courts (Legal Judgment &amp; Latin Maxims), Delhi HC, SSC CGL/CHSL DEST, Paramilitary HCM, Bihar Beltron, and Railways NTPC.
                         </p>
                       </div>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -2131,6 +2245,41 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                           style={{ padding: '6px 10px', borderRadius: '6px', border: '1.5px solid #cbd5e1', fontSize: '0.85rem', fontWeight: 600 }}
                         />
                       </div>
+                    </div>
+
+                    {/* Visual Schedule of 10 Slots */}
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '8px', marginBottom: '16px' }}>
+                      {DAILY_BALANCED_SLOTS.map((slot) => (
+                        <div
+                          key={slot.slot}
+                          style={{
+                            background: '#f8fafc',
+                            border: '1px solid #e2e8f0',
+                            borderRadius: '8px',
+                            padding: '8px 10px',
+                            fontSize: '0.75rem'
+                          }}
+                        >
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '3px' }}>
+                            <span style={{ fontWeight: 800, color: '#0f172a' }}>Slot #{slot.slot}: {slot.examTitle}</span>
+                            <span
+                              style={{
+                                padding: '1px 5px',
+                                borderRadius: '4px',
+                                fontSize: '0.65rem',
+                                fontWeight: 700,
+                                background: slot.difficulty === 'hard' ? '#fee2e2' : '#fef3c7',
+                                color: slot.difficulty === 'hard' ? '#b91c1c' : '#92400e'
+                              }}
+                            >
+                              {slot.difficulty.toUpperCase()}
+                            </span>
+                          </div>
+                          <div style={{ color: '#64748b', fontSize: '0.7rem' }}>
+                            {slot.language === 'english' ? 'English (QWERTY)' : 'Hindi Mangal (Inscript)'} • {slot.duration} min • ~{slot.targetWords} words
+                          </div>
+                        </div>
+                      ))}
                     </div>
 
                     {isGeneratingDaily && (
@@ -2147,6 +2296,7 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                     )}
 
                     <button
+                      type="button"
                       onClick={handleGenerateDaily}
                       disabled={isGeneratingDaily}
                       style={{
@@ -2160,7 +2310,7 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                         cursor: isGeneratingDaily ? 'not-allowed' : 'pointer'
                       }}
                     >
-                      {isGeneratingDaily ? 'Generating 8 Tests in Progress...' : `⚡ Generate & Publish 8 Live Tests for ${selectedDate}`}
+                      {isGeneratingDaily ? 'Generating 10 Multi-Exam Tests in Progress...' : `⚡ Generate & Publish All 10 Exam Tests for ${selectedDate}`}
                     </button>
                   </div>
 
