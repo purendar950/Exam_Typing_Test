@@ -134,6 +134,22 @@ function dataUrlToBlob(dataUrl: string): Blob {
   return new Blob([ab], { type: mime });
 }
 
+// Helper: Get robust app base URL (handles GitHub Pages subdirectory)
+export function getAppBaseUrl(): string {
+  if (typeof window !== 'undefined' && window.location) {
+    const origin = window.location.origin;
+    let pathname = window.location.pathname || '';
+    if (pathname.endsWith('.html')) {
+      pathname = pathname.substring(0, pathname.lastIndexOf('/') + 1);
+    }
+    if (!pathname.endsWith('/')) {
+      pathname = pathname + '/';
+    }
+    return `${origin}${pathname}`;
+  }
+  return 'https://purendar950.github.io/Exam_Typing_Test/';
+}
+
 // 2. Test Connection Ping
 export async function testTelegramPing(config: TelegramConfig): Promise<{ success: boolean; message: string }> {
   if (!config.botToken.trim()) {
@@ -143,7 +159,7 @@ export async function testTelegramPing(config: TelegramConfig): Promise<{ succes
     return { success: false, message: 'Please enter your Admin Chat ID (from @userinfobot)' };
   }
 
-  const siteOrigin = window.location.origin;
+  const appBaseUrl = getAppBaseUrl();
   const testCaption = `🤖 <b>Telegram Admin Alert Engine Connected!</b>\n\n` +
     `✅ Your Telegram bot is active and wired to <b>Exam Typing Mentor</b>.\n\n` +
     `When candidates make payments, their <b>payment receipt screenshot</b>, <b>UTR number</b>, and <b>1-click approval buttons</b> will be delivered straight to this chat.`;
@@ -160,7 +176,7 @@ export async function testTelegramPing(config: TelegramConfig): Promise<{ succes
         reply_markup: {
           inline_keyboard: [
             [
-              { text: '🛡️ Open Admin Portal', url: `${siteOrigin}/?admin_portal=1` }
+              { text: '🛡️ Open Admin Portal', url: `${appBaseUrl}?admin_portal=1` }
             ]
           ]
         }
@@ -189,10 +205,10 @@ export async function sendTelegramPaymentNotification(
     return { success: false, message: 'Telegram integration is not configured or disabled' };
   }
 
-  const siteOrigin = window.location.origin;
-  const approveUrl = `${siteOrigin}/?admin_approve=${encodeURIComponent(sub.id)}&token=${encodeURIComponent(config.approvalSecretToken)}`;
-  const rejectUrl = `${siteOrigin}/?admin_reject=${encodeURIComponent(sub.id)}&token=${encodeURIComponent(config.approvalSecretToken)}`;
-  const adminSuiteUrl = `${siteOrigin}/?admin_portal=1`;
+  const appBaseUrl = getAppBaseUrl();
+  const approveUrl = `${appBaseUrl}?admin_approve=${encodeURIComponent(sub.id)}&token=${encodeURIComponent(config.approvalSecretToken)}`;
+  const rejectUrl = `${appBaseUrl}?admin_reject=${encodeURIComponent(sub.id)}&token=${encodeURIComponent(config.approvalSecretToken)}`;
+  const adminSuiteUrl = `${appBaseUrl}?admin_portal=1`;
 
   const amount = sub.finalAmount || sub.finalAmountPaid || 0;
   const examName = sub.selectedExamTitle || sub.examTitle || 'All 129 Exams Mega Pass';

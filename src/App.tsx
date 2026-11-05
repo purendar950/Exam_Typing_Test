@@ -18,6 +18,7 @@ import { AdminPanelModal } from './components/AdminPanelModal';
 import { PaymentModal } from './components/PaymentModal';
 import { LegalPolicyModal, LegalTab } from './components/LegalPolicyModal';
 import { TelegramSupportWidget } from './components/TelegramSupportWidget';
+import { TelegramAdminChatSheet } from './components/TelegramAdminChatSheet';
 import { PwaInstallPrompt } from './components/PwaInstallPrompt';
 import { audioEngine } from './utils/audioEngine';
 import { fetchDailyLivePassages, triggerAutoDailyGenerationIfDue } from './services/aiGenerator';
@@ -231,6 +232,20 @@ export const App: React.FC = () => {
   const [telegramToast, setTelegramToast] = useState<{ success: boolean; message: string } | null>(null);
   const [adminInitialTab, setAdminInitialTab] = useState<'overview' | 'live_chat' | 'ai_engine' | 'passages' | 'candidates' | 'payments' | 'settings' | undefined>(undefined);
   const [adminInitialChatId, setAdminInitialChatId] = useState<string | undefined>(undefined);
+  const [telegramAdminChatSessionId, setTelegramAdminChatSessionId] = useState<string | null>(() => {
+    if (typeof window !== 'undefined') {
+      const urlParams = new URLSearchParams(window.location.search);
+      return urlParams.get('admin_chat');
+    }
+    return null;
+  });
+  const [telegramAdminChatToken, setTelegramAdminChatToken] = useState<string | null>(() => {
+    if (typeof window !== 'undefined') {
+      const urlParams = new URLSearchParams(window.location.search);
+      return urlParams.get('token');
+    }
+    return null;
+  });
 
   // Automatically fetch today's 8 Daily Live Tests, Custom Passages and handle Telegram 1-click approvals
   useEffect(() => {
@@ -269,13 +284,12 @@ export const App: React.FC = () => {
     try {
       const urlParams = new URLSearchParams(window.location.search);
       const chatParam = urlParams.get('admin_chat');
+      const tokenParam = urlParams.get('token');
       if (chatParam) {
-        setAdminInitialTab('live_chat');
-        setAdminInitialChatId(chatParam);
-        setIsAdminOpen(true);
-        const u = new URL(window.location.href);
-        u.searchParams.delete('admin_chat');
-        window.history.replaceState({}, document.title, u.pathname + (u.search ? u.search : ''));
+        setTelegramAdminChatSessionId(chatParam);
+        if (tokenParam) {
+          setTelegramAdminChatToken(tokenParam);
+        }
       }
     } catch {}
 
@@ -1002,6 +1016,24 @@ export const App: React.FC = () => {
           config={telegramConfig}
           currentUser={currentUser}
           onOpenPayment={() => handleOpenPayment()}
+        />
+      )}
+
+      {/* Native Telegram In-App Admin Chat Reply Sheet */}
+      {telegramAdminChatSessionId && (
+        <TelegramAdminChatSheet
+          sessionId={telegramAdminChatSessionId}
+          token={telegramAdminChatToken}
+          currentUser={currentUser}
+          onClose={() => {
+            setTelegramAdminChatSessionId(null);
+            try {
+              const u = new URL(window.location.href);
+              u.searchParams.delete('admin_chat');
+              u.searchParams.delete('token');
+              window.history.replaceState({}, document.title, u.pathname + (u.search ? u.search : ''));
+            } catch {}
+          }}
         />
       )}
 
