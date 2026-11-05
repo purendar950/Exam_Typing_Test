@@ -81,6 +81,13 @@ export async function getOrCreateChatSession(currentUser?: UserProfile | null): 
   const cached = getLocalChatSession();
   let sessionId = cached?.id || localStorage.getItem(STORAGE_KEY_SESSION_ID);
 
+  // Chats created by the previous guest flow have no authenticated owner. Do not
+  // upload or take ownership of that history after sign-in; create a new private
+  // session for the authenticated account instead.
+  if (cached && currentUser && cached.userId !== currentUser.uid) {
+    sessionId = null;
+  }
+
   if (cached && sessionId) {
     if (currentUser && (!cached.userId || cached.userName === 'Candidate')) {
       cached.userId = currentUser.uid;
@@ -139,15 +146,9 @@ export async function getOrCreateChatSession(currentUser?: UserProfile | null): 
     lastMessageAt: new Date().toISOString(),
     unreadByAdmin: false,
     unreadByUser: false,
-    messages: [
-      {
-        id: `msg_welcome_${Date.now()}`,
-        sender: 'admin',
-        senderName: 'Exam Typing Helpdesk',
-        text: '👋 Namaste! Welcome to Exam Typing Support Desk. How can we help you today with your exams, typing tests, or Pro pass?',
-        timestamp: new Date().toISOString()
-      }
-    ],
+    // The welcome message is rendered by the widget. A candidate may create an
+    // empty cloud chat only; subsequent writes can append candidate messages.
+    messages: [],
     createdAt: new Date().toISOString()
   };
 
