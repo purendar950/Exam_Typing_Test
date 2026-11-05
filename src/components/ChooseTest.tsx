@@ -1002,6 +1002,13 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
       } else if (route.level === 1) {
         setSelectedUnifiedPost(null);
         setSelectedExamProfile(null);
+        try {
+          const filterGroup = sessionStorage.getItem('up_exam_filter_group');
+          if (filterGroup) {
+            setSelectedExamCategory(filterGroup);
+            sessionStorage.removeItem('up_exam_filter_group');
+          }
+        } catch {}
       }
     };
 
@@ -1027,7 +1034,13 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
 
   // 129 All Exams Explorer State
   const [level1ViewMode, setLevel1ViewMode] = useState<'posts' | 'individual'>('posts');
-  const [selectedExamCategory, setSelectedExamCategory] = useState<string>('all');
+  const [selectedExamCategory, setSelectedExamCategory] = useState<string>(() => {
+    try {
+      return sessionStorage.getItem('up_exam_filter_group') || 'all';
+    } catch {
+      return 'all';
+    }
+  });
   const [selectedExamSubFilter, setSelectedExamSubFilter] = useState<string>('all');
   const [examSearchQuery, setExamSearchQuery] = useState<string>('');
   const [selectedExamLanguageFilter, setSelectedExamLanguageFilter] = useState<'all' | 'english' | 'hindi'>('all');
