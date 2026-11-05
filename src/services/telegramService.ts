@@ -142,6 +142,10 @@ export function getAppBaseUrl(): string {
     if (pathname.endsWith('.html')) {
       pathname = pathname.substring(0, pathname.lastIndexOf('/') + 1);
     }
+    // Safeguard for GitHub Pages repository subfolder
+    if (window.location.hostname.endsWith('github.io') && !pathname.includes('Exam_Typing_Test')) {
+      pathname = '/Exam_Typing_Test/';
+    }
     if (!pathname.endsWith('/')) {
       pathname = pathname + '/';
     }
