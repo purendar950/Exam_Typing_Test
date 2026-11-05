@@ -30,7 +30,7 @@ export const DEFAULT_TELEGRAM_CONFIG: TelegramConfig = {
   adminChatId: '702252555',
   approvalSecretToken: 'exam_adm_2026_newSecret',
   communityChannelUrl: 'https://t.me/Exam_Typing_Mentor',
-  discussionGroupUrl: 'https://t.me/+Lw-tPbRqO0c2ZTA1',
+  discussionGroupUrl: 'https://t.me/+Lw-tPbRqOOc2ZTA1',
   supportUsername: 'purendare'
 };
 
