@@ -8,6 +8,8 @@
  * 2. Telegram Alert Dispatch: Sends instant notifications with 1-click reply buttons
  *    to the Admin's Telegram bot independently from Firestore status.
  * 3. Real-Time Sync: Changes are streamed to candidate & admin via onSnapshot listeners.
+ * 4. Messages are appended with arrayUnion so concurrent writes from candidate and admin
+ *    never overwrite each other (no read-modify-write races).
  */
 
 import {
@@ -16,6 +18,7 @@ import {
   getDoc,
   getDocs,
   setDoc,
+  arrayUnion,
   onSnapshot,
   query,
   orderBy,
@@ -86,7 +89,8 @@ export async function getOrCreateChatSession(currentUser?: UserProfile | null): 
       saveLocalChatSession(cached);
       // Sync user profile to Firestore in background
       try {
-        await setDoc(doc(db, 'support_chats', sessionId), cached, { merge: true });
+        const { messages: _m, ...profileOnly } = cached;
+        await setDoc(doc(db, 'support_chats', sessionId), profileOnly, { merge: true });
       } catch {}
     }
 
@@ -266,10 +270,15 @@ export async function sendUserLiveMessage(
     console.warn('Telegram live alert dispatch failed:', err);
   });
 
-  // 3. Sync to Firestore using setDoc with merge: true (never crashes if doc does not exist)
+  // 3. Sync to Firestore. arrayUnion appends ONLY this message, so admin replies already in the
+  //    cloud document are never overwritten by the candidate's local copy.
   try {
-    const ref = doc(db, 'support_chats', sessionId);
-    await setDoc(ref, currentSession, { merge: true });
+    const { messages: _m, ...meta } = currentSession;
+    await setDoc(
+      doc(db, 'support_chats', sessionId),
+      { ...meta, messages: arrayUnion(newMessage) },
+      { merge: true }
+    );
   } catch (err) {
     console.warn('Firestore live chat sync notice (stored locally):', err);
   }
@@ -277,91 +286,9 @@ export async function sendUserLiveMessage(
   return { success: true, message: newMessage };
 }
 
-// ── GitHub Relay Bridge ──────────────────────────────────────────────────────
-// Admin replies are stored as JSON files in the GitHub repo via GitHub API.
-// Candidate's widget polls the raw.githubusercontent.com URL every 3 seconds.
-// No external service needed — uses the existing GitHub repo as a free KV store.
-const GH_RELAY_TOKEN = import.meta.env.VITE_GH_RELAY_TOKEN as string;
-const GH_RELAY_REPO = 'purendar950/Exam_Typing_Test';
-const GH_RELAY_BRANCH = 'main';
-
-function relayFilePath(sessionId: string) {
-  return `public/relay/${sessionId}.json`;
-}
-
-function relayRawUrl(sessionId: string) {
-  // Add cache-buster so browser never serves a stale cached version
-  return `https://raw.githubusercontent.com/${GH_RELAY_REPO}/${GH_RELAY_BRANCH}/public/relay/${sessionId}.json?t=${Date.now()}`;
-}
-
-// Write / merge admin reply into the GitHub relay file for this session
-async function pushReplyToRelay(sessionId: string, message: ChatMessage): Promise<void> {
-  const filePath = relayFilePath(sessionId);
-  const apiUrl = `https://api.github.com/repos/${GH_RELAY_REPO}/contents/${filePath}`;
-
-  try {
-    // 1. Try to fetch the existing file to get its sha (required for updates)
-    let existingSha: string | undefined;
-    let existingMessages: ChatMessage[] = [];
-
-    const getRes = await fetch(apiUrl, {
-      headers: { Authorization: `token ${GH_RELAY_TOKEN}`, Accept: 'application/vnd.github.v3+json' }
-    });
-
-    if (getRes.ok) {
-      const fileData = await getRes.json();
-      existingSha = fileData.sha;
-      try {
-        const decoded = atob(fileData.content.replace(/\n/g, ''));
-        const parsed = JSON.parse(decoded);
-        existingMessages = parsed.messages || [];
-      } catch {}
-    }
-
-    // 2. Merge new message, deduplicate by id
-    const msgMap = new Map<string, ChatMessage>();
-    existingMessages.forEach((m) => msgMap.set(m.id, m));
-    msgMap.set(message.id, message);
-    const merged = Array.from(msgMap.values()).sort(
-      (a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
-    );
-
-    // 3. Base64 encode and PUT/POST to GitHub
-    const content = btoa(JSON.stringify({ messages: merged }, null, 2));
-    const body: Record<string, unknown> = {
-      message: `relay: admin reply for ${sessionId}`,
-      content,
-      branch: GH_RELAY_BRANCH
-    };
-    if (existingSha) body.sha = existingSha;
-
-    await fetch(apiUrl, {
-      method: 'PUT',
-      headers: {
-        Authorization: `token ${GH_RELAY_TOKEN}`,
-        Accept: 'application/vnd.github.v3+json',
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(body)
-    });
-  } catch (err) {
-    console.warn('GitHub relay push failed (non-critical):', err);
-  }
-}
-
-// Read admin replies from GitHub relay (polled by candidate's widget every 3s)
-export async function fetchRelayReplies(sessionId: string): Promise<ChatMessage[]> {
-  try {
-    const res = await fetch(relayRawUrl(sessionId));
-    if (!res.ok) return [];
-    const data = await res.json();
-    return (data.messages as ChatMessage[]) || [];
-  } catch {
-    return [];
-  }
-}
-
 // 4. Send reply from Admin to Candidate
+// Returns true ONLY if the reply was really written to Firestore (so the candidate's
+// onSnapshot listener receives it on any device). Returns false on failure.
 export async function sendAdminLiveReply(
   sessionId: string,
   text: string,
@@ -379,28 +306,35 @@ export async function sendAdminLiveReply(
     timestamp: now
   };
 
-  // 1. Immediately cache locally (same-device fallback)
+  // 1. Write to Firestore first: this is the real delivery channel.
+  try {
+    await setDoc(
+      doc(db, 'support_chats', sessionId),
+      {
+        id: sessionId,
+        status: 'open',
+        messages: arrayUnion(newMessage),
+        lastMessage: cleanText,
+        lastMessageAt: now,
+        unreadByAdmin: false,
+        unreadByUser: true
+      },
+      { merge: true }
+    );
+  } catch (err) {
+    console.error('Admin reply was NOT delivered (Firestore write failed):', err);
+    return false;
+  }
+
+  // 2. Same-device cache (admin panel opened in the same browser as the candidate)
   try {
     const key = `up_ticket_replies_${sessionId}`;
     const existingReplies: ChatMessage[] = JSON.parse(localStorage.getItem(key) || '[]');
     existingReplies.push(newMessage);
     localStorage.setItem(key, JSON.stringify(existingReplies));
-
-    // Also update active session if matching
-    const active = getLocalChatSession();
-    if (active && active.id === sessionId) {
-      active.messages = [...(active.messages || []), newMessage];
-      active.lastMessage = cleanText;
-      active.lastMessageAt = now;
-      active.unreadByUser = true;
-      saveLocalChatSession(active);
-    }
   } catch {}
 
-  // 2. Push to public relay so candidate can poll cross-device ✅
-  pushReplyToRelay(sessionId, newMessage);
-
-  // 3. Dispatch Telegram confirmation so admin bot records the reply
+  // 3. Telegram confirmation so the admin bot records the reply (non-blocking)
   try {
     getTelegramConfig().then((cfg) => {
       if (cfg?.botToken && cfg?.adminChatId) {
@@ -418,46 +352,7 @@ export async function sendAdminLiveReply(
     });
   } catch {}
 
-  // 4. Try Firestore (may fail on permission — relay is the real channel now)
-  try {
-    const ref = doc(db, 'support_chats', sessionId);
-    const snap = await getDoc(ref);
-    if (snap.exists()) {
-      const existing = snap.data() as SupportChatSession;
-      const updatedMessages = [...(existing.messages || []), newMessage];
-      await setDoc(
-        ref,
-        {
-          messages: updatedMessages,
-          lastMessage: cleanText,
-          lastMessageAt: now,
-          unreadByAdmin: false,
-          unreadByUser: true
-        },
-        { merge: true }
-      );
-    } else {
-      await setDoc(
-        ref,
-        {
-          id: sessionId,
-          userName: 'Candidate',
-          status: 'open',
-          messages: [newMessage],
-          lastMessage: cleanText,
-          lastMessageAt: now,
-          unreadByAdmin: false,
-          unreadByUser: true,
-          createdAt: now
-        },
-        { merge: true }
-      );
-    }
-    return true;
-  } catch (err) {
-    console.warn('Firestore admin reply sync note (relay is active):', err);
-    return true; // Reply safely dispatched via relay bridge
-  }
+  return true;
 }
 
 // 5. Real-Time Listener for all chat sessions (used by Admin Panel)
