@@ -7,8 +7,7 @@ import {
   getOrCreateChatSession,
   subscribeToChatSession,
   sendUserLiveMessage,
-  markChatReadByUser,
-  fetchRelayReplies
+  markChatReadByUser
 } from '../services/liveChatService';
 
 interface TelegramSupportWidgetProps {
@@ -60,46 +59,6 @@ export const TelegramSupportWidget: React.FC<TelegramSupportWidgetProps> = ({
       markChatReadByUser(chatSession.id);
     }
   }, [isOpen, chatSession?.unreadByUser]);
-
-  // Poll relay bridge for admin replies (cross-device — works on any browser)
-  useEffect(() => {
-    if (!chatSession?.id) return;
-    let active = true;
-
-    const poll = async () => {
-      if (!active) return;
-      try {
-        const relayMessages = await fetchRelayReplies(chatSession.id);
-        if (relayMessages.length > 0) {
-          setChatSession((prev) => {
-            if (!prev) return prev;
-            const existingIds = new Set((prev.messages || []).map((m) => m.id));
-            const newMsgs = relayMessages.filter((r) => !existingIds.has(r.id));
-            if (newMsgs.length > 0) {
-              return {
-                ...prev,
-                messages: [...(prev.messages || []), ...newMsgs].sort(
-                  (a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
-                ),
-                lastMessage: newMsgs[newMsgs.length - 1].text,
-                lastMessageAt: newMsgs[newMsgs.length - 1].timestamp,
-                unreadByUser: true
-              };
-            }
-            return prev;
-          });
-        }
-      } catch {}
-    };
-
-    // Poll immediately, then every 3 seconds
-    poll();
-    const interval = setInterval(poll, 3000);
-    return () => {
-      active = false;
-      clearInterval(interval);
-    };
-  }, [chatSession?.id]);
 
   // Auto-scroll messages to bottom
   useEffect(() => {

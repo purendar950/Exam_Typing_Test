@@ -1680,11 +1680,15 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                               const textToSend = adminReplyText.trim();
                               setAdminReplyText('');
                               try {
-                                await sendAdminLiveReply(
+                                const ok = await sendAdminLiveReply(
                                   selectedChatId,
                                   textToSend,
                                   activeAdminUser?.displayName || activeAdminUser?.email || 'Support Admin'
                                 );
+                                if (!ok) {
+                                  setAdminReplyText(textToSend);
+                                  alert('⚠️ Reply NOT delivered. Check Firestore rules / internet and try again.');
+                                }
                               } catch (err) {
                                 console.error('Failed to send admin reply:', err);
                               } finally {
