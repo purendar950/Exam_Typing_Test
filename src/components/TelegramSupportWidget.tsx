@@ -30,7 +30,7 @@ export const TelegramSupportWidget: React.FC<TelegramSupportWidgetProps> = ({
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const channelUrl = config?.communityChannelUrl || 'https://t.me/Exam_Typing_Mentor';
-  const groupUrl = config?.discussionGroupUrl || 'https://t.me/+Lw-tPbRqO0c2ZTA1';
+  const groupUrl = config?.discussionGroupUrl || 'https://t.me/+Lw-tPbRqOOc2ZTA1';
   const rawSupport = config?.supportUsername || 'purendare';
   const supportUrl = rawSupport.startsWith('http')
     ? rawSupport
