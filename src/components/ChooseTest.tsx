@@ -5,7 +5,7 @@ import { UserProfile } from '../services/firebase';
 import { isTestLocked, hasExamProAccess } from '../services/paymentService';
 import { getFallbackDailyPassages } from '../services/aiGenerator';
 import appLogo from '../assets/logo.png';
-import { ExamLogo } from '../utils/examLogos';
+import { ExamLogo, getExamTheme, CardWatermark } from '../utils/examLogos';
 
 interface ChooseTestProps {
   passages: Passage[];
@@ -127,13 +127,17 @@ const ExamBenchmarkTestCard: React.FC<ExamBenchmarkTestCardProps> = ({
     }
   };
 
+  const cardTheme = getExamTheme(logoIdentifier || '', categoryGroup);
+
   return (
     <div
       className="examportal-exam-card exam-card-hover benchmark-test-card"
       onClick={handleCardClick}
       style={{
-        background: isLocked ? '#fffdfa' : '#ffffff',
-        border: isLocked ? '1.5px solid #fed7aa' : '1.5px solid #e2e8f0',
+        position: 'relative',
+        isolation: 'isolate',
+        background: cardTheme.bg,
+        border: isLocked ? '1.5px solid #fed7aa' : `1.5px solid ${cardTheme.border}`,
         borderRadius: '14px',
         padding: '16px',
         display: 'flex',
@@ -150,6 +154,7 @@ const ExamBenchmarkTestCard: React.FC<ExamBenchmarkTestCardProps> = ({
         alignItems: 'stretch'
       }}
     >
+      <CardWatermark identifier={logoIdentifier || ''} categoryGroup={categoryGroup} />
       <div style={{ minWidth: 0 }}>
         {/* Top Header: Organization/Category on left + Language pill on right */}
         <div style={{
@@ -521,14 +526,17 @@ const ExamTypePostCard: React.FC<{
   };
 
   const badgeStyle = getTypeBadgeStyle(post.examType);
+  const postTheme = getExamTheme(post.id, post.categoryGroup);
 
   return (
     <div
       className="examportal-exam-card exam-card-hover benchmark-test-card"
       onClick={() => onEnterExam(post)}
       style={{
-        background: '#ffffff',
-        border: '1.5px solid #e2e8f0',
+        position: 'relative',
+        isolation: 'isolate',
+        background: postTheme.bg,
+        border: `1.5px solid ${postTheme.border}`,
         borderRadius: '14px',
         padding: '16px',
         display: 'flex',
@@ -545,6 +553,7 @@ const ExamTypePostCard: React.FC<{
         alignItems: 'stretch'
       }}
     >
+      <CardWatermark identifier={post.id} categoryGroup={post.categoryGroup} />
       <div style={{ minWidth: 0 }}>
         {/* Top Header: Organization & Exam Type Badge */}
         <div style={{
@@ -1700,6 +1709,41 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
         }
         return true;
       });
+    }
+
+    // 4b. Unique numbering: when two series are merged into one list (e.g. UP Police CO + ASI),
+    // each test number appears twice (#01, #01, #02, #02 ...). Renumber sequentially so every
+    // card has its own number. The same number drives the free-demo / Pro lock, so they stay consistent.
+    if (currentMode.id !== 'daily_live') {
+      const seenNums = new Set<number>();
+      let hasDuplicateNumbers = false;
+      for (const p of resultList) {
+        if (p.testNumber === undefined) continue;
+        if (seenNums.has(p.testNumber)) {
+          hasDuplicateNumbers = true;
+          break;
+        }
+        seenNums.add(p.testNumber);
+      }
+      if (hasDuplicateNumbers) {
+        const ranked = [...resultList].sort(
+          (a, b) =>
+            (a.testNumber ?? 99999) - (b.testNumber ?? 99999) ||
+            (a.category || '').localeCompare(b.category || '') ||
+            (a.date || '').localeCompare(b.date || '') ||
+            a.id.localeCompare(b.id)
+        );
+        const rankById = new Map<string, number>(ranked.map((p, i) => [p.id, i + 1]));
+        resultList = resultList.map((p) => {
+          const n = rankById.get(p.id) as number;
+          const label = n < 100 ? String(n).padStart(2, '0') : String(n);
+          return {
+            ...p,
+            testNumber: n,
+            title: (p.title || '').replace(/^Test\s*#\s*\d+\s*[:\-–—]\s*/i, `Test #${label}: `)
+          };
+        });
+      }
     }
 
     // 5. Sort passages by level3SortBy
