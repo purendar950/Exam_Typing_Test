@@ -436,7 +436,7 @@ export const LegalPolicyModal: React.FC<LegalPolicyModalProps> = ({
                   <span style={{ fontSize: '0.82rem', color: '#64748b' }}>Chat with thousands of fellow aspirants & share tips:</span>
                   <div style={{ marginTop: '8px' }}>
                     <a
-                      href="https://t.me/+Lw-tPbRqO0c2ZTA1"
+                      href="https://t.me/+Lw-tPbRqOOc2ZTA1"
                       target="_blank"
                       rel="noopener noreferrer"
                       style={{ color: '#0284c7', fontWeight: 700, textDecoration: 'none' }}

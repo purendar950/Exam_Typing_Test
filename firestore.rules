@@ -2,15 +2,77 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
+    // ── Helpers ───────────────────────────────────────────────
+    function signedIn() { return request.auth != null; }
+    function isOwner(uid) { return signedIn() && request.auth.uid == uid; }
+
+    // Admin = has a document in /admins/{uid} (create it manually in the console).
+    // Never trust users/{uid}.isAdmin: users can edit their own profile.
     function isAdmin() {
-      return request.auth != null &&
-        (exists(/databases/$(database)/documents/admins/$(request.auth.uid)) ||
-         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin');
+      return signedIn() &&
+        exists(/databases/$(database)/documents/admins/$(request.auth.uid));
     }
 
-    // Live support chat. Session ids are random and unguessable
-    // (chat_<timestamp>_<random>); candidates and the Telegram admin sheet
-    // access a single document by id. Only signed-in admins may LIST all chats.
+    // Fields a candidate must never set on their own profile.
+    function protectedKeys() {
+      return ['isAdmin', 'role', 'is_subscribed', 'subscriptionPlan', 'subscriptionPlanType',
+              'subscriptionExpiresAt', 'subscriptionExamId', 'subscriptionExamTitle',
+              'subscriptionApprovedAt'];
+    }
+
+    // ── Candidate profiles + typing history ──────────────────
+    match /users/{userId} {
+      allow get: if isOwner(userId) || isAdmin();
+      allow list: if isAdmin();
+
+      allow create: if isOwner(userId)
+        && (!('isAdmin' in request.resource.data) || request.resource.data.isAdmin == false)
+        && (!('role' in request.resource.data) || request.resource.data.role == 'candidate')
+        && (!('is_subscribed' in request.resource.data) || request.resource.data.is_subscribed == false);
+
+      allow update: if isAdmin()
+        || (isOwner(userId)
+            && !request.resource.data.diff(resource.data).affectedKeys().hasAny(protectedKeys()));
+
+      allow delete: if isAdmin();
+
+      match /test_attempts/{testId} {
+        allow read, write: if isOwner(userId) || isAdmin();
+      }
+    }
+
+    // ── Admin accounts ───────────────────────────────────────
+    match /admins/{adminId} {
+      allow get: if isOwner(adminId) || isAdmin();
+      allow list, write: if isAdmin();
+
+      match /system_settings/{docId} {
+        allow read, write: if isAdmin();
+      }
+    }
+
+    // ── App settings ─────────────────────────────────────────
+    // telegram_config (bot token) and ai_config (API key) are admin-only.
+    match /system_settings/{docId} {
+      allow read: if docId == 'exam_config' || isAdmin();
+      allow write: if isAdmin();
+    }
+
+    // ── Payments ─────────────────────────────────────────────
+    match /payment_submissions/{submissionId} {
+      allow create: if signedIn()
+        && request.resource.data.userId == request.auth.uid
+        && request.resource.data.status == 'pending';
+      allow get: if isAdmin() || (signedIn() && resource.data.userId == request.auth.uid);
+      allow list: if isAdmin()
+        || (signedIn() && resource.data.userId == request.auth.uid);
+      allow update, delete: if isAdmin();
+    }
+
+    // ── Live support chat (candidate <-> admin) ─────────────
+    // Session ids are random & unguessable (chat_<time>_<random>).
+    // Candidates and the Telegram reply sheet access one chat by id;
+    // only signed-in admins can list or delete chats.
     match /support_chats/{chatId} {
       allow get: if true;
       allow list: if isAdmin();
@@ -20,6 +82,16 @@ service cloud.firestore {
            'unreadByAdmin','unreadByUser','messages','createdAt']) &&
         (!('messages' in request.resource.data) || request.resource.data.messages.size() < 500);
       allow delete: if isAdmin();
+    }
+
+    // ── Public content (read by everyone, written by admin) ─
+    match /daily_live_tests/{dateId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+    match /custom_passages/{passageId} {
+      allow read: if true;
+      allow write: if isAdmin();
     }
   }
 }
