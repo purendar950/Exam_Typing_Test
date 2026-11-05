@@ -208,3 +208,101 @@ export const ExamLogo: React.FC<ExamLogoProps> = ({
     />
   );
 };
+
+
+// ── Per-commission card themes ──────────────────────────────────────────────
+// Each commission/board gets its own soft card colour so exams are told apart at a glance.
+export interface ExamCardTheme {
+  bg: string;
+  border: string;
+}
+
+const mk = (from: string, to: string, border: string): ExamCardTheme => ({
+  bg: `linear-gradient(135deg, ${from} 0%, ${to} 100%)`,
+  border
+});
+
+// Keyed by logo file name (prefix match), so every commission that shares a logo shares a colour.
+const LOGO_THEMES: Array<[string, ExamCardTheme]> = [
+  ['up-police', mk('#eff6ff', '#dbeafe', '#93c5fd')], // UP Police - blue
+  ['uppsc', mk('#eef2ff', '#e0e7ff', '#a5b4fc')], // UPPSC - indigo
+  ['upsssc', mk('#f0fdfa', '#ccfbf1', '#5eead4')], // UPSSSC - teal
+  ['ssc', mk('#fff7ed', '#ffedd5', '#fdba74')], // SSC - orange
+  ['railways', mk('#fef2f2', '#fee2e2', '#fca5a5')], // Railways - red
+  ['allahabad-hc', mk('#fffbeb', '#fef3c7', '#fcd34d')], // Allahabad HC - amber
+  ['delhi-high-court', mk('#faf5ff', '#f3e8ff', '#d8b4fe')], // Delhi HC - purple
+  ['delhi-hc', mk('#faf5ff', '#f3e8ff', '#d8b4fe')],
+  ['supreme-court', mk('#fefce8', '#fef9c3', '#fde047')], // Supreme Court - yellow
+  ['phhc', mk('#f7fee7', '#ecfccb', '#bef264')], // Punjab & Haryana HC - lime
+  ['aphc', mk('#ecfdf5', '#d1fae5', '#6ee7b7')], // Andhra HC - emerald
+  ['judiciary-seal', mk('#fafaf9', '#f5f5f4', '#d6d3d1')], // Generic judiciary - stone
+  ['delhi-police', mk('#f0f9ff', '#e0f2fe', '#7dd3fc')], // Delhi Police - sky
+  ['dsssb', mk('#ecfeff', '#cffafe', '#67e8f9')], // DSSSB - cyan
+  ['dda', mk('#f0fdfa', '#e6fffa', '#99f6e4')], // DDA
+  ['capf-bsf', mk('#f0fdf4', '#dcfce7', '#86efac')], // Defence / BSF - green
+  ['bihar-govt', mk('#fff1f2', '#ffe4e6', '#fda4af')], // Bihar - rose
+  ['cbse', mk('#f5f3ff', '#ede9fe', '#c4b5fd')], // CBSE / NTA - violet
+  ['ncert', mk('#fdf4ff', '#fae8ff', '#f0abfc')], // NCERT - fuchsia
+  ['kvs', mk('#fff7ed', '#fef3c7', '#fdba74')], // KVS/NVS
+  ['csir', mk('#f8fafc', '#e2e8f0', '#94a3b8')], // CSIR - slate
+  ['aiims', mk('#fef2f2', '#ffe4e6', '#fda4af')], // AIIMS
+  ['bhu', mk('#fffbeb', '#fef3c7', '#fcd34d')], // BHU
+  ['emrs', mk('#f0fdf4', '#d1fae5', '#6ee7b7')], // EMRS
+  ['mp-cpct', mk('#fdf2f8', '#fce7f3', '#f9a8d4')], // MP CPCT - pink
+  ['rssb', mk('#fdf2f8', '#fbcfe8', '#f472b6')], // Rajasthan RSSB
+  ['skau', mk('#f7fee7', '#d9f99d', '#a3e635')], // SKAU
+  ['wbpsc', mk('#eff6ff', '#bfdbfe', '#60a5fa')] // West Bengal
+];
+
+const GROUP_THEMES: Record<string, ExamCardTheme> = {
+  up_govt: mk('#eff6ff', '#dbeafe', '#93c5fd'),
+  judiciary: mk('#fffbeb', '#fef3c7', '#fcd34d'),
+  ssc: mk('#fff7ed', '#ffedd5', '#fdba74'),
+  delhi_govt: mk('#ecfeff', '#cffafe', '#67e8f9'),
+  defense: mk('#f0fdf4', '#dcfce7', '#86efac'),
+  bihar: mk('#fff1f2', '#ffe4e6', '#fda4af'),
+  central_nta: mk('#f5f3ff', '#ede9fe', '#c4b5fd'),
+  railways: mk('#fef2f2', '#fee2e2', '#fca5a5'),
+  state_exams: mk('#fdf2f8', '#fce7f3', '#f9a8d4')
+};
+
+export function getExamTheme(identifier: string, categoryGroup?: string): ExamCardTheme {
+  const { logoUrl } = getExamLogo(identifier, categoryGroup);
+  const stem = (logoUrl.split('/').pop() || '').replace(/\.[a-z0-9]+$/i, '').toLowerCase();
+  for (const [key, theme] of LOGO_THEMES) {
+    if (stem.startsWith(key)) return theme;
+  }
+  return GROUP_THEMES[categoryGroup || ''] || mk('#f8fafc', '#f1f5f9', '#cbd5e1');
+}
+
+// Faint, see-through commission logo in the corner of a card.
+// Parent card must have `position: relative; isolation: isolate`.
+export const CardWatermark: React.FC<{ identifier: string; categoryGroup?: string }> = ({
+  identifier,
+  categoryGroup
+}) => {
+  const [hidden, setHidden] = useState(false);
+  const { logoUrl } = getExamLogo(identifier, categoryGroup);
+  if (hidden || !logoUrl) return null;
+  return (
+    <img
+      src={logoUrl}
+      alt=""
+      aria-hidden="true"
+      onError={() => setHidden(true)}
+      loading="lazy"
+      style={{
+        position: 'absolute',
+        right: '-14px',
+        bottom: '-14px',
+        width: '140px',
+        height: '140px',
+        objectFit: 'contain',
+        opacity: 0.12,
+        zIndex: -1,
+        pointerEvents: 'none',
+        userSelect: 'none'
+      }}
+    />
+  );
+};
