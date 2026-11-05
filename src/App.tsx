@@ -198,6 +198,32 @@ export const App: React.FC = () => {
   const [isMyCoursesOpen, setIsMyCoursesOpen] = useState<boolean>(false);
   const [isAiGeneratorOpen, setIsAiGeneratorOpen] = useState<boolean>(false);
   const [isAdminOpen, setIsAdminOpen] = useState<boolean>(false);
+  const [isDarkMode, setIsDarkMode] = useState<boolean>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('up_theme');
+      if (saved) return saved === 'dark';
+      return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+    }
+    return false;
+  });
+
+  useEffect(() => {
+    if (typeof document !== 'undefined') {
+      if (isDarkMode) {
+        document.documentElement.classList.add('dark');
+        document.documentElement.setAttribute('data-theme', 'dark');
+        localStorage.setItem('up_theme', 'dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+        document.documentElement.setAttribute('data-theme', 'light');
+        localStorage.setItem('up_theme', 'light');
+      }
+    }
+  }, [isDarkMode]);
+
+  const toggleDarkMode = () => {
+    setIsDarkMode((prev) => !prev);
+  };
   const [isLegalOpen, setIsLegalOpen] = useState<boolean>(() => {
     if (typeof window !== 'undefined') {
       const hash = window.location.hash || '';
@@ -595,6 +621,8 @@ export const App: React.FC = () => {
             setDashboardInitialTab('overview');
             setIsDashboardOpen(true);
           }}
+          isDarkMode={isDarkMode}
+          onToggleDarkMode={toggleDarkMode}
         />
 
       )}
@@ -670,7 +698,7 @@ export const App: React.FC = () => {
             marginTop: 'auto'
           }}
         >
-          <div className="container" style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 20px' }}>
+          <div className="container" style={{ margin: '0 auto', padding: '0 20px' }}>
             {/* Top Multi-Column Grid */}
             <div
               style={{

@@ -2,10 +2,11 @@ import React, { useState, useMemo, useEffect } from 'react';
 import { Passage, Language, ExamCategory, TestSettings, EvaluationResult, UnifiedExamPost } from '../types';
 import { ALL_EXAMS, CATEGORY_GROUPS, CATEGORY_SUB_FILTERS, UNIFIED_EXAM_POSTS, ExamProfile } from '../data/allExams';
 import { UserProfile } from '../services/firebase';
-import { isTestLocked, hasExamProAccess } from '../services/paymentService';
+import { isTestLocked, hasExamProAccess, isUserAdmin } from '../services/paymentService';
 import { getFallbackDailyPassages } from '../services/aiGenerator';
 import appLogo from '../assets/logo.png';
 import { ExamLogo, getExamTheme, CardWatermark } from '../utils/examLogos';
+import { getExamBackspaceRule } from '../utils/examBackspaceRules';
 
 interface ChooseTestProps {
   passages: Passage[];
@@ -706,6 +707,31 @@ const ExamTypePostCard: React.FC<{
           }}>
             🎁 7 Free Demo Tests
           </span>
+
+          {/* Backspace Rule Badge */}
+          {(() => {
+            const bsRule = getExamBackspaceRule(post);
+            return (
+              <span
+                title={`${bsRule.title}\n${bsRule.fullRule}`}
+                style={{
+                  fontSize: '0.72rem',
+                  fontWeight: 700,
+                  background: bsRule.badgeBg,
+                  color: bsRule.badgeText,
+                  padding: '3px 8px',
+                  borderRadius: '6px',
+                  border: `1px solid ${bsRule.badgeBorder}`,
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '4px',
+                  cursor: 'help'
+                }}
+              >
+                {bsRule.badgeLabel}
+              </span>
+            );
+          })()}
         </div>
 
         {/* Available Tests Inside: English, Hindi, Live, Drills */}
@@ -2078,7 +2104,7 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
                     <span>Today's Live Tests (8 Active) →</span>
                   </button>
 
-                  {onOpenAiGenerator && (
+                  {currentUser && isUserAdmin(currentUser) && onOpenAiGenerator && (
                     <button
                       onClick={onOpenAiGenerator}
                       style={{
@@ -2102,7 +2128,7 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
                     </button>
                   )}
 
-                  {onOpenAdmin && (
+                  {currentUser && isUserAdmin(currentUser) && onOpenAdmin && (
                     <button
                       onClick={onOpenAdmin}
                       style={{
@@ -2124,6 +2150,7 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
                       <span>Admin Panel</span>
                     </button>
                   )}
+
                 </div>
               </div>
 
@@ -2578,6 +2605,22 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
                     <span className="level2-bench-badge">⏱️ {activePost.variants[0]?.durationMinutes || 15} Mins Duration</span>
                     <span className="level2-bench-badge">🎯 ≥{activePost.variants[0]?.minAccuracy || 85}% Accuracy Mandatory</span>
                     <span className="level2-bench-badge">📏 {activePost.variants[0]?.inputType === 'character' ? `${activePost.variants[0]?.inputLimit} Chars` : `${activePost.variants[0]?.inputLimit} Words`}</span>
+                    {(() => {
+                      const bsRule = getExamBackspaceRule(activePost);
+                      return (
+                        <span
+                          className="level2-bench-badge"
+                          title={`${bsRule.title}\n${bsRule.fullRule}`}
+                          style={{
+                            background: bsRule.badgeBg,
+                            color: bsRule.badgeText,
+                            borderColor: bsRule.badgeBorder
+                          }}
+                        >
+                          {bsRule.badgeLabel}
+                        </span>
+                      );
+                    })()}
                   </div>
                 </div>
               </div>
@@ -2930,8 +2973,32 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
                       Active Target Exam
                     </span>
                   </div>
-                  <div style={{ fontSize: '0.82rem', color: '#2563eb', marginTop: '2px' }}>
-                    Official Benchmark: <strong>{selectedExamProfile ? selectedExamProfile.targetSpeed : (engVariant?.targetSpeed || 30)} WPM Speed</strong> &bull; Timer: <strong>{selectedDuration} Mins</strong> &bull; Min Accuracy: <strong>{selectedExamProfile?.minAccuracy || 85}%</strong> &bull; Mode: <strong>{currentMode.title}</strong>
+                  <div style={{ fontSize: '0.82rem', color: '#2563eb', marginTop: '2px', display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+                    <span>
+                      Official Benchmark: <strong>{selectedExamProfile ? selectedExamProfile.targetSpeed : (engVariant?.targetSpeed || 30)} WPM Speed</strong> &bull; Timer: <strong>{selectedDuration} Mins</strong> &bull; Min Accuracy: <strong>{selectedExamProfile?.minAccuracy || 85}%</strong> &bull; Mode: <strong>{currentMode.title}</strong>
+                    </span>
+                    {(() => {
+                      const bsRule = getExamBackspaceRule(selectedExamProfile || activePost);
+                      return (
+                        <span
+                          title={`${bsRule.title}\n${bsRule.fullRule}`}
+                          style={{
+                            fontSize: '0.72rem',
+                            fontWeight: 700,
+                            background: bsRule.badgeBg,
+                            color: bsRule.badgeText,
+                            padding: '2px 8px',
+                            borderRadius: '6px',
+                            border: `1px solid ${bsRule.badgeBorder}`,
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '3px'
+                          }}
+                        >
+                          {bsRule.badgeLabel}
+                        </span>
+                      );
+                    })()}
                   </div>
                 </div>
               </div>
@@ -3239,7 +3306,7 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
                           </button>
                         </div>
 
-                        {onOpenAiGenerator && (
+                        {currentUser && isUserAdmin(currentUser) && onOpenAiGenerator && (
                           <button
                             onClick={onOpenAiGenerator}
                             style={{
@@ -3324,7 +3391,7 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
                         </div>
                       </div>
 
-                      {onOpenAiGenerator && (
+                      {currentUser && isUserAdmin(currentUser) && onOpenAiGenerator && (
                         <button
                           onClick={onOpenAiGenerator}
                           style={{
@@ -3407,7 +3474,7 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
                         </div>
                       </div>
 
-                      {onOpenAiGenerator && (
+                      {currentUser && isUserAdmin(currentUser) && onOpenAiGenerator && (
                         <button
                           onClick={onOpenAiGenerator}
                           style={{
