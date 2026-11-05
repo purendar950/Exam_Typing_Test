@@ -277,48 +277,85 @@ export async function sendUserLiveMessage(
   return { success: true, message: newMessage };
 }
 
-// Relay bridge key for cross-device admin→candidate messaging
-const RELAY_BASE = 'https://api.restful-api.dev/objects';
-function relayKey(sessionId: string) {
-  // Use a short deterministic suffix so the key is a valid object name
-  return `exam_chat_${sessionId.replace(/[^a-zA-Z0-9_-]/g, '_')}`;
+// ── GitHub Relay Bridge ──────────────────────────────────────────────────────
+// Admin replies are stored as JSON files in the GitHub repo via GitHub API.
+// Candidate's widget polls the raw.githubusercontent.com URL every 3 seconds.
+// No external service needed — uses the existing GitHub repo as a free KV store.
+const GH_RELAY_TOKEN = import.meta.env.VITE_GH_RELAY_TOKEN as string;
+const GH_RELAY_REPO = 'purendar950/Exam_Typing_Test';
+const GH_RELAY_BRANCH = 'main';
+
+function relayFilePath(sessionId: string) {
+  return `public/relay/${sessionId}.json`;
 }
 
-// Write admin reply to public relay so candidate's browser can poll it
+function relayRawUrl(sessionId: string) {
+  // Add cache-buster so browser never serves a stale cached version
+  return `https://raw.githubusercontent.com/${GH_RELAY_REPO}/${GH_RELAY_BRANCH}/public/relay/${sessionId}.json?t=${Date.now()}`;
+}
+
+// Write / merge admin reply into the GitHub relay file for this session
 async function pushReplyToRelay(sessionId: string, message: ChatMessage): Promise<void> {
-  const key = relayKey(sessionId);
+  const filePath = relayFilePath(sessionId);
+  const apiUrl = `https://api.github.com/repos/${GH_RELAY_REPO}/contents/${filePath}`;
+
   try {
-    // Try GET first to see if the object already exists
-    const getRes = await fetch(`${RELAY_BASE}/${key}`, { method: 'GET' });
+    // 1. Try to fetch the existing file to get its sha (required for updates)
+    let existingSha: string | undefined;
+    let existingMessages: ChatMessage[] = [];
+
+    const getRes = await fetch(apiUrl, {
+      headers: { Authorization: `token ${GH_RELAY_TOKEN}`, Accept: 'application/vnd.github.v3+json' }
+    });
+
     if (getRes.ok) {
-      const existing = await getRes.json();
-      const prevMessages: ChatMessage[] = existing?.data?.messages || [];
-      const merged = [...prevMessages, message];
-      await fetch(`${RELAY_BASE}/${key}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: key, data: { messages: merged } })
-      });
-    } else {
-      // Object does not exist yet — create it via POST with a fixed id
-      await fetch(`${RELAY_BASE}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id: key, name: key, data: { messages: [message] } })
-      });
+      const fileData = await getRes.json();
+      existingSha = fileData.sha;
+      try {
+        const decoded = atob(fileData.content.replace(/\n/g, ''));
+        const parsed = JSON.parse(decoded);
+        existingMessages = parsed.messages || [];
+      } catch {}
     }
+
+    // 2. Merge new message, deduplicate by id
+    const msgMap = new Map<string, ChatMessage>();
+    existingMessages.forEach((m) => msgMap.set(m.id, m));
+    msgMap.set(message.id, message);
+    const merged = Array.from(msgMap.values()).sort(
+      (a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
+    );
+
+    // 3. Base64 encode and PUT/POST to GitHub
+    const content = btoa(JSON.stringify({ messages: merged }, null, 2));
+    const body: Record<string, unknown> = {
+      message: `relay: admin reply for ${sessionId}`,
+      content,
+      branch: GH_RELAY_BRANCH
+    };
+    if (existingSha) body.sha = existingSha;
+
+    await fetch(apiUrl, {
+      method: 'PUT',
+      headers: {
+        Authorization: `token ${GH_RELAY_TOKEN}`,
+        Accept: 'application/vnd.github.v3+json',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(body)
+    });
   } catch (err) {
-    console.warn('Relay bridge push failed (non-critical):', err);
+    console.warn('GitHub relay push failed (non-critical):', err);
   }
 }
 
-// Read all admin replies from relay (called by candidate's widget)
+// Read admin replies from GitHub relay (polled by candidate's widget every 3s)
 export async function fetchRelayReplies(sessionId: string): Promise<ChatMessage[]> {
   try {
-    const res = await fetch(`${RELAY_BASE}/${relayKey(sessionId)}`, { method: 'GET' });
+    const res = await fetch(relayRawUrl(sessionId));
     if (!res.ok) return [];
-    const obj = await res.json();
-    return (obj?.data?.messages as ChatMessage[]) || [];
+    const data = await res.json();
+    return (data.messages as ChatMessage[]) || [];
   } catch {
     return [];
   }
