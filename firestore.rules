@@ -20,6 +20,18 @@ service cloud.firestore {
               'subscriptionApprovedAt'];
     }
 
+    function validUserChatMessage(message) {
+      return message is map
+        && message.keys().hasOnly(['id', 'sender', 'senderName', 'text', 'timestamp'])
+        && message.sender == 'user'
+        && message.id is string
+        && message.senderName is string
+        && message.text is string
+        && message.timestamp is string
+        && message.text.size() > 0
+        && message.text.size() <= 2000;
+    }
+
     // ── Candidate profiles + typing history ──────────────────
     match /users/{userId} {
       allow get: if isOwner(userId) || isAdmin();
@@ -70,17 +82,50 @@ service cloud.firestore {
     }
 
     // ── Live support chat (candidate <-> admin) ─────────────
-    // Session ids are random & unguessable (chat_<time>_<random>).
-    // Candidates and the Telegram reply sheet access one chat by id;
-    // only signed-in admins can list or delete chats.
+    // A candidate can access only the chat attached to their Firebase UID.
+    // Do not rely on a random session ID as an authorization control.
     match /support_chats/{chatId} {
-      allow get: if true;
+      allow get: if isAdmin() ||
+        (signedIn() && resource.data.userId == request.auth.uid);
       allow list: if isAdmin();
-      allow create, update: if
-        request.resource.data.keys().hasOnly(
+      allow create: if signedIn()
+        && request.resource.data.userId == request.auth.uid
+        && request.resource.data.id == chatId
+        && request.resource.data.keys().hasOnly(
           ['id','userId','userName','userEmail','status','lastMessage','lastMessageAt',
-           'unreadByAdmin','unreadByUser','messages','createdAt']) &&
-        (!('messages' in request.resource.data) || request.resource.data.messages.size() < 500);
+           'unreadByAdmin','unreadByUser','messages','createdAt'])
+        && request.resource.data.messages is list
+        && request.resource.data.messages.size() == 0
+        && request.resource.data.status == 'open';
+      // Candidates may append one message at a time. They cannot alter the owner,
+      // identity, status, creation time, or existing chat history.
+      allow update: if isAdmin() ||
+        (signedIn()
+          && resource.data.userId == request.auth.uid
+          && request.resource.data.userId == resource.data.userId
+          && (
+            (
+              request.resource.data.diff(resource.data).affectedKeys().hasOnly(
+                ['messages','lastMessage','lastMessageAt','unreadByAdmin'])
+              && request.resource.data.messages is list
+              && request.resource.data.messages.size() == resource.data.messages.size() + 1
+              && request.resource.data.messages.hasAll(resource.data.messages)
+              && request.resource.data.messages.size() <= 500
+              && validUserChatMessage(
+                request.resource.data.messages[resource.data.messages.size()]
+              )
+              && request.resource.data.lastMessage ==
+                request.resource.data.messages[resource.data.messages.size()].text
+              && request.resource.data.lastMessageAt ==
+                request.resource.data.messages[resource.data.messages.size()].timestamp
+              && request.resource.data.unreadByAdmin == true
+            )
+            || (
+              request.resource.data.diff(resource.data).affectedKeys().hasOnly(['unreadByUser'])
+              && resource.data.unreadByUser == true
+              && request.resource.data.unreadByUser == false
+            )
+          ));
       allow delete: if isAdmin();
     }
 

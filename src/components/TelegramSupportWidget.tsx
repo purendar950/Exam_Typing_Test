@@ -25,7 +25,6 @@ export const TelegramSupportWidget: React.FC<TelegramSupportWidgetProps> = ({
   const [activeTab, setActiveTab] = useState<'chat' | 'channels'>('chat');
   const [chatSession, setChatSession] = useState<SupportChatSession | null>(null);
   const [inputText, setInputText] = useState('');
-  const [candidateNameInput, setCandidateNameInput] = useState('');
   const [isSending, setIsSending] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -35,10 +34,15 @@ export const TelegramSupportWidget: React.FC<TelegramSupportWidgetProps> = ({
   const supportUrl = rawSupport.startsWith('http')
     ? rawSupport
     : `https://t.me/${rawSupport.replace(/^@/, '')}`;
+  const canUseLiveChat = Boolean(currentUser && !currentUser.isAnonymous);
 
   // Initialize or fetch Chat Session
   useEffect(() => {
     let unsubscribe: (() => void) | undefined;
+    if (!currentUser || currentUser.isAnonymous) {
+      setChatSession(null);
+      return () => {};
+    }
     getOrCreateChatSession(currentUser).then((session) => {
       setChatSession(session);
       unsubscribe = subscribeToChatSession(session.id, (updated) => {
@@ -69,11 +73,10 @@ export const TelegramSupportWidget: React.FC<TelegramSupportWidgetProps> = ({
 
   const handleSendMessage = async (textToSendArg?: string) => {
     const rawText = textToSendArg || inputText;
-    if (!rawText.trim() || isSending || !chatSession) return;
+    if (!rawText.trim() || isSending || !chatSession || !currentUser || currentUser.isAnonymous) return;
 
     const nameToUse =
       currentUser?.displayName ||
-      candidateNameInput.trim() ||
       chatSession.userName ||
       'Candidate';
 
@@ -330,8 +333,7 @@ export const TelegramSupportWidget: React.FC<TelegramSupportWidgetProps> = ({
                   background: '#f8fafc'
                 }}
               >
-                {/* Guest name input if not logged in */}
-                {!currentUser && (!chatSession?.userName || chatSession.userName === 'Candidate') && (
+                {!canUseLiveChat && (
                   <div
                     style={{
                       background: '#f0f9ff',
@@ -343,23 +345,8 @@ export const TelegramSupportWidget: React.FC<TelegramSupportWidgetProps> = ({
                     }}
                   >
                     <span style={{ fontSize: '0.74rem', color: '#0369a1', fontWeight: 700, whiteSpace: 'nowrap' }}>
-                      👤 Your Name:
+                      🔐 Sign in to use secure live support.
                     </span>
-                    <input
-                      type="text"
-                      placeholder="e.g. Rahul Sharma"
-                      value={candidateNameInput}
-                      onChange={(e) => setCandidateNameInput(e.target.value)}
-                      style={{
-                        flex: 1,
-                        padding: '5px 10px',
-                        borderRadius: '6px',
-                        border: '1px solid #7dd3fc',
-                        fontSize: '0.78rem',
-                        outline: 'none',
-                        background: '#ffffff'
-                      }}
-                    />
                   </div>
                 )}
 
@@ -489,6 +476,7 @@ export const TelegramSupportWidget: React.FC<TelegramSupportWidgetProps> = ({
                       key={idx}
                       type="button"
                       onClick={() => handleSendMessage(p.text)}
+                      disabled={!canUseLiveChat}
                       style={{
                         background: '#f1f5f9',
                         border: '1px solid #cbd5e1',
@@ -497,7 +485,8 @@ export const TelegramSupportWidget: React.FC<TelegramSupportWidgetProps> = ({
                         fontSize: '0.72rem',
                         fontWeight: 700,
                         color: '#334155',
-                        cursor: 'pointer',
+                        cursor: canUseLiveChat ? 'pointer' : 'not-allowed',
+                        opacity: canUseLiveChat ? 1 : 0.55,
                         whiteSpace: 'nowrap',
                         transition: 'all 0.15s ease'
                       }}
@@ -537,7 +526,7 @@ export const TelegramSupportWidget: React.FC<TelegramSupportWidgetProps> = ({
                     placeholder="Type your query to Admin..."
                     value={inputText}
                     onChange={(e) => setInputText(e.target.value)}
-                    disabled={isSending}
+                    disabled={isSending || !canUseLiveChat}
                     style={{
                       flex: 1,
                       padding: '10px 14px',
@@ -559,20 +548,20 @@ export const TelegramSupportWidget: React.FC<TelegramSupportWidgetProps> = ({
                   />
                   <button
                     type="submit"
-                    disabled={!inputText.trim() || isSending}
+                    disabled={!inputText.trim() || isSending || !canUseLiveChat}
                     style={{
-                      background: inputText.trim() && !isSending ? 'linear-gradient(135deg, #0284c7 0%, #0369a1 100%)' : '#cbd5e1',
+                      background: inputText.trim() && !isSending && canUseLiveChat ? 'linear-gradient(135deg, #0284c7 0%, #0369a1 100%)' : '#cbd5e1',
                       color: '#ffffff',
                       border: 'none',
                       borderRadius: '50%',
                       width: '40px',
                       height: '40px',
-                      cursor: inputText.trim() && !isSending ? 'pointer' : 'default',
+                      cursor: inputText.trim() && !isSending && canUseLiveChat ? 'pointer' : 'default',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
                       flexShrink: 0,
-                      boxShadow: inputText.trim() && !isSending ? '0 4px 12px rgba(2, 132, 199, 0.4)' : 'none',
+                      boxShadow: inputText.trim() && !isSending && canUseLiveChat ? '0 4px 12px rgba(2, 132, 199, 0.4)' : 'none',
                       transition: 'all 0.15s ease'
                     }}
                     title="Send message to Admin"
