@@ -243,7 +243,20 @@ export const TelegramAdminChatSheet: React.FC<TelegramAdminChatSheetProps> = ({
     setReplyText('');
 
     try {
-      await sendAdminLiveReply(sessionId, textToSend, 'Admin (Purendar)');
+      const ok = await sendAdminLiveReply(sessionId, textToSend, 'Admin (Purendar)');
+      if (!ok) {
+        setReplyText(textToSend);
+        setSession((prev) => ({
+          ...prev,
+          messages: (prev?.messages || []).filter((m) => m.id !== optimisticMessage.id)
+        }));
+        try {
+          const savedKey = `up_ticket_replies_${sessionId}`;
+          const arr: ChatMessage[] = JSON.parse(localStorage.getItem(savedKey) || '[]');
+          localStorage.setItem(savedKey, JSON.stringify(arr.filter((m) => m.id !== optimisticMessage.id)));
+        } catch {}
+        alert('⚠️ Reply NOT delivered. Check Firestore rules / internet and try again.');
+      }
     } catch (err) {
       console.error('Failed to send admin reply:', err);
     } finally {
