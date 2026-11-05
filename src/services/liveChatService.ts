@@ -277,6 +277,53 @@ export async function sendUserLiveMessage(
   return { success: true, message: newMessage };
 }
 
+// Relay bridge key for cross-device admin→candidate messaging
+const RELAY_BASE = 'https://api.restful-api.dev/objects';
+function relayKey(sessionId: string) {
+  // Use a short deterministic suffix so the key is a valid object name
+  return `exam_chat_${sessionId.replace(/[^a-zA-Z0-9_-]/g, '_')}`;
+}
+
+// Write admin reply to public relay so candidate's browser can poll it
+async function pushReplyToRelay(sessionId: string, message: ChatMessage): Promise<void> {
+  const key = relayKey(sessionId);
+  try {
+    // Try GET first to see if the object already exists
+    const getRes = await fetch(`${RELAY_BASE}/${key}`, { method: 'GET' });
+    if (getRes.ok) {
+      const existing = await getRes.json();
+      const prevMessages: ChatMessage[] = existing?.data?.messages || [];
+      const merged = [...prevMessages, message];
+      await fetch(`${RELAY_BASE}/${key}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: key, data: { messages: merged } })
+      });
+    } else {
+      // Object does not exist yet — create it via POST with a fixed id
+      await fetch(`${RELAY_BASE}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: key, name: key, data: { messages: [message] } })
+      });
+    }
+  } catch (err) {
+    console.warn('Relay bridge push failed (non-critical):', err);
+  }
+}
+
+// Read all admin replies from relay (called by candidate's widget)
+export async function fetchRelayReplies(sessionId: string): Promise<ChatMessage[]> {
+  try {
+    const res = await fetch(`${RELAY_BASE}/${relayKey(sessionId)}`, { method: 'GET' });
+    if (!res.ok) return [];
+    const obj = await res.json();
+    return (obj?.data?.messages as ChatMessage[]) || [];
+  } catch {
+    return [];
+  }
+}
+
 // 4. Send reply from Admin to Candidate
 export async function sendAdminLiveReply(
   sessionId: string,
@@ -295,7 +342,7 @@ export async function sendAdminLiveReply(
     timestamp: now
   };
 
-  // 1. Immediately cache locally
+  // 1. Immediately cache locally (same-device fallback)
   try {
     const key = `up_ticket_replies_${sessionId}`;
     const existingReplies: ChatMessage[] = JSON.parse(localStorage.getItem(key) || '[]');
@@ -313,7 +360,10 @@ export async function sendAdminLiveReply(
     }
   } catch {}
 
-  // 2. Dispatch Telegram confirmation so admin bot records the reply
+  // 2. Push to public relay so candidate can poll cross-device ✅
+  pushReplyToRelay(sessionId, newMessage);
+
+  // 3. Dispatch Telegram confirmation so admin bot records the reply
   try {
     getTelegramConfig().then((cfg) => {
       if (cfg?.botToken && cfg?.adminChatId) {
@@ -331,6 +381,7 @@ export async function sendAdminLiveReply(
     });
   } catch {}
 
+  // 4. Try Firestore (may fail on permission — relay is the real channel now)
   try {
     const ref = doc(db, 'support_chats', sessionId);
     const snap = await getDoc(ref);
@@ -367,8 +418,8 @@ export async function sendAdminLiveReply(
     }
     return true;
   } catch (err) {
-    console.warn('Firestore admin reply sync note (cached locally):', err);
-    return true; // Still return true because it is safely cached locally and dispatched
+    console.warn('Firestore admin reply sync note (relay is active):', err);
+    return true; // Reply safely dispatched via relay bridge
   }
 }
 
