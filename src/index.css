@@ -70,13 +70,20 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-/* Container */
+/* Container - expanded for modern widescreen displays */
 .container {
-  max-width: 1240px;
+  max-width: 1540px;
   margin: 0 auto;
-  padding: 0 16px;
+  padding: 0 20px;
   width: 100%;
   box-sizing: border-box;
+}
+
+@media (min-width: 1800px) {
+  .container {
+    max-width: 1720px;
+    padding: 0 32px;
+  }
 }
 
 /* Button styles */
@@ -325,8 +332,16 @@ body {
   box-shadow: 0 3px 8px rgba(2, 132, 199, 0.45);
 }
 
-/* Desktop layout (screens wider than 1150px) */
-@media (min-width: 1151px) {
+/* Header Text Responsive Visibility */
+.header-text-short {
+  display: none;
+}
+.header-text-full {
+  display: inline;
+}
+
+/* Desktop layout (screens wider than 1360px) */
+@media (min-width: 1360px) {
   .header-top-row {
     display: contents;
   }
@@ -346,15 +361,28 @@ body {
   }
 }
 
-/* Hide subtitle on medium screens (< 1280px) to prevent squeezing */
-@media (max-width: 1280px) {
+/* Hide subtitle on medium screens (< 1440px) to prevent squeezing */
+@media (max-width: 1440px) {
   .logo-subtitle {
     display: none;
   }
 }
 
-/* Mobile & Tablet layout (<= 1150px) - clean 2-row layout so right actions NEVER overflow */
-@media (max-width: 1150px) {
+/* Responsive Header Buttons (short text on compact viewports) */
+@media (max-width: 900px) {
+  .header-text-full {
+    display: none;
+  }
+  .header-text-short {
+    display: inline;
+  }
+  .header-actions {
+    gap: 6px;
+  }
+}
+
+/* Mobile & Tablet layout (<= 1359px) - clean 2-row layout so right actions NEVER overflow */
+@media (max-width: 1359px) {
   .header-container {
     flex-direction: column;
     height: auto;
@@ -406,6 +434,19 @@ body {
     white-space: nowrap;
     font-size: 0.8rem;
     padding: 6px 10px;
+  }
+}
+
+@media (max-width: 600px) {
+  .header-actions {
+    gap: 4px;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+  }
+  .header-plan-btn,
+  .header-courses-btn {
+    padding: 4px 8px !important;
+    font-size: 0.74rem !important;
   }
 }
 
@@ -2329,3 +2370,284 @@ body {
     min-height: auto;
   }
 }
+
+/* ========================================================
+   DARK MODE / NIGHT MODE (डार्क मोड) COMPREHENSIVE STYLING
+   ======================================================== */
+html.dark,
+body.dark,
+[data-theme='dark'] {
+  --primary: #38bdf8;
+  --primary-hover: #0ea5e9;
+  --primary-light: rgba(56, 189, 248, 0.15);
+  --primary-dark: #0284c7;
+  --surface: #1e293b;
+  --background: #0b1120;
+  --text-main: #f1f5f9;
+  --text-muted: #94a3b8;
+  --border-color: #334155;
+  --border-dark: #475569;
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.4);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.5), 0 2px 4px -2px rgb(0 0 0 / 0.4);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.6), 0 4px 6px -4px rgb(0 0 0 / 0.5);
+  color-scheme: dark;
+}
+
+html.dark body {
+  background-color: #0b1120;
+  color: #f1f5f9;
+}
+
+/* Header Dark Mode */
+html.dark .app-header {
+  background: #0f172a;
+  border-bottom-color: #1e293b;
+}
+
+html.dark .logo-title {
+  color: #f8fafc;
+}
+
+html.dark .logo-subtitle {
+  color: #94a3b8;
+}
+
+html.dark .nav-links .nav-btn {
+  color: #94a3b8;
+}
+
+html.dark .nav-links .nav-btn:hover {
+  background: #1e293b;
+  color: #38bdf8;
+}
+
+html.dark .nav-links .nav-btn.active {
+  background: rgba(56, 189, 248, 0.15);
+  color: #38bdf8;
+}
+
+html.dark .sound-btn {
+  color: #94a3b8;
+}
+
+html.dark .sound-btn:hover {
+  background: #1e293b;
+  color: #f8fafc;
+}
+
+html.dark .theme-toggle-btn {
+  background: #1e293b !important;
+  border-color: #334155 !important;
+  color: #fbbf24 !important;
+}
+
+html.dark .theme-toggle-btn:hover {
+  background: #334155 !important;
+}
+
+/* Candidate Profile Header Pill */
+html.dark .candidate-profile-btn {
+  background: #1e293b;
+  border-color: #334155;
+  color: #34d399;
+}
+
+html.dark .candidate-name {
+  color: #f1f5f9;
+}
+
+/* Trust Bar */
+html.dark .examportal-trust-bar {
+  background: #1e293b;
+  border-color: #334155;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+html.dark .examportal-brand-title {
+  color: #f8fafc;
+}
+
+html.dark .examportal-brand-sub {
+  color: #94a3b8;
+}
+
+html.dark .examportal-metric-pill {
+  background: #0f172a;
+  border-color: #334155;
+}
+
+html.dark .examportal-metric-val {
+  color: #f8fafc;
+}
+
+html.dark .examportal-metric-lbl {
+  color: #94a3b8;
+}
+
+html.dark .examportal-courses-title {
+  color: #f8fafc;
+}
+
+/* Exam Cards */
+html.dark .benchmark-test-card,
+html.dark .examportal-exam-card {
+  background: #1e293b !important;
+  border-color: #334155 !important;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3) !important;
+}
+
+html.dark .benchmark-test-card:hover,
+html.dark .examportal-exam-card:hover {
+  background: #243247 !important;
+  border-color: #38bdf8 !important;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.45) !important;
+}
+
+html.dark .benchmark-test-card h3,
+html.dark .examportal-exam-title {
+  color: #f8fafc !important;
+}
+
+html.dark .benchmark-test-card p {
+  color: #94a3b8 !important;
+}
+
+html.dark .level-breadcrumb-current {
+  color: #cbd5e1;
+}
+
+/* Level 2 Mode Cards */
+html.dark .level2-mode-card {
+  background: #1e293b;
+  border-color: #334155;
+  color: #f1f5f9;
+}
+
+html.dark .level2-mode-card:hover {
+  background: #243247;
+  border-color: #38bdf8;
+}
+
+html.dark .level2-mode-title {
+  color: #f8fafc;
+}
+
+html.dark .level2-mode-sub {
+  color: #94a3b8;
+}
+
+/* Modals */
+html.dark .modal-content {
+  background: #1e293b;
+  color: #f1f5f9;
+  border: 1px solid #334155;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+}
+
+html.dark .modal-header {
+  border-bottom-color: #334155;
+}
+
+html.dark .modal-title {
+  color: #f8fafc;
+}
+
+html.dark .modal-footer {
+  border-top-color: #334155;
+  background: #0f172a;
+}
+
+/* Inputs, Textareas, Selects */
+html.dark input[type="text"],
+html.dark input[type="search"],
+html.dark input[type="number"],
+html.dark input[type="email"],
+html.dark input[type="password"],
+html.dark textarea,
+html.dark select {
+  background: #0f172a !important;
+  color: #f1f5f9 !important;
+  border-color: #334155 !important;
+}
+
+html.dark input::placeholder,
+html.dark textarea::placeholder {
+  color: #64748b;
+}
+
+/* Card & Content Panels */
+html.dark .card {
+  background: #1e293b;
+  border-color: #334155;
+  color: #f1f5f9;
+}
+
+html.dark .stat-chip {
+  background: #0f172a;
+  border-color: #334155;
+}
+
+html.dark .stat-chip-val {
+  color: #f8fafc;
+}
+
+html.dark .stat-chip-label {
+  color: #94a3b8;
+}
+
+/* Test Execution Screens */
+html.dark .ar-source-box {
+  background: #1e293b !important;
+  border-color: #334155 !important;
+  color: #f1f5f9 !important;
+}
+
+html.dark .ar-typing-box {
+  background: #0f172a !important;
+  border-color: #334155 !important;
+  color: #f8fafc !important;
+}
+
+html.dark .passage-pane {
+  background: #1e293b;
+  border-color: #334155;
+  color: #f1f5f9;
+}
+
+html.dark .typing-input-area {
+  background: #0f172a;
+  border-color: #334155;
+  color: #f8fafc;
+}
+
+/* Buttons in dark mode */
+html.dark .btn-secondary {
+  background: #1e293b;
+  color: #f1f5f9;
+  border-color: #334155;
+}
+
+html.dark .btn-secondary:hover {
+  background: #334155;
+  border-color: #475569;
+}
+
+/* Footer in dark mode */
+html.dark footer {
+  background: #0b1120 !important;
+  border-top-color: #1e293b !important;
+  color: #94a3b8 !important;
+}
+
+html.dark footer h3 {
+  color: #f8fafc !important;
+}
+
+html.dark footer a {
+  color: #94a3b8 !important;
+}
+
+html.dark footer a:hover {
+  color: #38bdf8 !important;
+}
+

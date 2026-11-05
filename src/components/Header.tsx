@@ -18,6 +18,8 @@ interface HeaderProps {
   currentUser: UserProfile | null;
   onOpenAuth: () => void;
   onOpenDashboard: () => void;
+  isDarkMode?: boolean;
+  onToggleDarkMode?: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -34,7 +36,9 @@ export const Header: React.FC<HeaderProps> = ({
   onToggleSound,
   currentUser,
   onOpenAuth,
-  onOpenDashboard
+  onOpenDashboard,
+  isDarkMode = false,
+  onToggleDarkMode
 }) => {
   return (
     <header className="app-header">
@@ -79,6 +83,28 @@ export const Header: React.FC<HeaderProps> = ({
               )}
             </button>
 
+            {onToggleDarkMode && (
+              <button
+                className="nav-btn theme-toggle-btn"
+                onClick={onToggleDarkMode}
+                title={isDarkMode ? 'Switch to Light Mode (लाइट मोड चालू करें)' : 'Switch to Dark Mode (डार्क मोड चालू करें)'}
+                aria-label="Toggle Dark Mode"
+                style={{
+                  fontSize: '1rem',
+                  padding: '5px 8px',
+                  borderRadius: 'var(--radius-md)',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  background: 'transparent',
+                  border: '1px solid transparent'
+                }}
+              >
+                {isDarkMode ? '☀️' : '🌙'}
+              </button>
+            )}
+
             {currentUser && isUserAdmin(currentUser) && onOpenAdmin && (
               <button
                 className="nav-btn admin-portal-btn"
@@ -92,7 +118,7 @@ export const Header: React.FC<HeaderProps> = ({
 
             {onOpenPayment && (
               <button
-                className="nav-btn"
+                className="nav-btn header-plan-btn"
                 onClick={onOpenPayment}
                 style={{
                   background: currentUser?.is_subscribed
@@ -114,13 +140,14 @@ export const Header: React.FC<HeaderProps> = ({
                 title={currentUser?.is_subscribed ? 'Pro Member Active • View Subscription' : 'Upgrade to Pro • Single Exam / All 129 Pass'}
               >
                 <span>👑</span>
-                <span>{currentUser?.is_subscribed ? 'Pro Active' : 'Plans & Pricing'}</span>
+                <span className="header-text-full">{currentUser?.is_subscribed ? 'Pro Active' : 'Plans & Pricing'}</span>
+                <span className="header-text-short">{currentUser?.is_subscribed ? 'Pro' : 'Plans'}</span>
               </button>
             )}
 
             {currentUser && onOpenMyCourses && (
               <button
-                className="nav-btn"
+                className="nav-btn header-courses-btn"
                 onClick={onOpenMyCourses}
                 style={{
                   background: 'linear-gradient(135deg, #7c3aed 0%, #4f46e5 100%)',
@@ -139,7 +166,8 @@ export const Header: React.FC<HeaderProps> = ({
                 title="My Purchased Courses — View plan status & validity"
               >
                 <span>🎓</span>
-                <span>My Courses</span>
+                <span className="header-text-full">My Courses</span>
+                <span className="header-text-short">Courses</span>
               </button>
             )}
 

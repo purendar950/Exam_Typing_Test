@@ -6,6 +6,7 @@ import { evaluateTypingTest } from '../utils/evaluator';
 import { HindiHelperModal } from './HindiHelperModal';
 import { HindiKeyboardLayout } from './HindiKeyboardLayout';
 import { ExamLogo } from '../utils/examLogos';
+import { getExamBackspaceRule } from '../utils/examBackspaceRules';
 
 interface StartTestProps {
   passage: Passage;
@@ -487,6 +488,29 @@ export const StartTest: React.FC<StartTestProps> = ({
           <span style={{ background: '#f1f5f9', color: '#475569', padding: '1px 8px', borderRadius: '4px', fontWeight: 600 }}>
             ⏱️ {durationMinutes} Mins
           </span>
+          {(() => {
+            const bsRule = getExamBackspaceRule(activeExamProfile);
+            return (
+              <span
+                title={`${bsRule.title}: ${bsRule.fullRule}`}
+                style={{
+                  background: bsRule.badgeBg,
+                  color: bsRule.badgeText,
+                  border: `1px solid ${bsRule.badgeBorder}`,
+                  padding: '1px 8px',
+                  borderRadius: '4px',
+                  fontWeight: 700,
+                  fontSize: '0.78rem',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '3px',
+                  cursor: 'help'
+                }}
+              >
+                {bsRule.badgeLabel}
+              </span>
+            );
+          })()}
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
