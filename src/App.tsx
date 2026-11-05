@@ -13,6 +13,7 @@ import { HistoryModal } from './components/HistoryModal';
 import { HindiHelperModal } from './components/HindiHelperModal';
 import { AuthModal } from './components/AuthModal';
 import { UserDashboardModal } from './components/UserDashboardModal';
+import { MyCoursesModal } from './components/MyCoursesModal';
 import { AiGeneratorModal } from './components/AiGeneratorModal';
 import { AdminPanelModal } from './components/AdminPanelModal';
 import { PaymentModal } from './components/PaymentModal';
@@ -193,6 +194,8 @@ export const App: React.FC = () => {
     }
   });
   const [isDashboardOpen, setIsDashboardOpen] = useState<boolean>(false);
+  const [dashboardInitialTab, setDashboardInitialTab] = useState<'overview' | 'history' | 'courses' | 'admitCard'>('overview');
+  const [isMyCoursesOpen, setIsMyCoursesOpen] = useState<boolean>(false);
   const [isAiGeneratorOpen, setIsAiGeneratorOpen] = useState<boolean>(false);
   const [isAdminOpen, setIsAdminOpen] = useState<boolean>(false);
   const [isLegalOpen, setIsLegalOpen] = useState<boolean>(() => {
@@ -583,13 +586,17 @@ export const App: React.FC = () => {
           onOpenAiGenerator={() => setIsAiGeneratorOpen(true)}
           onOpenAdmin={() => setIsAdminOpen(true)}
           onOpenPayment={() => handleOpenPayment()}
-          onOpenMyCourses={() => setIsDashboardOpen(true)}
+          onOpenMyCourses={() => setIsMyCoursesOpen(true)}
           settings={settings}
           onToggleSound={toggleSound}
           currentUser={currentUser}
           onOpenAuth={() => setIsAuthOpen(true)}
-          onOpenDashboard={() => setIsDashboardOpen(true)}
+          onOpenDashboard={() => {
+            setDashboardInitialTab('overview');
+            setIsDashboardOpen(true);
+          }}
         />
+
       )}
 
       <main style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
@@ -903,6 +910,7 @@ export const App: React.FC = () => {
           isOpen={isDashboardOpen}
           onClose={() => setIsDashboardOpen(false)}
           user={currentUser}
+          initialTab={dashboardInitialTab}
           onLogout={async () => {
             await logoutUser();
             setCurrentUser(null);
@@ -919,12 +927,27 @@ export const App: React.FC = () => {
             setIsDashboardOpen(false);
             handlePracticeWrongWords(words);
           }}
-          onOpenPayment={() => {
+          onOpenPayment={(examId) => {
             setIsDashboardOpen(false);
-            handleOpenPayment();
+            handleOpenPayment(examId);
+          }}
+          onNavigateToCourse={() => {
+            setCurrentView('choose');
           }}
         />
       )}
+
+      <MyCoursesModal
+        isOpen={isMyCoursesOpen}
+        onClose={() => setIsMyCoursesOpen(false)}
+        currentUser={currentUser}
+        onOpenAuth={() => setIsAuthOpen(true)}
+        onOpenPayment={(examId) => handleOpenPayment(examId)}
+        onNavigateToCourse={() => {
+          setCurrentView('choose');
+        }}
+      />
+
 
 
       <AiGeneratorModal
