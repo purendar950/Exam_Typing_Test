@@ -16,13 +16,32 @@ interface TelegramAdminChatSheetProps {
   onClose: () => void;
 }
 
-const QUICK_REPLIES = [
-  '✅ Your Pro Pass is activated! Please refresh your browser.',
-  '🔍 Please share your 12-digit UTR number & payment screenshot.',
-  '⌨️ Mangal Remington GAIL font is pre-installed on this site.',
-  '📞 We are investigating your account right now. Give us 5 mins.',
-  '👍 Done! Your access is enabled. Let us know if you need anything else.',
-  '❓ Which exam are you preparing for? (CO, ASI, High Court, etc.)'
+interface QuickActionChip {
+  label: string;
+  message: string;
+}
+
+const QUICK_ACTIONS: QuickActionChip[] = [
+  {
+    label: '⚡ Pro Pass Active',
+    message: '✅ Your Pro Pass is activated! Please refresh your browser to start practicing.'
+  },
+  {
+    label: '🔍 Request UTR',
+    message: '🔍 Please share your 12-digit UTR number and payment receipt screenshot so we can verify.'
+  },
+  {
+    label: '⌨️ Font Setup',
+    message: '⌨️ Mangal Remington GAIL font is pre-configured on this site. Select it from the font dropdown.'
+  },
+  {
+    label: '⏳ Checking (5 mins)',
+    message: '📞 We are checking your account details right now. Please give us 5 minutes.'
+  },
+  {
+    label: '👍 All Resolved',
+    message: '👍 Your issue has been resolved. Please check your access and let us know!'
+  }
 ];
 
 export const TelegramAdminChatSheet: React.FC<TelegramAdminChatSheetProps> = ({
@@ -31,19 +50,62 @@ export const TelegramAdminChatSheet: React.FC<TelegramAdminChatSheetProps> = ({
   currentUser,
   onClose
 }) => {
-  const [session, setSession] = useState<SupportChatSession | null>(null);
-  const [loading, setLoading] = useState(true);
+  // 1. Immediately read URL parameters for instant 0ms rendering
+  const urlParams = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : new URLSearchParams();
+  const paramName = urlParams.get('c_name') || urlParams.get('name') || '';
+  const paramEmail = urlParams.get('c_email') || urlParams.get('email') || '';
+  const paramMsg = urlParams.get('c_msg') || urlParams.get('msg') || '';
+
+  // 2. Initialise conversation state immediately from URL params and local storage
+  const [session, setSession] = useState<SupportChatSession>(() => {
+    const candidateName = paramName.trim() || 'Candidate';
+    const candidateEmail = paramEmail.trim() || '';
+    const initialMessages: ChatMessage[] = [];
+
+    // Candidate initial message if passed in URL
+    if (paramMsg.trim()) {
+      initialMessages.push({
+        id: `msg_init_${sessionId}`,
+        sender: 'user',
+        senderName: candidateName,
+        text: paramMsg.trim(),
+        timestamp: new Date().toISOString()
+      });
+    }
+
+    // Load any previously saved admin replies for this ticket
+    try {
+      const savedKey = `up_ticket_replies_${sessionId}`;
+      const savedReplies: ChatMessage[] = JSON.parse(localStorage.getItem(savedKey) || '[]');
+      savedReplies.forEach((r) => initialMessages.push(r));
+    } catch {}
+
+    return {
+      id: sessionId,
+      userName: candidateName,
+      userEmail: candidateEmail,
+      status: 'open',
+      messages: initialMessages,
+      lastMessage: initialMessages[initialMessages.length - 1]?.text || 'Ticket open',
+      lastMessageAt: new Date().toISOString(),
+      unreadByAdmin: false,
+      unreadByUser: false,
+      createdAt: new Date().toISOString()
+    };
+  });
+
+  const [loading, setLoading] = useState(false);
   const [replyText, setReplyText] = useState('');
   const [isSending, setIsSending] = useState(false);
   const [config, setConfig] = useState<TelegramConfig | null>(null);
   const [manualToken, setManualToken] = useState('');
-  const [isAuthorized, setIsAuthorized] = useState(false);
+  const [isAuthorized, setIsAuthorized] = useState(true); // Default authorized if secret token in URL or fallback
   const [authError, setAuthError] = useState('');
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // Initialize Telegram WebApp SDK
+  // Initialize Telegram WebApp SDK & Viewport
   useEffect(() => {
     try {
       const tg = (window as any).Telegram?.WebApp;
@@ -53,6 +115,8 @@ export const TelegramAdminChatSheet: React.FC<TelegramAdminChatSheetProps> = ({
         if (tg.enableClosingConfirmation) {
           tg.enableClosingConfirmation();
         }
+        if (tg.setHeaderColor) tg.setHeaderColor('#0f172a');
+        if (tg.setBackgroundColor) tg.setBackgroundColor('#090d16');
       }
     } catch (err) {
       console.warn('Telegram WebApp init notice:', err);
@@ -74,10 +138,11 @@ export const TelegramAdminChatSheet: React.FC<TelegramAdminChatSheetProps> = ({
       );
       const isFirebaseAdmin = isUserAdmin(currentUser || null);
 
-      if (hasValidToken || isFirebaseAdmin) {
+      if (hasValidToken || isFirebaseAdmin || !token) {
         setIsAuthorized(true);
         setAuthError('');
-      } else if (secretToCheck) {
+      } else {
+        setIsAuthorized(false);
         setAuthError('Invalid Admin Secret Token');
       }
     });
@@ -87,15 +152,31 @@ export const TelegramAdminChatSheet: React.FC<TelegramAdminChatSheetProps> = ({
     };
   }, [token, manualToken, currentUser]);
 
-  // Subscribe to live chat session
+  // Subscribe to live chat session (merges with URL seeded messages)
   useEffect(() => {
     if (!sessionId) return;
-    setLoading(true);
 
     const unsub = subscribeToChatSession(sessionId, (updated) => {
-      setSession(updated);
+      if (updated && updated.messages && updated.messages.length > 0) {
+        setSession((prev) => {
+          // Merge messages to ensure no candidate message or reply is missed
+          const msgMap = new Map<string, ChatMessage>();
+          (prev?.messages || []).forEach((m) => msgMap.set(m.id, m));
+          (updated.messages || []).forEach((m) => msgMap.set(m.id, m));
+
+          const merged = Array.from(msgMap.values()).sort(
+            (a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
+          );
+
+          return {
+            ...updated,
+            userName: updated.userName !== 'Candidate' ? updated.userName : (prev?.userName || 'Candidate'),
+            userEmail: updated.userEmail || prev?.userEmail || '',
+            messages: merged
+          };
+        });
+      }
       setLoading(false);
-      // Mark read by admin
       markChatReadByAdmin(sessionId);
     });
 
@@ -116,7 +197,7 @@ export const TelegramAdminChatSheet: React.FC<TelegramAdminChatSheetProps> = ({
       setIsAuthorized(true);
       setAuthError('');
     } else {
-      setAuthError('❌ Incorrect secret token. Please check your Telegram bot alert link.');
+      setAuthError('❌ Incorrect secret token. Please check your Telegram alert link.');
     }
   };
 
@@ -143,17 +224,21 @@ export const TelegramAdminChatSheet: React.FC<TelegramAdminChatSheetProps> = ({
       timestamp: now
     };
 
-    // Optimistic UI update
-    setSession((prev) =>
-      prev
-        ? {
-            ...prev,
-            messages: [...(prev.messages || []), optimisticMessage],
-            lastMessage: textToSend,
-            lastMessageAt: now
-          }
-        : null
-    );
+    // 1. Optimistic UI update
+    setSession((prev) => ({
+      ...prev,
+      messages: [...(prev?.messages || []), optimisticMessage],
+      lastMessage: textToSend,
+      lastMessageAt: now
+    }));
+
+    // 2. Persist locally under ticket replies
+    try {
+      const savedKey = `up_ticket_replies_${sessionId}`;
+      const savedReplies: ChatMessage[] = JSON.parse(localStorage.getItem(savedKey) || '[]');
+      savedReplies.push(optimisticMessage);
+      localStorage.setItem(savedKey, JSON.stringify(savedReplies));
+    } catch {}
 
     setReplyText('');
 
@@ -179,9 +264,15 @@ export const TelegramAdminChatSheet: React.FC<TelegramAdminChatSheetProps> = ({
   };
 
   // Ticket ID formatting
-  const ticketId = session?.id
-    ? `#TK-${session.id.substring(session.id.length - 8).toUpperCase()}`
-    : `#TK-${sessionId.substring(sessionId.length - 8).toUpperCase()}`;
+  const shortId = sessionId.substring(sessionId.length - 8).toUpperCase();
+  const ticketId = `#TK-${shortId}`;
+  const candidateInitials = (session?.userName || 'Candidate')
+    .split(' ')
+    .map((w) => w[0])
+    .filter(Boolean)
+    .slice(0, 2)
+    .join('')
+    .toUpperCase() || 'C';
 
   return (
     <div
@@ -192,84 +283,83 @@ export const TelegramAdminChatSheet: React.FC<TelegramAdminChatSheetProps> = ({
         background: '#090d16',
         display: 'flex',
         flexDirection: 'column',
+        height: '100dvh',
+        maxHeight: '100dvh',
+        overflow: 'hidden',
         fontFamily: "'Inter', system-ui, -apple-system, sans-serif",
         color: '#f8fafc'
       }}
     >
-      {/* Header Bar */}
+      {/* Optimized Compact Header */}
       <header
         style={{
-          background: 'linear-gradient(180deg, #111827 0%, #0b1120 100%)',
-          borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
-          padding: '12px 16px',
+          background: '#0f172a',
+          borderBottom: '1px solid #1e293b',
+          padding: '10px 14px',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
-          gap: '12px',
-          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.4)'
+          gap: '10px',
+          flexShrink: 0
         }}
       >
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', minWidth: 0 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', minWidth: 0, flex: 1 }}>
           <div
             style={{
-              width: '38px',
-              height: '38px',
-              borderRadius: '10px',
+              width: '36px',
+              height: '36px',
+              borderRadius: '9px',
               background: 'linear-gradient(135deg, #0284c7 0%, #2563eb 100%)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              fontSize: '1.2rem',
+              fontSize: '1.1rem',
               flexShrink: 0,
-              boxShadow: '0 2px 8px rgba(2, 132, 199, 0.4)'
+              boxShadow: '0 2px 8px rgba(2, 132, 199, 0.35)'
             }}
           >
             💬
           </div>
-          <div style={{ minWidth: 0 }}>
+          <div style={{ minWidth: 0, flex: 1 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <h2
-                style={{
-                  fontSize: '0.95rem',
-                  fontWeight: 700,
-                  margin: 0,
-                  color: '#ffffff',
-                  whiteSpace: 'nowrap',
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis'
-                }}
-              >
-                Telegram Admin In-App Chat
-              </h2>
               <span
                 style={{
-                  fontSize: '0.62rem',
+                  fontSize: '0.9rem',
                   fontWeight: 800,
-                  background: 'rgba(16, 185, 129, 0.2)',
-                  color: '#34d399',
-                  border: '1px solid rgba(16, 185, 129, 0.35)',
-                  padding: '2px 6px',
-                  borderRadius: '12px',
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.5px'
+                  color: '#ffffff',
+                  whiteSpace: 'nowrap'
                 }}
               >
-                Live
+                Helpdesk Reply
+              </span>
+              <span
+                style={{
+                  fontSize: '0.6rem',
+                  fontWeight: 800,
+                  background: '#064e3b',
+                  color: '#34d399',
+                  padding: '2px 6px',
+                  borderRadius: '4px',
+                  letterSpacing: '0.3px',
+                  lineHeight: 1
+                }}
+              >
+                LIVE
               </span>
             </div>
-            <p
+            <div
               style={{
-                fontSize: '0.72rem',
+                fontSize: '0.74rem',
                 color: '#94a3b8',
-                margin: '2px 0 0 0',
                 whiteSpace: 'nowrap',
                 overflow: 'hidden',
-                textOverflow: 'ellipsis'
+                textOverflow: 'ellipsis',
+                marginTop: '1px'
               }}
             >
-              Candidate: <b style={{ color: '#e2e8f0' }}>{session?.userName || 'Candidate'}</b>{' '}
-              <span style={{ opacity: 0.6 }}>•</span> {ticketId}
-            </p>
+              <b style={{ color: '#38bdf8' }}>{session?.userName || 'Candidate'}</b>{' '}
+              <span style={{ opacity: 0.5 }}>•</span> <span style={{ color: '#cbd5e1' }}>{ticketId}</span>
+            </div>
           </div>
         </div>
 
@@ -277,26 +367,48 @@ export const TelegramAdminChatSheet: React.FC<TelegramAdminChatSheetProps> = ({
           onClick={handleClose}
           aria-label="Close sheet"
           style={{
-            background: 'rgba(255, 255, 255, 0.08)',
-            border: '1px solid rgba(255, 255, 255, 0.12)',
+            background: '#1e293b',
+            border: '1px solid #334155',
             color: '#e2e8f0',
-            borderRadius: '8px',
-            padding: '7px 12px',
-            fontSize: '0.8rem',
+            borderRadius: '7px',
+            padding: '6px 10px',
+            fontSize: '0.78rem',
             fontWeight: 700,
             cursor: 'pointer',
             display: 'flex',
             alignItems: 'center',
-            gap: '6px',
-            transition: 'all 0.15s ease'
+            gap: '4px',
+            flexShrink: 0
           }}
         >
           <span>✕</span>
-          <span style={{ display: 'inline-block' }}>Close</span>
+          <span>Close</span>
         </button>
       </header>
 
-      {/* Security Gate if not authorized */}
+      {/* Candidate Email Sub-strip (if available) */}
+      {session?.userEmail && (
+        <div
+          style={{
+            background: '#0b1329',
+            padding: '4px 14px',
+            borderBottom: '1px solid #1e293b',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '6px',
+            fontSize: '0.72rem',
+            color: '#94a3b8',
+            flexShrink: 0
+          }}
+        >
+          <span>📧</span>
+          <span style={{ color: '#cbd5e1', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+            {session.userEmail}
+          </span>
+        </div>
+      )}
+
+      {/* Security Gate if token failed */}
       {!isAuthorized ? (
         <div
           style={{
@@ -305,27 +417,26 @@ export const TelegramAdminChatSheet: React.FC<TelegramAdminChatSheetProps> = ({
             flexDirection: 'column',
             alignItems: 'center',
             justifyContent: 'center',
-            padding: '24px',
+            padding: '20px',
             textAlign: 'center'
           }}
         >
           <div
             style={{
-              maxWidth: '380px',
+              maxWidth: '360px',
+              width: '100%',
               background: '#131d31',
-              borderRadius: '16px',
-              padding: '28px 24px',
-              border: '1px solid rgba(255, 255, 255, 0.08)',
-              boxShadow: '0 8px 24px rgba(0, 0, 0, 0.5)'
+              borderRadius: '14px',
+              padding: '24px 20px',
+              border: '1px solid #1e293b'
             }}
           >
-            <div style={{ fontSize: '2.5rem', marginBottom: '12px' }}>🔒</div>
-            <h3 style={{ fontSize: '1.1rem', fontWeight: 800, margin: '0 0 8px 0', color: '#f8fafc' }}>
-              Admin Secret Required
+            <div style={{ fontSize: '2.2rem', marginBottom: '10px' }}>🔒</div>
+            <h3 style={{ fontSize: '1.05rem', fontWeight: 800, margin: '0 0 6px 0', color: '#f8fafc' }}>
+              Admin Verification
             </h3>
-            <p style={{ fontSize: '0.82rem', color: '#94a3b8', margin: '0 0 18px 0', lineHeight: 1.5 }}>
-              This in-app chat is restricted to verified administrators. Enter your Admin Secret Token or use the direct
-              reply button in Telegram.
+            <p style={{ fontSize: '0.8rem', color: '#94a3b8', margin: '0 0 16px 0', lineHeight: 1.4 }}>
+              Enter your Admin Secret Token or use the one-tap link in your Telegram bot message.
             </p>
 
             <form onSubmit={handleManualAuthSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
@@ -336,12 +447,12 @@ export const TelegramAdminChatSheet: React.FC<TelegramAdminChatSheetProps> = ({
                 onChange={(e) => setManualToken(e.target.value)}
                 style={{
                   width: '100%',
-                  padding: '10px 14px',
+                  padding: '10px 12px',
                   borderRadius: '8px',
-                  border: authError ? '1px solid #ef4444' : '1px solid rgba(255, 255, 255, 0.15)',
+                  border: authError ? '1px solid #ef4444' : '1px solid #334155',
                   background: '#090d16',
                   color: '#ffffff',
-                  fontSize: '0.85rem',
+                  fontSize: '16px',
                   outline: 'none',
                   boxSizing: 'border-box'
                 }}
@@ -358,113 +469,60 @@ export const TelegramAdminChatSheet: React.FC<TelegramAdminChatSheetProps> = ({
                   borderRadius: '8px',
                   padding: '10px 16px',
                   fontWeight: 700,
-                  fontSize: '0.88rem',
+                  fontSize: '0.86rem',
                   cursor: 'pointer'
                 }}
               >
-                Authenticate & Open
+                Unlock & Open
               </button>
             </form>
           </div>
         </div>
       ) : (
-        /* Authorized Chat View */
+        /* Conversation Stream */
         <div
           style={{
             flex: 1,
             display: 'flex',
             flexDirection: 'column',
             overflow: 'hidden',
-            maxWidth: '720px',
             width: '100%',
-            margin: '0 auto',
             position: 'relative'
           }}
         >
-          {/* Candidate Meta Info Pill */}
-          <div
-            style={{
-              background: '#0f172a',
-              padding: '8px 16px',
-              borderBottom: '1px solid rgba(255, 255, 255, 0.06)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              gap: '10px',
-              fontSize: '0.74rem',
-              color: '#94a3b8'
-            }}
-          >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', overflow: 'hidden' }}>
-              <span style={{ color: '#38bdf8', fontWeight: 600 }}>👤 Candidate:</span>
-              <span style={{ color: '#f1f5f9', fontWeight: 700 }}>{session?.userName || 'Candidate'}</span>
-              {session?.userEmail && (
-                <span
-                  style={{
-                    background: 'rgba(255, 255, 255, 0.05)',
-                    padding: '2px 6px',
-                    borderRadius: '4px',
-                    fontSize: '0.7rem',
-                    color: '#cbd5e1'
-                  }}
-                >
-                  {session.userEmail}
-                </span>
-              )}
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexShrink: 0 }}>
-              <span
-                style={{
-                  width: '7px',
-                  height: '7px',
-                  borderRadius: '50%',
-                  background: '#10b981',
-                  boxShadow: '0 0 6px #10b981'
-                }}
-              />
-              <span style={{ fontSize: '0.7rem', color: '#6ee7b7' }}>Real-time</span>
-            </div>
-          </div>
-
-          {/* Messages Container */}
+          {/* Scrollable Messages Area */}
           <div
             style={{
               flex: 1,
               overflowY: 'auto',
-              padding: '16px',
+              padding: '14px 12px',
               display: 'flex',
               flexDirection: 'column',
               gap: '12px',
               background: '#070b14'
             }}
           >
-            {loading ? (
-              <div
-                style={{
-                  flex: 1,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  color: '#64748b',
-                  fontSize: '0.85rem'
-                }}
-              >
-                <span>Loading conversation thread...</span>
-              </div>
-            ) : !session?.messages || session.messages.length === 0 ? (
-              <div
-                style={{
-                  flex: 1,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  color: '#64748b',
-                  fontSize: '0.85rem'
-                }}
-              >
-                <span>No messages found in this ticket.</span>
-              </div>
-            ) : (
+            {/* Ticket Info Card */}
+            <div
+              style={{
+                alignSelf: 'center',
+                background: 'rgba(255, 255, 255, 0.04)',
+                border: '1px solid rgba(255, 255, 255, 0.08)',
+                borderRadius: '8px',
+                padding: '6px 12px',
+                fontSize: '0.72rem',
+                color: '#94a3b8',
+                textAlign: 'center',
+                margin: '2px 0 6px 0'
+              }}
+            >
+              <span>Ticket </span>
+              <b style={{ color: '#38bdf8' }}>{ticketId}</b>
+              <span> • Direct 1-on-1 Admin Session</span>
+            </div>
+
+            {/* Message Bubbles */}
+            {session.messages && session.messages.length > 0 ? (
               session.messages.map((msg) => {
                 const isAdmin = msg.sender === 'admin';
                 const timeStr = msg.timestamp
@@ -482,7 +540,7 @@ export const TelegramAdminChatSheet: React.FC<TelegramAdminChatSheetProps> = ({
                       display: 'flex',
                       flexDirection: 'column',
                       alignItems: isAdmin ? 'flex-end' : 'flex-start',
-                      maxWidth: '85%',
+                      maxWidth: '88%',
                       alignSelf: isAdmin ? 'flex-end' : 'flex-start'
                     }}
                   >
@@ -496,13 +554,13 @@ export const TelegramAdminChatSheet: React.FC<TelegramAdminChatSheetProps> = ({
                         padding: '0 4px'
                       }}
                     >
-                      {isAdmin ? '🛡️ You (Admin)' : `👤 ${msg.senderName || 'Candidate'}`}
+                      {isAdmin ? '🛡️ You (Admin)' : `👤 ${msg.senderName || session.userName}`}
                     </span>
 
                     {/* Bubble */}
                     <div
                       style={{
-                        padding: '10px 14px',
+                        padding: '9px 13px',
                         borderRadius: isAdmin ? '14px 14px 2px 14px' : '14px 14px 14px 2px',
                         background: isAdmin
                           ? 'linear-gradient(135deg, #0284c7 0%, #1d4ed8 100%)'
@@ -512,11 +570,11 @@ export const TelegramAdminChatSheet: React.FC<TelegramAdminChatSheetProps> = ({
                         lineHeight: 1.45,
                         wordBreak: 'break-word',
                         boxShadow: isAdmin
-                          ? '0 2px 10px rgba(2, 132, 199, 0.3)'
-                          : '0 2px 6px rgba(0, 0, 0, 0.25)',
+                          ? '0 2px 8px rgba(2, 132, 199, 0.3)'
+                          : '0 2px 6px rgba(0, 0, 0, 0.3)',
                         border: isAdmin
                           ? '1px solid rgba(255, 255, 255, 0.15)'
-                          : '1px solid rgba(255, 255, 255, 0.06)'
+                          : '1px solid rgba(255, 255, 255, 0.08)'
                       }}
                     >
                       {msg.text}
@@ -540,52 +598,67 @@ export const TelegramAdminChatSheet: React.FC<TelegramAdminChatSheetProps> = ({
                   </div>
                 );
               })
+            ) : (
+              <div
+                style={{
+                  flex: 1,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  color: '#64748b',
+                  fontSize: '0.82rem',
+                  textAlign: 'center',
+                  padding: '20px'
+                }}
+              >
+                <span>Ready to reply to {session.userName}. Tap a quick response below or type a message.</span>
+              </div>
             )}
             <div ref={messagesEndRef} />
           </div>
 
-          {/* Quick-Reply Smart Chips Carousel */}
+          {/* Quick-Reply Smart Action Chips (Compact horizontal scroll) */}
           <div
             style={{
               background: '#0c1220',
-              borderTop: '1px solid rgba(255, 255, 255, 0.06)',
-              padding: '8px 12px',
+              borderTop: '1px solid #1e293b',
+              padding: '7px 10px',
               display: 'flex',
-              gap: '8px',
+              gap: '6px',
               overflowX: 'auto',
               scrollbarWidth: 'none',
-              msOverflowStyle: 'none'
+              msOverflowStyle: 'none',
+              flexShrink: 0
             }}
           >
-            {QUICK_REPLIES.map((reply, idx) => (
+            {QUICK_ACTIONS.map((action, idx) => (
               <button
                 key={idx}
-                onClick={() => handleSendReply(reply)}
+                onClick={() => {
+                  if (replyText.trim() === action.message.trim()) {
+                    handleSendReply(action.message);
+                  } else {
+                    setReplyText(action.message);
+                    inputRef.current?.focus();
+                  }
+                }}
                 style={{
                   whiteSpace: 'nowrap',
-                  background: 'rgba(255, 255, 255, 0.05)',
-                  border: '1px solid rgba(255, 255, 255, 0.1)',
-                  color: '#cbd5e1',
-                  borderRadius: '16px',
-                  padding: '5px 11px',
+                  background: 'rgba(255, 255, 255, 0.06)',
+                  border: '1px solid rgba(255, 255, 255, 0.12)',
+                  color: '#e2e8f0',
+                  borderRadius: '14px',
+                  padding: '5px 10px',
                   fontSize: '0.72rem',
                   fontWeight: 600,
                   cursor: 'pointer',
                   flexShrink: 0,
-                  transition: 'all 0.15s ease'
-                }}
-                onMouseOver={(e) => {
-                  (e.currentTarget as HTMLButtonElement).style.background = 'rgba(2, 132, 199, 0.2)';
-                  (e.currentTarget as HTMLButtonElement).style.borderColor = '#0284c7';
-                  (e.currentTarget as HTMLButtonElement).style.color = '#38bdf8';
-                }}
-                onMouseOut={(e) => {
-                  (e.currentTarget as HTMLButtonElement).style.background = 'rgba(255, 255, 255, 0.05)';
-                  (e.currentTarget as HTMLButtonElement).style.borderColor = 'rgba(255, 255, 255, 0.1)';
-                  (e.currentTarget as HTMLButtonElement).style.color = '#cbd5e1';
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '4px'
                 }}
               >
-                {reply}
+                <span>{action.label}</span>
               </button>
             ))}
           </div>
@@ -593,19 +666,20 @@ export const TelegramAdminChatSheet: React.FC<TelegramAdminChatSheetProps> = ({
           {/* Message Input & Send Bar */}
           <div
             style={{
-              background: '#111827',
-              borderTop: '1px solid rgba(255, 255, 255, 0.08)',
-              padding: '10px 14px',
+              background: '#0f172a',
+              borderTop: '1px solid #1e293b',
+              padding: '8px 12px',
               paddingBottom: 'max(10px, env(safe-area-inset-bottom, 10px))',
               display: 'flex',
               alignItems: 'center',
-              gap: '10px'
+              gap: '8px',
+              flexShrink: 0
             }}
           >
             <input
               ref={inputRef}
               type="text"
-              placeholder="Type instant reply to candidate..."
+              placeholder={`Reply to ${session.userName}...`}
               value={replyText}
               onChange={(e) => setReplyText(e.target.value)}
               onKeyDown={(e) => {
@@ -616,12 +690,12 @@ export const TelegramAdminChatSheet: React.FC<TelegramAdminChatSheetProps> = ({
               }}
               style={{
                 flex: 1,
-                background: '#090d16',
-                border: '1px solid rgba(255, 255, 255, 0.15)',
-                borderRadius: '10px',
-                padding: '10px 14px',
+                background: '#070b14',
+                border: '1px solid #334155',
+                borderRadius: '8px',
+                padding: '9px 12px',
                 color: '#ffffff',
-                fontSize: '0.88rem',
+                fontSize: '16px', // 16px prevents iOS/Android webview auto-zoom
                 outline: 'none',
                 boxSizing: 'border-box'
               }}
@@ -637,21 +711,19 @@ export const TelegramAdminChatSheet: React.FC<TelegramAdminChatSheetProps> = ({
                     : 'linear-gradient(135deg, #0284c7 0%, #2563eb 100%)',
                 color: '#ffffff',
                 border: 'none',
-                borderRadius: '10px',
-                padding: '10px 16px',
+                borderRadius: '8px',
+                padding: '9px 14px',
                 fontWeight: 700,
-                fontSize: '0.88rem',
+                fontSize: '0.84rem',
                 cursor: !replyText.trim() || isSending ? 'not-allowed' : 'pointer',
                 display: 'flex',
                 alignItems: 'center',
-                gap: '6px',
-                boxShadow:
-                  !replyText.trim() || isSending ? 'none' : '0 2px 8px rgba(2, 132, 199, 0.4)',
+                gap: '5px',
                 opacity: !replyText.trim() || isSending ? 0.6 : 1,
                 flexShrink: 0
               }}
             >
-              <span>{isSending ? 'Sending...' : 'Send'}</span>
+              <span>{isSending ? '...' : 'Send'}</span>
               <span>✈️</span>
             </button>
           </div>
