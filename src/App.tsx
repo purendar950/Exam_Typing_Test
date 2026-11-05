@@ -583,6 +583,7 @@ export const App: React.FC = () => {
           onOpenAiGenerator={() => setIsAiGeneratorOpen(true)}
           onOpenAdmin={() => setIsAdminOpen(true)}
           onOpenPayment={() => handleOpenPayment()}
+          onOpenMyCourses={() => setIsDashboardOpen(true)}
           settings={settings}
           onToggleSound={toggleSound}
           currentUser={currentUser}
@@ -918,8 +919,13 @@ export const App: React.FC = () => {
             setIsDashboardOpen(false);
             handlePracticeWrongWords(words);
           }}
+          onOpenPayment={() => {
+            setIsDashboardOpen(false);
+            handleOpenPayment();
+          }}
         />
       )}
+
 
       <AiGeneratorModal
         isOpen={isAiGeneratorOpen}

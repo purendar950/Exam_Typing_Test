@@ -64,6 +64,7 @@ export interface PaymentSubmission {
   submittedAt: string; // ISO date
   reviewedAt?: string; // ISO date
   approvedAt?: string;
+  expiresAt?: string;  // ISO date — set when approved, based on plan durationDays
   reviewedBy?: string; // admin email / uid
 }
 
@@ -300,6 +301,42 @@ export function savePaymentPlans(plans: PaymentPlan[]): void {
 export async function submitPaymentRequest(
   submission: Omit<PaymentSubmission, 'id' | 'status' | 'submittedAt'>
 ): Promise<PaymentSubmission> {
+  // ── Duplicate UTR guard ──────────────────────────────────────────────────
+  // Check both localStorage and Firestore for the same UTR number.
+  const utrNorm = submission.utrNumber.trim().toUpperCase();
+  const localSubs = getAllLocalSubmissions();
+  const localDup = localSubs.find(
+    (s) => s.utrNumber.trim().toUpperCase() === utrNorm && s.status !== 'rejected'
+  );
+  if (localDup) {
+    throw new Error(
+      `UTR number ${submission.utrNumber} has already been submitted. ` +
+      `Status: ${localDup.status.toUpperCase()}. If you believe this is an error, contact support.`
+    );
+  }
+
+  // Also check Firestore for UTR duplicates (catches cross-device submissions)
+  try {
+    const colRef = collection(db, 'payment_submissions');
+    const snap = await getDocs(colRef);
+    const cloudDup = snap.docs.find((d) => {
+      const data = d.data() as PaymentSubmission;
+      return data.utrNumber.trim().toUpperCase() === utrNorm && data.status !== 'rejected';
+    });
+    if (cloudDup) {
+      const existing = cloudDup.data() as PaymentSubmission;
+      throw new Error(
+        `UTR number ${submission.utrNumber} has already been submitted. ` +
+        `Status: ${existing.status.toUpperCase()}. If you believe this is an error, contact support.`
+      );
+    }
+  } catch (err) {
+    // Re-throw duplicate errors; swallow network errors to allow offline submission
+    if (err instanceof Error && err.message.includes('UTR number')) throw err;
+    console.warn('Could not check Firestore for duplicate UTR (allowing submission):', err);
+  }
+  // ────────────────────────────────────────────────────────────────────────
+
   const newSubmission: PaymentSubmission = {
     ...submission,
     id: `pay_${Date.now()}_${Math.floor(1000 + Math.random() * 9000)}`,
@@ -316,16 +353,21 @@ export async function submitPaymentRequest(
     // Ignore
   }
 
-  // 2. Sync to Firebase Firestore
+  // 2. Sync to Firebase Firestore (without base64 screenshot to avoid 1 MB doc limit)
   try {
     const docRef = doc(db, 'payment_submissions', newSubmission.id);
-    await setDoc(docRef, newSubmission);
+    // Strip the base64 screenshot before Firestore write to stay well under 1 MB limit.
+    // Admin can still view the screenshot from localStorage / admin panel on the same device.
+    const { screenshotUrl: _ss, ...firestorePayload } = newSubmission;
+    void _ss; // explicitly unused
+    await setDoc(docRef, { ...firestorePayload, hasScreenshot: true });
   } catch (err) {
     console.warn('Could not sync payment submission to Firestore (saved locally):', err);
   }
 
   return newSubmission;
 }
+
 
 export function getAllLocalSubmissions(): PaymentSubmission[] {
   try {
@@ -366,6 +408,40 @@ export async function fetchAllPaymentSubmissions(): Promise<PaymentSubmission[]>
   return localList;
 }
 
+// 3b. Fetch submissions for a specific user
+export async function fetchUserPaymentSubmissions(userId: string): Promise<PaymentSubmission[]> {
+  // First check localStorage for submissions matching this user
+  const localAll = getAllLocalSubmissions();
+  const localUser = localAll.filter((s) => s.userId === userId);
+
+  try {
+    const colRef = collection(db, 'payment_submissions');
+    const snap = await getDocs(colRef);
+    if (!snap.empty) {
+      const cloudUser: PaymentSubmission[] = [];
+      snap.forEach((d) => {
+        const sub = d.data() as PaymentSubmission;
+        if (sub.userId === userId) cloudUser.push(sub);
+      });
+
+      // Merge local + cloud, cloud wins on conflict
+      const mergedMap = new Map<string, PaymentSubmission>();
+      localUser.forEach((s) => mergedMap.set(s.id, s));
+      cloudUser.forEach((s) => mergedMap.set(s.id, s));
+
+      return Array.from(mergedMap.values()).sort(
+        (a, b) => new Date(b.submittedAt).getTime() - new Date(a.submittedAt).getTime()
+      );
+    }
+  } catch (err) {
+    console.warn('Firestore fetch user submissions fallback to local:', err);
+  }
+
+  return localUser.sort(
+    (a, b) => new Date(b.submittedAt).getTime() - new Date(a.submittedAt).getTime()
+  );
+}
+
 // 4. Admin Approval & Rejection
 export async function approvePaymentSubmission(
   submissionId: string,
@@ -377,13 +453,16 @@ export async function approvePaymentSubmission(
 
   target.status = 'approved';
   target.reviewedAt = new Date().toISOString();
+  target.approvedAt = new Date().toISOString();
   target.reviewedBy = adminEmail;
 
-  // Compute expiry date based on plan
+  // Compute expiry date based on plan and store it in the submission itself
   const plan = getPaymentPlans().find((p) => p.id === target.planId);
   const durationDays = plan?.durationDays || 30;
   const expiryDate = new Date();
   expiryDate.setDate(expiryDate.getDate() + durationDays);
+  target.expiresAt = expiryDate.toISOString();
+
 
   // Update in local storage
   const localList = getAllLocalSubmissions().map((s) => (s.id === submissionId ? target : s));
@@ -469,19 +548,14 @@ export async function rejectPaymentSubmission(
 }
 
 /**
- * Check if the active user has administrative privileges
+ * Check if the active user has administrative privileges.
+ * SECURITY: Only trust `user.isAdmin` and `user.role` which are populated by
+ * firebase.ts after verifying the Firestore `/admins/{uid}` collection.
+ * Do NOT check email strings here — anyone could sign up with "admin" in their email.
  */
 export function isUserAdmin(user?: UserProfile | null): boolean {
   if (!user) return false;
-  if (user.isAdmin || user.role === 'admin') return true;
-  if (
-    user.email &&
-    (user.email.toLowerCase().includes('admin') ||
-      user.email.toLowerCase() === 'purendar950@gmail.com')
-  ) {
-    return true;
-  }
-  return false;
+  return !!(user.isAdmin || user.role === 'admin');
 }
 
 /**
