@@ -8,7 +8,9 @@ import {
   generateAll8DailyLiveTests,
   generateCustomTest,
   fetchDailyLivePassages,
-  DAILY_8_SLOTS
+  DAILY_8_SLOTS,
+  DAILY_BALANCED_SLOTS,
+  getActiveProviders
 } from '../services/aiGenerator';
 import { Passage, Language, ExamCategory } from '../types';
 
@@ -28,7 +30,7 @@ export const AiGeneratorModal: React.FC<AiGeneratorModalProps> = ({
   const [config, setConfig] = useState<AiConfig>({
     baseUrl: 'https://generativelanguage.googleapis.com/v1beta/openai/',
     apiKey: '',
-    model: 'gemini-2.5-flash',
+    model: 'gemini-2.0-flash',
     autoDaily: true
   });
 
@@ -100,21 +102,23 @@ export const AiGeneratorModal: React.FC<AiGeneratorModalProps> = ({
   };
 
   const handleStartGeneration = async () => {
-    if (!config.apiKey.trim()) {
+    const active = getActiveProviders(config);
+    if (active.length === 0) {
       setActiveTab('settings');
       setTestStatus({
         loading: false,
         success: false,
-        message: 'Please enter your API Key first in AI Settings.'
+        message: 'Please enter your API Key first in AI Settings / Providers.'
       });
       return;
     }
 
+    const totalSlots = DAILY_BALANCED_SLOTS.length;
     setIsGenerating(true);
     setGenerationProgress({
       completed: 0,
-      total: 8,
-      message: 'Initializing AI Generator for 8 Daily Live Tests...'
+      total: totalSlots,
+      message: 'Initializing AI Generator for 10 Daily Live Tests...'
     });
 
     try {
@@ -126,20 +130,21 @@ export const AiGeneratorModal: React.FC<AiGeneratorModalProps> = ({
         config,
         (completed, total, message) => {
           setGenerationProgress({ completed, total, message });
-        }
+        },
+        DAILY_BALANCED_SLOTS
       );
 
       setGeneratedPassages(tests);
       onPassagesGenerated(tests);
       setGenerationProgress({
-        completed: 8,
-        total: 8,
-        message: '🎉 Successfully generated all 8 Live Tests!'
+        completed: totalSlots,
+        total: totalSlots,
+        message: `🎉 Successfully generated all ${totalSlots} Live Tests!`
       });
     } catch (err: any) {
       setGenerationProgress({
         completed: 0,
-        total: 8,
+        total: totalSlots,
         message: `❌ Generation Error: ${err?.message || 'Unknown error occurred'}`
       });
     } finally {

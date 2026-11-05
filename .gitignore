@@ -29,3 +29,6 @@ secrets.*
 *.njsproj
 *.sln
 *.sw?
+__pycache__/
+*.py[cod]
+*$py.class

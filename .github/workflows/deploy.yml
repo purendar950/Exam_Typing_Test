@@ -3,6 +3,10 @@ name: Deploy to GitHub Pages
 on:
   push:
     branches: [main]
+  workflow_run:
+    workflows: ["Daily AI Exam Passages Generator"]
+    types:
+      - completed
   workflow_dispatch:
 
 permissions:
@@ -16,6 +20,7 @@ concurrency:
 
 jobs:
   build-and-deploy:
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
@@ -38,6 +43,8 @@ jobs:
         run: pnpm install --no-frozen-lockfile
 
       - name: Build project
+        env:
+          VITE_GH_RELAY_TOKEN: ${{ secrets.VITE_GH_RELAY_TOKEN }}
         run: pnpm build
 
       - name: Setup GitHub Pages

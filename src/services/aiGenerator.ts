@@ -11,18 +11,62 @@ import { db } from './firebase';
 import { Passage, Language, ExamCategory } from '../types';
 import { saveCustomPassage } from './adminService';
 
+export interface AiProviderConfig {
+  id: string;
+  name: string;
+  providerPreset?: string;
+  baseUrl: string;
+  apiKey: string;
+  model: string;
+  enabled: boolean;
+  priority: number; // 1 = highest priority (tried first)
+}
+
 export interface AiConfig {
   baseUrl: string;
   apiKey: string;
   model: string;
   autoDaily: boolean;
+  providers?: AiProviderConfig[]; // Multi-provider failover list configured by admin
 }
 
 export const DEFAULT_AI_CONFIG: AiConfig = {
   baseUrl: 'https://generativelanguage.googleapis.com/v1beta/openai/',
   apiKey: '',
-  model: 'gemini-2.5-flash',
-  autoDaily: true
+  model: 'gemini-2.0-flash',
+  autoDaily: true,
+  providers: [
+    {
+      id: 'prov_gemini',
+      name: 'Google Gemini 2.0 Flash (Primary)',
+      providerPreset: 'gemini',
+      baseUrl: 'https://generativelanguage.googleapis.com/v1beta/openai/',
+      apiKey: '',
+      model: 'gemini-2.0-flash',
+      enabled: true,
+      priority: 1
+    },
+    {
+      id: 'prov_groq',
+      name: 'Groq Cloud Llama 3.3 (Fallback 1)',
+      providerPreset: 'groq',
+      baseUrl: 'https://api.groq.com/openai/v1',
+      apiKey: '',
+      model: 'llama-3.1-8b-instant',
+      enabled: false,
+      priority: 2
+    },
+    {
+      id: 'prov_openrouter',
+      name: 'OpenRouter Free Models (Fallback 2)',
+      providerPreset: 'openrouter',
+      baseUrl: 'https://openrouter.ai/api/v1',
+      apiKey: '',
+      model: 'google/gemini-2.0-flash-exp:free',
+      enabled: false,
+      priority: 3
+    }
+  ]
 };
 
 export interface DetectedModel {
@@ -46,6 +90,20 @@ export interface AiProviderPreset {
 }
 
 export const AI_PRESETS: AiProviderPreset[] = [
+  {
+    id: 'gemini',
+    name: 'Google Gemini',
+    badge: '👑 Official Google AI',
+    baseUrl: 'https://generativelanguage.googleapis.com/v1beta/openai/',
+    defaultModel: 'gemini-2.0-flash',
+    model: 'gemini-2.0-flash',
+    info: 'Native Google AI. High quality for Hindi Devanagari & English passages.',
+    popularModels: [
+      { id: 'gemini-2.0-flash', name: 'Gemini 2.0 Flash (Recommended)', isFree: true },
+      { id: 'gemini-1.5-flash', name: 'Gemini 1.5 Flash (Fast)', isFree: true },
+      { id: 'gemini-1.5-pro', name: 'Gemini 1.5 Pro (High Reasoning)', isFree: false }
+    ]
+  },
   {
     id: 'groq',
     name: 'Groq Cloud',
@@ -76,22 +134,8 @@ export const AI_PRESETS: AiProviderPreset[] = [
       { id: 'deepseek/deepseek-r1:free', name: 'DeepSeek R1 Reasoning (Free)', isFree: true },
       { id: 'mistralai/mistral-7b-instruct:free', name: 'Mistral 7B Instruct (Free)', isFree: true },
       { id: 'qwen/qwen-2.5-72b-instruct:free', name: 'Qwen 2.5 72B Instruct (Free)', isFree: true },
-      { id: 'google/gemini-2.5-flash', name: 'Google Gemini 2.5 Flash', isFree: false },
+      { id: 'google/gemini-2.0-flash', name: 'Google Gemini 2.0 Flash', isFree: false },
       { id: 'openai/gpt-4o-mini', name: 'OpenAI GPT-4o Mini', isFree: false }
-    ]
-  },
-  {
-    id: 'gemini',
-    name: 'Google Gemini',
-    badge: '👑 Official Google AI',
-    baseUrl: 'https://generativelanguage.googleapis.com/v1beta/openai/',
-    defaultModel: 'gemini-2.0-flash',
-    model: 'gemini-2.0-flash',
-    info: 'Native Google AI. High quality for Hindi Devanagari & English passages.',
-    popularModels: [
-      { id: 'gemini-2.0-flash', name: 'Gemini 2.0 Flash (Recommended)', isFree: true },
-      { id: 'gemini-1.5-flash', name: 'Gemini 1.5 Flash (Fast)', isFree: true },
-      { id: 'gemini-1.5-pro', name: 'Gemini 1.5 Pro (High Reasoning)', isFree: false }
     ]
   },
   {
@@ -183,76 +227,156 @@ export interface DailySlotPlan {
   language: Language;
   difficulty: 'medium' | 'hard';
   category: ExamCategory;
+  categoryGroup?: string;
+  examTitle?: string;
+  duration?: number;
+  targetWords?: number;
   topic: string;
   subType: string;
 }
 
-export const DAILY_8_SLOTS: DailySlotPlan[] = [
+/**
+ * Balanced Daily Rotation: 10 Core Exam Slots covering:
+ * - UP Police & UP Govt (Slots 1 & 2)
+ * - High Courts & Judiciary: Allahabad HC & Delhi HC (Slots 3 & 4)
+ * - SSC CGL / CHSL DEST (Slots 5 & 6)
+ * - Defense & Paramilitary: BSF / CISF / CRPF HCM (Slots 7 & 8)
+ * - Bihar Beltron & Railways RRB NTPC (Slots 9 & 10)
+ */
+export const DAILY_BALANCED_SLOTS: DailySlotPlan[] = [
+  // 1 & 2: UP Police & UP Govt
   {
     slot: 1,
     language: 'english',
     difficulty: 'medium',
     category: 'up_police_co',
-    subType: 'English Medium #1',
-    topic: 'Digital India, E-Governance & Public Service Delivery Systems'
+    categoryGroup: 'up_govt',
+    examTitle: 'UP Police Computer Operator & ASI',
+    duration: 15,
+    targetWords: 540,
+    subType: 'UP Police English Medium #1',
+    topic: 'Digital India, E-Governance & Police Automation Data Infrastructure'
   },
   {
     slot: 2,
-    language: 'english',
-    difficulty: 'medium',
+    language: 'hindi_mangal',
+    difficulty: 'hard',
     category: 'up_police_co',
-    subType: 'English Medium #2',
-    topic: 'India Space Programme, ISRO Milestones & Advanced Telecommunications'
+    categoryGroup: 'up_govt',
+    examTitle: 'UP Police Computer Operator (दीर्घ शब्द)',
+    duration: 15,
+    targetWords: 430,
+    subType: 'UP Police Hindi Mangal Hard #2 (दीर्घ शब्द)',
+    topic: 'साइबर अपराध जांच, डिजिटल साक्ष्य प्रमाणीकरण, उत्तरदायित्व एवं पुलिस प्रशासनिक चुनौतियाँ'
   },
+
+  // 3 & 4: Courts & Judiciary
   {
     slot: 3,
     language: 'english',
     difficulty: 'hard',
-    category: 'up_police_co',
-    subType: 'English Hard #1 (Long Words)',
-    topic: 'Cyber Security Operations, Ransomware Threat Intelligence, Infrastructure Vulnerabilities & Police Digital Forensics'
+    category: 'court_ahc',
+    categoryGroup: 'judiciary',
+    examTitle: 'Allahabad High Court RO / ARO (Legal Judgment)',
+    duration: 15,
+    targetWords: 520,
+    subType: 'High Court Legal English (Citations & Judgment)',
+    topic: 'Constitutional Jurisprudence, High Court Writ Jurisdiction, Evidentiary Proportionality & Criminal Appellate Review'
   },
   {
     slot: 4,
     language: 'english',
-    difficulty: 'hard',
-    category: 'up_police_asi',
-    subType: 'English Hard #2 (Long Words)',
-    topic: 'Indian Judicial Administration, High Court Procedural Jurisprudence, Constitutionalism & Official Evidence Laws'
+    difficulty: 'medium',
+    category: 'court_delhi',
+    categoryGroup: 'judiciary',
+    examTitle: 'Delhi High Court Junior Judicial Assistant (JJA)',
+    duration: 10,
+    targetWords: 380,
+    subType: 'Delhi Court English Medium',
+    topic: 'Civil Procedure Directives, Subordinate Registry Filings & Statutory Declarations'
   },
+
+  // 5 & 6: SSC CGL / CHSL DEST (Alphanumeric, Shift-key, %, Numbers)
   {
     slot: 5,
-    language: 'hindi_mangal',
-    difficulty: 'medium',
-    category: 'up_police_co',
-    subType: 'Hindi Mangal Medium #1',
-    topic: 'भारतीय संस्कृति, राष्ट्रीय विरासत एवं सामाजिक समरसता'
+    language: 'english',
+    difficulty: 'hard',
+    category: 'ssc_dest',
+    categoryGroup: 'ssc',
+    examTitle: 'SSC CGL / CHSL Data Entry Skill Test (DEST)',
+    duration: 15,
+    targetWords: 380,
+    subType: 'SSC CGL DEO Alphanumeric (Codes, %, Figures)',
+    topic: 'Union Ministry Financial Allocation, Audit Disclosures, Public Accounts & Expenditure Statistics'
   },
   {
     slot: 6,
     language: 'hindi_mangal',
     difficulty: 'medium',
-    category: 'up_police_asi',
-    subType: 'Hindi Mangal Medium #2',
-    topic: 'पर्यावरण संरक्षण, नवीकरणीय ऊर्जा एवं सतत विकास'
+    category: 'ssc_dest',
+    categoryGroup: 'ssc',
+    examTitle: 'SSC CHSL Hindi DEST (1500 Key Depressions)',
+    duration: 10,
+    targetWords: 320,
+    subType: 'SSC Hindi Mangal Medium',
+    topic: 'केंद्रीय सतर्कता आयोग, राजकोषीय अनुशासन, आर्थिक नीतियां एवं बजट प्रबंधन'
   },
+
+  // 7 & 8: Defense & Paramilitary (BSF / CISF / CRPF HCM)
   {
     slot: 7,
-    language: 'hindi_mangal',
+    language: 'english',
     difficulty: 'hard',
-    category: 'up_police_co',
-    subType: 'Hindi Mangal Hard #1 (दीर्घ शब्द)',
-    topic: 'साइबर अपराध जांच, डिजिटल साक्ष्य प्रमाणीकरण, उत्तरदायित्व एवं पुलिस प्रशासनिक चुनौतियाँ'
+    category: 'paramilitary_hcm',
+    categoryGroup: 'defense',
+    examTitle: 'BSF / CISF / CRPF Head Constable Ministerial (HCM)',
+    duration: 10,
+    targetWords: 370,
+    subType: 'Paramilitary HCM English Hard',
+    topic: 'Border Security Surveillance Protocols, Tactical Field Telecommunications & Central Armed Police Orders'
   },
   {
     slot: 8,
     language: 'hindi_mangal',
     difficulty: 'hard',
-    category: 'up_police_asi',
-    subType: 'Hindi Mangal Hard #2 (दीर्घ शब्द)',
-    topic: 'शासकीय राजभाषा परिपत्र, अंतर-विभागीय अधिसूचनाएं एवं संवैधानिक विधिक व्यवस्था'
+    category: 'paramilitary_hcm',
+    categoryGroup: 'defense',
+    examTitle: 'CRPF / SSB Head Constable Ministerial (हिंदी कठिन)',
+    duration: 10,
+    targetWords: 330,
+    subType: 'Paramilitary HCM Hindi Hard',
+    topic: 'आंतरिक सुरक्षा प्रबंधन, अग्रिम रक्षा चौकियां एवं सीमा सुरक्षा बल प्रशासनिक नियमावली'
+  },
+
+  // 9 & 10: Bihar Beltron & Railways RRB NTPC
+  {
+    slot: 9,
+    language: 'hindi_mangal',
+    difficulty: 'medium',
+    category: 'bihar_beltron',
+    categoryGroup: 'bihar',
+    examTitle: 'Bihar Beltron DEO / BSSC Inter Level',
+    duration: 10,
+    targetWords: 320,
+    subType: 'Bihar Beltron Hindi Mangal',
+    topic: 'बिहार भूमि राजस्व अभिलेख, लोक शिकायत निवारण अधिकार एवं पंचायती राज प्रशासन'
+  },
+  {
+    slot: 10,
+    language: 'english',
+    difficulty: 'medium',
+    category: 'rrb_ntpc',
+    categoryGroup: 'railways',
+    examTitle: 'Railways RRB NTPC Senior Clerk cum Typist',
+    duration: 10,
+    targetWords: 330,
+    subType: 'Railways NTPC English Medium',
+    topic: 'Indian Railways Dedicated Freight Corridors, Telemetry Signaling & Passenger Traffic Management'
   }
 ];
+
+// Backward-compatible alias for 8 slots
+export const DAILY_8_SLOTS: DailySlotPlan[] = DAILY_BALANCED_SLOTS.slice(0, 8);
 
 // Helper to sanitize base URL
 export function cleanBaseUrl(url: string): string {
@@ -264,6 +388,35 @@ export function cleanBaseUrl(url: string): string {
     cleaned = cleaned.replace('/models', '');
   }
   return cleaned.replace(/\/+$/, '');
+}
+
+/// Helper to get ordered list of active providers (sorted by priority 1 -> 2 -> 3...)
+export function getActiveProviders(config: AiConfig): { baseUrl: string; apiKey: string; model: string; name: string }[] {
+  if (Array.isArray(config.providers) && config.providers.length > 0) {
+    const enabled = config.providers
+      .filter((p) => p.enabled && p.apiKey && p.apiKey.trim())
+      .sort((a, b) => (a.priority || 999) - (b.priority || 999));
+    if (enabled.length > 0) {
+      return enabled.map((p) => ({
+        baseUrl: cleanBaseUrl(p.baseUrl),
+        apiKey: p.apiKey.trim(),
+        model: p.model.trim() || 'gemini-2.0-flash',
+        name: p.name || p.id
+      }));
+    }
+  }
+
+  // Fallback to primary config if set
+  if (config.apiKey && config.apiKey.trim()) {
+    return [{
+      baseUrl: cleanBaseUrl(config.baseUrl),
+      apiKey: config.apiKey.trim(),
+      model: config.model.trim() || 'gemini-2.0-flash',
+      name: 'Primary Provider'
+    }];
+  }
+
+  return [];
 }
 
 // 1. Fetch AI Configuration (Firestore -> LocalStorage -> Default)
@@ -289,7 +442,10 @@ export async function getAiConfig(): Promise<AiConfig> {
         baseUrl: cloudData.baseUrl || localConfig?.baseUrl || DEFAULT_AI_CONFIG.baseUrl,
         apiKey: cloudData.apiKey || localConfig?.apiKey || '',
         model: cloudData.model || localConfig?.model || DEFAULT_AI_CONFIG.model,
-        autoDaily: typeof cloudData.autoDaily === 'boolean' ? cloudData.autoDaily : true
+        autoDaily: typeof cloudData.autoDaily === 'boolean' ? cloudData.autoDaily : true,
+        providers: Array.isArray(cloudData.providers) && cloudData.providers.length > 0
+          ? cloudData.providers
+          : (localConfig?.providers || DEFAULT_AI_CONFIG.providers)
       };
       localStorage.setItem(STORAGE_KEY_AI_CONFIG, JSON.stringify(merged));
       return merged;
@@ -306,8 +462,20 @@ export async function saveAiConfig(config: AiConfig, saveToFirestore: boolean = 
   const sanitized: AiConfig = {
     baseUrl: cleanBaseUrl(config.baseUrl),
     apiKey: config.apiKey.trim(),
-    model: config.model.trim() || 'gemini-2.5-flash',
-    autoDaily: !!config.autoDaily
+    model: config.model.trim() || 'gemini-2.0-flash',
+    autoDaily: !!config.autoDaily,
+    providers: Array.isArray(config.providers)
+      ? config.providers.map((p, idx) => ({
+          id: p.id || `prov_${Date.now()}_${idx}`,
+          name: p.name || `Provider #${idx + 1}`,
+          providerPreset: p.providerPreset || '',
+          baseUrl: cleanBaseUrl(p.baseUrl),
+          apiKey: p.apiKey.trim(),
+          model: p.model.trim() || 'gemini-2.0-flash',
+          enabled: typeof p.enabled === 'boolean' ? p.enabled : true,
+          priority: typeof p.priority === 'number' ? p.priority : idx + 1
+        }))
+      : DEFAULT_AI_CONFIG.providers
   };
 
   localStorage.setItem(STORAGE_KEY_AI_CONFIG, JSON.stringify(sanitized));
@@ -322,44 +490,98 @@ export async function saveAiConfig(config: AiConfig, saveToFirestore: boolean = 
   }
 }
 
-// 3. Test AI Connection
-export async function testAiConnection(config: AiConfig): Promise<{ success: boolean; message: string }> {
-  const baseUrl = cleanBaseUrl(config.baseUrl);
-  const apiKey = config.apiKey.trim();
-  const model = config.model.trim() || 'gemini-2.5-flash';
+// 3. Test AI Connection (Single or Failover Chain)
+export async function testAiConnection(
+  config: AiConfig,
+  specificProviderId?: string
+): Promise<{ success: boolean; message: string; failoverResults?: { name: string; success: boolean; message: string }[] }> {
+  // If a specific provider was requested
+  if (specificProviderId && Array.isArray(config.providers)) {
+    const target = config.providers.find((p) => p.id === specificProviderId);
+    if (target) {
+      return testSingleProvider(target.baseUrl, target.apiKey, target.model, target.name);
+    }
+  }
 
-  if (!apiKey) {
-    return { success: false, message: 'API Key is missing. Please provide a valid API key.' };
+  const activeProviders = getActiveProviders(config);
+  if (activeProviders.length === 0) {
+    return { success: false, message: 'No AI providers configured with valid API keys. Please add at least one API key.' };
+  }
+
+  // Test full failover chain
+  const failoverResults: { name: string; success: boolean; message: string }[] = [];
+  let atLeastOneWorking = false;
+
+  for (const prov of activeProviders) {
+    const res = await testSingleProvider(prov.baseUrl, prov.apiKey, prov.model, prov.name);
+    failoverResults.push({ name: prov.name, success: res.success, message: res.message });
+    if (res.success) {
+      atLeastOneWorking = true;
+    }
+  }
+
+  const summary = failoverResults.map((r) => `${r.success ? '✅' : '❌'} ${r.name}: ${r.message}`).join(' | ');
+
+  return {
+    success: atLeastOneWorking,
+    message: atLeastOneWorking ? `Failover Chain Ready: ${summary}` : `All providers failed: ${summary}`,
+    failoverResults
+  };
+}
+
+async function testSingleProvider(
+  baseUrl: string,
+  apiKey: string,
+  model: string,
+  name: string
+): Promise<{ success: boolean; message: string }> {
+  const cleanUrl = cleanBaseUrl(baseUrl);
+  const trimmedKey = apiKey.trim();
+  const cleanModel = model.trim() || 'gemini-2.0-flash';
+
+  if (!trimmedKey) {
+    return { success: false, message: `${name}: API Key is missing` };
   }
 
   try {
-    const endpoint = `${baseUrl}/chat/completions`;
+    const endpoint = `${cleanUrl}/chat/completions`;
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${trimmedKey}`
+    };
+    if (cleanUrl.includes('openrouter')) {
+      headers['HTTP-Referer'] = 'https://purendar950.github.io/Exam_Typing_Test/';
+      headers['X-Title'] = 'UP Typing Exam Suite';
+    }
+
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 8000);
+
     const res = await fetch(endpoint, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${apiKey}`
-      },
+      headers,
       body: JSON.stringify({
-        model,
+        model: cleanModel,
         messages: [
           { role: 'system', content: 'You are an AI assistant.' },
           { role: 'user', content: 'Say "OK" if connected.' }
         ],
         max_tokens: 10
-      })
+      }),
+      signal: controller.signal
     });
+    clearTimeout(timeoutId);
 
     if (!res.ok) {
       const errorText = await res.text();
-      return { success: false, message: `API Error (${res.status}): ${errorText.slice(0, 150)}` };
+      return { success: false, message: `HTTP ${res.status}: ${errorText.slice(0, 100)}` };
     }
 
     const data = await res.json();
     const reply = data.choices?.[0]?.message?.content || 'OK';
-    return { success: true, message: `Connected successfully! Response: "${reply.trim()}"` };
+    return { success: true, message: `Connected (${reply.trim().slice(0, 30)})` };
   } catch (err: any) {
-    return { success: false, message: `Network error: ${err?.message || 'Unable to reach endpoint'}` };
+    return { success: false, message: err?.message || 'Connection failed' };
   }
 }
 
@@ -616,173 +838,198 @@ export function extractPassageFromAiResponse(
   };
 }
 
-// 6. Generate Single Passage from AI calibrated to AR Typing Standards
+/**
+ * Execute LLM call with Automatic Multi-Provider Failover.
+ * Tries Provider #1 (Priority 1). If it fails (rate limit, quota, 404, 503, timeout),
+ * it automatically switches to Provider #2, then Provider #3, etc.
+ */
+export async function executeFailoverAiCall(
+  config: AiConfig,
+  messages: { role: 'system' | 'user' | 'assistant'; content: string }[],
+  temperature: number = 0.7,
+  maxTokens: number = 3500
+): Promise<{ content: string; providerUsed: string; modelUsed: string }> {
+  const activeProviders = getActiveProviders(config);
+  if (activeProviders.length === 0) {
+    throw new Error('No AI providers configured with valid API keys. Please configure an API key in AI Settings.');
+  }
+
+  const errors: string[] = [];
+
+  for (let i = 0; i < activeProviders.length; i++) {
+    const prov = activeProviders[i];
+    try {
+      console.log(`[AI Failover] Trying provider ${i + 1}/${activeProviders.length}: "${prov.name}" (${prov.model})...`);
+      const endpoint = `${prov.baseUrl}/chat/completions`;
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${prov.apiKey}`
+      };
+      if (prov.baseUrl.includes('openrouter')) {
+        headers['HTTP-Referer'] = 'https://purendar950.github.io/Exam_Typing_Test/';
+        headers['X-Title'] = 'UP Typing Exam Suite';
+      }
+
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 25000); // 25s timeout
+
+      const res = await fetch(endpoint, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({
+          model: prov.model,
+          messages,
+          temperature,
+          max_tokens: maxTokens
+        }),
+        signal: controller.signal
+      });
+      clearTimeout(timeoutId);
+
+      if (!res.ok) {
+        const errorText = await res.text();
+        throw new Error(`HTTP ${res.status}: ${errorText.slice(0, 140)}`);
+      }
+
+      const data = await res.json();
+      const content = data.choices?.[0]?.message?.content || '';
+      if (!content || !content.trim()) {
+        throw new Error('Empty response from model');
+      }
+
+      console.log(`[AI Failover] ✅ Success with provider "${prov.name}"!`);
+      return { content, providerUsed: prov.name, modelUsed: prov.model };
+    } catch (err: any) {
+      console.warn(`[AI Failover] ⚠️ Provider "${prov.name}" failed: ${err.message}. Switching to next provider in failover chain...`);
+      errors.push(`${prov.name}: ${err.message}`);
+    }
+  }
+
+  throw new Error(`All ${activeProviders.length} AI providers failed in failover chain: ${errors.join(' | ')}`);
+}
+
+// 6. Generate Single Passage from AI calibrated to exact exam specifications
 async function generateSinglePassage(
   slot: DailySlotPlan,
   dateStr: string,
   config: AiConfig
 ): Promise<Passage> {
-  const baseUrl = cleanBaseUrl(config.baseUrl);
-  const apiKey = config.apiKey.trim();
-  const model = config.model.trim() || 'gemini-2.5-flash';
-
   const isHindi = slot.language.startsWith('hindi');
   const isHard = slot.difficulty === 'hard';
+  const duration = slot.duration || 15;
+  const targetWords = slot.targetWords || (duration === 5 ? 190 : duration === 10 ? 360 : 540);
+  const catGroup = slot.categoryGroup || 'up_govt';
 
   let systemPrompt = '';
   let userPrompt = '';
 
   if (!isHindi) {
     // English
-    systemPrompt =
-      'You are the principal typing examination evaluator and passage creator for Uttar Pradesh Police Recruitment Board (UPPRPB) and AR Typing portal.';
-    if (isHard) {
-      userPrompt = `Generate an official competitive examination typing passage in standard English strictly conforming to the AR Typing HARD level standard for UP Police Computer Operator Grade-A and ASI examinations.
-Topic: ${slot.topic}
-Difficulty: HARD (Official UP Police Examination Standard - LONGER WORDS MANDATE)
-
-CRUCIAL REQUIREMENT — "HARD" IN TYPING EXAMS MEANS MUCH LONGER WORDS:
-The defining characteristic of HARD difficulty is a high concentration of LONGER, MULTI-SYLLABIC WORDS (8 to 16+ letters each) and a high Average Word Length (AWL >= 7.0 characters per word). Long words require far more finger travel, sustained memory, shift key usage, and dramatically increase typing difficulty.
-
-Detailed Requirements:
-1. Target Word Count: Exactly 520 to 580 words (CRUCIAL: Must be between 510 and 590 words for the 15-minute examination hall test).
-2. Longer Words & Vocabulary Architecture (MANDATORY):
-   - At least 45% to 55% of all words across the passage MUST be long words of 8 to 16+ letters each.
-   - Use high-syllable, polysyllabic words frequently throughout every paragraph. Examples of mandatory word styles:
-     * Institutional & Administrative: institutionalization, telecommunications, counter-intelligence, misappropriation, constitutionalism, superintendence, decentralization, implementation, comprehensive, multidisciplinary, democratization, representations, administration, accountability.
-     * Legal & Judicial: jurisprudence, proportionality, responsiveness, interoperability, extraterritoriality, circumstantial, corroboration, confidentiality, admissibility, unenforceable, indemnification.
-     * Technical & Security: infrastructure, vulnerabilities, authentication, surveillance, microcontroller, interoperability, microprocessors, electronically, forensic.
-   - Strictly minimize short 2-to-4 letter monosyllabic words (limit them only to unavoidable prepositions like in, of, to, for).
-   - Average Word Length (AWL) across the entire passage MUST be between 7.0 and 8.5 characters per word.
-3. Content & Punctuation Complexity:
-   - High vocabulary density, official judicial, administrative, legislative and forensic terminology.
-   - Include official departmental abbreviations and legal acronyms (e.g. "IPC", "CrPC", "UPPRPB", "CCTNS", "FIR", "IT Act", "CCTV", "AI", "DNA").
-   - Include historical dates (e.g. "26 November 2008", "15.08.1947"), statistics, percentages (e.g. "45.8%"), and serial numbers.
-   - Include hyphenated compound terms (e.g. "state-of-the-art", "real-time", "multi-agency", "capacity-building", "inter-departmental"), paired quotation marks ("..."), and complex compound-complex sentence clauses.
-4. Formatting:
-   - Exactly 3 to 4 continuous paragraphs of formal prose.
-   - Absolutely NO bullet points, NO numbered lists, NO asterisks, and NO markdown headers/bolding.
-5. Output Format:
-Return ONLY valid JSON (no surrounding markdown code fences):
+    if (catGroup === 'judiciary') {
+      systemPrompt =
+        'You are the Chief Examination Controller and Senior Legal Registrar preparing official typing test passages for High Court and Supreme Court typing examinations (Allahabad HC RO/ARO, Delhi HC JJA).';
+      userPrompt = `Generate an official High Court competitive examination typing passage in legal English on '${slot.topic}'.
+Target Word Count: Exactly ${targetWords} words (between ${targetWords - 25} and ${targetWords + 25} words for a ${duration}-minute test).
+CRITICAL JUDICIARY EXAM REQUIREMENTS:
+1. High Legal Jurisprudence: Include authentic statutory references and case citations (e.g. "(2022) 5 SCC 312", "Section 482 Cr.P.C.", "Article 226(2) of the Constitution", "Section 138 of the Negotiable Instruments Act").
+2. Latin Maxims & Legal Terms: Use authentic Latin legal terms naturally (e.g. "prima facie", "suo motu", "res judicata", "ultra vires", "inter alia", "ratio decidendi").
+3. Complex Sentence Syntax: Long, multi-clause compound sentences, paired quotation marks ("..."), semicolons, and commas to challenge typographical rhythm.
+4. Average Word Length: AWL must be between 7.0 and 8.5 letters per word.
+5. Format: Exactly 3 continuous formal paragraphs, NO bullet points, NO markdown headers.
+Return ONLY valid JSON:
 {
-  "title": "Short descriptive official title (max 7-9 words)",
-  "text": "The complete 520-580 word continuous passage text with high concentration of long words here..."
+  "title": "${slot.examTitle || slot.subType}",
+  "text": "The complete legal passage text here..."
+}`;
+    } else if (catGroup === 'ssc') {
+      systemPrompt =
+        'You are the Staff Selection Commission (SSC) examination director preparing official Data Entry Skill Test (DEST) typing passages for SSC CGL DEO and CHSL LDC/JSA.';
+      userPrompt = `Generate an official SSC DEST competitive examination typing passage in standard English on '${slot.topic}'.
+Target Word Count: Exactly ${targetWords} words (between ${targetWords - 20} and ${targetWords + 20} words for a ${duration}-minute test).
+CRITICAL SSC DEST REQUIREMENTS:
+1. Alphanumeric & Numeric Density: Include realistic monetary amounts (e.g. "₹24,850.50", "Rs. 1,45,000/-"), percentages (e.g. "48.65%"), calendar dates ("26.11.2008", "15th August 1947"), and file references ("Ref: MoF/Exp-2024/09").
+2. Uppercase Acronyms (Shift-Key Strain): High frequency of capitalized institutional abbreviations (e.g. "NITI Aayog", "CAG", "GSTN", "UIDAI", "AIIMS", "CBI", "MoF", "FY 2024-25").
+3. Vocabulary & Syntax: Economic surveys, public accounts, fiscal policy, administrative audits.
+4. Format: Exactly 3 continuous formal paragraphs, NO bullet points, NO markdown bolding.
+Return ONLY valid JSON:
+{
+  "title": "${slot.examTitle || slot.subType}",
+  "text": "The complete SSC DEST passage text here..."
+}`;
+    } else if (catGroup === 'defense') {
+      systemPrompt =
+        'You are the Central Armed Police Forces (CAPF) board evaluator creating Head Constable Ministerial (HCM) typing test materials for BSF, CISF, CRPF, and SSB.';
+      userPrompt = `Generate an official Paramilitary HCM competitive examination typing passage in standard English on '${slot.topic}'.
+Target Word Count: Exactly ${targetWords} words (between ${targetWords - 20} and ${targetWords + 20} words for a ${duration}-minute test).
+CRITICAL PARAMILITARY HCM REQUIREMENTS:
+1. Subject Matter: Border security architecture, tactical surveillance telemetry, logistics supply chains, and central administrative directives.
+2. Discipline & Long Words: Average Word Length >= 7.0 letters/word. Words like "telecommunications", "interoperability", "infrastructure", "counter-intelligence", "superintendence", "reconnaissance".
+3. Military References: "SOP", "DG CAPF", "BSF HQ", "CCTV", "UAV", "Section 144", "Battalion".
+4. Format: Exactly 3 continuous formal paragraphs, NO bullet points, NO markdown.
+Return ONLY valid JSON:
+{
+  "title": "${slot.examTitle || slot.subType}",
+  "text": "The complete Paramilitary HCM passage text here..."
 }`;
     } else {
-      userPrompt = `Generate an official competitive examination typing passage in standard English strictly conforming to the AR Typing MEDIUM level standard for UP Police Computer Operator Grade-A and ASI examinations.
-Topic: ${slot.topic}
-Difficulty: MEDIUM (Balanced Editorial Standard)
-Requirements:
-1. Target Word Count: Exactly 500 to 540 words (for the 15-minute examination hall test).
-2. Content & Vocabulary:
-   - Balanced editorial, socioeconomic and administrative prose.
-   - Clean sentence structure, standard commas, periods, and occasional years or data figures.
-   - Fluid vocabulary suitable for candidates targeting 30 to 35 WPM net speed.
-3. Formatting:
-   - Exactly 3 continuous paragraphs of formal prose.
-   - Absolutely NO bullet points, NO numbered lists, NO asterisks, and NO markdown formatting.
-4. Output Format:
-Return ONLY valid JSON (no surrounding markdown code fences):
+      // UP Police & General
+      systemPrompt =
+        'You are the principal typing examination passage author for Uttar Pradesh Police Recruitment Board (UPPRPB) and state administrative typing examinations.';
+      userPrompt = `Generate an official competitive examination typing passage in standard English for ${slot.examTitle || 'UP Police Examination'} on '${slot.topic}'.
+Target Word Count: Exactly ${targetWords} words (between ${targetWords - 25} and ${targetWords + 25} words for a ${duration}-minute test).
+CRITICAL EXAM REQUIREMENTS:
+1. ${isHard ? 'HARD LEVEL (LONGER WORDS MANDATE): At least 45% of words must be 8-16+ letters long (AWL >= 7.2 letters/word). Use high-syllable administrative words: "institutionalization, telecommunications, constitutionalism, misappropriation, jurisprudence, accountability, interoperability, proportionality".' : 'MEDIUM LEVEL: Balanced administrative prose, fluid sentence structure, standard punctuation.'}
+2. Departmental Terminology: Include official terms like "CCTNS", "UPPRPB", "FIR", "IT Act", "CrPC", "IPC", percentages, and statistics.
+3. Format: Exactly 3 continuous formal paragraphs, NO bullet points, NO markdown headers.
+Return ONLY valid JSON:
 {
-  "title": "Short descriptive official title (max 7-9 words)",
-  "text": "The complete 500-540 word continuous passage text here..."
+  "title": "${slot.examTitle || slot.subType}",
+  "text": "The complete continuous passage text here..."
 }`;
     }
   } else {
-    // Hindi
+    // Hindi (Mangal Inscript)
     systemPrompt =
-      'आप उत्तर प्रदेश पुलिस भर्ती एवं प्रोन्नति बोर्ड (UPPRPB) एवं एआर टाइपिंग (AR Typing) पोर्टल के मुख्य टंकण सामग्री निर्माता एवं वरिष्ठ परीक्षा नियंत्रक हैं।';
-    if (isHard) {
-      userPrompt = `दिए गए विषय पर उत्तर प्रदेश पुलिस कंप्यूटर ऑपरेटर (ग्रेड-ए) एवं एएसआई टंकण परीक्षा के 'कठिन स्तर' (HARD LEVEL) के अनुसार आधिकारिक 15-मिनट की टंकण सामग्री तैयार करें।
+      'आप विभिन्न सरकारी भर्ती आयोगों (UPPRPB, उच्च न्यायालय, एसएससी, अर्धसैनिक बल) के मुख्य टंकण सामग्री नियंत्रक एवं वरिष्ठ हिंदी परीक्षा विशेषज्ञ हैं।';
+    userPrompt = `दिए गए विषय पर '${slot.examTitle || 'टंकण परीक्षा'}' के लिए मानक देवनागरी यूनिकोड (मंगल इनस्क्रिप्ट) में आधिकारिक टंकण सामग्री तैयार करें।
 विषय: ${slot.topic}
-कठिनाई स्तर: कठिन (HARD LEVEL • आधिकारिक परीक्षा मानक - दीर्घ एवं लंबे शब्द)
+कठिनाई: ${isHard ? 'कठिन (HARD LEVEL - दीर्घ एवं लंबे शब्द, जटिल संयुक्ताक्षर)' : 'मध्यम (MEDIUM LEVEL - संतुलित परीक्षा मानक)'}
+लक्षित शब्द संख्या: ठीक ${targetWords} शब्द (अवधि: ${duration} मिनट हेतु ${targetWords - 20} से ${targetWords + 20} शब्दों के बीच)।
 
-अनिवार्य मानक — टंकण परीक्षा में 'कठिन' का अर्थ है: "अधिक से अधिक दीर्घ एवं लंबे शब्द" (LONGER WORDS):
-टंकण परीक्षा में कठिन स्तर का मुख्य उद्देश्य परीक्षार्थी की उंगलियों की सहनशीलता, एकाग्रता और कीस्ट्रोक्स की कठिन परीक्षा लेना है। इसके लिए गद्यांश में छोटे शब्दों की तुलना में 'दीर्घ, बहु-अक्षरीय एवं सामासिक शब्दों' (8 से 16 अक्षर/मात्राओं वाले लंबे शब्द) की प्रचुरता अनिवार्य है।
-
-अनिवार्य आवश्यकताएं:
-1. लक्षित शब्द संख्या: ठीक 520 से 580 शब्द (15 मिनट की परीक्षा के लिए 510 से 590 शब्दों के बीच अनिवार्य)।
-2. दीर्घ शब्द (Long Words) एवं शब्दावली संरचना (अत्यंत अनिवार्य):
-   - गद्यांश के प्रत्येक वाक्य में कम से कम 45% से 55% शब्द 8 से 16 अक्षर/मात्रा वाले 'दीर्घ, सामासिक एवं संधि-युक्त शब्द' होने चाहिए।
-   - उदाहरण स्वरूप इस प्रकार के लंबे शब्दों का निरंतर प्रयोग करें:
-     * प्रशासनिक एवं संवैधानिक: 'संवैधानिकता', 'उत्तरदायित्व', 'कार्यप्रणाली', 'प्रशासनिक', 'दूरसंचार', 'न्यायाधिकरण', 'पुनर्गठन', 'विभागाध्यक्ष', 'अंतर-विभागीय', 'विशेषज्ञता', 'प्रतिबद्धता', 'आत्मनिर्भरता', 'प्रमाणीकरण', 'कार्यकुशलता', 'सार्वभौमिकता', 'परिस्थितिजन्य', 'सुदृढ़ीकरण', 'क्षेत्राधिकार', 'जवाबदेही', 'दूरदर्शितापूर्ण', 'अंतरराज्यीय'।
-     * विधिक एवं तकनीकी: 'सूचना-प्रौद्योगिकी', 'अभियोजनपक्ष', 'विशेषाधिकार', 'पुनर्वास', 'सहानुभूतिपूर्वक', 'अधिसूचनाएं', 'कार्यान्वयन', 'गैर-सरकारी', 'विधि-सम्मत', 'अधिनियमित', 'दंडात्मकता'।
-   - छोटे सरल शब्दों (था, थे, हैं, से, को, पर, का, की, और, या) का केवल आवश्यक न्यूनतम व्याकरणिक उपयोग करें; गद्यांश को दीर्घ, भारी-भरकम सामासिक शब्दों से समृद्ध रखें ताकि औसत शब्द लंबाई (AWL) अत्यधिक हो।
-   - कठिन एवं जटिल संयुक्त व्यंजन प्रचुरता में शामिल करें, जैसे: 'द्ध' (बुद्धि, शुद्ध, प्रतिबद्ध), 'द्व' (द्वार, विद्वान, द्विपक्षीय), 'द्य' (विद्या, उद्योग, औद्योगिकीकरण), 'ष्ट' (दृष्टिकोण, विशिष्ट, स्पष्टीकरण), 'क्त' (शक्ति, संयुक्त, अनासक्त), 'ह्न' (चिह्न), 'हृ' (हृदय), 'त्त' (उत्तरदायित्व, संपत्ति), 'ट्र' (ट्रैफिक, इलेक्ट्रॉनिक, राष्ट्रीय), 'क्र' (क्रम, प्रक्रिया, तकनीकी), 'द्द' (उद्देश्य, मुद्दा), 'ह्म' (ब्रह्म)।
-   - शुद्ध नुक्ता युक्त शब्द (जैसे फ़ैसला, ज़िला, ख़ास), अल्पविराम (,), पूर्णविराम (।), उद्धरण चिह्न ('...') और सांख्यिकीय आंकड़े व तिथियां।
-3. प्रारूप:
-   - 3 से 4 निरंतर पैराग्राफ।
-   - कोई बुलेट पॉइंट नहीं, कोई नंबरिंग नहीं, कोई स्टार (*) चिह्न या मार्कडाउन बोल्डिंग नहीं।
-   - मानक देवनागरी यूनिकोड (NFC)।
-4. उत्तर केवल वैध JSON प्रारूप में दें:
+अनिवार्य मानक:
+1. ${isHard ? 'दीर्घ एवं लंबे शब्द (Long Words): गद्यांश में 8 से 16 अक्षर/मात्रा वाले भारी-भरकम सामासिक शब्दों की प्रचुरता हो (जैसे: संवैधानिकता, उत्तरदायित्व, कार्यप्रणाली, प्रशासनिक, दूरसंचार, न्यायाधिकरण, पुनर्गठन, विभागाध्यक्ष, अंतर-विभागीय, विशेषज्ञता, प्रतिबद्धता, आत्मनिर्भरता, प्रमाणीकरण, कार्यकुशलता, सार्वभौमिकता, परिस्थितिजन्य, सुदृढ़ीकरण)।' : 'संतुलित शब्दावली: मानक खड़ी बोली हिंदी, सामान्य प्रशासनिक व सामान्य ज्ञान शब्दावली।'}
+2. कठिन संयुक्ताक्षर (Halant Conjuncts): ${isHard ? 'प्रचुर मात्रा में कठिन संयुक्त व्यंजन शामिल करें: द्ध (बुद्धि, शुद्ध), द्व (विद्वान, द्वार), द्य (उद्योग, विद्या), ष्ट (दृष्टिकोण, विशिष्ट), क्त (शक्ति, संयुक्त), ह्न (चिह्न), हृ (हृदय), त्त (उत्तरदायित्व), ट्र (ट्रैफिक, राष्ट्रीय), क्र (क्रम, प्रक्रिया), द्द (उद्देश्य)।' : 'सामान्य संयुक्त व्यंजन (प्र, त्र, ज्ञ, श्र, क्ष)।'}
+3. नुक्ता एवं विराम चिह्न: नुक्ता वाले शब्द (ज़िला, फ़ैसला, क़ानून, ख़ास) जो इनस्क्रिप्ट कीबोर्ड पर ']' कुंजी से टाइप होते हैं, अल्पविराम (,), पूर्णविराम (।), और उद्धरण चिह्न।
+4. प्रारूप: ठीक 3 निरंतर पैराग्राफ, कोई बुलेट नहीं, कोई नंबरिंग नहीं, कोई मार्कडाउन नहीं।
+केवल शुद्ध JSON दें:
 {
-  "title": "परीक्षण का आधिकारिक शीर्षक (अधिकतम 7-9 शब्द)",
-  "text": "पूर्ण 520 से 580 शब्दों का गद्यांश (दीर्घ एवं लंबे शब्दों से भरपूर)..."
+  "title": "${slot.examTitle || slot.subType}",
+  "text": "पूर्ण गद्यांश..."
 }`;
-    } else {
-      userPrompt = `दिए गए विषय पर उत्तर प्रदेश पुलिस कंप्यूटर ऑपरेटर एवं एएसआई टंकण परीक्षा के 'मध्यम स्तर' (MEDIUM LEVEL) के अनुसार आधिकारिक 15-मिनट की टंकण सामग्री तैयार करें।
-विषय: ${slot.topic}
-कठिनाई स्तर: मध्यम (MEDIUM LEVEL • संतुलित मानक)
-अनिवार्य आवश्यकताएं:
-1. लक्षित शब्द संख्या: ठीक 500 से 540 शब्द (15 मिनट की परीक्षा हेतु)।
-2. शब्दावली एवं संरचना:
-   - मानक खड़ी बोली हिंदी (देवनागरी यूनिकोड), स्पष्ट वाक्य विन्यास, संतुलित प्रशासनिक एवं सामान्य ज्ञान शब्दावली।
-   - सामान्य संयुक्त व्यंजन (प्र, त्र, ज्ञ, श्र, क्ष), अल्पविराम और पूर्णविराम।
-   - मंगल इनस्क्रिप्ट कीबोर्ड पर 25 से 30 WPM की गति बनाए रखने के लिए उपयुक्त।
-3. प्रारूप:
-   - 3 निरंतर पैराग्राफ।
-   - कोई बुलेट पॉइंट, नंबरिंग या मार्कडाउन फॉर्मेटिंग न लगाएं।
-4. उत्तर केवल वैध JSON प्रारूप में दें:
-{
-  "title": "परीक्षण का आधिकारिक शीर्षक (अधिकतम 7-9 शब्द)",
-  "text": "पूर्ण 500 से 540 शब्दों का गद्यांश..."
-}`;
-    }
   }
 
-  const endpoint = `${baseUrl}/chat/completions`;
-  const headers: Record<string, string> = {
-    'Content-Type': 'application/json',
-    Authorization: `Bearer ${apiKey}`
-  };
-  if (baseUrl.includes('openrouter')) {
-    headers['HTTP-Referer'] = 'https://purendar950.github.io/Typing-computer-operator-/';
-    headers['X-Title'] = 'UP Police Typing Exam Suite';
-  }
+  const { content } = await executeFailoverAiCall(
+    config,
+    [
+      { role: 'system', content: systemPrompt },
+      { role: 'user', content: userPrompt }
+    ],
+    0.7,
+    3500
+  );
 
-  const res = await fetch(endpoint, {
-    method: 'POST',
-    headers,
-    body: JSON.stringify({
-      model,
-      messages: [
-        { role: 'system', content: systemPrompt },
-        { role: 'user', content: userPrompt }
-      ],
-      temperature: 0.7,
-      max_tokens: 3500
-    })
-  });
-
-  if (!res.ok) {
-    const errorText = await res.text();
-    throw new Error(`AI Request Failed (${res.status}): ${errorText.slice(0, 120)}`);
-  }
-
-  const data = await res.json();
-  const rawContent = data.choices?.[0]?.message?.content || '';
-  const parsed = extractPassageFromAiResponse(rawContent, `Live Exam Test #${slot.slot} (${slot.subType})`);
-
+  const parsed = extractPassageFromAiResponse(content, slot.examTitle || `Live Exam Test #${slot.slot} (${slot.subType})`);
   const cleanText = parsed.text;
   const words = cleanText.split(/\s+/).filter(Boolean);
   const wordCount = words.length;
 
   return {
     id: `ar-live-${dateStr}-slot${slot.slot}`,
-    title: parsed.title || `Live Exam Test #${slot.slot} (${slot.subType})`,
+    title: parsed.title || slot.examTitle || `Live Exam Test #${slot.slot} (${slot.subType})`,
     language: slot.language,
     category: slot.category,
-    duration: 15,
+    categoryGroup: slot.categoryGroup || 'up_govt',
+    duration,
     wordCount,
     difficulty: slot.difficulty,
     date: dateStr,
@@ -790,116 +1037,64 @@ Return ONLY valid JSON (no surrounding markdown code fences):
   };
 }
 
-// Reusable single test generator calibrated to AR Typing Medium & Hard standards
+// Reusable single test generator calibrated to exact exam specifications
 export async function generateCustomTest(options: {
   language: Language;
   difficulty: 'medium' | 'hard';
   category: ExamCategory;
+  categoryGroup?: string;
   topic: string;
   targetWords?: number;
+  duration?: number;
   config: AiConfig;
 }): Promise<Passage> {
-  const { language, difficulty, category, topic, targetWords, config } = options;
-  const baseUrl = cleanBaseUrl(config.baseUrl);
-  const apiKey = config.apiKey.trim();
-  const model = config.model.trim() || 'gemini-2.5-flash';
-
-  if (!apiKey) {
-    throw new Error('API Key is missing. Please configure your API key in AI Settings.');
-  }
-
+  const { language, difficulty, category, categoryGroup, topic, targetWords, duration, config } = options;
   const isHindi = language.startsWith('hindi');
   const isHard = difficulty === 'hard';
-  const wordCountTarget = targetWords || (isHard ? 550 : 520);
+  const dur = duration || 15;
+  const wordCountTarget = targetWords || (dur === 5 ? 190 : dur === 10 ? 360 : isHard ? 550 : 520);
 
   let systemPrompt = '';
   let userPrompt = '';
 
   if (!isHindi) {
     systemPrompt =
-      'You are the principal typing examination passage author for Uttar Pradesh Police Recruitment Board (UPPRPB) and AR Typing portal.';
-    if (isHard) {
-      userPrompt = `Generate an official AR Typing HARD level competitive examination typing passage in standard English on '${topic}'.
-Target Word Count: Exactly ${wordCountTarget} words (between 520 and 580 words).
-CRUCIAL HARD CRITERIA — MORE LONGER WORDS (MANDATORY):
-- High concentration of long, polysyllabic words (8 to 16+ letters each, Average Word Length >= 7.0 to 8.5 characters per word). At least 45% to 55% of all words must be long words such as: telecommunications, institutionalization, counter-intelligence, misappropriation, constitutionalism, superintendence, jurisprudence, proportionality, responsiveness, interoperability, infrastructure, vulnerabilities, democratization, multidisciplinary, administration, accountability, parliamentary, implementation, comprehensive, extraterritoriality, confidentiality.
-- Strictly minimize short 2-to-4 letter monosyllabic words.
-- High vocabulary complexity, official legal/administrative/police terminology, departmental acronyms (IPC, CrPC, UPPRPB, CCTNS, FIR), quotes, hyphens, and statistical dates. Continuous 3-4 paragraphs, no bullet points, no markdown.
+      'You are the principal typing examination evaluator and passage author for official competitive examinations across India.';
+    userPrompt = `Generate an official competitive typing examination passage in standard English on '${topic}'.
+Category: ${categoryGroup || category}
+Target Word Count: Exactly ${wordCountTarget} words (between ${wordCountTarget - 20} and ${wordCountTarget + 20} words for a ${dur}-minute test).
+${isHard ? 'CRUCIAL HARD CRITERIA: High Average Word Length (AWL >= 7.2 letters/word). High concentration of 8-16 letter words: telecommunications, institutionalization, counter-intelligence, misappropriation, constitutionalism, jurisprudence, proportionality, interoperability, infrastructure, accountability, administration.' : 'MEDIUM CRITERIA: Balanced editorial and administrative prose.'}
+Continuous 3 paragraphs, standard punctuation, no bullet points, no markdown.
 Return ONLY valid JSON:
 {
-  "title": "Official Title (${topic})",
-  "text": "Full continuous passage text with high concentration of long words here..."
-}`;
-    } else {
-      userPrompt = `Generate an official AR Typing MEDIUM level competitive examination typing passage in standard English on '${topic}'.
-Target Word Count: Exactly ${wordCountTarget} words (between 500 and 540 words).
-Requirements: Balanced vocabulary, clear administrative and general knowledge prose, standard punctuation, continuous 3 paragraphs, no bullet points, no markdown.
-Return ONLY valid JSON:
-{
-  "title": "Official Title (${topic})",
+  "title": "Official Title: ${topic}",
   "text": "Full continuous passage text here..."
 }`;
-    }
   } else {
     systemPrompt =
-      'आप उत्तर प्रदेश पुलिस भर्ती एवं प्रोन्नति बोर्ड (UPPRPB) एवं एआर टाइपिंग (AR Typing) पोर्टल के मुख्य टंकण सामग्री निर्माता हैं।';
-    if (isHard) {
-      userPrompt = `दिए गए विषय '${topic}' पर आधिकारिक एआर टाइपिंग 'कठिन स्तर' (HARD) मानक के अनुसार 15-मिनट की टंकण सामग्री तैयार करें।
-लक्षित शब्द संख्या: ठीक ${wordCountTarget} शब्द (520 से 580 शब्दों के बीच)।
-अनिवार्य कठिन मानक — अधिक से अधिक दीर्घ एवं लंबे शब्द (LONGER WORDS MANDATE):
-- गद्यांश में 8 से 16 अक्षर/मात्रा वाले 'दीर्घ, बहु-अक्षरीय एवं सामासिक शब्दों' का अनुपात कम से कम 50% होना अनिवार्य है (जैसे: संवैधानिकता, उत्तरदायित्व, कार्यप्रणाली, प्रशासनिक, दूरसंचार, न्यायाधिकरण, पुनर्गठन, विभागाध्यक्ष, अंतर-विभागीय, विशेषज्ञता, प्रतिबद्धता, आत्मनिर्भरता, प्रमाणीकरण, कार्यकुशलता, सार्वभौमिकता, परिस्थितिजन्य, सुदृढ़ीकरण, क्षेत्राधिकार, सूचना-प्रौद्योगिकी, अभियोजनपक्ष, विशेषाधिकार)।
-- छोटे सरल शब्दों का न्यूनतम प्रयोग करें ताकि औसत शब्द लंबाई (AWL) अत्यधिक रहे और टंकण की वास्तविक कठिन परीक्षा हो।
-- उच्च विधिक एवं प्रशासनिक शब्दावली, कठिन संयुक्त व्यंजन (द्ध, द्व, द्य, ष्ट, क्त, ह्न, हृ, त्त, ट्र, क्र, द्द), नुक्ता शब्द (फ़, ज़), उद्धरण चिह्न, 3-4 निरंतर पैराग्राफ, कोई बुलेट नहीं।
-केवल शुद्ध JSON दें:
+      'आप भारत के विभिन्न सरकारी भर्ती आयोगों के लिए आधिकारिक टंकण परीक्षा गद्यांश निर्माता हैं।';
+    userPrompt = `दिए गए विषय '${topic}' पर आधिकारिक टंकण परीक्षा के लिए 15-मिनट की टंकण सामग्री तैयार करें।
+कठिनाई: ${isHard ? 'कठिन (HARD LEVEL - दीर्घ एवं लंबे शब्द, कठिन संयुक्ताक्षर)' : 'मध्यम (MEDIUM LEVEL)'}
+लक्षित शब्द संख्या: ठीक ${wordCountTarget} शब्द (${dur} मिनट हेतु)।
+${isHard ? 'दीर्घ एवं लंबे शब्द (संवैधानिकता, उत्तरदायित्व, कार्यप्रणाली, प्रशासनिक, दूरसंचार, न्यायाधिकरण), कठिन संयुक्ताक्षर (द्ध, द्व, द्य, ष्ट, क्त, ह्न, हृ, त्त, ट्र, क्र), नुक्ता शब्द (फ़, ज़)।' : 'मानक खड़ी बोली हिंदी, सामान्य प्रशासनिक शब्दावली।'}
+3 निरंतर पैराग्राफ, कोई बुलेट नहीं, केवल शुद्ध JSON दें:
 {
-  "title": "आधिकारिक शीर्षक (${topic})",
-  "text": "पूर्ण गद्यांश (दीर्घ एवं लंबे शब्दों से युक्त)..."
-}`;
-    } else {
-      userPrompt = `दिए गए विषय '${topic}' पर आधिकारिक एआर टाइपिंग 'मध्यम स्तर' (MEDIUM) मानक के अनुसार 15-मिनट की टंकण सामग्री तैयार करें।
-लक्षित शब्द संख्या: ठीक ${wordCountTarget} शब्द (500 से 540 शब्दों के बीच)।
-अनिवार्यता: मानक देवनागरी यूनिकोड, संतुलित शब्दावली, मंगल इनस्क्रिप्ट अनुकूल, 3 निरंतर पैराग्राफ, कोई बुलेट नहीं।
-केवल शुद्ध JSON दें:
-{
-  "title": "आधिकारिक शीर्षक (${topic})",
+  "title": "आधिकारिक शीर्षक: ${topic}",
   "text": "पूर्ण गद्यांश..."
 }`;
-    }
   }
 
-  const endpoint = `${baseUrl}/chat/completions`;
-  const headers: Record<string, string> = {
-    'Content-Type': 'application/json',
-    Authorization: `Bearer ${apiKey}`
-  };
-  if (baseUrl.includes('openrouter')) {
-    headers['HTTP-Referer'] = 'https://purendar950.github.io/Typing-computer-operator-/';
-    headers['X-Title'] = 'UP Police Typing Exam Suite';
-  }
+  const { content } = await executeFailoverAiCall(
+    config,
+    [
+      { role: 'system', content: systemPrompt },
+      { role: 'user', content: userPrompt }
+    ],
+    0.7,
+    3500
+  );
 
-  const res = await fetch(endpoint, {
-    method: 'POST',
-    headers,
-    body: JSON.stringify({
-      model,
-      messages: [
-        { role: 'system', content: systemPrompt },
-        { role: 'user', content: userPrompt }
-      ],
-      temperature: 0.7,
-      max_tokens: 3500
-    })
-  });
-
-  if (!res.ok) {
-    const errorText = await res.text();
-    throw new Error(`AI Request Failed (${res.status}): ${errorText.slice(0, 120)}`);
-  }
-
-  const data = await res.json();
-  const rawContent = data.choices?.[0]?.message?.content || '';
-  const parsed = extractPassageFromAiResponse(rawContent, `Custom AI Test: ${topic}`);
-
+  const parsed = extractPassageFromAiResponse(content, `Custom AI Test: ${topic}`);
   const cleanText = parsed.text;
   const wordCount = cleanText.split(/\s+/).filter(Boolean).length;
   const todayStr = new Date().toISOString().split('T')[0];
@@ -909,7 +1104,8 @@ Return ONLY valid JSON:
     title: parsed.title || `Custom AI Test: ${topic}`,
     language,
     category,
-    duration: 15,
+    categoryGroup: categoryGroup || 'up_govt',
+    duration: dur,
     wordCount,
     difficulty,
     date: todayStr,
@@ -920,19 +1116,20 @@ Return ONLY valid JSON:
   return newPassage;
 }
 
-// 5. Generate All 8 Daily Live Tests
+// 5. Generate All Daily Live Tests (10 Balanced Slots)
 export async function generateAll8DailyLiveTests(
   dateStr: string,
   config: AiConfig,
-  onProgress?: (completed: number, total: number, currentSlotTitle: string) => void
+  onProgress?: (completed: number, total: number, currentSlotTitle: string) => void,
+  slotsToUse: DailySlotPlan[] = DAILY_BALANCED_SLOTS
 ): Promise<Passage[]> {
   const results: Passage[] = [];
-  const total = DAILY_8_SLOTS.length;
+  const total = slotsToUse.length;
 
   for (let i = 0; i < total; i++) {
-    const slot = DAILY_8_SLOTS[i];
+    const slot = slotsToUse[i];
     if (onProgress) {
-      onProgress(i, total, `Generating ${slot.subType} (${slot.topic})...`);
+      onProgress(i, total, `Generating #${slot.slot}: ${slot.examTitle || slot.subType}...`);
     }
 
     try {
@@ -945,7 +1142,7 @@ export async function generateAll8DailyLiveTests(
   }
 
   if (onProgress) {
-    onProgress(total, total, 'Completed all 8 Daily Live Tests!');
+    onProgress(total, total, `Completed all ${total} Daily Live Tests!`);
   }
 
   // Save to localStorage and Firestore
