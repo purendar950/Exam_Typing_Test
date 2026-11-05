@@ -771,7 +771,7 @@ export const App: React.FC = () => {
                   </li>
                   <li>
                     <a
-                      href="https://t.me/+Lw-tPbRqO0c2ZTA1"
+                      href="https://t.me/+Lw-tPbRqOOc2ZTA1"
                       target="_blank"
                       rel="noopener noreferrer"
                       style={{ color: '#0284c7', textDecoration: 'none', fontSize: '0.84rem', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '6px' }}

@@ -3516,7 +3516,7 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                           </label>
                           <input
                             type="text"
-                            placeholder="e.g. https://t.me/+Lw-tPbRqO0c2ZTA1"
+                            placeholder="e.g. https://t.me/+Lw-tPbRqOOc2ZTA1"
                             value={telegramConfig.discussionGroupUrl || ''}
                             onChange={(e) => setTelegramConfig({ ...telegramConfig, discussionGroupUrl: e.target.value.trim() })}
                             style={{
