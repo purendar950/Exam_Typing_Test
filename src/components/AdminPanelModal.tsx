@@ -64,6 +64,7 @@ import {
   sendAdminLiveReply,
   markChatReadByAdmin
 } from '../services/liveChatService';
+import { syncPaidPassagesToFirestore } from '../services/passageService';
 import appLogo from '../assets/logo.png';
 
 interface AdminPanelModalProps {
@@ -206,6 +207,9 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
   const [passageSearch, setPassageSearch] = useState<string>('');
   const [passageLangFilter, setPassageLangFilter] = useState<string>('all');
   const [customPassagesList, setCustomPassagesList] = useState<Passage[]>([]);
+  const [isSyncingPaidPassages, setIsSyncingPaidPassages] = useState<boolean>(false);
+  const [syncStatusMsg, setSyncStatusMsg] = useState<string | null>(null);
+  const [syncProgressCount, setSyncProgressCount] = useState<{ done: number; total: number } | null>(null);
 
   // Candidates Directory State
   const [candidatesList, setCandidatesList] = useState<UserProfile[]>([]);
@@ -869,6 +873,30 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
     const updated = customPassagesList.filter((p) => p.id !== id);
     setCustomPassagesList(updated);
     onPassagesUpdated(passages.filter((p) => p.id !== id));
+  };
+
+  // Sync Paid Passages to Cloud Firestore
+  const handleSyncPaidPassages = async () => {
+    const totalToSync = passages.filter((p) => (p.testNumber ?? 0) > 7 && p.text?.trim()).length;
+    if (!window.confirm(`Sync ${totalToSync} Paid Passages (Tests #8+) to Cloud Firestore?\n\nThis will upload all test content securely into the /paid_passages collection on Firebase. Only candidates with active Pro subscriptions will be able to read them.`)) {
+      return;
+    }
+
+    setIsSyncingPaidPassages(true);
+    setSyncStatusMsg('⏳ Initializing Cloud Sync...');
+    setSyncProgressCount(null);
+
+    const res = await syncPaidPassagesToFirestore(passages, (done, total) => {
+      setSyncProgressCount({ done, total });
+      setSyncStatusMsg(`⏳ Uploading to Cloud Firestore: ${done} / ${total} (${Math.round((done / total) * 100)}%)`);
+    });
+
+    setIsSyncingPaidPassages(false);
+    if (res.success) {
+      setSyncStatusMsg(`🎉 Success! All ${res.totalSynced} paid passages are now securely synced to Cloud Firestore.`);
+    } else {
+      setSyncStatusMsg(`❌ Cloud Sync Error: ${res.error}`);
+    }
   };
 
   // Save Exam System Settings
@@ -2987,6 +3015,29 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                       </button>
 
                       <button
+                        type="button"
+                        onClick={handleSyncPaidPassages}
+                        disabled={isSyncingPaidPassages}
+                        style={{
+                          padding: '8px 14px',
+                          background: isSyncingPaidPassages ? '#94a3b8' : 'linear-gradient(135deg, #059669 0%, #047857 100%)',
+                          color: '#ffffff',
+                          border: 'none',
+                          borderRadius: '8px',
+                          fontWeight: 700,
+                          fontSize: '0.82rem',
+                          cursor: isSyncingPaidPassages ? 'wait' : 'pointer',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '6px',
+                          boxShadow: '0 2px 6px rgba(5, 150, 105, 0.3)'
+                        }}
+                      >
+                        <span>{isSyncingPaidPassages ? '⏳' : '☁️'}</span>
+                        <span>{isSyncingPaidPassages ? 'Syncing...' : 'Sync Paid Passages to Cloud'}</span>
+                      </button>
+
+                      <button
                         onClick={() => setIsCreatingManual(!isCreatingManual)}
                         style={{
                           padding: '8px 14px',
@@ -3003,6 +3054,31 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                       </button>
                     </div>
                   </div>
+
+                  {/* Cloud Sync Status Banner */}
+                  {syncStatusMsg && (
+                    <div style={{
+                      padding: '10px 16px',
+                      borderRadius: '8px',
+                      background: syncStatusMsg.startsWith('❌') ? '#fef2f2' : syncStatusMsg.startsWith('🎉') ? '#f0fdf4' : '#eff6ff',
+                      border: syncStatusMsg.startsWith('❌') ? '1px solid #f87171' : syncStatusMsg.startsWith('🎉') ? '1px solid #86efac' : '1px solid #93c5fd',
+                      color: syncStatusMsg.startsWith('❌') ? '#991b1b' : syncStatusMsg.startsWith('🎉') ? '#166534' : '#1e40af',
+                      fontWeight: 600,
+                      fontSize: '0.85rem',
+                      marginBottom: '14px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between'
+                    }}>
+                      <span>{syncStatusMsg}</span>
+                      <button
+                        onClick={() => setSyncStatusMsg(null)}
+                        style={{ background: 'transparent', border: 'none', cursor: 'pointer', fontWeight: 700, color: 'inherit' }}
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  )}
 
                   {/* Manual Creation Drawer */}
                   {isCreatingManual && (
