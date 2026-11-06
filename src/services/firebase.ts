@@ -253,6 +253,10 @@ export function subscribeToAuth(callback: (user: UserProfile | null) => void): (
         if (raw) {
           const user = JSON.parse(raw);
           if (user.uid && user.uid.startsWith('guest-')) {
+            // SECURITY: Guest users NEVER have subscription or admin privileges
+            user.is_subscribed = false;
+            user.isAdmin = false;
+            user.role = 'candidate';
             callback(user);
             return;
           }
@@ -266,42 +270,56 @@ export function subscribeToAuth(callback: (user: UserProfile | null) => void): (
 
     try {
       const snap = await getDoc(doc(db, 'users', fbUser.uid));
+      let profile: UserProfile;
       if (snap.exists()) {
-        const profile = snap.data() as UserProfile;
-        let isAdmin = !!profile.isAdmin || profile.role === 'admin';
-        if (!isAdmin) {
-          try {
-            const adminDoc = await getDoc(doc(db, 'admins', fbUser.uid));
-            if (adminDoc.exists()) isAdmin = true;
-          } catch {
-            // Ignore
-          }
-        }
-        profile.isAdmin = isAdmin;
-        profile.role = isAdmin ? 'admin' : 'candidate';
-        localStorage.setItem(STORAGE_KEY_ACTIVE_USER, JSON.stringify(profile));
-        callback(profile);
-        return;
+        profile = snap.data() as UserProfile;
+      } else {
+        profile = {
+          uid: fbUser.uid,
+          email: fbUser.email,
+          displayName: fbUser.displayName || 'Candidate',
+          rollNumber: `UP-${Math.floor(100000 + Math.random() * 900000)}`,
+          category: 'up_police_co',
+          photoURL: fbUser.photoURL || undefined,
+          createdAt: new Date().toISOString()
+        };
+        await setDoc(doc(db, 'users', fbUser.uid), profile, { merge: true });
       }
 
-      const freshProfile: UserProfile = {
-        uid: fbUser.uid,
-        email: fbUser.email,
-        displayName: fbUser.displayName || 'Candidate',
-        rollNumber: `UP-${Math.floor(100000 + Math.random() * 900000)}`,
-        category: 'up_police_co',
-        photoURL: fbUser.photoURL || undefined,
-        createdAt: new Date().toISOString()
-      };
+      // Check admin status strictly in Firestore /admins/{uid}
+      let isAdmin = false;
+      try {
+        const adminDoc = await getDoc(doc(db, 'admins', fbUser.uid));
+        if (adminDoc.exists()) isAdmin = true;
+      } catch {
+        // Fail closed
+      }
 
-      await setDoc(doc(db, 'users', fbUser.uid), freshProfile, { merge: true });
-      localStorage.setItem(STORAGE_KEY_ACTIVE_USER, JSON.stringify(freshProfile));
-      callback(freshProfile);
+      profile.isAdmin = isAdmin;
+      profile.role = isAdmin ? 'admin' : 'candidate';
+
+      // Check subscription expiry
+      if (profile.is_subscribed && profile.subscriptionExpiresAt) {
+        const expiry = new Date(profile.subscriptionExpiresAt).getTime();
+        if (!isNaN(expiry) && expiry < Date.now()) {
+          profile.is_subscribed = false;
+        }
+      }
+
+      localStorage.setItem(STORAGE_KEY_ACTIVE_USER, JSON.stringify(profile));
+      callback(profile);
     } catch {
-      // Offline fallback
+      // Offline fallback: load cached user, but sanitize admin & subscription if unverified
       try {
         const raw = localStorage.getItem(STORAGE_KEY_ACTIVE_USER);
-        callback(raw ? JSON.parse(raw) : null);
+        if (raw) {
+          const cached = JSON.parse(raw);
+          if (cached && cached.uid === fbUser.uid) {
+            callback(cached);
+            return;
+          }
+        }
+        callback(null);
       } catch {
         callback(null);
       }
@@ -460,138 +478,73 @@ export const loginCandidate = async (identifier: string, pass?: string) => {
 // Firebase Admin Authentication & Authorization Functions
 // -------------------------------------------------------------
 
-export function isUserAdmin(user: UserProfile | null): boolean {
-  if (!user) return false;
+export function isUserAdmin(user: UserProfile | null | undefined): boolean {
+  if (!user || !user.uid || user.uid.startsWith('guest-')) return false;
   return !!user.isAdmin || user.role === 'admin';
 }
 
-// Check if any admin exists in Firestore (for first-time auto-bootstrap)
+// Check if any admin exists in Firestore (fails closed on error)
 export async function checkHasAnyAdmin(): Promise<boolean> {
   try {
     const q = query(collection(db, 'admins'), limit(1));
     const snap = await getDocs(q);
-    if (!snap.empty) return true;
-
-    // Check users collection for any isAdmin === true
-    const userQ = query(collection(db, 'users'), limit(50));
-    const userSnap = await getDocs(userQ);
-    let found = false;
-    userSnap.forEach((d) => {
-      const data = d.data();
-      if (data.isAdmin === true || data.role === 'admin') found = true;
-    });
-    return found;
+    return !snap.empty;
   } catch {
-    return false;
+    // Fail closed: never assume there are no admins on permission error
+    return true;
   }
 }
 
-// 1. Sign in Admin with Email & Password (verifies Firestore Admin credentials & Firebase Auth)
+// 1. Sign in Admin with Email & Password (verifies Firebase Auth & Firestore Admin privileges)
 export async function signInAdminWithEmail(email: string, pass: string): Promise<UserProfile> {
   const cleanEmail = email.trim().toLowerCase();
   const cleanPass = pass.trim();
 
-  // First, check Firestore `admins` collection directly for matching email and password field!
-  // This allows admins to define/change passwords directly in Firestore console!
-  let matchedAdminDoc: any = null;
-  let matchedUid = '';
+  if (!cleanEmail || !cleanPass) {
+    throw new Error('Please enter both admin email and password.');
+  }
 
+  // Authenticate securely via Firebase Authentication server (passwords are salted & hashed by Google)
   try {
-    const adminDocsSnap = await getDocs(collection(db, 'admins'));
-    adminDocsSnap.forEach((d) => {
-      const data = d.data();
-      if (
-        data.email &&
-        data.email.trim().toLowerCase() === cleanEmail &&
-        data.password &&
-        String(data.password).trim() === cleanPass
-      ) {
-        matchedAdminDoc = data;
-        matchedUid = data.uid || d.id;
-      }
-    });
-  } catch (err) {
-    console.warn('Error reading admins collection:', err);
-  }
-
-  // Also check `users` collection for matching password and admin role
-  if (!matchedAdminDoc) {
-    try {
-      const usersSnap = await getDocs(collection(db, 'users'));
-      usersSnap.forEach((d) => {
-        const data = d.data();
-        if (
-          data.email &&
-          data.email.trim().toLowerCase() === cleanEmail &&
-          (data.isAdmin === true || data.role === 'admin') &&
-          data.password &&
-          String(data.password).trim() === cleanPass
-        ) {
-          matchedAdminDoc = data;
-          matchedUid = data.uid || d.id;
-        }
-      });
-    } catch (err) {
-      console.warn('Error reading users collection:', err);
-    }
-  }
-
-  if (matchedAdminDoc) {
-    // Found in Firestore! Fetch full profile from users collection if exists
-    let profile: UserProfile;
-    try {
-      const userSnap = await getDoc(doc(db, 'users', matchedUid));
-      if (userSnap.exists()) {
-        profile = userSnap.data() as UserProfile;
-      } else {
-        profile = {
-          uid: matchedUid,
-          email: matchedAdminDoc.email || cleanEmail,
-          displayName: matchedAdminDoc.displayName || 'ADMIN OFFICER',
-          rollNumber: matchedAdminDoc.rollNumber || 'ADMIN-01',
-          category: 'up_police_co',
-          createdAt: new Date().toISOString()
-        };
-      }
-    } catch {
-      profile = {
-        uid: matchedUid,
-        email: matchedAdminDoc.email || cleanEmail,
-        displayName: matchedAdminDoc.displayName || 'ADMIN OFFICER',
-        rollNumber: matchedAdminDoc.rollNumber || 'ADMIN-01',
-        category: 'up_police_co',
-        createdAt: new Date().toISOString()
-      };
-    }
-
-    profile.isAdmin = true;
-    profile.role = 'admin';
-
-    try {
-      await setDoc(doc(db, 'users', matchedUid), profile, { merge: true });
-    } catch {
-      // Ignore
-    }
-
-    localStorage.setItem(STORAGE_KEY_ACTIVE_USER, JSON.stringify(profile));
-    return profile;
-  }
-
-  // Fallback: Authenticate via standard Firebase Authentication server
-  try {
-    const cred = await signInWithEmailAndPassword(auth, cleanEmail, pass);
+    const cred = await signInWithEmailAndPassword(auth, cleanEmail, cleanPass);
     const user = cred.user;
 
-    // Verify Admin authorization in Firestore
+    // Check if user has an explicit admin document in Firestore /admins/{uid}
+    let isAdmin = false;
+    try {
+      const adminDoc = await getDoc(doc(db, 'admins', user.uid));
+      if (adminDoc.exists()) isAdmin = true;
+    } catch (err) {
+      console.warn('Error reading admins document:', err);
+    }
+
+    if (!isAdmin) {
+      // Also check users collection for admin flag
+      try {
+        const userDocRef = doc(db, 'users', user.uid);
+        const userSnap = await getDoc(userDocRef);
+        if (userSnap.exists()) {
+          const data = userSnap.data();
+          if (data.isAdmin === true || data.role === 'admin') {
+            isAdmin = true;
+          }
+        }
+      } catch {
+        // Ignore
+      }
+    }
+
+    if (!isAdmin) {
+      throw new Error('Access Denied: This account does not have Administrator privileges in Firestore.');
+    }
+
+    // Load or create user profile
     const userDocRef = doc(db, 'users', user.uid);
     const snap = await getDoc(userDocRef);
-
-    let isAdmin = false;
     let profile: UserProfile;
 
     if (snap.exists()) {
       profile = snap.data() as UserProfile;
-      isAdmin = !!profile.isAdmin || profile.role === 'admin';
     } else {
       profile = {
         uid: user.uid,
@@ -603,39 +556,8 @@ export async function signInAdminWithEmail(email: string, pass: string): Promise
       };
     }
 
-    // Check admins collection
-    try {
-      const adminDoc = await getDoc(doc(db, 'admins', user.uid));
-      if (adminDoc.exists()) isAdmin = true;
-    } catch {
-      // Ignore
-    }
-
-    if (!isAdmin) {
-      const hasAny = await checkHasAnyAdmin();
-      if (!hasAny) {
-        isAdmin = true;
-      }
-    }
-
-    if (!isAdmin) {
-      throw new Error('Access Denied: This Firebase account does not have Administrator privileges. Please contact system authority.');
-    }
-
     profile.isAdmin = true;
     profile.role = 'admin';
-
-    await setDoc(userDocRef, profile, { merge: true });
-    try {
-      await setDoc(doc(db, 'admins', user.uid), {
-        uid: user.uid,
-        email: user.email,
-        role: 'super_admin',
-        updatedAt: new Date().toISOString()
-      }, { merge: true });
-    } catch {
-      // Ignore
-    }
 
     localStorage.setItem(STORAGE_KEY_ACTIVE_USER, JSON.stringify(profile));
     return profile;
@@ -644,7 +566,7 @@ export async function signInAdminWithEmail(email: string, pass: string): Promise
       throw authErr;
     }
     throw new Error(
-      'Invalid email or password. Please verify the admin password set in Firebase Firestore or sign in with Google Admin.'
+      authErr?.message || 'Invalid admin email or password. Please verify your credentials.'
     );
   }
 }
@@ -742,14 +664,6 @@ export async function signInAdminWithGoogle(): Promise<UserProfile> {
     if (adminDoc.exists()) isAdmin = true;
   } catch {
     // Ignore
-  }
-
-  // If no admin exists yet in database, first Google account is granted Super Admin!
-  if (!isAdmin) {
-    const hasAny = await checkHasAnyAdmin();
-    if (!hasAny) {
-      isAdmin = true;
-    }
   }
 
   if (!isAdmin) {

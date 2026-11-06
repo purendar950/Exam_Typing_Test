@@ -43,8 +43,6 @@ jobs:
         run: pnpm install --no-frozen-lockfile
 
       - name: Build project
-        env:
-          VITE_GH_RELAY_TOKEN: ${{ secrets.VITE_GH_RELAY_TOKEN }}
         run: pnpm build
 
       - name: Setup GitHub Pages

@@ -107,7 +107,7 @@ export const TelegramSupportWidget: React.FC<TelegramSupportWidgetProps> = ({
     if (!textToSendArg) setInputText('');
 
     try {
-      await sendUserLiveMessage(chatSession.id, textToSend, nameToUse, currentUser?.email, config);
+      await sendUserLiveMessage(chatSession.id, textToSend, nameToUse, currentUser?.email || undefined, config);
     } catch (err) {
       console.error('Failed to send live message:', err);
     } finally {

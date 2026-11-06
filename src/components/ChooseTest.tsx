@@ -1359,6 +1359,7 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
     if (dailyTab === 'hindi') {
       return todayDailyLiveTests.filter((p) => p.language.startsWith('hindi'));
     }
+    return todayDailyLiveTests;
   }, [todayDailyLiveTests, dailyTab]);
 
   const englishLiveTests = useMemo(
@@ -1820,14 +1821,14 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
   }, [passages, classicLanguage]);
 
   const classicAvailableDates = useMemo(() => {
-    return Array.from(new Set(classicLanguagePassages.map((p) => p.date).filter(Boolean)))
+    return Array.from(new Set(classicLanguagePassages.map((p) => p.date).filter((d): d is string => Boolean(d))))
       .sort()
       .reverse();
   }, [classicLanguagePassages]);
 
   useEffect(() => {
     if (classicAvailableDates.length > 0 && !classicAvailableDates.includes(classicDate)) {
-      setClassicDate(classicAvailableDates[0]);
+      setClassicDate(classicAvailableDates[0] || '');
     }
   }, [classicAvailableDates, classicDate]);
 
