@@ -21,6 +21,7 @@ import { LegalPolicyModal, LegalTab } from './components/LegalPolicyModal';
 import { TelegramSupportWidget } from './components/TelegramSupportWidget';
 import { TelegramAdminChatSheet } from './components/TelegramAdminChatSheet';
 import { PwaInstallPrompt } from './components/PwaInstallPrompt';
+import { ErrorBoundary } from './components/ErrorBoundary';
 import { audioEngine } from './utils/audioEngine';
 import { fetchDailyLivePassages, triggerAutoDailyGenerationIfDue } from './services/aiGenerator';
 import { fetchAllCustomPassages } from './services/adminService';
@@ -177,7 +178,18 @@ export const App: React.FC = () => {
   const [currentUser, setCurrentUser] = useState<UserProfile | null>(() => {
     try {
       const raw = localStorage.getItem('up_typing_active_user');
-      return raw ? JSON.parse(raw) : null;
+      if (!raw) return null;
+      const parsed = JSON.parse(raw);
+      if (parsed) {
+        // SECURITY: Guest users or unverified sessions must not have active subscription or admin rights
+        if (!parsed.uid || parsed.uid.startsWith('guest-')) {
+          parsed.is_subscribed = false;
+          parsed.isAdmin = false;
+          parsed.role = 'candidate';
+        }
+        return parsed;
+      }
+      return null;
     } catch {
       return null;
     }
@@ -647,16 +659,18 @@ export const App: React.FC = () => {
         )}
 
         {currentView === 'test' && selectedPassage && (
-          <StartTest
-            passage={selectedPassage}
-            durationMinutes={selectedDurationMinutes}
-            settings={settings}
-            onUpdateSettings={handleUpdateSettings}
-            onFinishTest={handleFinishTest}
-            onCancelTest={returnToExamOrHome}
-            activeExamProfile={selectedExamProfile}
-            onOpenRules={openRulesModal}
-          />
+          <ErrorBoundary fallbackTitle="Exam Session Error" onReset={returnToExamOrHome}>
+            <StartTest
+              passage={selectedPassage}
+              durationMinutes={selectedDurationMinutes}
+              settings={settings}
+              onUpdateSettings={handleUpdateSettings}
+              onFinishTest={handleFinishTest}
+              onCancelTest={returnToExamOrHome}
+              activeExamProfile={selectedExamProfile}
+              onOpenRules={openRulesModal}
+            />
+          </ErrorBoundary>
         )}
 
         {currentView === 'result' && currentResult && (

@@ -224,8 +224,6 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
       if (currentUser && isUserAdmin(currentUser)) {
         setIsAuthenticated(true);
         setActiveAdminUser(currentUser);
-      } else if (isAdminAuthenticated()) {
-        setIsAuthenticated(true);
       } else {
         setIsAuthenticated(false);
       }

@@ -25,10 +25,10 @@ const STORAGE_KEY_TELEGRAM_CONFIG = 'up_typing_telegram_config';
 // Panel → Telegram Settings and are stored exclusively in Firestore
 // (system_settings/telegram_config). They are NEVER shipped in the client bundle.
 export const DEFAULT_TELEGRAM_CONFIG: TelegramConfig = {
-  enabled: true,
-  botToken: '',
-  adminChatId: '',
-  approvalSecretToken: '',
+  enabled: false,
+  botToken: (typeof import.meta !== 'undefined' && import.meta.env?.VITE_TELEGRAM_BOT_TOKEN) || '',
+  adminChatId: (typeof import.meta !== 'undefined' && import.meta.env?.VITE_TELEGRAM_ADMIN_CHAT_ID) || '',
+  approvalSecretToken: (typeof import.meta !== 'undefined' && import.meta.env?.VITE_TELEGRAM_APPROVAL_TOKEN) || '',
   communityChannelUrl: 'https://t.me/Exam_Typing_Mentor',
   discussionGroupUrl: 'https://t.me/+Lw-tPbRqOOc2ZTA1',
   supportUsername: 'purendare'
@@ -44,6 +44,7 @@ export async function getTelegramConfig(): Promise<TelegramConfig> {
       if (localConfig) {
         if (!localConfig.adminChatId) localConfig.adminChatId = DEFAULT_TELEGRAM_CONFIG.adminChatId;
         if (!localConfig.botToken) localConfig.botToken = DEFAULT_TELEGRAM_CONFIG.botToken;
+        if (!localConfig.approvalSecretToken) localConfig.approvalSecretToken = DEFAULT_TELEGRAM_CONFIG.approvalSecretToken;
         if (!localConfig.supportUsername || localConfig.supportUsername === 'ExamTypingSupportBot') {
           localConfig.supportUsername = DEFAULT_TELEGRAM_CONFIG.supportUsername;
         }
@@ -328,7 +329,7 @@ export async function handleTelegramApprovalFromUrl(): Promise<{
   }
 
   // Token validation for secure 1-click approvals
-  if (!token || token.trim() !== config.approvalSecretToken.trim()) {
+  if (!token || !config.approvalSecretToken || token.trim() !== config.approvalSecretToken.trim()) {
     cleanQueryParam(['admin_approve', 'admin_reject', 'token']);
     return {
       handled: true,

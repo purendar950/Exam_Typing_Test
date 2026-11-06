@@ -297,6 +297,49 @@ export function savePaymentPlans(plans: PaymentPlan[]): void {
   }
 }
 
+/**
+ * Compress an image data URL (base64) so it stays safely under ~100KB,
+ * ensuring it fits comfortably in Firestore without hitting document limits.
+ */
+export async function compressScreenshotDataUrl(dataUrl: string, maxDim = 800, quality = 0.65): Promise<string> {
+  if (!dataUrl || !dataUrl.startsWith('data:image/')) return dataUrl;
+  if (typeof document === 'undefined') return dataUrl;
+
+  return new Promise((resolve) => {
+    try {
+      const img = new Image();
+      img.onload = () => {
+        let width = img.width;
+        let height = img.height;
+        if (width > maxDim || height > maxDim) {
+          if (width > height) {
+            height = Math.round((height * maxDim) / width);
+            width = maxDim;
+          } else {
+            width = Math.round((width * maxDim) / height);
+            height = maxDim;
+          }
+        }
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) {
+          resolve(dataUrl);
+          return;
+        }
+        ctx.drawImage(img, 0, 0, width, height);
+        const compressed = canvas.toDataURL('image/jpeg', quality);
+        resolve(compressed.length < dataUrl.length ? compressed : dataUrl);
+      };
+      img.onerror = () => resolve(dataUrl);
+      img.src = dataUrl;
+    } catch {
+      resolve(dataUrl);
+    }
+  });
+}
+
 // 3. Payment Submissions Management
 export async function submitPaymentRequest(
   submission: Omit<PaymentSubmission, 'id' | 'status' | 'submittedAt'>
@@ -315,30 +358,19 @@ export async function submitPaymentRequest(
     );
   }
 
-  // Also check Firestore for UTR duplicates (catches cross-device submissions)
-  try {
-    const colRef = collection(db, 'payment_submissions');
-    const snap = await getDocs(colRef);
-    const cloudDup = snap.docs.find((d) => {
-      const data = d.data() as PaymentSubmission;
-      return data.utrNumber.trim().toUpperCase() === utrNorm && data.status !== 'rejected';
-    });
-    if (cloudDup) {
-      const existing = cloudDup.data() as PaymentSubmission;
-      throw new Error(
-        `UTR number ${submission.utrNumber} has already been submitted. ` +
-        `Status: ${existing.status.toUpperCase()}. If you believe this is an error, contact support.`
-      );
+  // Compress screenshot client-side so it can be safely stored in Firestore for admin review
+  let compressedScreenshot = submission.screenshotUrl || '';
+  if (compressedScreenshot) {
+    try {
+      compressedScreenshot = await compressScreenshotDataUrl(compressedScreenshot, 800, 0.65);
+    } catch {
+      // Ignore
     }
-  } catch (err) {
-    // Re-throw duplicate errors; swallow network errors to allow offline submission
-    if (err instanceof Error && err.message.includes('UTR number')) throw err;
-    console.warn('Could not check Firestore for duplicate UTR (allowing submission):', err);
   }
-  // ────────────────────────────────────────────────────────────────────────
 
   const newSubmission: PaymentSubmission = {
     ...submission,
+    screenshotUrl: compressedScreenshot,
     id: `pay_${Date.now()}_${Math.floor(1000 + Math.random() * 9000)}`,
     status: 'pending',
     submittedAt: new Date().toISOString()
@@ -353,14 +385,18 @@ export async function submitPaymentRequest(
     // Ignore
   }
 
-  // 2. Sync to Firebase Firestore (without base64 screenshot to avoid 1 MB doc limit)
+  // 2. Sync to Firebase Firestore (compressed screenshot fits easily in Firestore <100KB)
   try {
     const docRef = doc(db, 'payment_submissions', newSubmission.id);
-    // Strip the base64 screenshot before Firestore write to stay well under 1 MB limit.
-    // Admin can still view the screenshot from localStorage / admin panel on the same device.
-    const { screenshotUrl: _ss, ...firestorePayload } = newSubmission;
-    void _ss; // explicitly unused
-    await setDoc(docRef, { ...firestorePayload, hasScreenshot: true });
+    const includeScreenshot = compressedScreenshot && compressedScreenshot.length < 350000;
+    const firestorePayload = includeScreenshot
+      ? { ...newSubmission, hasScreenshot: true }
+      : (() => {
+          const { screenshotUrl: _ss, ...rest } = newSubmission;
+          void _ss;
+          return { ...rest, hasScreenshot: Boolean(compressedScreenshot) };
+        })();
+    await setDoc(docRef, firestorePayload);
   } catch (err) {
     console.warn('Could not sync payment submission to Firestore (saved locally):', err);
   }
@@ -463,8 +499,37 @@ export async function approvePaymentSubmission(
   expiryDate.setDate(expiryDate.getDate() + durationDays);
   target.expiresAt = expiryDate.toISOString();
 
+  // 1. Sync to Firestore FIRST (server-side security rules must permit the write)
+  try {
+    const payRef = doc(db, 'payment_submissions', submissionId);
+    await setDoc(payRef, target, { merge: true });
 
-  // Update in local storage
+    // Update user's Firestore profile
+    if (target.userId) {
+      const userRef = doc(db, 'users', target.userId);
+      await setDoc(
+        userRef,
+        {
+          is_subscribed: true,
+          subscriptionPlan: target.planId,
+          subscriptionPlanType: target.planType,
+          subscriptionExpiresAt: expiryDate.toISOString(),
+          subscriptionExamId: target.selectedExamId || null,
+          subscriptionExamTitle: target.selectedExamTitle || null,
+          subscriptionApprovedAt: new Date().toISOString()
+        },
+        { merge: true }
+      );
+    }
+  } catch (err: any) {
+    console.warn('Could not sync approval to Firestore:', err);
+    return {
+      success: false,
+      message: `Permission Denied: Only authenticated administrators can approve payments. (${err?.message || 'Unauthorized'})`
+    };
+  }
+
+  // 2. Only update local storage if Firestore write succeeded
   const localList = getAllLocalSubmissions().map((s) => (s.id === submissionId ? target : s));
   localStorage.setItem(STORAGE_KEY_SUBMISSIONS, JSON.stringify(localList));
 
@@ -489,32 +554,6 @@ export async function approvePaymentSubmission(
     // Ignore
   }
 
-  // Sync to Firestore
-  try {
-    const payRef = doc(db, 'payment_submissions', submissionId);
-    await setDoc(payRef, target, { merge: true });
-
-    // Update user's Firestore profile
-    if (target.userId) {
-      const userRef = doc(db, 'users', target.userId);
-      await setDoc(
-        userRef,
-        {
-          is_subscribed: true,
-          subscriptionPlan: target.planId,
-          subscriptionPlanType: target.planType,
-          subscriptionExpiresAt: expiryDate.toISOString(),
-          subscriptionExamId: target.selectedExamId || null,
-          subscriptionExamTitle: target.selectedExamTitle || null,
-          subscriptionApprovedAt: new Date().toISOString()
-        },
-        { merge: true }
-      );
-    }
-  } catch (err) {
-    console.warn('Could not sync approval to Firestore:', err);
-  }
-
   return { success: true, submission: target };
 }
 
@@ -532,17 +571,21 @@ export async function rejectPaymentSubmission(
   target.reviewedAt = new Date().toISOString();
   target.reviewedBy = adminEmail;
 
-  // Update in local storage
-  const localList = getAllLocalSubmissions().map((s) => (s.id === submissionId ? target : s));
-  localStorage.setItem(STORAGE_KEY_SUBMISSIONS, JSON.stringify(localList));
-
-  // Sync to Firestore
+  // 1. Sync to Firestore FIRST
   try {
     const payRef = doc(db, 'payment_submissions', submissionId);
     await setDoc(payRef, target, { merge: true });
-  } catch (err) {
+  } catch (err: any) {
     console.warn('Could not sync rejection to Firestore:', err);
+    return {
+      success: false,
+      message: `Permission Denied: Only authenticated administrators can reject payments. (${err?.message || 'Unauthorized'})`
+    };
   }
+
+  // 2. Only update local storage if Firestore write succeeded
+  const localList = getAllLocalSubmissions().map((s) => (s.id === submissionId ? target : s));
+  localStorage.setItem(STORAGE_KEY_SUBMISSIONS, JSON.stringify(localList));
 
   return { success: true, submission: target };
 }
@@ -551,10 +594,10 @@ export async function rejectPaymentSubmission(
  * Check if the active user has administrative privileges.
  * SECURITY: Only trust `user.isAdmin` and `user.role` which are populated by
  * firebase.ts after verifying the Firestore `/admins/{uid}` collection.
- * Do NOT check email strings here — anyone could sign up with "admin" in their email.
+ * Guest users cannot be administrators.
  */
 export function isUserAdmin(user?: UserProfile | null): boolean {
-  if (!user) return false;
+  if (!user || !user.uid || user.uid.startsWith('guest-')) return false;
   return !!(user.isAdmin || user.role === 'admin');
 }
 
@@ -566,7 +609,7 @@ export function hasExamProAccess(
   examId?: string,
   categoryGroup?: string
 ): boolean {
-  if (!user) return false;
+  if (!user || !user.uid || user.uid.startsWith('guest-')) return false;
   if (isUserAdmin(user)) return true;
   if (!user.is_subscribed) return false;
 
