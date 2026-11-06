@@ -138,5 +138,15 @@ service cloud.firestore {
       allow read: if true;
       allow write: if isAdmin();
     }
+
+    // ── Paid passages (read only by active subscribers or admin; write and list only by admin) ─
+    match /paid_passages/{passageId} {
+      allow get: if signedIn() && (
+        isAdmin() ||
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.is_subscribed == true
+      );
+      allow list, write: if isAdmin();
+    }
   }
 }
+

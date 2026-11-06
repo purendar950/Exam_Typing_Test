@@ -31,6 +31,7 @@ import {
   TelegramConfig
 } from './services/telegramService';
 import { isTestLocked } from './services/paymentService';
+import { fetchPaidPassageText } from './services/passageService';
 import {
   subscribeToAuth,
   saveTestResultToCloud,
@@ -218,6 +219,7 @@ export const App: React.FC = () => {
     }
     return false;
   });
+  const [isLoadingPassage, setIsLoadingPassage] = useState<boolean>(false);
 
   useEffect(() => {
     if (typeof document !== 'undefined') {
@@ -477,7 +479,7 @@ export const App: React.FC = () => {
   };
 
   // Start test
-  const handleStartTest = (passage: Passage, customDurationMinutes?: number, examProfile?: ExamProfile | null) => {
+  const handleStartTest = async (passage: Passage, customDurationMinutes?: number, examProfile?: ExamProfile | null) => {
     // Pro Paywall Guard: First 7 tests of each exam are free demo.
     // Tests #8+ require Pro subscription or Admin privileges.
     const examId = examProfile?.id || passage.examSlug;
@@ -489,28 +491,62 @@ export const App: React.FC = () => {
       return;
     }
 
-    setSelectedPassage(passage);
+    let finalPassage = passage;
+    const isPaidTest = (passage.testNumber ?? 0) > 7;
+
+    // Server-Side Verification & Content Delivery for Paid Tests (#8+)
+    if (isPaidTest) {
+      setIsLoadingPassage(true);
+      try {
+        const fetchRes = await fetchPaidPassageText(passage.id);
+        if (fetchRes.success && fetchRes.text) {
+          finalPassage = { ...passage, text: fetchRes.text };
+        } else if (fetchRes.isPermissionDenied) {
+          setIsLoadingPassage(false);
+          alert('🔒 Server Security Verification: Active Pro subscription required for Test #' + (passage.testNumber || '') + '. Please upgrade or renew.');
+          handleOpenPayment(examId);
+          return;
+        } else if (!passage.text) {
+          // Cloud doc not loaded and no local fallback text
+          setIsLoadingPassage(false);
+          alert('⚠️ ' + (fetchRes.error || 'Unable to load test from secure server. Please check internet connection.'));
+          return;
+        }
+        // If fetch returned error but passage.text already exists locally (fallback), proceed gracefully
+      } catch (err) {
+        console.warn('Paid passage fetch fallback warning:', err);
+        if (!passage.text) {
+          setIsLoadingPassage(false);
+          alert('Network error loading test. Please retry.');
+          return;
+        }
+      } finally {
+        setIsLoadingPassage(false);
+      }
+    }
+
+    setSelectedPassage(finalPassage);
     let resolvedProfile: ExamProfile | null = examProfile || null;
     if (!resolvedProfile) {
-      if (passage.examSlug) {
-        resolvedProfile = ALL_EXAMS.find((p) => p.slug === passage.examSlug) || null;
+      if (finalPassage.examSlug) {
+        resolvedProfile = ALL_EXAMS.find((p) => p.slug === finalPassage.examSlug) || null;
       }
-      if (!resolvedProfile && passage.categoryGroup) {
-        resolvedProfile = ALL_EXAMS.find((p) => p.categoryGroup === passage.categoryGroup && p.language === passage.language) || null;
+      if (!resolvedProfile && finalPassage.categoryGroup) {
+        resolvedProfile = ALL_EXAMS.find((p) => p.categoryGroup === finalPassage.categoryGroup && p.language === finalPassage.language) || null;
       }
-      if (!resolvedProfile && passage.category) {
-        resolvedProfile = ALL_EXAMS.find((p) => (p.slug.includes(passage.category) || p.id === passage.category) && p.language === passage.language) || null;
+      if (!resolvedProfile && finalPassage.category) {
+        resolvedProfile = ALL_EXAMS.find((p) => (p.slug.includes(finalPassage.category) || p.id === finalPassage.category) && p.language === finalPassage.language) || null;
       }
     }
     setSelectedExamProfile(resolvedProfile);
 
-    const finalDuration = customDurationMinutes || resolvedProfile?.durationMinutes || passage.duration || 15;
+    const finalDuration = customDurationMinutes || resolvedProfile?.durationMinutes || finalPassage.duration || 15;
     setSelectedDurationMinutes(finalDuration);
 
     // Save active test session so page refresh stays right here
     try {
       sessionStorage.setItem('up_active_test_session', JSON.stringify({
-        passage,
+        passage: finalPassage,
         durationMinutes: finalDuration,
         examProfile: resolvedProfile,
         timestamp: Date.now()
@@ -1108,7 +1144,45 @@ export const App: React.FC = () => {
         />
       )}
 
+      {/* Secure Test Loading Overlay */}
+      {isLoadingPassage && (
+        <div
+          style={{
+            position: 'fixed',
+            inset: 0,
+            zIndex: 99999,
+            background: 'rgba(15, 23, 42, 0.78)',
+            backdropFilter: 'blur(5px)',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            color: '#ffffff',
+            padding: '20px',
+            textAlign: 'center'
+          }}
+        >
+          <div
+            style={{
+              width: '46px',
+              height: '46px',
+              border: '4px solid rgba(255, 255, 255, 0.2)',
+              borderTopColor: '#38bdf8',
+              borderRadius: '50%',
+              animation: 'spin 0.8s linear infinite'
+            }}
+          />
+          <h3 style={{ margin: '18px 0 6px 0', fontSize: '1.15rem', fontWeight: 700, color: '#f8fafc' }}>
+            🔒 Verifying Security & Loading Test...
+          </h3>
+          <p style={{ margin: 0, fontSize: '0.88rem', color: '#94a3b8' }}>
+            क्लाउड सर्वर से सुरक्षित टेस्ट डेटा लोड किया जा रहा है...
+          </p>
+        </div>
+      )}
+
       <PwaInstallPrompt />
     </div>
   );
 };
+
