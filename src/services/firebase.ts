@@ -46,9 +46,12 @@ export interface UserProfile {
   isAdmin?: boolean;
   role?: 'admin' | 'candidate';
   is_subscribed?: boolean;
+  subscriptionStatus?: 'active' | 'free_trial' | 'expired' | 'pending';
   subscriptionPlan?: string;
+  subscriptionPlanName?: string;
   subscriptionPlanType?: 'single_exam' | 'category_combo' | 'all_exams_pass';
   subscriptionExpiresAt?: string;
+  subscriptionApprovedAt?: string;
   subscriptionExamId?: string;
   subscriptionExamTitle?: string;
   createdAt: string;
@@ -295,14 +298,62 @@ export function subscribeToAuth(callback: (user: UserProfile | null) => void): (
         // Fail closed
       }
 
-      profile.isAdmin = isAdmin;
-      profile.role = isAdmin ? 'admin' : 'candidate';
+      if (isAdmin) {
+        profile.isAdmin = true;
+        profile.role = 'admin';
+        profile.is_subscribed = true;
+        profile.subscriptionStatus = 'active';
+        profile.subscriptionPlan = 'admin_mega_pass';
+        profile.subscriptionPlanName = 'Administrator Mega Pass (Lifetime All-Access)';
+        profile.subscriptionPlanType = 'all_exams_pass';
+        profile.subscriptionExamId = 'all';
+        profile.subscriptionExamTitle = 'All 129+ Central & State Exams (Lifetime Access)';
+        profile.subscriptionExpiresAt = '2099-12-31T23:59:59.000Z';
+        profile.subscriptionApprovedAt = profile.subscriptionApprovedAt || profile.createdAt;
 
-      // Check subscription expiry
-      if (profile.is_subscribed && profile.subscriptionExpiresAt) {
+        // Auto-sync professional subscription metadata to Firestore doc /users/{uid}
+        // if not already present, ensuring clean database records
+        const firestoreData = snap.data();
+        if (!firestoreData?.is_subscribed || !firestoreData?.subscriptionPlan) {
+          try {
+            await setDoc(
+              doc(db, 'users', fbUser.uid),
+              {
+                isAdmin: true,
+                role: 'admin',
+                is_subscribed: true,
+                subscriptionStatus: 'active',
+                subscriptionPlan: 'admin_mega_pass',
+                subscriptionPlanName: 'Administrator Mega Pass (Lifetime All-Access)',
+                subscriptionPlanType: 'all_exams_pass',
+                subscriptionExamId: 'all',
+                subscriptionExamTitle: 'All 129+ Central & State Exams (Lifetime Access)',
+                subscriptionExpiresAt: '2099-12-31T23:59:59.000Z',
+                subscriptionApprovedAt: profile.subscriptionApprovedAt
+              },
+              { merge: true }
+            );
+          } catch (e) {
+            console.warn('Could not sync admin subscription schema to Firestore:', e);
+          }
+        }
+      } else {
+        profile.isAdmin = false;
+        profile.role = 'candidate';
+        if (profile.is_subscribed === undefined) {
+          profile.is_subscribed = false;
+          profile.subscriptionStatus = 'free_trial';
+          profile.subscriptionPlan = 'free_demo';
+          profile.subscriptionPlanName = 'Free Demo Pass (First 7 Tests Free)';
+        }
+      }
+
+      // Check subscription expiry for candidates
+      if (profile.is_subscribed && profile.subscriptionExpiresAt && !profile.isAdmin) {
         const expiry = new Date(profile.subscriptionExpiresAt).getTime();
         if (!isNaN(expiry) && expiry < Date.now()) {
           profile.is_subscribed = false;
+          profile.subscriptionStatus = 'expired';
         }
       }
 

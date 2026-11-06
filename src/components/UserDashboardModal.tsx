@@ -166,10 +166,31 @@ export const UserDashboardModal: React.FC<UserDashboardModalProps> = ({
                 >
                   {user.isAnonymous ? '⚡ Guest Profile' : '☁️ Cloud Synced'}
                 </span>
+                <span
+                  style={{
+                    background: user.isAdmin
+                      ? 'linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%)'
+                      : user.is_subscribed
+                      ? 'linear-gradient(135deg, #059669 0%, #047857 100%)'
+                      : '#f1f5f9',
+                    color: user.isAdmin || user.is_subscribed ? '#ffffff' : '#64748b',
+                    padding: '2px 9px',
+                    borderRadius: '10px',
+                    fontSize: '0.72rem',
+                    fontWeight: 800
+                  }}
+                >
+                  {user.isAdmin
+                    ? '🛡️ Admin (Lifetime)'
+                    : user.is_subscribed
+                    ? '👑 Pro Member'
+                    : '🆓 Free Tier'}
+                </span>
               </div>
-              <div style={{ display: 'flex', gap: '12px', fontSize: '0.8rem', opacity: 0.9, marginTop: '2px' }}>
+              <div style={{ display: 'flex', gap: '12px', fontSize: '0.8rem', opacity: 0.9, marginTop: '2px', flexWrap: 'wrap' }}>
                 <span>Roll No: <strong>{user.rollNumber}</strong></span>
                 <span>Post: <strong>{user.category === 'up_police_asi' ? 'ASI (Clerk/Accounts)' : 'Computer Operator Grade-A'}</strong></span>
+                <span>Plan: <strong>{user.subscriptionPlanName || (user.isAdmin ? 'All 129+ Exams Mega Pass' : user.is_subscribed ? 'Active Pro' : 'Free Demo (Tests 1-7)')}</strong></span>
               </div>
             </div>
           </div>
