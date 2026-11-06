@@ -414,13 +414,13 @@ export async function notifyAdminViaTelegram(
 ): Promise<{ success: boolean; message: string }> {
   const config = configOverride || (await getTelegramConfig());
 
-  if (!config || !config.enabled || !config.botToken?.trim() || !config.adminChatId?.trim()) {
-    console.warn('Telegram live chat alert skipped: botToken or adminChatId not yet loaded');
+  if (!config || !config.enabled || !config.botToken?.trim() || !config.adminChatId?.trim() || !config.approvalSecretToken?.trim()) {
+    console.warn('Telegram live chat alert skipped: botToken, adminChatId, or approvalSecretToken not configured');
     return { success: false, message: 'Telegram config incomplete' };
   }
 
   const appBaseUrl = getAppBaseUrl();
-  const secret = config.approvalSecretToken || '';
+  const secret = config.approvalSecretToken.trim();
   const cName = encodeURIComponent(userName || 'Candidate');
   const cEmail = encodeURIComponent(userEmail || '');
   const cMsg = encodeURIComponent(messageText);

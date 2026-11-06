@@ -130,20 +130,17 @@ export const TelegramAdminChatSheet: React.FC<TelegramAdminChatSheetProps> = ({
       if (!isMounted) return;
       setConfig(cfg);
 
-      const secretToCheck = token || manualToken;
-      const validSecret = cfg.approvalSecretToken || '';
-      const hasValidToken = Boolean(
-        secretToCheck &&
-          (secretToCheck.trim() === validSecret.trim() || secretToCheck.trim() === '')
-      );
+      const secretToCheck = (token || manualToken || '').trim();
+      const validSecret = (cfg.approvalSecretToken || '').trim();
       const isFirebaseAdmin = isUserAdmin(currentUser || null);
+      const hasValidToken = Boolean(validSecret && secretToCheck && secretToCheck === validSecret);
 
-      if (hasValidToken || isFirebaseAdmin || !token) {
+      if (hasValidToken || isFirebaseAdmin) {
         setIsAuthorized(true);
         setAuthError('');
       } else {
         setIsAuthorized(false);
-        setAuthError('Invalid Admin Secret Token');
+        setAuthError('Access Denied: Valid Admin Secret Token or Administrator sign-in required.');
       }
     });
 
@@ -192,8 +189,8 @@ export const TelegramAdminChatSheet: React.FC<TelegramAdminChatSheetProps> = ({
 
   const handleManualAuthSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const validSecret = config?.approvalSecretToken || '';
-    if (manualToken.trim() === validSecret.trim() || manualToken.trim() === '') {
+    const validSecret = (config?.approvalSecretToken || '').trim();
+    if (validSecret && manualToken.trim() === validSecret) {
       setIsAuthorized(true);
       setAuthError('');
     } else {
