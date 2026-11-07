@@ -15,7 +15,8 @@ service cloud.firestore {
 
     // Fields a candidate must never set on their own profile.
     function protectedKeys() {
-      return ['isAdmin', 'role', 'is_subscribed', 'subscriptionPlan', 'subscriptionPlanType',
+      return ['isAdmin', 'role', 'is_subscribed', 'subscriptionPlan', 'subscriptionPlanName',
+              'subscriptionStatus', 'subscriptionPlanType',
               'subscriptionExpiresAt', 'subscriptionExamId', 'subscriptionExamTitle',
               'subscriptionApprovedAt'];
     }

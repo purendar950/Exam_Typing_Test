@@ -314,7 +314,7 @@ export function subscribeToAuth(callback: (user: UserProfile | null) => void): (
         // Auto-sync professional subscription metadata to Firestore doc /users/{uid}
         // if not already present, ensuring clean database records
         const firestoreData = snap.data();
-        if (!firestoreData?.is_subscribed || !firestoreData?.subscriptionPlan) {
+        if (!firestoreData?.is_subscribed || !firestoreData?.subscriptionPlan || !firestoreData?.subscriptionStatus || !firestoreData?.subscriptionPlanName) {
           try {
             await setDoc(
               doc(db, 'users', fbUser.uid),
