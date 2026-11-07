@@ -30,8 +30,10 @@ HI_KRUTI_PADDING = """vk/kqfud lekt ds lokZaxh.k fodkl ds fy, cqfu;knh <kaps] tu
 izfr;ksxh Vad.k ijh{kk esa lfEefyr gksus okys vH;fFkZ;ksa dks pkfg, fd os fofo/k lkekftd] vkfFkZd ,oa fof/kd fo"k;ksa ls lacaf/kr vuqPNsnksa ij Vad.k dk xgu vH;kl djsaA vH;kl ds nkSjku 'kq¼rk dks loksZPp izkFkfedrk nsuh pkfg, D;ksafd 'kq¼ Vad.k gh usV xfr dks c<+krk gS vkSj ijh{kk esa liQyrk dk ekxZ iz'kLr djrk gSA mÙkj izns'k iqfyl HkrhZ ,oa izksUufr cksMZ }kjk vk;ksftr dEI;wVj vkWijsVj ijh{kk esa fu/kkZfjr xfr ,oa mPp 'kq¼rk izkIr djuk gh vafre p;u dk vk/kkj curk gSA"""
 
 def get_token():
-    email = os.environ.get("ARTYPING_EMAIL", "placeholder_email@example.com")
-    password = os.environ.get("ARTYPING_PASSWORD", "placeholder_password")
+    email = os.environ.get("ARTYPING_EMAIL")
+    password = os.environ.get("ARTYPING_PASSWORD")
+    if not email or not password:
+        raise ValueError("ARTYPING_EMAIL and ARTYPING_PASSWORD environment variables are required.")
     url = f"{API_BASE}/jwt/create/"
     data = json.dumps({"email": email, "password": password}).encode()
     req = urllib.request.Request(url, data=data, headers={"Content-Type": "application/json", "User-Agent": "Mozilla/5.0"})
