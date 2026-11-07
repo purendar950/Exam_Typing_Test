@@ -1,6 +1,5 @@
 # GitHub Linguist Language Detection
 # Vendor large bundled passage datasets and builds so they don't skew repository language statistics
-public/passages-by-date.json linguist-vendored
 dist/** linguist-vendored
 *.json linguist-vendored
 scripts/** linguist-vendored

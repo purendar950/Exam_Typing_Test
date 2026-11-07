@@ -499,27 +499,24 @@ export const App: React.FC = () => {
       setIsLoadingPassage(true);
       try {
         const fetchRes = await fetchPaidPassageText(passage.id);
-        if (fetchRes.success && fetchRes.text) {
+        if (fetchRes.success && fetchRes.text && fetchRes.text.trim().length > 0) {
           finalPassage = { ...passage, text: fetchRes.text };
         } else if (fetchRes.isPermissionDenied) {
           setIsLoadingPassage(false);
           alert('🔒 Server Security Verification: Active Pro subscription required for Test #' + (passage.testNumber || '') + '. Please upgrade or renew.');
           handleOpenPayment(examId);
           return;
-        } else if (!passage.text) {
-          // Cloud doc not loaded and no local fallback text
+        } else {
+          // Hard security failure — NEVER proceed without verified server content
           setIsLoadingPassage(false);
-          alert('⚠️ ' + (fetchRes.error || 'Unable to load test from secure server. Please check internet connection.'));
+          alert('⚠️ ' + (fetchRes.error || 'Access Denied: Unable to load secure test passage from server. Active Pro subscription required.'));
           return;
         }
-        // If fetch returned error but passage.text already exists locally (fallback), proceed gracefully
       } catch (err) {
-        console.warn('Paid passage fetch fallback warning:', err);
-        if (!passage.text) {
-          setIsLoadingPassage(false);
-          alert('Network error loading test. Please retry.');
-          return;
-        }
+        console.error('Paid passage security fetch error:', err);
+        setIsLoadingPassage(false);
+        alert('⚠️ Security Verification Failed: Unable to verify access to this Pro test. Please check internet connection.');
+        return;
       } finally {
         setIsLoadingPassage(false);
       }

@@ -41,9 +41,9 @@ jobs:
         run: |
           git config user.name "Exam AI Generator [Bot]"
           git config user.email "bot@exam-typing-test.local"
-          if ! git diff --quiet src/data/passages.ts public/passages-by-date.json; then
+          if ! git diff --quiet src/data/passages.ts; then
             echo "[+] New daily AI exam tests generated! Committing and pushing..."
-            git add src/data/passages.ts public/passages-by-date.json
+            git add src/data/passages.ts
             git commit -m "Auto-generate daily exam typing tests [$(date +'%Y-%m-%d')]"
             git push origin main
           else
