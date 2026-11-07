@@ -1,11 +1,10 @@
 // UP Police Typing Test Portal - Service Worker
-const CACHE_NAME = 'up-typing-cache-v2';
+const CACHE_NAME = 'up-typing-cache-v3';
 
 const STATIC_ASSETS = [
   './',
   './index.html',
   './manifest.json',
-  './passages-by-date.json',
   './icon-192.png',
   './icon-512.png',
   './fonts/KrutiDev010.ttf'

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { Passage, Language, ExamCategory } from '../types';
 import {
   UserProfile,
@@ -875,9 +875,27 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
     onPassagesUpdated(passages.filter((p) => p.id !== id));
   };
 
+  const syncFileInputRef = useRef<HTMLInputElement>(null);
+
   // Sync Paid Passages to Cloud Firestore
-  const handleSyncPaidPassages = async () => {
-    const totalToSync = passages.filter((p) => (p.testNumber ?? 0) > 7 && p.text?.trim()).length;
+  const handleSyncPaidPassages = async (passagesToUpload?: Passage[]) => {
+    let targetPassages = passagesToUpload || passages;
+    const totalToSync = targetPassages.filter((p) => (p.testNumber ?? 0) > 7 && p.text?.trim()).length;
+
+    if (totalToSync === 0) {
+      // In production, paid passages text is stripped from the client bundle for security.
+      // Prompt admin to select the private master passages JSON file.
+      if (syncFileInputRef.current) {
+        alert(
+          'ℹ️ Secure Paywall Architecture:\n\n' +
+          'Paid test passages are stored exclusively in Cloud Firestore and are not bundled in public client code.\n\n' +
+          'Please select your master passages JSON file (e.g. "master-paid-passages.private.json") to upload directly to Cloud Firestore.'
+        );
+        syncFileInputRef.current.click();
+        return;
+      }
+    }
+
     if (!window.confirm(`Sync ${totalToSync} Paid Passages (Tests #8+) to Cloud Firestore?\n\nThis will upload all test content securely into the /paid_passages collection on Firebase. Only candidates with active Pro subscriptions will be able to read them.`)) {
       return;
     }
@@ -886,7 +904,7 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
     setSyncStatusMsg('⏳ Initializing Cloud Sync...');
     setSyncProgressCount(null);
 
-    const res = await syncPaidPassagesToFirestore(passages, (done, total) => {
+    const res = await syncPaidPassagesToFirestore(targetPassages, (done, total) => {
       setSyncProgressCount({ done, total });
       setSyncStatusMsg(`⏳ Uploading to Cloud Firestore: ${done} / ${total} (${Math.round((done / total) * 100)}%)`);
     });
@@ -897,6 +915,27 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
     } else {
       setSyncStatusMsg(`❌ Cloud Sync Error: ${res.error}`);
     }
+  };
+
+  const handleFileSelectedForSync = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = async (event) => {
+      try {
+        const data = JSON.parse(event.target?.result as string);
+        if (!Array.isArray(data)) {
+          alert('Invalid format: Selected JSON must be an array of passages.');
+          return;
+        }
+        await handleSyncPaidPassages(data as Passage[]);
+      } catch (err: any) {
+        alert('Failed to parse JSON file: ' + err.message);
+      } finally {
+        if (e.target) e.target.value = '';
+      }
+    };
+    reader.readAsText(file);
   };
 
   // Save Exam System Settings
@@ -3014,9 +3053,16 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                         <span>{isFullscreen ? 'Exit Full Screen Studio' : 'Full Screen Studio'}</span>
                       </button>
 
+                      <input
+                        type="file"
+                        ref={syncFileInputRef}
+                        accept=".json"
+                        style={{ display: 'none' }}
+                        onChange={handleFileSelectedForSync}
+                      />
                       <button
                         type="button"
-                        onClick={handleSyncPaidPassages}
+                        onClick={() => handleSyncPaidPassages()}
                         disabled={isSyncingPaidPassages}
                         style={{
                           padding: '8px 14px',

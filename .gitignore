@@ -18,6 +18,10 @@ dist-ssr
 !.env.example
 *.secret
 secrets.*
+*.private.json
+master-paid-passages.*
+master-passages.*
+passages-by-date.json
 
 # Editor directories and files
 .vscode/*
