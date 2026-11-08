@@ -15,6 +15,7 @@ import { AuthModal } from './components/AuthModal';
 import { UserDashboardModal } from './components/UserDashboardModal';
 import { LeaderboardModal } from './components/LeaderboardModal';
 import { MyCoursesModal } from './components/MyCoursesModal';
+import { ExclusiveOfferBanner } from './components/ExclusiveOfferBanner';
 import { AiGeneratorModal } from './components/AiGeneratorModal';
 import { AdminPanelModal } from './components/AdminPanelModal';
 import { PaymentModal } from './components/PaymentModal';
@@ -266,10 +267,19 @@ export const App: React.FC = () => {
   };
   const [isPaymentOpen, setIsPaymentOpen] = useState<boolean>(false);
   const [paymentInitialExamId, setPaymentInitialExamId] = useState<string | undefined>(undefined);
+  const [paymentInitialPlanId, setPaymentInitialPlanId] = useState<string | undefined>(undefined);
+  const [showOfferBanner, setShowOfferBanner] = useState<boolean>(() => {
+    if (typeof window !== 'undefined') {
+      const dismissed = sessionStorage.getItem('up_offer_banner_dismissed') === 'true';
+      return !dismissed;
+    }
+    return true;
+  });
   const [dailyLivePassages, setDailyLivePassages] = useState<Passage[]>([]);
 
-  const handleOpenPayment = (examId?: string) => {
+  const handleOpenPayment = (examId?: string, planId?: string) => {
     setPaymentInitialExamId(examId);
+    setPaymentInitialPlanId(planId);
     setIsPaymentOpen(true);
   };
   const [customPassages, setCustomPassages] = useState<Passage[]>([]);
@@ -675,6 +685,20 @@ export const App: React.FC = () => {
 
       )}
 
+      {/* ⚡ EXCLUSIVE ₹12 FOR 15 DAYS WELCOME OFFER BANNER (Shown when user logs in) */}
+      {showOfferBanner && currentUser && !currentUser.is_subscribed && currentView !== 'test' && (
+        <ExclusiveOfferBanner
+          userName={currentUser.displayName}
+          onClaim={() => {
+            handleOpenPayment(undefined, 'plan_exclusive_12');
+          }}
+          onDismiss={() => {
+            setShowOfferBanner(false);
+            sessionStorage.setItem('up_offer_banner_dismissed', 'true');
+          }}
+        />
+      )}
+
       <main style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
         {currentView === 'choose' && (
           <ChooseTest
@@ -973,6 +997,8 @@ export const App: React.FC = () => {
           setCurrentUser(user);
           setIsAuthOpen(false);
           sessionStorage.removeItem('up_auth_dismissed');
+          sessionStorage.removeItem('up_offer_banner_dismissed');
+          setShowOfferBanner(true);
           setSettings((prev) => ({
             ...prev,
             candidateName: user.displayName
@@ -1075,9 +1101,11 @@ export const App: React.FC = () => {
         onClose={() => {
           setIsPaymentOpen(false);
           setPaymentInitialExamId(undefined);
+          setPaymentInitialPlanId(undefined);
         }}
         currentUser={currentUser}
         initialSelectedExamId={paymentInitialExamId}
+        initialPlanId={paymentInitialPlanId}
       />
 
       <LegalPolicyModal

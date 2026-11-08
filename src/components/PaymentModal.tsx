@@ -16,6 +16,7 @@ interface PaymentModalProps {
   onClose: () => void;
   currentUser: UserProfile | null;
   initialSelectedExamId?: string;
+  initialPlanId?: string;
   onPaymentSubmitted?: () => void;
 }
 
@@ -24,6 +25,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
   onClose,
   currentUser,
   initialSelectedExamId,
+  initialPlanId,
   onPaymentSubmitted
 }) => {
   const plans = useMemo(() => getPaymentPlans(), []);
@@ -31,6 +33,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
 
   // Selected Plan state
   const [selectedPlanId, setSelectedPlanId] = useState<string>(() => {
+    if (initialPlanId) return initialPlanId;
     return plans.find((p) => p.isBestValue)?.id || plans[plans.length - 1]?.id || plans[0]?.id || 'plan_all_exams_12m';
   });
 
@@ -40,6 +43,13 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
 
   // Single exam selection if single_exam plan chosen
   const [selectedExamId, setSelectedExamId] = useState<string>(initialSelectedExamId || '53');
+
+  // Sync when initialPlanId or modal opens
+  useEffect(() => {
+    if (initialPlanId && isOpen) {
+      setSelectedPlanId(initialPlanId);
+    }
+  }, [initialPlanId, isOpen]);
 
   // Sync when initialSelectedExamId or modal opens
   useEffect(() => {
@@ -77,12 +87,14 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
 
   // Re-calculate promo discount if plan changes
   const currentDiscountAmount = useMemo(() => {
-    if (!appliedPromo) return 0;
+    if (!appliedPromo || selectedPlan.id === 'plan_exclusive_12') return 0;
     const reval = validatePromoCode(appliedPromo.code, selectedPlan.discountedPrice);
     return reval.valid ? reval.discountAmount : 0;
   }, [appliedPromo, selectedPlan]);
 
-  const finalPayable = Math.max(9, selectedPlan.discountedPrice - currentDiscountAmount);
+  const finalPayable = selectedPlan.id === 'plan_exclusive_12'
+    ? 12
+    : Math.max(9, selectedPlan.discountedPrice - currentDiscountAmount);
 
   // Form states
   const [candidateName, setCandidateName] = useState<string>(currentUser?.displayName || '');

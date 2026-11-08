@@ -23,6 +23,7 @@ export interface PaymentPlan {
   features: string[];
   isPopular?: boolean;
   isBestValue?: boolean;
+  isExclusiveOffer?: boolean;
 }
 
 export interface PromoCode {
@@ -69,6 +70,24 @@ export interface PaymentSubmission {
 }
 
 export const DEFAULT_PAYMENT_PLANS: PaymentPlan[] = [
+  {
+    id: 'plan_exclusive_12',
+    name: '15-Day Single Exam Pass',
+    badge: '⚡ EXCLUSIVE ₹12 OFFER',
+    type: 'single_exam',
+    durationDays: 15,
+    durationLabel: '15 Days',
+    originalPrice: 99,
+    discountedPrice: 12,
+    isExclusiveOffer: true,
+    features: [
+      '⚡ Candidate Welcome Special: Just ₹12 for 15 Days',
+      'Unlock ANY 1 Examination of your choice (out of 129 Exams)',
+      'Unlimited Mock Test Series & Live Passage Practice',
+      'Official Speed, Accuracy & Error Penalty Evaluation',
+      'Daily Practice & Skill Tracking Included'
+    ]
+  },
   {
     id: 'plan_single_1m',
     name: 'Single Exam Pass',
@@ -281,7 +300,12 @@ export function getPaymentPlans(): PaymentPlan[] {
     const saved = localStorage.getItem(STORAGE_KEY_CUSTOM_PLANS);
     if (saved) {
       const parsed = JSON.parse(saved);
-      if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        if (!parsed.some((p: PaymentPlan) => p.id === 'plan_exclusive_12')) {
+          return [DEFAULT_PAYMENT_PLANS[0], ...parsed];
+        }
+        return parsed;
+      }
     }
     return DEFAULT_PAYMENT_PLANS;
   } catch {
