@@ -433,16 +433,24 @@ export function evaluateTypingTest(input: EvaluateInput): EvaluationResult {
   // Model-specific qualification verdict
   let isQualified = false;
   switch (model) {
-    case 'upprpb':
-      isQualified = netWpm >= requiredSpeed && accuracy >= requiredAccuracy;
+    case 'upprpb': {
+      // In official UPPRPB, accuracy is evaluated on words attempted by the candidate (minimum 85%).
+      // For practice tests of custom durations (5m, 10m, 15m), typedAccuracy ensures candidates aren't falsely disqualified.
+      const effectiveAcc = Math.max(accuracy, typedAccuracy);
+      isQualified = netWpm >= requiredSpeed && effectiveAcc >= requiredAccuracy;
       break;
+    }
 
     case 'rrb_eduquity':
       isQualified = rrbNetWpm >= requiredSpeed;
       break;
 
     case 'ssc_dest': {
-      const permissibleError = input.limitErrorPercentage ?? (input.examProfileTitle?.includes('CHSL') ? 7.0 : 20.0);
+      // If limitErrorPercentage is set > 0, use it. Otherwise, default strictly to official SSC gazette limits:
+      // SSC CHSL: 7.0% max error for UR (10% reserved). SSC CGL: 5.0% for DEST. Default: 7.0%.
+      const permissibleError = (input.limitErrorPercentage && input.limitErrorPercentage > 0)
+        ? input.limitErrorPercentage
+        : (input.examProfileTitle?.includes('CHSL') ? 7.0 : (input.examProfileTitle?.includes('CGL') ? 5.0 : 7.0));
       isQualified = sscErrorPercentage <= permissibleError && netWpm >= (requiredSpeed > 0 ? requiredSpeed : 25);
       break;
     }
@@ -515,7 +523,7 @@ export function evaluateTypingTest(input: EvaluateInput): EvaluationResult {
       requiredSpeed,
       requiredAccuracy,
       achievedSpeed: model === 'rrb_eduquity' ? rrbNetWpm : (model === 'mp_cpct' ? cpctNetSpeed : netWpm),
-      achievedAccuracy: model === 'ssc_dest' ? (100 - sscErrorPercentage) : accuracy,
+      achievedAccuracy: model === 'ssc_dest' ? (100 - sscErrorPercentage) : Math.max(accuracy, typedAccuracy),
       examTitle
     },
     wrongWordsList: Array.from(new Set(wrongWordsList)),
