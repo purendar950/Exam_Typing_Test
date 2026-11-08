@@ -285,7 +285,7 @@ export const App: React.FC = () => {
   const [customPassages, setCustomPassages] = useState<Passage[]>([]);
   const [telegramConfig, setTelegramConfig] = useState<TelegramConfig | null>(null);
   const [telegramToast, setTelegramToast] = useState<{ success: boolean; message: string } | null>(null);
-  const [adminInitialTab, setAdminInitialTab] = useState<'overview' | 'live_chat' | 'ai_engine' | 'passages' | 'candidates' | 'payments' | 'settings' | undefined>(undefined);
+  const [adminInitialTab, setAdminInitialTab] = useState<'overview' | 'live_chat' | 'ai_engine' | 'passages' | 'candidates' | 'payments' | 'pricing' | 'settings' | undefined>(undefined);
   const [adminInitialChatId, setAdminInitialChatId] = useState<string | undefined>(undefined);
   const [telegramAdminChatSessionId, setTelegramAdminChatSessionId] = useState<string | null>(() => {
     if (typeof window !== 'undefined') {
@@ -690,7 +690,7 @@ export const App: React.FC = () => {
         <ExclusiveOfferBanner
           userName={currentUser.displayName}
           onClaim={() => {
-            handleOpenPayment(undefined, 'plan_exclusive_12');
+            handleOpenPayment(undefined, 'plan_single_15d');
           }}
           onDismiss={() => {
             setShowOfferBanner(false);

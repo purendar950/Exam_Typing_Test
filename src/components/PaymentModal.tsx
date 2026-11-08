@@ -87,12 +87,12 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
 
   // Re-calculate promo discount if plan changes
   const currentDiscountAmount = useMemo(() => {
-    if (!appliedPromo || selectedPlan.id === 'plan_exclusive_12') return 0;
+    if (!appliedPromo || selectedPlan.id === 'plan_single_15d' || selectedPlan.id === 'plan_exclusive_12') return 0;
     const reval = validatePromoCode(appliedPromo.code, selectedPlan.discountedPrice);
     return reval.valid ? reval.discountAmount : 0;
   }, [appliedPromo, selectedPlan]);
 
-  const finalPayable = selectedPlan.id === 'plan_exclusive_12'
+  const finalPayable = (selectedPlan.id === 'plan_single_15d' || selectedPlan.id === 'plan_exclusive_12')
     ? 12
     : Math.max(9, selectedPlan.discountedPrice - currentDiscountAmount);
 
@@ -249,11 +249,14 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
             <span style={{ fontSize: '1.75rem' }}>👑</span>
             <div>
-              <h2 style={{ fontSize: '1.25rem', fontWeight: 800, margin: 0, letterSpacing: '-0.02em' }}>
-                Upgrade to Pro Examination Membership
+              <div style={{ fontSize: '0.72rem', fontWeight: 800, color: '#38bdf8', letterSpacing: '1px', textTransform: 'uppercase' }}>
+                EXAM TYPING
+              </div>
+              <h2 style={{ fontSize: '1.25rem', fontWeight: 900, margin: '2px 0 0 0', letterSpacing: '-0.02em', color: '#ffffff' }}>
+                PREMIUM PLANS
               </h2>
-              <p style={{ fontSize: '0.82rem', color: '#94a3b8', margin: '2px 0 0 0' }}>
-                Instant Access to Authentic Test Series • PhonePe UPI QR Code Verification
+              <p style={{ fontSize: '0.82rem', color: '#94a3b8', margin: '3px 0 0 0' }}>
+                Practice smarter. Improve faster. Get exam-ready.
               </p>
             </div>
           </div>

@@ -71,110 +71,87 @@ export interface PaymentSubmission {
 
 export const DEFAULT_PAYMENT_PLANS: PaymentPlan[] = [
   {
-    id: 'plan_exclusive_12',
-    name: '15-Day Single Exam Pass',
-    badge: '⚡ EXCLUSIVE ₹12 OFFER',
+    id: 'plan_single_15d',
+    name: '15 DAYS',
+    badge: 'Welcome Offer',
     type: 'single_exam',
     durationDays: 15,
     durationLabel: '15 Days',
-    originalPrice: 99,
+    originalPrice: 49,
     discountedPrice: 12,
     isExclusiveOffer: true,
     features: [
-      '⚡ Candidate Welcome Special: Just ₹12 for 15 Days',
-      'Unlock ANY 1 Examination of your choice (out of 129 Exams)',
-      'Unlimited Mock Test Series & Live Passage Practice',
-      'Official Speed, Accuracy & Error Penalty Evaluation',
-      'Daily Practice & Skill Tracking Included'
+      'Choose ANY 1 of 129 Examinations to unlock',
+      'Full 15 Days Access — Unrestricted Mock Tests',
+      'Authentic Speed & Accuracy Evaluation',
+      'Exclusive ₹12 Starter Special'
     ]
   },
   {
     id: 'plan_single_1m',
-    name: 'Single Exam Pass',
-    badge: 'Focused Prep',
+    name: '1 MONTH',
+    badge: 'Flexible plan',
     type: 'single_exam',
     durationDays: 30,
     durationLabel: '1 Month',
-    originalPrice: 299,
-    discountedPrice: 149,
+    originalPrice: 99,
+    discountedPrice: 39,
     features: [
-      'Access to 1 Selected Examination (e.g. UP Police or High Court)',
-      'All Official Benchmark Speed & Accuracy Modes',
-      'Instant AR Typing Evaluation & Result Analytics',
-      'Daily Practice & Typing Drills',
-      '1 Month Complete Access'
+      'Access to 1 Selected Examination of your choice',
+      'Complete 1 Month (30 Days) Practice & Drill Access',
+      'All Mock Series & Live Tests for chosen exam',
+      'Detailed In-Depth Error & Speed Analytics'
     ]
   },
   {
-    id: 'plan_single_3m',
-    name: 'Single Exam Pro',
-    badge: 'Most Chosen for 1 Exam',
-    type: 'single_exam',
+    id: 'plan_all_exams_3m',
+    name: '3 MONTHS',
+    badge: 'Popular choice',
+    type: 'all_exams_pass',
     durationDays: 90,
     durationLabel: '3 Months',
-    originalPrice: 499,
-    discountedPrice: 249,
+    originalPrice: 249,
+    discountedPrice: 89,
+    isPopular: true,
     features: [
-      'Full Access to 1 Selected Examination',
-      'Includes All Series & Live Mock Tests for this Exam',
-      'In-Depth Backspace & Net WPM Audit Reports',
-      'Priority Speed Booster Exercises',
-      '3 Months Extended Validity'
-    ]
-  },
-  {
-    id: 'plan_category_combo',
-    name: 'Category Combo Pass',
-    badge: 'Multi-Exam Sector',
-    type: 'category_combo',
-    durationDays: 90,
-    durationLabel: '3 Months',
-    originalPrice: 699,
-    discountedPrice: 349,
-    features: [
-      'Access to Entire Sector (e.g. All Courts/Judiciary OR All Police/Defense)',
-      'Over 150+ Dedicated Mock Test Series',
-      'Both Hindi (Mangal/Kruti) & English Modules',
-      'National Percentile & Leaderboard Tracking',
-      '3 Months Validity'
+      '⭐ ALL 129 Government Examinations Unlocked',
+      'UP Police, High Courts, SSC, Delhi Police, BSF, Beltron & all states',
+      'Over 877+ Authentic Mock Test Series included',
+      'Daily Live Simulation Tests for 90 Days'
     ]
   },
   {
     id: 'plan_all_exams_6m',
-    name: 'All 129 Exams Pass (6 Months)',
-    badge: 'Popular',
+    name: '6 MONTHS',
+    badge: 'Long-term practice',
     type: 'all_exams_pass',
     durationDays: 180,
     durationLabel: '6 Months',
-    originalPrice: 1199,
-    discountedPrice: 599,
-    isPopular: true,
+    originalPrice: 399,
+    discountedPrice: 149,
     features: [
-      '⭐ UNLIMITED Access to ALL 129 Government Examinations',
-      '⭐ Complete 877+ Authentic Test Series',
-      'UP Police, High Courts, Supreme Court, SSC CGL/CHSL, Delhi Police, BSF, Beltron',
-      'Daily 8 Live Simulation Tests (Every Day New)',
-      'Detailed Printable Result Sheets with AR Typing Formula',
-      '6 Months Complete Freedom'
+      '⭐ UNLIMITED Access to ALL 129 Examinations',
+      'Complete 877+ Test Series & Practice Bank',
+      '6 Months Complete Freedom across All State & Central exams',
+      'Full Leaderboard, Speed Trajectory & Weak Key Analytics'
     ]
   },
   {
     id: 'plan_all_exams_12m',
-    name: 'Mega All-Access VIP Pass (1 Year)',
-    badge: '🔥 BEST VALUE',
+    name: '1 YEAR',
+    badge: 'Just ₹16.58 per month',
     type: 'all_exams_pass',
     durationDays: 365,
     durationLabel: '1 Full Year (12 Months)',
-    originalPrice: 1999,
-    discountedPrice: 799,
+    originalPrice: 599,
+    discountedPrice: 199,
     isBestValue: true,
     features: [
-      '👑 Complete VIP Access to ALL 129 Examinations',
-      '👑 ALL 877+ Tests + ALL Future Exam Series Included',
+      '👑 Complete VIP Access to ALL 129 Examinations for 365 Days',
+      'Just ₹16.58 per month — Best Value Ever!',
+      'ALL 877+ Tests + ALL Future Exam Series Included Free',
       'All Languages: Hindi Mangal, Kruti Dev 010 & English',
-      'Unlimited Re-attempts & Full Exam Hall Simulation',
-      'Personal Error Analytics & Finger Weakness Telemetry',
-      'Full 12 Months Unconditional Validity'
+      'Unlimited Re-attempts & Full Exam Hall Simulation'
     ]
   }
 ];
@@ -301,10 +278,9 @@ export function getPaymentPlans(): PaymentPlan[] {
     if (saved) {
       const parsed = JSON.parse(saved);
       if (Array.isArray(parsed) && parsed.length > 0) {
-        if (!parsed.some((p: PaymentPlan) => p.id === 'plan_exclusive_12')) {
-          return [DEFAULT_PAYMENT_PLANS[0], ...parsed];
+        if (parsed.some((p: PaymentPlan) => p.id === 'plan_single_15d')) {
+          return parsed;
         }
-        return parsed;
       }
     }
     return DEFAULT_PAYMENT_PLANS;

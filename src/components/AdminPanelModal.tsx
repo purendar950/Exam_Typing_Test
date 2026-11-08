@@ -45,11 +45,15 @@ import {
 import {
   PaymentSubmission,
   PromoCode,
+  PaymentPlan,
   fetchAllPaymentSubmissions,
   approvePaymentSubmission,
   rejectPaymentSubmission,
   getPromoCodes,
-  savePromoCodes
+  savePromoCodes,
+  getPaymentPlans,
+  savePaymentPlans,
+  DEFAULT_PAYMENT_PLANS
 } from '../services/paymentService';
 import {
   TelegramConfig,
@@ -75,7 +79,7 @@ interface AdminPanelModalProps {
   onDailyLiveGenerated: (tests: Passage[]) => void;
   currentUser?: UserProfile | null;
   onLoginSuccess?: (user: UserProfile) => void;
-  initialTab?: 'overview' | 'live_chat' | 'ai_engine' | 'passages' | 'candidates' | 'payments' | 'settings';
+  initialTab?: 'overview' | 'live_chat' | 'ai_engine' | 'passages' | 'candidates' | 'payments' | 'pricing' | 'settings';
   initialChatId?: string;
 }
 
@@ -104,7 +108,11 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
   const [showPassword, setShowPassword] = useState<boolean>(false);
 
   // Tab State
-  const [activeTab, setActiveTab] = useState<'overview' | 'live_chat' | 'ai_engine' | 'passages' | 'candidates' | 'payments' | 'settings'>(initialTab || 'overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'live_chat' | 'ai_engine' | 'passages' | 'candidates' | 'payments' | 'pricing' | 'settings'>(initialTab || 'overview');
+
+  // Pricing Plans State
+  const [pricingPlansList, setPricingPlansList] = useState<PaymentPlan[]>(() => getPaymentPlans());
+  const [pricingSaveMessage, setPricingSaveMessage] = useState<string | null>(null);
 
   // Live Support Chat State
   const [liveChatsList, setLiveChatsList] = useState<SupportChatSession[]>([]);
@@ -520,6 +528,41 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
     const updated = promoCodesList.filter((p) => p.code !== code);
     savePromoCodes(updated);
     setPromoCodesList(updated);
+  };
+
+  // Pricing Plans Handlers
+  const handleUpdatePlan = (index: number, field: keyof PaymentPlan, value: any) => {
+    setPricingPlansList((prev) => {
+      const copy = [...prev];
+      copy[index] = { ...copy[index], [field]: value };
+      return copy;
+    });
+  };
+
+  const handleUpdatePlanFeatures = (index: number, featuresText: string) => {
+    const features = featuresText
+      .split('\n')
+      .map((s) => s.trim())
+      .filter(Boolean);
+    setPricingPlansList((prev) => {
+      const copy = [...prev];
+      copy[index] = { ...copy[index], features };
+      return copy;
+    });
+  };
+
+  const handleSavePricingPlans = () => {
+    savePaymentPlans(pricingPlansList);
+    setPricingSaveMessage('✅ Pricing plans saved successfully! All users and checkout modals will now reflect these updated rates.');
+    setTimeout(() => setPricingSaveMessage(null), 4000);
+  };
+
+  const handleResetPricingPlans = () => {
+    if (!window.confirm('Reset all 5 pricing tiers to factory defaults (₹12, ₹39, ₹89, ₹149, ₹199)?')) return;
+    savePaymentPlans(DEFAULT_PAYMENT_PLANS);
+    setPricingPlansList(DEFAULT_PAYMENT_PLANS);
+    setPricingSaveMessage('🔄 Pricing plans reset to factory defaults.');
+    setTimeout(() => setPricingSaveMessage(null), 4000);
   };
 
   // AI Handlers
@@ -1418,6 +1461,10 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                 {
                   id: 'payments',
                   label: `💳 Payments & Subscriptions (${pendingPaymentsCount > 0 ? `🚨 ${pendingPaymentsCount} PENDING` : paymentsList.length})`
+                },
+                {
+                  id: 'pricing',
+                  label: `🏷️ Pricing & Promos (${promoCodesList.length} Promos)`
                 },
                 { id: 'settings', label: '⚙️ Governance & Security' }
               ].map((tab) => (
@@ -3857,6 +3904,46 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                     </div>
                   </div>
 
+                  {/* Quick Shortcut to Dedicated Pricing & Promos Studio */}
+                  <div
+                    style={{
+                      background: 'linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%)',
+                      border: '1.5px solid #bfdbfe',
+                      borderRadius: '12px',
+                      padding: '14px 18px',
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      flexWrap: 'wrap',
+                      gap: '12px'
+                    }}
+                  >
+                    <div>
+                      <div style={{ fontWeight: 800, fontSize: '0.92rem', color: '#1e40af' }}>
+                        🏷️ Dedicated Pricing Plans & Promos Studio Active
+                      </div>
+                      <div style={{ fontSize: '0.78rem', color: '#475569' }}>
+                        Adjust subscription rates (15 Days ₹12, 1 Month ₹39, 3 Months ₹89, 6 Months ₹149, 1 Year ₹199) and manage coupons in the dedicated studio tab.
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => setActiveTab('pricing' as any)}
+                      style={{
+                        padding: '8px 16px',
+                        borderRadius: '8px',
+                        background: '#2563eb',
+                        color: '#ffffff',
+                        border: 'none',
+                        fontWeight: 700,
+                        fontSize: '0.82rem',
+                        cursor: 'pointer',
+                        boxShadow: '0 2px 6px rgba(37, 99, 235, 0.3)'
+                      }}
+                    >
+                      Open Pricing & Promos Studio →
+                    </button>
+                  </div>
+
                   {/* Promo Codes Management Suite */}
                   <div
                     style={{
@@ -4507,6 +4594,623 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                       >
                         Close Preview
                       </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* --------------------------------------------------
+                  TAB: PRICING & PROMOTIONS STUDIO
+                  -------------------------------------------------- */}
+              {activeTab === 'pricing' && (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+                  {/* Studio Header & Action Bar */}
+                  <div
+                    style={{
+                      background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)',
+                      borderRadius: '16px',
+                      padding: '24px',
+                      color: '#ffffff',
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      flexWrap: 'wrap',
+                      gap: '16px',
+                      boxShadow: '0 4px 20px rgba(15, 23, 42, 0.25)'
+                    }}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+                      <div
+                        style={{
+                          width: '48px',
+                          height: '48px',
+                          borderRadius: '12px',
+                          background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          fontSize: '1.6rem',
+                          boxShadow: '0 4px 12px rgba(245, 158, 11, 0.35)'
+                        }}
+                      >
+                        🏷️
+                      </div>
+                      <div>
+                        <div style={{ fontSize: '0.72rem', fontWeight: 800, color: '#38bdf8', letterSpacing: '1px', textTransform: 'uppercase' }}>
+                          COMMERCIAL CONTROL CENTER
+                        </div>
+                        <h2 style={{ margin: '2px 0 0 0', fontSize: '1.3rem', fontWeight: 900, color: '#ffffff' }}>
+                          Pricing Plans & Promo Codes Studio
+                        </h2>
+                        <p style={{ margin: '4px 0 0 0', fontSize: '0.82rem', color: '#94a3b8' }}>
+                          Live control over candidate subscription tiers, promotional banners, and discount coupon campaigns.
+                        </p>
+                      </div>
+                    </div>
+
+                    <div style={{ display: 'flex', gap: '10px', alignItems: 'center', flexWrap: 'wrap' }}>
+                      <button
+                        onClick={handleResetPricingPlans}
+                        style={{
+                          background: 'rgba(255, 255, 255, 0.1)',
+                          border: '1px solid rgba(255, 255, 255, 0.2)',
+                          color: '#e2e8f0',
+                          padding: '9px 16px',
+                          borderRadius: '8px',
+                          fontSize: '0.82rem',
+                          fontWeight: 700,
+                          cursor: 'pointer'
+                        }}
+                      >
+                        🔄 Reset Factory Defaults
+                      </button>
+                      <button
+                        onClick={handleSavePricingPlans}
+                        style={{
+                          background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                          border: 'none',
+                          color: '#ffffff',
+                          padding: '9px 20px',
+                          borderRadius: '8px',
+                          fontSize: '0.85rem',
+                          fontWeight: 800,
+                          cursor: 'pointer',
+                          boxShadow: '0 2px 10px rgba(16, 185, 129, 0.35)'
+                        }}
+                      >
+                        💾 Save All Pricing Changes
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Success / Feedback Banner */}
+                  {pricingSaveMessage && (
+                    <div
+                      style={{
+                        background: '#dcfce7',
+                        border: '1.5px solid #86efac',
+                        borderRadius: '10px',
+                        padding: '12px 18px',
+                        color: '#15803d',
+                        fontWeight: 700,
+                        fontSize: '0.88rem',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '8px'
+                      }}
+                    >
+                      <span>✅</span>
+                      <span>{pricingSaveMessage}</span>
+                    </div>
+                  )}
+
+                  {/* Section 1: Live Pricing Plans (5 Tiers) */}
+                  <div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
+                      <div>
+                        <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 800, color: '#0f172a' }}>
+                          🎯 5-Tier Subscription Ladder ({pricingPlansList.length} Active Plans)
+                        </h3>
+                        <div style={{ fontSize: '0.78rem', color: '#64748b' }}>
+                          Changes made here directly update the candidate checkout modal and welcome banner across the platform.
+                        </div>
+                      </div>
+                    </div>
+
+                    <div
+                      style={{
+                        display: 'grid',
+                        gridTemplateColumns: 'repeat(auto-fit, minmax(290px, 1fr))',
+                        gap: '16px'
+                      }}
+                    >
+                      {pricingPlansList.map((plan, idx) => {
+                        const discountPct = plan.originalPrice > plan.discountedPrice
+                          ? Math.round(((plan.originalPrice - plan.discountedPrice) / plan.originalPrice) * 100)
+                          : 0;
+                        return (
+                          <div
+                            key={plan.id}
+                            style={{
+                              background: '#ffffff',
+                              border: plan.isExclusiveOffer
+                                ? '2px solid #f59e0b'
+                                : plan.isPopular
+                                ? '2px solid #0284c7'
+                                : plan.isBestValue
+                                ? '2px solid #8b5cf6'
+                                : '1px solid #e2e8f0',
+                              borderRadius: '12px',
+                              padding: '16px',
+                              display: 'flex',
+                              flexDirection: 'column',
+                              gap: '12px',
+                              boxShadow: plan.isPopular || plan.isExclusiveOffer ? '0 4px 14px rgba(0,0,0,0.06)' : 'none',
+                              position: 'relative'
+                            }}
+                          >
+                            {/* Card Header & Badges */}
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '8px' }}>
+                              <div style={{ flex: 1 }}>
+                                <span
+                                  style={{
+                                    fontSize: '0.68rem',
+                                    fontFamily: 'monospace',
+                                    color: '#64748b',
+                                    background: '#f1f5f9',
+                                    padding: '2px 6px',
+                                    borderRadius: '4px',
+                                    fontWeight: 700
+                                  }}
+                                >
+                                  ID: {plan.id}
+                                </span>
+                                <div style={{ marginTop: '6px' }}>
+                                  <label style={{ fontSize: '0.72rem', fontWeight: 700, color: '#475569' }}>Plan Tier Name:</label>
+                                  <input
+                                    type="text"
+                                    value={plan.name}
+                                    onChange={(e) => handleUpdatePlan(idx, 'name', e.target.value)}
+                                    style={{
+                                      width: '100%',
+                                      fontWeight: 800,
+                                      fontSize: '1rem',
+                                      color: '#0f172a',
+                                      border: '1px solid #cbd5e1',
+                                      borderRadius: '6px',
+                                      padding: '4px 8px',
+                                      marginTop: '2px'
+                                    }}
+                                  />
+                                </div>
+                              </div>
+
+                              <div style={{ textAlign: 'right', flexShrink: 0 }}>
+                                <span
+                                  style={{
+                                    fontSize: '0.68rem',
+                                    fontWeight: 800,
+                                    padding: '3px 8px',
+                                    borderRadius: '12px',
+                                    background: plan.type === 'all_exams_pass' ? '#dbeafe' : '#fef3c7',
+                                    color: plan.type === 'all_exams_pass' ? '#1e40af' : '#92400e',
+                                    textTransform: 'uppercase'
+                                  }}
+                                >
+                                  {plan.type === 'all_exams_pass' ? 'All 129 Exams' : 'Single Exam'}
+                                </span>
+                                {discountPct > 0 && (
+                                  <div style={{ fontSize: '0.7rem', fontWeight: 800, color: '#16a34a', marginTop: '4px' }}>
+                                    {discountPct}% OFF
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+
+                            {/* Badge Label Input */}
+                            <div>
+                              <label style={{ fontSize: '0.72rem', fontWeight: 700, color: '#475569' }}>Badge Tagline:</label>
+                              <input
+                                type="text"
+                                value={plan.badge || ''}
+                                onChange={(e) => handleUpdatePlan(idx, 'badge', e.target.value)}
+                                placeholder="e.g. Welcome Offer, Flexible plan, Popular choice"
+                                style={{
+                                  width: '100%',
+                                  fontSize: '0.8rem',
+                                  border: '1px solid #cbd5e1',
+                                  borderRadius: '6px',
+                                  padding: '4px 8px',
+                                  marginTop: '2px'
+                                }}
+                              />
+                            </div>
+
+                            {/* Price Row: Discounted (Payable) & Original */}
+                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+                              <div style={{ background: '#f0fdf4', padding: '8px 10px', borderRadius: '8px', border: '1px solid #bbf7d0' }}>
+                                <label style={{ display: 'block', fontSize: '0.7rem', fontWeight: 800, color: '#166534' }}>
+                                  Payable Price (₹):
+                                </label>
+                                <input
+                                  type="number"
+                                  min="1"
+                                  value={plan.discountedPrice}
+                                  onChange={(e) => handleUpdatePlan(idx, 'discountedPrice', Number(e.target.value))}
+                                  style={{
+                                    width: '100%',
+                                    fontWeight: 900,
+                                    fontSize: '1.15rem',
+                                    color: '#15803d',
+                                    background: '#ffffff',
+                                    border: '1px solid #86efac',
+                                    borderRadius: '6px',
+                                    padding: '4px 8px',
+                                    marginTop: '2px'
+                                  }}
+                                />
+                              </div>
+
+                              <div style={{ background: '#f8fafc', padding: '8px 10px', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
+                                <label style={{ display: 'block', fontSize: '0.7rem', fontWeight: 700, color: '#64748b' }}>
+                                  Original Price (₹):
+                                </label>
+                                <input
+                                  type="number"
+                                  min="1"
+                                  value={plan.originalPrice}
+                                  onChange={(e) => handleUpdatePlan(idx, 'originalPrice', Number(e.target.value))}
+                                  style={{
+                                    width: '100%',
+                                    fontWeight: 700,
+                                    fontSize: '1rem',
+                                    color: '#64748b',
+                                    background: '#ffffff',
+                                    border: '1px solid #cbd5e1',
+                                    borderRadius: '6px',
+                                    padding: '4px 8px',
+                                    marginTop: '2px'
+                                  }}
+                                />
+                              </div>
+                            </div>
+
+                            {/* Validity & Exam Type Grid */}
+                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+                              <div>
+                                <label style={{ display: 'block', fontSize: '0.7rem', fontWeight: 700, color: '#475569' }}>
+                                  Validity (Days):
+                                </label>
+                                <input
+                                  type="number"
+                                  min="1"
+                                  value={plan.durationDays}
+                                  onChange={(e) => handleUpdatePlan(idx, 'durationDays', Number(e.target.value))}
+                                  style={{
+                                    width: '100%',
+                                    fontSize: '0.8rem',
+                                    border: '1px solid #cbd5e1',
+                                    borderRadius: '6px',
+                                    padding: '4px 8px',
+                                    marginTop: '2px'
+                                  }}
+                                />
+                              </div>
+
+                              <div>
+                                <label style={{ display: 'block', fontSize: '0.7rem', fontWeight: 700, color: '#475569' }}>
+                                  Access Scope:
+                                </label>
+                                <select
+                                  value={plan.type}
+                                  onChange={(e) => handleUpdatePlan(idx, 'type', e.target.value as any)}
+                                  style={{
+                                    width: '100%',
+                                    fontSize: '0.8rem',
+                                    border: '1px solid #cbd5e1',
+                                    borderRadius: '6px',
+                                    padding: '4px 6px',
+                                    marginTop: '2px',
+                                    background: '#ffffff'
+                                  }}
+                                >
+                                  <option value="single_exam">Single Exam</option>
+                                  <option value="all_exams_pass">All 129 Exams</option>
+                                </select>
+                              </div>
+                            </div>
+
+                            {/* Features List (Multiline) */}
+                            <div>
+                              <label style={{ display: 'block', fontSize: '0.7rem', fontWeight: 700, color: '#475569', marginBottom: '2px' }}>
+                                Features (1 per line):
+                              </label>
+                              <textarea
+                                rows={3}
+                                value={plan.features.join('\n')}
+                                onChange={(e) => handleUpdatePlanFeatures(idx, e.target.value)}
+                                style={{
+                                  width: '100%',
+                                  fontSize: '0.76rem',
+                                  border: '1px solid #cbd5e1',
+                                  borderRadius: '6px',
+                                  padding: '6px 8px',
+                                  fontFamily: 'inherit',
+                                  resize: 'vertical'
+                                }}
+                              />
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* Section 2: Promo Codes & Coupon Studio */}
+                  <div
+                    style={{
+                      display: 'grid',
+                      gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))',
+                      gap: '20px'
+                    }}
+                  >
+                    {/* Active Promo Codes List */}
+                    <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '20px' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
+                        <div>
+                          <h3 style={{ margin: 0, fontSize: '1rem', fontWeight: 800, color: '#0f172a' }}>
+                            🎟️ Live Discount Promo Codes ({promoCodesList.length})
+                          </h3>
+                          <div style={{ fontSize: '0.75rem', color: '#64748b' }}>
+                            Candidates enter these codes during payment for instant discounts.
+                          </div>
+                        </div>
+                      </div>
+
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                        {promoCodesList.length === 0 ? (
+                          <div style={{ textAlign: 'center', padding: '24px', color: '#94a3b8', fontSize: '0.85rem' }}>
+                            No promo codes created yet. Use the form on the right to create your first coupon!
+                          </div>
+                        ) : (
+                          promoCodesList.map((promo) => (
+                            <div
+                              key={promo.code}
+                              style={{
+                                display: 'flex',
+                                justifyContent: 'space-between',
+                                alignItems: 'center',
+                                padding: '10px 14px',
+                                borderRadius: '8px',
+                                background: promo.isActive ? '#f8fafc' : '#f1f5f9',
+                                border: '1px solid #e2e8f0',
+                                opacity: promo.isActive ? 1 : 0.65
+                              }}
+                            >
+                              <div>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                  <span
+                                    style={{
+                                      fontFamily: 'monospace',
+                                      fontWeight: 800,
+                                      fontSize: '0.88rem',
+                                      color: '#4338ca',
+                                      background: '#e0e7ff',
+                                      padding: '2px 8px',
+                                      borderRadius: '4px'
+                                    }}
+                                  >
+                                    {promo.code}
+                                  </span>
+                                  <span
+                                    style={{
+                                      fontSize: '0.75rem',
+                                      fontWeight: 700,
+                                      color: promo.discountType === 'percentage' ? '#047857' : '#0369a1',
+                                      background: promo.discountType === 'percentage' ? '#d1fae5' : '#e0f2fe',
+                                      padding: '2px 6px',
+                                      borderRadius: '4px'
+                                    }}
+                                  >
+                                    {promo.discountType === 'percentage' ? `${promo.discountValue}% OFF` : `₹${promo.discountValue} FLAT OFF`}
+                                  </span>
+                                </div>
+                                <div style={{ fontSize: '0.75rem', color: '#475569', marginTop: '4px' }}>
+                                  {promo.description} &bull; Min Order: ₹{promo.minOrderValue || promo.minOrderAmount || 0}
+                                  {(promo.maxDiscount || promo.maxDiscountAmount) ? ` &bull; Max: ₹${promo.maxDiscount || promo.maxDiscountAmount}` : ''}
+                                </div>
+                              </div>
+
+                              <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                                <button
+                                  onClick={() => handleTogglePromoStatus(promo.code)}
+                                  style={{
+                                    padding: '4px 8px',
+                                    borderRadius: '6px',
+                                    border: 'none',
+                                    fontSize: '0.72rem',
+                                    fontWeight: 700,
+                                    cursor: 'pointer',
+                                    background: promo.isActive ? '#dcfce7' : '#fee2e2',
+                                    color: promo.isActive ? '#15803d' : '#991b1b'
+                                  }}
+                                >
+                                  {promo.isActive ? 'Active' : 'Disabled'}
+                                </button>
+
+                                <button
+                                  onClick={() => handleDeletePromoCode(promo.code)}
+                                  style={{
+                                    padding: '4px 8px',
+                                    borderRadius: '6px',
+                                    border: '1px solid #fecaca',
+                                    fontSize: '0.72rem',
+                                    fontWeight: 700,
+                                    cursor: 'pointer',
+                                    background: '#ffffff',
+                                    color: '#dc2626'
+                                  }}
+                                  title="Delete promo code"
+                                >
+                                  🗑️
+                                </button>
+                              </div>
+                            </div>
+                          ))
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Create New Promo Code Form */}
+                    <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '20px' }}>
+                      <h3 style={{ margin: '0 0 14px 0', fontSize: '1rem', fontWeight: 800, color: '#0f172a' }}>
+                        ➕ Create New Promo Code
+                      </h3>
+
+                      <form onSubmit={handleCreatePromoCode} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                        <div>
+                          <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#475569', marginBottom: '4px' }}>
+                            Promo Code Name (Uppercase):
+                          </label>
+                          <input
+                            type="text"
+                            placeholder="e.g. POLICE2026, SUMMER50"
+                            value={newPromoCode}
+                            onChange={(e) => setNewPromoCode(e.target.value.toUpperCase())}
+                            required
+                            style={{
+                              width: '100%',
+                              padding: '8px 12px',
+                              borderRadius: '8px',
+                              border: '1px solid #cbd5e1',
+                              fontSize: '0.85rem',
+                              fontFamily: 'monospace',
+                              fontWeight: 700
+                            }}
+                          />
+                        </div>
+
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                          <div>
+                            <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#475569', marginBottom: '4px' }}>
+                              Discount Type:
+                            </label>
+                            <select
+                              value={newPromoType}
+                              onChange={(e) => setNewPromoType(e.target.value as any)}
+                              style={{
+                                width: '100%',
+                                padding: '8px 10px',
+                                borderRadius: '8px',
+                                border: '1px solid #cbd5e1',
+                                fontSize: '0.85rem'
+                              }}
+                            >
+                              <option value="percentage">Percentage (%)</option>
+                              <option value="flat">Flat Rupee (₹)</option>
+                            </select>
+                          </div>
+
+                          <div>
+                            <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#475569', marginBottom: '4px' }}>
+                              Discount Value:
+                            </label>
+                            <input
+                              type="number"
+                              min="1"
+                              value={newPromoDiscount}
+                              onChange={(e) => setNewPromoDiscount(Number(e.target.value))}
+                              required
+                              style={{
+                                width: '100%',
+                                padding: '8px 10px',
+                                borderRadius: '8px',
+                                border: '1px solid #cbd5e1',
+                                fontSize: '0.85rem',
+                                fontWeight: 700
+                              }}
+                            />
+                          </div>
+                        </div>
+
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                          <div>
+                            <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#475569', marginBottom: '4px' }}>
+                              Min Order Amount (₹):
+                            </label>
+                            <input
+                              type="number"
+                              min="0"
+                              value={newPromoMinOrder}
+                              onChange={(e) => setNewPromoMinOrder(Number(e.target.value))}
+                              style={{
+                                width: '100%',
+                                padding: '8px 10px',
+                                borderRadius: '8px',
+                                border: '1px solid #cbd5e1',
+                                fontSize: '0.85rem'
+                              }}
+                            />
+                          </div>
+
+                          {newPromoType === 'percentage' && (
+                            <div>
+                              <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#475569', marginBottom: '4px' }}>
+                                Max Discount Cap (₹):
+                              </label>
+                              <input
+                                type="number"
+                                min="1"
+                                value={newPromoMaxDiscount}
+                                onChange={(e) => setNewPromoMaxDiscount(Number(e.target.value))}
+                                style={{
+                                  width: '100%',
+                                  padding: '8px 10px',
+                                  borderRadius: '8px',
+                                  border: '1px solid #cbd5e1',
+                                  fontSize: '0.85rem'
+                                }}
+                              />
+                            </div>
+                          )}
+                        </div>
+
+                        <div>
+                          <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#475569', marginBottom: '4px' }}>
+                            Description:
+                          </label>
+                          <input
+                            type="text"
+                            placeholder="e.g. Special candidate festival discount"
+                            value={newPromoDesc}
+                            onChange={(e) => setNewPromoDesc(e.target.value)}
+                            style={{
+                              width: '100%',
+                              padding: '8px 12px',
+                              borderRadius: '8px',
+                              border: '1px solid #cbd5e1',
+                              fontSize: '0.85rem'
+                            }}
+                          />
+                        </div>
+
+                        <button
+                          type="submit"
+                          style={{
+                            padding: '10px 16px',
+                            background: 'linear-gradient(135deg, #0284c7 0%, #0369a1 100%)',
+                            color: '#ffffff',
+                            border: 'none',
+                            borderRadius: '8px',
+                            fontWeight: 700,
+                            fontSize: '0.85rem',
+                            cursor: 'pointer',
+                            marginTop: '6px'
+                          }}
+                        >
+                          ➕ Create & Publish Promo Code
+                        </button>
+                      </form>
                     </div>
                   </div>
                 </div>
