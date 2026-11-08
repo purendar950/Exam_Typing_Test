@@ -21,6 +21,7 @@ import {
 import {
   getFirestore,
   collection,
+  collectionGroup,
   doc,
   setDoc,
   getDoc,
@@ -385,7 +386,8 @@ export function subscribeToAuth(callback: (user: UserProfile | null) => void): (
 // Save completed test result to Cloud Firestore & Local Backup
 export async function saveTestResultToCloud(
   userId: string,
-  result: EvaluationResult
+  result: EvaluationResult,
+  displayName?: string
 ): Promise<boolean> {
   // 1. Always save to LocalStorage immediately
   try {
@@ -410,7 +412,8 @@ export async function saveTestResultToCloud(
     const testDocId = `${Date.now()}-${result.testId}`;
     await setDoc(doc(db, 'users', userId, 'test_attempts', testDocId), {
       ...result,
-      userId
+      userId,
+      displayName: displayName || 'Candidate'
     });
     return true;
   } catch (err) {
@@ -503,6 +506,192 @@ export function computeUserStats(attempts: EvaluationResult[]): UserStats {
     hindiTestsCount: hindiCount,
     englishTestsCount: englishCount
   };
+}
+
+// -------------------------------------------------------------
+// Daily Practice Streak Tracking
+// -------------------------------------------------------------
+
+export interface UserStreak {
+  currentStreak: number;
+  longestStreak: number;
+  lastTestDate: string | null;
+  todayCompleted: boolean;
+}
+
+export function computeStreak(attempts: EvaluationResult[]): UserStreak {
+  if (!attempts || attempts.length === 0) {
+    return { currentStreak: 0, longestStreak: 0, lastTestDate: null, todayCompleted: false };
+  }
+
+  // Extract unique calendar dates in YYYY-MM-DD format
+  const dateMap = new Set<string>();
+  for (const a of attempts) {
+    if (!a.timestamp) continue;
+    const d = new Date(a.timestamp);
+    if (isNaN(d.getTime())) continue;
+    const yyyy = d.getFullYear();
+    const mm = String(d.getMonth() + 1).padStart(2, '0');
+    const dd = String(d.getDate()).padStart(2, '0');
+    dateMap.add(`${yyyy}-${mm}-${dd}`);
+  }
+
+  const sortedDates = Array.from(dateMap).sort().reverse(); // newest first
+  if (sortedDates.length === 0) {
+    return { currentStreak: 0, longestStreak: 0, lastTestDate: null, todayCompleted: false };
+  }
+
+  const now = new Date();
+  const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+  
+  const yesterday = new Date(now.getTime() - 86400000);
+  const yesterdayStr = `${yesterday.getFullYear()}-${String(yesterday.getMonth() + 1).padStart(2, '0')}-${String(yesterday.getDate()).padStart(2, '0')}`;
+
+  const todayCompleted = sortedDates.includes(todayStr);
+
+  let currentStreak = 0;
+  if (sortedDates[0] === todayStr || sortedDates[0] === yesterdayStr) {
+    let checkDate = new Date(sortedDates[0]);
+    currentStreak = 1;
+
+    for (let i = 1; i < sortedDates.length; i++) {
+      const prevExpected = new Date(checkDate.getTime() - 86400000);
+      const prevExpectedStr = `${prevExpected.getFullYear()}-${String(prevExpected.getMonth() + 1).padStart(2, '0')}-${String(prevExpected.getDate()).padStart(2, '0')}`;
+      if (sortedDates[i] === prevExpectedStr) {
+        currentStreak++;
+        checkDate = prevExpected;
+      } else {
+        break;
+      }
+    }
+  }
+
+  let longestStreak = currentStreak;
+  let running = 1;
+  for (let i = 0; i < sortedDates.length - 1; i++) {
+    const d1 = new Date(sortedDates[i]);
+    const d2 = new Date(sortedDates[i + 1]);
+    const diffDays = Math.round((d1.getTime() - d2.getTime()) / 86400000);
+    if (diffDays === 1) {
+      running++;
+      if (running > longestStreak) longestStreak = running;
+    } else {
+      running = 1;
+    }
+  }
+
+  return {
+    currentStreak,
+    longestStreak: Math.max(longestStreak, currentStreak),
+    lastTestDate: sortedDates[0],
+    todayCompleted
+  };
+}
+
+// -------------------------------------------------------------
+// Live Exam Leaderboard
+// -------------------------------------------------------------
+
+export interface LeaderboardEntry {
+  rank: number;
+  userId?: string;
+  displayName: string;
+  netWpm: number;
+  accuracy: number;
+  language: string;
+  examTitle: string;
+  timestamp: string;
+  isQualified: boolean;
+  isCurrentUser?: boolean;
+}
+
+export async function fetchLeaderboard(
+  category: 'all' | 'hindi' | 'english' = 'all',
+  maxResults: number = 20
+): Promise<LeaderboardEntry[]> {
+  const entries: LeaderboardEntry[] = [];
+  const seenUsers = new Set<string>();
+
+  // 1. Try fetching from Cloud Firestore collectionGroup
+  try {
+    const attemptsRef = collectionGroup(db, 'test_attempts');
+    // Querying with single field order so no composite index setup is required
+    const q = query(attemptsRef, orderBy('netWpm', 'desc'), limit(100));
+    const snap = await getDocs(q);
+
+    for (const docSnap of snap.docs) {
+      const data = docSnap.data() as EvaluationResult & { userId?: string; displayName?: string };
+      // Only qualified tests count for the official examination leaderboard
+      if (!data.isQualified) continue;
+
+      const pathParts = docSnap.ref.path.split('/');
+      const docUserId = data.userId || pathParts[1] || 'unknown';
+
+      // Keep only the single best attempt per candidate
+      if (seenUsers.has(docUserId)) continue;
+
+      // Filter by language
+      if (category === 'hindi' && !data.language?.startsWith('hindi')) continue;
+      if (category === 'english' && data.language !== 'english') continue;
+
+      seenUsers.add(docUserId);
+      entries.push({
+        rank: entries.length + 1,
+        userId: docUserId,
+        displayName: data.displayName || 'Candidate ' + docUserId.slice(0, 5),
+        netWpm: data.netWpm || 0,
+        accuracy: data.accuracy || 0,
+        language: data.language || 'english',
+        examTitle: data.examProfileTitle || data.testTitle || 'Typing Test',
+        timestamp: data.timestamp || new Date().toISOString(),
+        isQualified: true
+      });
+
+      if (entries.length >= maxResults) break;
+    }
+  } catch (err) {
+    console.warn('Firestore leaderboard fetch warning (falling back to local):', err);
+  }
+
+  // 2. If Firestore is offline or local user has qualified attempts, merge local results
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY_LOCAL_HISTORY);
+    if (raw) {
+      const localHistory: EvaluationResult[] = JSON.parse(raw);
+      const activeUserRaw = localStorage.getItem(STORAGE_KEY_ACTIVE_USER);
+      const activeUser = activeUserRaw ? JSON.parse(activeUserRaw) : null;
+      const currentUserName = activeUser?.displayName || 'You';
+      const currentUserId = activeUser?.uid || 'current-local';
+
+      for (const item of localHistory) {
+        if (!item.isQualified) continue;
+        if (category === 'hindi' && !item.language?.startsWith('hindi')) continue;
+        if (category === 'english' && item.language !== 'english') continue;
+
+        if (!seenUsers.has(currentUserId)) {
+          seenUsers.add(currentUserId);
+          entries.push({
+            rank: entries.length + 1,
+            userId: currentUserId,
+            displayName: currentUserName,
+            netWpm: item.netWpm || 0,
+            accuracy: item.accuracy || 0,
+            language: item.language || 'english',
+            examTitle: item.examProfileTitle || item.testTitle || 'Practice Test',
+            timestamp: item.timestamp || new Date().toISOString(),
+            isQualified: true,
+            isCurrentUser: true
+          });
+        }
+      }
+    }
+  } catch {
+    // Ignore local parse errors
+  }
+
+  // Sort by netWpm descending, reassign 1-based ranks
+  entries.sort((a, b) => (b.netWpm || 0) - (a.netWpm || 0));
+  return entries.slice(0, maxResults).map((e, idx) => ({ ...e, rank: idx + 1 }));
 }
 
 // Backwards compatibility aliases

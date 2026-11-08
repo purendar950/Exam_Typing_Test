@@ -13,6 +13,7 @@ interface HeaderProps {
   onOpenAdmin?: () => void;
   onOpenPayment?: () => void;
   onOpenMyCourses?: () => void;
+  onOpenLeaderboard?: () => void;
   settings: TestSettings;
   onToggleSound: () => void;
   currentUser: UserProfile | null;
@@ -32,6 +33,7 @@ export const Header: React.FC<HeaderProps> = ({
   onOpenAdmin,
   onOpenPayment,
   onOpenMyCourses,
+  onOpenLeaderboard,
   settings,
   onToggleSound,
   currentUser,
@@ -263,6 +265,18 @@ export const Header: React.FC<HeaderProps> = ({
             </svg>
             History
           </button>
+
+          {onOpenLeaderboard && (
+            <button
+              className="nav-btn"
+              onClick={onOpenLeaderboard}
+              title="Official Examination Hall of Fame (लीडरबोर्ड)"
+              style={{ color: '#0284c7', fontWeight: 700 }}
+            >
+              <span style={{ fontSize: '0.95rem', marginRight: '4px' }}>🏅</span>
+              Leaderboard
+            </button>
+          )}
         </nav>
       </div>
     </header>

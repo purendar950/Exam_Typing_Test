@@ -148,6 +148,11 @@ service cloud.firestore {
       );
       allow list, write: if isAdmin();
     }
+
+    // ── Collection group: Leaderboard query (read-only for authenticated candidates) ─
+    match /{path=**}/test_attempts/{testId} {
+      allow read: if signedIn();
+    }
   }
 }
 

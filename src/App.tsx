@@ -13,6 +13,7 @@ import { HistoryModal } from './components/HistoryModal';
 import { HindiHelperModal } from './components/HindiHelperModal';
 import { AuthModal } from './components/AuthModal';
 import { UserDashboardModal } from './components/UserDashboardModal';
+import { LeaderboardModal } from './components/LeaderboardModal';
 import { MyCoursesModal } from './components/MyCoursesModal';
 import { AiGeneratorModal } from './components/AiGeneratorModal';
 import { AdminPanelModal } from './components/AdminPanelModal';
@@ -207,7 +208,8 @@ export const App: React.FC = () => {
     }
   });
   const [isDashboardOpen, setIsDashboardOpen] = useState<boolean>(false);
-  const [dashboardInitialTab, setDashboardInitialTab] = useState<'overview' | 'history' | 'courses' | 'admitCard'>('overview');
+  const [dashboardInitialTab, setDashboardInitialTab] = useState<'overview' | 'history' | 'heatmap' | 'courses' | 'admitCard'>('overview');
+  const [isLeaderboardOpen, setIsLeaderboardOpen] = useState<boolean>(false);
   const [isMyCoursesOpen, setIsMyCoursesOpen] = useState<boolean>(false);
   const [isAiGeneratorOpen, setIsAiGeneratorOpen] = useState<boolean>(false);
   const [isAdminOpen, setIsAdminOpen] = useState<boolean>(false);
@@ -578,7 +580,7 @@ export const App: React.FC = () => {
     // Cloud Firestore Sync (if user is logged in or offline-synced)
     if (currentUser) {
       try {
-        await saveTestResultToCloud(currentUser.uid, result);
+        await saveTestResultToCloud(currentUser.uid, result, currentUser.displayName);
       } catch (err) {
         console.warn('Failed cloud test sync:', err);
       }
@@ -658,6 +660,7 @@ export const App: React.FC = () => {
           onOpenAdmin={() => setIsAdminOpen(true)}
           onOpenPayment={() => handleOpenPayment()}
           onOpenMyCourses={() => setIsMyCoursesOpen(true)}
+          onOpenLeaderboard={() => setIsLeaderboardOpen(true)}
           settings={settings}
           onToggleSound={toggleSound}
           currentUser={currentUser}
@@ -1009,8 +1012,23 @@ export const App: React.FC = () => {
           onNavigateToCourse={() => {
             setCurrentView('choose');
           }}
+          onOpenLeaderboard={() => {
+            setIsDashboardOpen(false);
+            setIsLeaderboardOpen(true);
+          }}
         />
       )}
+
+      <LeaderboardModal
+        isOpen={isLeaderboardOpen}
+        onClose={() => setIsLeaderboardOpen(false)}
+        isSubscribed={currentUser?.is_subscribed ?? false}
+        currentUserId={currentUser?.uid}
+        onOpenPayment={() => {
+          setIsLeaderboardOpen(false);
+          handleOpenPayment();
+        }}
+      />
 
       <MyCoursesModal
         isOpen={isMyCoursesOpen}

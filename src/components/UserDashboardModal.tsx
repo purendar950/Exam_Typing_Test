@@ -2,13 +2,17 @@ import React, { useState, useEffect } from 'react';
 import {
   UserProfile,
   UserStats,
+  UserStreak,
   computeUserStats,
+  computeStreak,
   fetchUserTestAttempts,
   logoutUser
 } from '../services/firebase';
 import { EvaluationResult } from '../types';
 import { PaymentSubmission, fetchUserPaymentSubmissions } from '../services/paymentService';
 import { openPurchasedCourse, resolveCourseDestination } from '../utils/courseNavigation';
+import { WpmProgressChart } from './WpmProgressChart';
+import { KeyboardHeatmap } from './KeyboardHeatmap';
 
 interface UserDashboardModalProps {
   isOpen: boolean;
@@ -18,8 +22,9 @@ interface UserDashboardModalProps {
   onViewScorecard?: (result: EvaluationResult) => void;
   onPracticeWrongWords?: (words: string[]) => void;
   onOpenPayment?: (examId?: string) => void;
-  initialTab?: 'overview' | 'history' | 'courses' | 'admitCard';
+  initialTab?: 'overview' | 'history' | 'heatmap' | 'courses' | 'admitCard';
   onNavigateToCourse?: (course: PaymentSubmission) => void;
+  onOpenLeaderboard?: () => void;
 }
 
 export const UserDashboardModal: React.FC<UserDashboardModalProps> = ({
@@ -31,12 +36,14 @@ export const UserDashboardModal: React.FC<UserDashboardModalProps> = ({
   onPracticeWrongWords,
   onOpenPayment,
   initialTab = 'overview',
-  onNavigateToCourse
+  onNavigateToCourse,
+  onOpenLeaderboard
 }) => {
   const [attempts, setAttempts] = useState<EvaluationResult[]>([]);
   const [stats, setStats] = useState<UserStats | null>(null);
+  const [streak, setStreak] = useState<UserStreak | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
-  const [activeTab, setActiveTab] = useState<'overview' | 'history' | 'courses' | 'admitCard'>(initialTab);
+  const [activeTab, setActiveTab] = useState<'overview' | 'history' | 'heatmap' | 'courses' | 'admitCard'>(initialTab);
   const [courses, setCourses] = useState<PaymentSubmission[]>([]);
   const [coursesLoading, setCoursesLoading] = useState<boolean>(false);
 
@@ -57,6 +64,7 @@ export const UserDashboardModal: React.FC<UserDashboardModalProps> = ({
         if (!isMounted) return;
         setAttempts(data);
         setStats(computeUserStats(data));
+        setStreak(computeStreak(data));
       })
       .finally(() => {
         if (isMounted) setLoading(false);
@@ -256,6 +264,21 @@ export const UserDashboardModal: React.FC<UserDashboardModalProps> = ({
             📜 Test Attempt History ({attempts.length})
           </button>
           <button
+            onClick={() => setActiveTab('heatmap')}
+            style={{
+              padding: '12px 18px',
+              border: 'none',
+              background: 'transparent',
+              fontWeight: 700,
+              fontSize: '0.88rem',
+              cursor: 'pointer',
+              color: activeTab === 'heatmap' ? '#0284c7' : '#64748b',
+              borderBottom: activeTab === 'heatmap' ? '2.5px solid #0284c7' : '2.5px solid transparent'
+            }}
+          >
+            ⌨️ Key Heatmap
+          </button>
+          <button
             onClick={() => setActiveTab('courses')}
             style={{
               padding: '12px 18px',
@@ -307,6 +330,47 @@ export const UserDashboardModal: React.FC<UserDashboardModalProps> = ({
               {/* TAB 1: OVERVIEW */}
               {activeTab === 'overview' && stats && (
                 <div>
+                  {/* Daily Practice Streak Banner */}
+                  {streak && streak.currentStreak > 0 && (
+                    <div
+                      style={{
+                        background: streak.currentStreak >= 7
+                          ? 'linear-gradient(135deg, #ea580c 0%, #dc2626 100%)'
+                          : streak.currentStreak >= 3
+                          ? 'linear-gradient(135deg, #f59e0b 0%, #ea580c 100%)'
+                          : 'linear-gradient(135deg, #0284c7 0%, #0369a1 100%)',
+                        borderRadius: '10px',
+                        padding: '14px 18px',
+                        marginBottom: '16px',
+                        color: '#ffffff',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        boxShadow: '0 3px 10px rgba(0,0,0,0.1)'
+                      }}
+                    >
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                        <span style={{ fontSize: '2rem' }}>
+                          {streak.currentStreak >= 30 ? '🏆' : streak.currentStreak >= 7 ? '🔥' : '⚡'}
+                        </span>
+                        <div>
+                          <div style={{ fontWeight: 900, fontSize: '1.05rem', letterSpacing: '0.3px' }}>
+                            {streak.currentStreak} Day Practice Streak! {streak.currentStreak >= 7 ? '🔥' : ''}
+                          </div>
+                          <div style={{ fontSize: '0.78rem', opacity: 0.95 }}>
+                            {streak.todayCompleted
+                              ? '✓ Today\'s practice target complete! Consistency builds qualifying speed.'
+                              : 'Keep the chain going! Complete a mock test today.'}
+                          </div>
+                        </div>
+                      </div>
+                      <div style={{ textAlign: 'right' }}>
+                        <div style={{ fontSize: '1.5rem', fontWeight: 900 }}>{streak.currentStreak}</div>
+                        <div style={{ fontSize: '0.7rem', opacity: 0.85 }}>Best: {streak.longestStreak} days</div>
+                      </div>
+                    </div>
+                  )}
+
                   {/* Hero Metric Cards */}
                   <div
                     style={{
@@ -364,6 +428,24 @@ export const UserDashboardModal: React.FC<UserDashboardModalProps> = ({
                       </span>
                     </div>
                   </div>
+
+                  {/* WPM Speed Progress Trajectory Chart */}
+                  {attempts.length >= 2 && (
+                    <div
+                      style={{
+                        background: '#ffffff',
+                        border: '1px solid #e2e8f0',
+                        borderRadius: '8px',
+                        padding: '16px',
+                        marginBottom: '20px'
+                      }}
+                    >
+                      <WpmProgressChart
+                        attempts={attempts}
+                        targetWpm={user.category === 'up_police_asi' ? 25 : 30}
+                      />
+                    </div>
+                  )}
 
                   {/* Cutoff Standards Checklist */}
                   <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '16px', marginBottom: '20px' }}>
@@ -542,6 +624,21 @@ export const UserDashboardModal: React.FC<UserDashboardModalProps> = ({
                       </table>
                     </div>
                   )}
+                </div>
+              )}
+
+              {/* TAB: KEYBOARD HEATMAP */}
+              {activeTab === 'heatmap' && (
+                <div>
+                  <KeyboardHeatmap
+                    attempts={attempts}
+                    onPracticeWords={(words) => {
+                      if (onPracticeWrongWords) {
+                        onClose();
+                        onPracticeWrongWords(words);
+                      }
+                    }}
+                  />
                 </div>
               )}
 
