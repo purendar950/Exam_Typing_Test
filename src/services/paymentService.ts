@@ -680,3 +680,37 @@ export function isTestLocked(
     testNumber: testNum
   };
 }
+
+/**
+ * UPI Merchant Configuration
+ */
+export interface UpiMerchantConfig {
+  upiId: string;
+  merchantName: string;
+}
+
+export const DEFAULT_UPI_CONFIG: UpiMerchantConfig = {
+  upiId: 'purendarchauhan@phonepe',
+  merchantName: 'PURENDAR CHAUHAN'
+};
+
+export function getUpiMerchantConfig(): UpiMerchantConfig {
+  if (typeof window !== 'undefined') {
+    const saved = localStorage.getItem('up_typing_upi_config');
+    if (saved) {
+      try {
+        return { ...DEFAULT_UPI_CONFIG, ...JSON.parse(saved) };
+      } catch (e) {
+        // fallback to default
+      }
+    }
+  }
+  return DEFAULT_UPI_CONFIG;
+}
+
+export function saveUpiMerchantConfig(config: UpiMerchantConfig): void {
+  if (typeof window !== 'undefined') {
+    localStorage.setItem('up_typing_upi_config', JSON.stringify(config));
+  }
+}
+

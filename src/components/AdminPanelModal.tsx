@@ -53,7 +53,11 @@ import {
   savePromoCodes,
   getPaymentPlans,
   savePaymentPlans,
-  DEFAULT_PAYMENT_PLANS
+  DEFAULT_PAYMENT_PLANS,
+  UpiMerchantConfig,
+  getUpiMerchantConfig,
+  saveUpiMerchantConfig,
+  DEFAULT_UPI_CONFIG
 } from '../services/paymentService';
 import {
   TelegramConfig,
@@ -110,8 +114,9 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
   // Tab State
   const [activeTab, setActiveTab] = useState<'overview' | 'live_chat' | 'ai_engine' | 'passages' | 'candidates' | 'payments' | 'pricing' | 'settings'>(initialTab || 'overview');
 
-  // Pricing Plans State
+  // Pricing Plans & UPI Merchant State
   const [pricingPlansList, setPricingPlansList] = useState<PaymentPlan[]>(() => getPaymentPlans());
+  const [upiMerchantConfig, setUpiMerchantConfig] = useState<UpiMerchantConfig>(() => getUpiMerchantConfig());
   const [pricingSaveMessage, setPricingSaveMessage] = useState<string | null>(null);
 
   // Live Support Chat State
@@ -553,15 +558,18 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
 
   const handleSavePricingPlans = () => {
     savePaymentPlans(pricingPlansList);
-    setPricingSaveMessage('✅ Pricing plans saved successfully! All users and checkout modals will now reflect these updated rates.');
+    saveUpiMerchantConfig(upiMerchantConfig);
+    setPricingSaveMessage('✅ Pricing plans and UPI Merchant settings saved successfully! All checkout modals will reflect these updated details.');
     setTimeout(() => setPricingSaveMessage(null), 4000);
   };
 
   const handleResetPricingPlans = () => {
-    if (!window.confirm('Reset all 5 pricing tiers to factory defaults (₹12, ₹39, ₹89, ₹149, ₹199)?')) return;
+    if (!window.confirm('Reset all 5 pricing tiers and UPI settings to factory defaults?')) return;
     savePaymentPlans(DEFAULT_PAYMENT_PLANS);
     setPricingPlansList(DEFAULT_PAYMENT_PLANS);
-    setPricingSaveMessage('🔄 Pricing plans reset to factory defaults.');
+    saveUpiMerchantConfig(DEFAULT_UPI_CONFIG);
+    setUpiMerchantConfig(DEFAULT_UPI_CONFIG);
+    setPricingSaveMessage('🔄 Pricing plans and UPI settings reset to factory defaults.');
     setTimeout(() => setPricingSaveMessage(null), 4000);
   };
 
@@ -5211,6 +5219,85 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                           ➕ Create & Publish Promo Code
                         </button>
                       </form>
+                    </div>
+                  </div>
+
+                  {/* Section 3: Fintech UPI Receiver & Merchant Configuration */}
+                  <div
+                    style={{
+                      background: 'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)',
+                      border: '1.5px solid #38bdf8',
+                      borderRadius: '14px',
+                      padding: '20px',
+                      boxShadow: '0 4px 14px rgba(56, 189, 248, 0.08)'
+                    }}
+                  >
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px', flexWrap: 'wrap', gap: '8px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                        <span style={{ fontSize: '1.4rem' }}>🏦</span>
+                        <div>
+                          <h3 style={{ margin: 0, fontSize: '1.05rem', fontWeight: 800, color: '#0f172a' }}>
+                            Fintech UPI Receiver & Merchant Configuration
+                          </h3>
+                          <div style={{ fontSize: '0.76rem', color: '#64748b' }}>
+                            Configure your PhonePe / UPI VPA and Merchant Name used for 1-Click Pay deep linking and instant QR scan.
+                          </div>
+                        </div>
+                      </div>
+                      <span style={{ fontSize: '0.7rem', fontWeight: 800, color: '#0369a1', background: '#e0f2fe', padding: '3px 10px', borderRadius: '12px' }}>
+                        ● ZERO GATEWAY FEE (0%)
+                      </span>
+                    </div>
+
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '16px' }}>
+                      <div>
+                        <label style={{ display: 'block', fontSize: '0.76rem', fontWeight: 700, color: '#475569', marginBottom: '4px' }}>
+                          Merchant UPI ID (VPA):
+                        </label>
+                        <input
+                          type="text"
+                          value={upiMerchantConfig.upiId}
+                          onChange={(e) => setUpiMerchantConfig({ ...upiMerchantConfig, upiId: e.target.value.trim() })}
+                          placeholder="e.g. purendarchauhan@phonepe"
+                          style={{
+                            width: '100%',
+                            padding: '8px 12px',
+                            borderRadius: '8px',
+                            border: '1.5px solid #cbd5e1',
+                            fontSize: '0.88rem',
+                            fontFamily: 'monospace',
+                            fontWeight: 800,
+                            color: '#0f172a'
+                          }}
+                        />
+                        <div style={{ fontSize: '0.72rem', color: '#64748b', marginTop: '3px' }}>
+                          Candidate UPI apps will send funds directly to this VPA.
+                        </div>
+                      </div>
+
+                      <div>
+                        <label style={{ display: 'block', fontSize: '0.76rem', fontWeight: 700, color: '#475569', marginBottom: '4px' }}>
+                          Payee / Merchant Display Name:
+                        </label>
+                        <input
+                          type="text"
+                          value={upiMerchantConfig.merchantName}
+                          onChange={(e) => setUpiMerchantConfig({ ...upiMerchantConfig, merchantName: e.target.value })}
+                          placeholder="e.g. PURENDAR CHAUHAN"
+                          style={{
+                            width: '100%',
+                            padding: '8px 12px',
+                            borderRadius: '8px',
+                            border: '1.5px solid #cbd5e1',
+                            fontSize: '0.88rem',
+                            fontWeight: 800,
+                            color: '#0f172a'
+                          }}
+                        />
+                        <div style={{ fontSize: '0.72rem', color: '#64748b', marginTop: '3px' }}>
+                          Shown on candidates' Google Pay, PhonePe & Paytm confirmation screen.
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>

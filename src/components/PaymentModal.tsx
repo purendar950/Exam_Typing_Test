@@ -4,9 +4,10 @@ import {
   getPaymentPlans,
   validatePromoCode,
   submitPaymentRequest,
-  getPromoCodes
+  getPromoCodes,
+  getUpiMerchantConfig
 } from '../services/paymentService';
-import { sendTelegramPaymentNotification, getTelegramConfig } from '../services/telegramService';
+import { sendTelegramPaymentNotification } from '../services/telegramService';
 import { UserProfile } from '../services/firebase';
 import { ALL_EXAMS } from '../data/allExams';
 import phonePeQrImg from '../assets/phonepe-qr.png';
@@ -29,6 +30,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
   onPaymentSubmitted
 }) => {
   const plans = useMemo(() => getPaymentPlans(), []);
+  const upiConfig = useMemo(() => getUpiMerchantConfig(), []);
   const availablePromoCodes = useMemo(() => getPromoCodes().filter((c) => c.isActive), []);
 
   // Selected Plan state
@@ -43,6 +45,34 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
 
   // Single exam selection if single_exam plan chosen
   const [selectedExamId, setSelectedExamId] = useState<string>(initialSelectedExamId || '53');
+
+  // Mobile step navigation (1 = Plan, 2 = Pay via UPI, 3 = Confirm UTR)
+  const [mobileStep, setMobileStep] = useState<1 | 2 | 3>(1);
+
+  // Fintech 15-Minute Price Lock Countdown Timer
+  const [timeLeft, setTimeLeft] = useState<number>(900); // 15:00
+  useEffect(() => {
+    if (!isOpen) return;
+    setTimeLeft(900);
+    const interval = setInterval(() => {
+      setTimeLeft((prev) => (prev > 0 ? prev - 1 : 900));
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [isOpen]);
+
+  const formattedTimer = `${Math.floor(timeLeft / 60)
+    .toString()
+    .padStart(2, '0')}:${(timeLeft % 60).toString().padStart(2, '0')}`;
+
+  // Copy UPI toast
+  const [copiedUpi, setCopiedUpi] = useState<boolean>(false);
+  const handleCopyUpi = () => {
+    if (navigator?.clipboard?.writeText) {
+      navigator.clipboard.writeText(upiConfig.upiId);
+      setCopiedUpi(true);
+      setTimeout(() => setCopiedUpi(false), 2500);
+    }
+  };
 
   // Sync when initialPlanId or modal opens
   useEffect(() => {
@@ -80,7 +110,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
     discountAmount: number;
     message: string;
   } | null>(() => {
-    const val = validatePromoCode('WELCOME50', selectedPlan?.discountedPrice || 799);
+    const val = validatePromoCode('WELCOME50', selectedPlan?.discountedPrice || 199);
     return val.valid ? { code: 'WELCOME50', discountAmount: val.discountAmount, message: val.message } : null;
   });
   const [promoError, setPromoError] = useState<string>('');
@@ -95,6 +125,11 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
   const finalPayable = (selectedPlan.id === 'plan_single_15d' || selectedPlan.id === 'plan_exclusive_12')
     ? 12
     : Math.max(9, selectedPlan.discountedPrice - currentDiscountAmount);
+
+  const totalSavings = Math.max(0, selectedPlan.originalPrice - finalPayable);
+  const savingsPct = selectedPlan.originalPrice > 0
+    ? Math.round((totalSavings / selectedPlan.originalPrice) * 100)
+    : 0;
 
   // Form states
   const [candidateName, setCandidateName] = useState<string>(currentUser?.displayName || '');
@@ -144,25 +179,47 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
     reader.readAsDataURL(file);
   };
 
+  // 1-Click Mobile UPI Launcher
+  const handleLaunchUpi = (app: 'generic' | 'gpay' | 'phonepe' | 'paytm') => {
+    const vpa = upiConfig.upiId;
+    const name = encodeURIComponent(upiConfig.merchantName);
+    const note = encodeURIComponent(`ExamTyping ${selectedPlan.name}`);
+    const genericUri = `upi://pay?pa=${vpa}&pn=${name}&am=${finalPayable}&cu=INR&tn=${note}`;
+
+    if (app === 'phonepe') {
+      window.location.href = `phonepe://pay?pa=${vpa}&pn=${name}&am=${finalPayable}&cu=INR&tn=${note}`;
+      setTimeout(() => { window.location.href = genericUri; }, 1200);
+    } else if (app === 'gpay') {
+      window.location.href = `tez://upi/pay?pa=${vpa}&pn=${name}&am=${finalPayable}&cu=INR&tn=${note}`;
+      setTimeout(() => { window.location.href = genericUri; }, 1200);
+    } else if (app === 'paytm') {
+      window.location.href = `paytmmp://pay?pa=${vpa}&pn=${name}&am=${finalPayable}&cu=INR&tn=${note}`;
+      setTimeout(() => { window.location.href = genericUri; }, 1200);
+    } else {
+      window.location.href = genericUri;
+    }
+  };
+
   // Handle submission
   const handleSubmitPayment = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMessage('');
 
     if (!candidateName.trim()) {
-      setErrorMessage('Please enter your full name.');
+      setErrorMessage('Please enter your full candidate name.');
       return;
     }
     if (!candidateEmail.trim() && !currentUser?.email) {
-      setErrorMessage('Please enter your email address for subscription activation.');
+      setErrorMessage('Please enter your email address for account activation.');
       return;
     }
-    if (!utrNumber.trim() || utrNumber.trim().length < 8) {
-      setErrorMessage('Please enter a valid 12-digit UPI / UTR Transaction ID from PhonePe/UPI receipt.');
+    const cleanUtr = utrNumber.trim();
+    if (!cleanUtr || cleanUtr.length < 8) {
+      setErrorMessage('Please enter a valid 12-digit UPI / UTR Transaction ID from your payment receipt.');
       return;
     }
     if (!screenshotPreview) {
-      setErrorMessage('Please upload a screenshot of your successful PhonePe/UPI payment.');
+      setErrorMessage('Please upload a screenshot of your successful UPI payment.');
       return;
     }
 
@@ -182,7 +239,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
         discountAmount: currentDiscountAmount,
         finalAmount: finalPayable,
         promoCodeApplied: appliedPromo?.code,
-        utrNumber: utrNumber.trim(),
+        utrNumber: cleanUtr,
         screenshotUrl: screenshotPreview
       });
 
@@ -208,8 +265,8 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
         position: 'fixed',
         inset: 0,
         zIndex: 9999,
-        backgroundColor: 'rgba(15, 23, 42, 0.75)',
-        backdropFilter: 'blur(6px)',
+        backgroundColor: 'rgba(9, 13, 22, 0.82)',
+        backdropFilter: 'blur(10px)',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
@@ -223,684 +280,1160 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
       <div
         style={{
           background: '#ffffff',
-          borderRadius: '18px',
+          borderRadius: '20px',
           width: '100%',
-          maxWidth: '860px',
+          maxWidth: '960px',
           maxHeight: '94vh',
           display: 'flex',
           flexDirection: 'column',
-          boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+          boxShadow: '0 25px 60px -15px rgba(15, 23, 42, 0.45)',
           overflow: 'hidden',
-          animation: 'fadeInUp 0.2s ease-out'
+          border: '1px solid rgba(226, 232, 240, 0.8)',
+          animation: 'fadeInUp 0.22s ease-out'
         }}
       >
-        {/* Modal Header */}
+        {/* ============================================================
+            FINTECH TOP HEADER
+            ============================================================ */}
         <div
           style={{
             padding: '18px 24px',
-            background: 'linear-gradient(135deg, #1e293b 0%, #0f172a 100%)',
+            background: 'linear-gradient(135deg, #090d16 0%, #0f172a 45%, #1e1b4b 100%)',
             color: '#ffffff',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
-            borderBottom: '1px solid rgba(255,255,255,0.1)'
+            borderBottom: '1px solid rgba(255, 255, 255, 0.12)',
+            position: 'relative'
           }}
         >
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <span style={{ fontSize: '1.75rem' }}>👑</span>
+          {/* Left: Brand & Verified Pill */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+            <div
+              style={{
+                width: '42px',
+                height: '42px',
+                borderRadius: '12px',
+                background: 'linear-gradient(135deg, #38bdf8 0%, #2563eb 100%)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: '1.4rem',
+                boxShadow: '0 4px 14px rgba(56, 189, 248, 0.35)',
+                flexShrink: 0
+              }}
+            >
+              👑
+            </div>
             <div>
-              <div style={{ fontSize: '0.72rem', fontWeight: 800, color: '#38bdf8', letterSpacing: '1px', textTransform: 'uppercase' }}>
-                EXAM TYPING
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                <span
+                  style={{
+                    fontSize: '0.68rem',
+                    fontWeight: 900,
+                    color: '#38bdf8',
+                    letterSpacing: '1.2px',
+                    textTransform: 'uppercase'
+                  }}
+                >
+                  EXAM TYPING
+                </span>
+                <span
+                  style={{
+                    fontSize: '0.65rem',
+                    fontWeight: 800,
+                    color: '#4ade80',
+                    background: 'rgba(34, 197, 94, 0.15)',
+                    border: '1px solid rgba(74, 222, 128, 0.3)',
+                    padding: '2px 8px',
+                    borderRadius: '12px',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '4px'
+                  }}
+                >
+                  <span style={{ fontSize: '0.6rem' }}>●</span> VERIFIED UPI MERCHANT
+                </span>
               </div>
-              <h2 style={{ fontSize: '1.25rem', fontWeight: 900, margin: '2px 0 0 0', letterSpacing: '-0.02em', color: '#ffffff' }}>
-                PREMIUM PLANS
+
+              <h2
+                style={{
+                  fontSize: '1.25rem',
+                  fontWeight: 900,
+                  margin: '2px 0 0 0',
+                  letterSpacing: '-0.02em',
+                  color: '#ffffff'
+                }}
+              >
+                Fintech Pro Checkout
               </h2>
-              <p style={{ fontSize: '0.82rem', color: '#94a3b8', margin: '3px 0 0 0' }}>
+              <p style={{ fontSize: '0.78rem', color: '#94a3b8', margin: '2px 0 0 0' }}>
                 Practice smarter. Improve faster. Get exam-ready.
               </p>
             </div>
           </div>
-          <button
-            onClick={onClose}
-            style={{
-              background: 'rgba(255,255,255,0.1)',
-              border: 'none',
-              borderRadius: '50%',
-              width: '34px',
-              height: '34px',
-              color: '#ffffff',
-              fontSize: '1.1rem',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center'
-            }}
-          >
-            ✕
-          </button>
+
+          {/* Right: Security & Price Lock Timer */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px',
+                background: 'rgba(255, 255, 255, 0.08)',
+                border: '1px solid rgba(255, 255, 255, 0.15)',
+                padding: '6px 12px',
+                borderRadius: '20px',
+                fontSize: '0.75rem',
+                color: '#e2e8f0',
+                fontWeight: 700
+              }}
+            >
+              <span>⏱️</span>
+              <span>Price locked:</span>
+              <strong style={{ color: '#fbbf24', fontFamily: 'monospace', fontSize: '0.85rem' }}>
+                {formattedTimer}
+              </strong>
+            </div>
+
+            <button
+              onClick={onClose}
+              aria-label="Close Checkout"
+              style={{
+                background: 'rgba(255, 255, 255, 0.12)',
+                border: 'none',
+                borderRadius: '50%',
+                width: '32px',
+                height: '32px',
+                color: '#cbd5e1',
+                fontSize: '1.1rem',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                transition: 'background 0.15s ease'
+              }}
+            >
+              ✕
+            </button>
+          </div>
         </div>
 
-        {/* Modal Body */}
-        <div style={{ padding: '24px', overflowY: 'auto', flex: 1 }}>
+        {/* ============================================================
+            STEPPER PROGRESS BAR (Mobile & Quick Nav)
+            ============================================================ */}
+        <div
+          style={{
+            display: 'flex',
+            background: '#f8fafc',
+            borderBottom: '1px solid #e2e8f0',
+            padding: '8px 20px',
+            gap: '8px',
+            overflowX: 'auto'
+          }}
+        >
+          {[
+            { step: 1, label: '1. Select Plan Tier', icon: '🎯' },
+            { step: 2, label: '2. Scan / 1-Click UPI', icon: '⚡' },
+            { step: 3, label: '3. Confirm UTR & Submit', icon: '🛡️' }
+          ].map((s) => {
+            const isActive = mobileStep === s.step;
+            return (
+              <button
+                key={s.step}
+                onClick={() => setMobileStep(s.step as any)}
+                style={{
+                  background: isActive ? '#0f172a' : 'transparent',
+                  color: isActive ? '#ffffff' : '#64748b',
+                  border: 'none',
+                  borderRadius: '20px',
+                  padding: '6px 14px',
+                  fontSize: '0.78rem',
+                  fontWeight: 700,
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  whiteSpace: 'nowrap',
+                  transition: 'all 0.15s ease'
+                }}
+              >
+                <span>{s.icon}</span>
+                <span>{s.label}</span>
+              </button>
+            );
+          })}
+        </div>
+
+        {/* ============================================================
+            MODAL BODY: 2-COLUMN FINTECH SPLIT
+            ============================================================ */}
+        <div style={{ padding: '20px 24px', overflowY: 'auto', flex: 1, background: '#f8fafc' }}>
           {submitSuccess ? (
-            <div style={{ textAlign: 'center', padding: '36px 16px' }}>
+            /* ============================================================
+               SUCCESS / INVOICE RECEIPT SCREEN
+               ============================================================ */
+            <div style={{ textAlign: 'center', padding: '28px 16px' }}>
               <div
                 style={{
-                  width: '76px',
-                  height: '76px',
+                  width: '80px',
+                  height: '80px',
                   borderRadius: '50%',
-                  backgroundColor: '#dcfce7',
-                  color: '#16a34a',
+                  background: 'linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%)',
+                  color: '#15803d',
                   fontSize: '2.5rem',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  margin: '0 auto 20px auto',
-                  boxShadow: '0 4px 12px rgba(22, 163, 74, 0.2)'
+                  margin: '0 auto 16px auto',
+                  boxShadow: '0 8px 24px rgba(22, 163, 74, 0.25)'
                 }}
               >
                 ✓
               </div>
-              <h3 style={{ fontSize: '1.5rem', fontWeight: 800, color: '#0f172a', marginBottom: '8px' }}>
-                Payment Submitted for Verification!
-              </h3>
-              <p style={{ fontSize: '0.95rem', color: '#475569', maxWidth: '520px', margin: '0 auto 24px auto', lineHeight: 1.5 }}>
-                Thank you, <strong>{candidateName}</strong>! Your UTR number <strong>{utrNumber}</strong> and payment screenshot for <strong>{selectedPlan.name} (₹{finalPayable})</strong> have been received by our admin team.
-              </p>
 
-              <div
+              <span
                 style={{
-                  background: '#f8fafc',
-                  border: '1.5px solid #e2e8f0',
-                  borderRadius: '12px',
-                  padding: '16px 20px',
-                  maxWidth: '460px',
-                  margin: '0 auto 24px auto',
-                  textAlign: 'left'
+                  background: '#dcfce7',
+                  color: '#15803d',
+                  fontSize: '0.72rem',
+                  fontWeight: 800,
+                  padding: '4px 12px',
+                  borderRadius: '20px',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.5px'
                 }}
               >
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px', fontSize: '0.88rem' }}>
-                  <span style={{ color: '#64748b' }}>Plan Chosen:</span>
-                  <span style={{ fontWeight: 700, color: '#0f172a' }}>{selectedPlan.name} ({selectedPlan.durationLabel})</span>
-                </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px', fontSize: '0.88rem' }}>
-                  <span style={{ color: '#64748b' }}>Amount Paid:</span>
-                  <span style={{ fontWeight: 800, color: '#16a34a' }}>₹{finalPayable}</span>
-                </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px', fontSize: '0.88rem' }}>
-                  <span style={{ color: '#64748b' }}>UTR / Txn ID:</span>
-                  <span style={{ fontWeight: 700, fontFamily: 'monospace', color: '#0f172a' }}>{utrNumber}</span>
-                </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.88rem' }}>
-                  <span style={{ color: '#64748b' }}>Verification Status:</span>
-                  <span style={{ fontWeight: 700, color: '#ea580c', background: '#fff7ed', padding: '2px 8px', borderRadius: '4px' }}>
-                    ⏳ Pending Admin Approval
+                PAYMENT PROOF SUBMITTED SUCCESSFULLY
+              </span>
+
+              <h3 style={{ fontSize: '1.45rem', fontWeight: 900, color: '#0f172a', margin: '12px 0 6px 0' }}>
+                Thank you, {candidateName}!
+              </h3>
+              <p style={{ fontSize: '0.88rem', color: '#475569', maxWidth: '540px', margin: '0 auto 20px auto', lineHeight: 1.5 }}>
+                Your UTR reference <strong>{utrNumber}</strong> and payment screenshot for <strong>{selectedPlan.name} (₹{finalPayable})</strong> have been queued for priority admin verification.
+              </p>
+
+              {/* Digital Slip */}
+              <div
+                style={{
+                  background: '#ffffff',
+                  border: '1.5px solid #cbd5e1',
+                  borderRadius: '14px',
+                  padding: '20px',
+                  maxWidth: '480px',
+                  margin: '0 auto 20px auto',
+                  textAlign: 'left',
+                  boxShadow: '0 4px 15px rgba(0,0,0,0.05)'
+                }}
+              >
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px dashed #cbd5e1', paddingBottom: '12px', marginBottom: '12px' }}>
+                  <div>
+                    <div style={{ fontSize: '0.72rem', color: '#64748b', textTransform: 'uppercase', fontWeight: 700 }}>
+                      DIGITAL RECEIPT
+                    </div>
+                    <div style={{ fontSize: '0.95rem', fontWeight: 900, color: '#0f172a' }}>
+                      #ET-PAY-{Date.now().toString().slice(-6)}
+                    </div>
+                  </div>
+                  <span style={{ fontSize: '0.72rem', color: '#16a34a', fontWeight: 800, background: '#f0fdf4', padding: '4px 10px', borderRadius: '12px' }}>
+                    ● VERIFICATION QUEUED
                   </span>
+                </div>
+
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px', fontSize: '0.85rem' }}>
+                  <span style={{ color: '#64748b' }}>Plan Tier:</span>
+                  <span style={{ fontWeight: 800, color: '#0f172a' }}>{selectedPlan.name} ({selectedPlan.durationLabel})</span>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px', fontSize: '0.85rem' }}>
+                  <span style={{ color: '#64748b' }}>Scope:</span>
+                  <span style={{ fontWeight: 700, color: '#0f172a' }}>
+                    {selectedPlan.type === 'all_exams_pass' ? '⭐ All 129 Examinations' : selectedExam.title}
+                  </span>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px', fontSize: '0.85rem' }}>
+                  <span style={{ color: '#64748b' }}>Amount Paid:</span>
+                  <span style={{ fontWeight: 900, color: '#16a34a', fontSize: '1.1rem' }}>₹{finalPayable}</span>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px', fontSize: '0.85rem' }}>
+                  <span style={{ color: '#64748b' }}>UTR / Reference:</span>
+                  <span style={{ fontWeight: 800, fontFamily: 'monospace', color: '#0f172a' }}>{utrNumber}</span>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', paddingTop: '8px', borderTop: '1px solid #f1f5f9' }}>
+                  <span style={{ color: '#64748b' }}>Activation Time:</span>
+                  <span style={{ fontWeight: 700, color: '#2563eb' }}>Within 15–30 Minutes</span>
                 </div>
               </div>
 
-              <div style={{ display: 'flex', justifyContent: 'center', gap: '12px' }}>
+              <div style={{ display: 'flex', justifyContent: 'center', gap: '12px', flexWrap: 'wrap' }}>
                 <button
-                  className="btn btn-primary"
                   onClick={onClose}
-                  style={{ padding: '12px 32px', fontWeight: 700, borderRadius: '8px' }}
+                  style={{
+                    padding: '12px 28px',
+                    fontWeight: 800,
+                    borderRadius: '10px',
+                    background: '#0f172a',
+                    color: '#ffffff',
+                    border: 'none',
+                    cursor: 'pointer',
+                    fontSize: '0.88rem'
+                  }}
                 >
-                  Continue Practicing Free
+                  Continue Practicing Free Demo Tests →
                 </button>
+                <a
+                  href="https://t.me/purendare"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{
+                    padding: '12px 20px',
+                    fontWeight: 800,
+                    borderRadius: '10px',
+                    background: '#229ed9',
+                    color: '#ffffff',
+                    textDecoration: 'none',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    fontSize: '0.88rem'
+                  }}
+                >
+                  <span>✈️</span>
+                  <span>Instant Telegram Activation (@purendare)</span>
+                </a>
               </div>
             </div>
           ) : (
-            <div>
-              {/* STEP 1: SELECT PLAN */}
-              <div style={{ marginBottom: '24px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
-                  <span
-                    style={{
-                      background: '#0284c7',
-                      color: '#ffffff',
-                      borderRadius: '50%',
-                      width: '24px',
-                      height: '24px',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      fontWeight: 800,
-                      fontSize: '0.78rem'
-                    }}
-                  >
-                    1
-                  </span>
-                  <h3 style={{ fontSize: '1.05rem', fontWeight: 800, color: '#0f172a', margin: 0 }}>
-                    Select Your Examination Plan
-                  </h3>
-                </div>
-
-                <div
-                  style={{
-                    display: 'grid',
-                    gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
-                    gap: '12px'
-                  }}
-                >
-                  {plans.map((p) => {
-                    const isSelected = selectedPlanId === p.id;
-                    return (
-                      <div
-                        key={p.id}
-                        onClick={() => setSelectedPlanId(p.id)}
+            /* ============================================================
+               ACTIVE CHECKOUT FLOW: 2-COLUMN RESPONSIVE GRID
+               ============================================================ */
+            <div
+              style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fit, minmax(360px, 1fr))',
+                gap: '20px',
+                alignItems: 'start'
+              }}
+            >
+              {/* ============================================================
+                  LEFT COLUMN: PLAN SELECTION & ORDER INVOICE SLIP
+                  ============================================================ */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                {/* Section 1: Choose Plan Tier */}
+                <div style={{ background: '#ffffff', borderRadius: '14px', padding: '18px', border: '1px solid #e2e8f0', boxShadow: '0 2px 8px rgba(0,0,0,0.03)' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <span
                         style={{
-                          border: isSelected ? '2px solid #0284c7' : '1.5px solid #e2e8f0',
-                          backgroundColor: isSelected ? '#f0f9ff' : '#ffffff',
-                          borderRadius: '12px',
-                          padding: '16px',
-                          cursor: 'pointer',
-                          position: 'relative',
-                          transition: 'all 0.15s ease',
-                          boxShadow: isSelected ? '0 4px 12px rgba(2, 132, 199, 0.15)' : 'none'
+                          width: '22px',
+                          height: '22px',
+                          borderRadius: '50%',
+                          background: '#0284c7',
+                          color: '#ffffff',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          fontSize: '0.72rem',
+                          fontWeight: 800
                         }}
                       >
-                        {p.badge && (
-                          <span
-                            style={{
-                              position: 'absolute',
-                              top: '-9px',
-                              right: '12px',
-                              backgroundColor: p.isBestValue ? '#16a34a' : p.isPopular ? '#0284c7' : '#e0f2fe',
-                              color: p.isBestValue || p.isPopular ? '#ffffff' : '#0369a1',
-                              fontSize: '0.68rem',
-                              fontWeight: 800,
-                              padding: '2px 8px',
-                              borderRadius: '10px',
-                              letterSpacing: '0.02em'
-                            }}
-                          >
-                            {p.badge}
-                          </span>
-                        )}
+                        1
+                      </span>
+                      <h3 style={{ margin: 0, fontSize: '0.98rem', fontWeight: 800, color: '#0f172a' }}>
+                        Select Subscription Tier
+                      </h3>
+                    </div>
+                    <span style={{ fontSize: '0.72rem', color: '#64748b' }}>5 Official Plans</span>
+                  </div>
 
-                        <div style={{ fontSize: '0.92rem', fontWeight: 800, color: '#0f172a', marginBottom: '4px' }}>
-                          {p.name}
-                        </div>
-                        <div style={{ fontSize: '0.78rem', color: '#64748b', marginBottom: '8px' }}>
-                          Validity: <strong>{p.durationLabel}</strong>
-                        </div>
+                  {/* Plan Cards Stack */}
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                    {plans.map((p) => {
+                      const isSelected = selectedPlanId === p.id;
+                      const planSavings = p.originalPrice > p.discountedPrice
+                        ? Math.round(((p.originalPrice - p.discountedPrice) / p.originalPrice) * 100)
+                        : 0;
+                      return (
+                        <div
+                          key={p.id}
+                          onClick={() => setSelectedPlanId(p.id)}
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'space-between',
+                            padding: '12px 14px',
+                            borderRadius: '10px',
+                            cursor: 'pointer',
+                            border: isSelected ? '2px solid #0284c7' : '1px solid #e2e8f0',
+                            background: isSelected ? '#f0f9ff' : '#ffffff',
+                            boxShadow: isSelected ? '0 2px 8px rgba(2, 132, 199, 0.12)' : 'none',
+                            transition: 'all 0.15s ease'
+                          }}
+                        >
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                            {/* Custom Radio Button */}
+                            <div
+                              style={{
+                                width: '18px',
+                                height: '18px',
+                                borderRadius: '50%',
+                                border: isSelected ? '5px solid #0284c7' : '2px solid #cbd5e1',
+                                background: '#ffffff',
+                                flexShrink: 0
+                              }}
+                            />
+                            <div>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                <span style={{ fontWeight: 800, fontSize: '0.92rem', color: '#0f172a' }}>
+                                  {p.name}
+                                </span>
+                                {p.badge && (
+                                  <span
+                                    style={{
+                                      fontSize: '0.62rem',
+                                      fontWeight: 800,
+                                      padding: '1px 6px',
+                                      borderRadius: '6px',
+                                      background: p.isExclusiveOffer
+                                        ? '#fef3c7'
+                                        : p.isPopular
+                                        ? '#dbeafe'
+                                        : p.isBestValue
+                                        ? '#f3e8ff'
+                                        : '#f1f5f9',
+                                      color: p.isExclusiveOffer
+                                        ? '#b45309'
+                                        : p.isPopular
+                                        ? '#1d4ed8'
+                                        : p.isBestValue
+                                        ? '#7e22ce'
+                                        : '#475569'
+                                    }}
+                                  >
+                                    {p.badge}
+                                  </span>
+                                )}
+                              </div>
+                              <div style={{ fontSize: '0.74rem', color: '#64748b' }}>
+                                {p.type === 'all_exams_pass' ? '⭐ All 129 Exams' : '1 Target Exam'} &bull; {p.durationLabel}
+                              </div>
+                            </div>
+                          </div>
 
-                        <div style={{ display: 'flex', alignItems: 'baseline', gap: '6px', marginBottom: '10px' }}>
-                          <span style={{ fontSize: '1.35rem', fontWeight: 900, color: '#0284c7' }}>
-                            ₹{p.discountedPrice}
-                          </span>
-                          <span style={{ fontSize: '0.85rem', color: '#94a3b8', textDecoration: 'line-through' }}>
-                            ₹{p.originalPrice}
-                          </span>
-                          <span style={{ fontSize: '0.72rem', fontWeight: 800, color: '#16a34a' }}>
-                            {Math.round(((p.originalPrice - p.discountedPrice) / p.originalPrice) * 100)}% OFF
-                          </span>
+                          <div style={{ textAlign: 'right' }}>
+                            <div style={{ display: 'flex', alignItems: 'baseline', gap: '6px', justifyContent: 'flex-end' }}>
+                              <span style={{ fontSize: '1.15rem', fontWeight: 900, color: isSelected ? '#0284c7' : '#0f172a' }}>
+                                ₹{p.discountedPrice}
+                              </span>
+                              <span style={{ fontSize: '0.75rem', color: '#94a3b8', textDecoration: 'line-through' }}>
+                                ₹{p.originalPrice}
+                              </span>
+                            </div>
+                            {planSavings > 0 && (
+                              <span style={{ fontSize: '0.68rem', fontWeight: 800, color: '#16a34a' }}>
+                                {planSavings}% SAVED
+                              </span>
+                            )}
+                          </div>
                         </div>
+                      );
+                    })}
+                  </div>
 
-                        <ul style={{ margin: 0, paddingLeft: '16px', fontSize: '0.75rem', color: '#475569', lineHeight: 1.4 }}>
-                          {p.features.slice(0, 3).map((f, i) => (
-                            <li key={i}>{f}</li>
-                          ))}
-                        </ul>
-                      </div>
-                    );
-                  })}
+                  {/* Target Exam Dropdown (if single exam plan) */}
+                  {selectedPlan.type === 'single_exam' && (
+                    <div
+                      style={{
+                        marginTop: '12px',
+                        background: '#f8fafc',
+                        padding: '12px',
+                        borderRadius: '8px',
+                        border: '1px solid #e2e8f0'
+                      }}
+                    >
+                      <label style={{ fontSize: '0.76rem', fontWeight: 700, color: '#334155', display: 'block', marginBottom: '4px' }}>
+                        🎯 Choose Exam to Unlock (out of 129 exams):
+                      </label>
+                      <select
+                        value={selectedExamId}
+                        onChange={(e) => setSelectedExamId(e.target.value)}
+                        style={{
+                          width: '100%',
+                          padding: '7px 10px',
+                          borderRadius: '6px',
+                          border: '1px solid #cbd5e1',
+                          fontSize: '0.82rem',
+                          fontWeight: 700,
+                          backgroundColor: '#ffffff'
+                        }}
+                      >
+                        {ALL_EXAMS.map((ex) => (
+                          <option key={ex.id} value={ex.id}>
+                            {ex.title} ({ex.language === 'english' ? 'English' : 'Hindi'} • {ex.targetSpeed} WPM)
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  )}
                 </div>
 
-                {/* If Single Exam selected, let candidate pick which exam */}
-                {selectedPlan.type === 'single_exam' && (
-                  <div
-                    style={{
-                      marginTop: '12px',
-                      background: '#f8fafc',
-                      padding: '12px 16px',
-                      borderRadius: '8px',
-                      border: '1px solid #e2e8f0'
-                    }}
-                  >
-                    <label style={{ fontSize: '0.82rem', fontWeight: 700, color: '#334155', display: 'block', marginBottom: '6px' }}>
-                      Choose Target Examination to Unlock:
-                    </label>
-                    <select
-                      value={selectedExamId}
-                      onChange={(e) => setSelectedExamId(e.target.value)}
+                {/* Section 2: Promo Code / Coupon */}
+                <div style={{ background: '#ffffff', borderRadius: '14px', padding: '16px', border: '1px solid #e2e8f0' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px' }}>
+                    <span
                       style={{
-                        width: '100%',
+                        width: '22px',
+                        height: '22px',
+                        borderRadius: '50%',
+                        background: '#0284c7',
+                        color: '#ffffff',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontSize: '0.72rem',
+                        fontWeight: 800
+                      }}
+                    >
+                      2
+                    </span>
+                    <h3 style={{ margin: 0, fontSize: '0.92rem', fontWeight: 800, color: '#0f172a' }}>
+                      Apply Discount Coupon
+                    </h3>
+                  </div>
+
+                  <div style={{ display: 'flex', gap: '8px' }}>
+                    <input
+                      type="text"
+                      value={couponCode}
+                      onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
+                      placeholder="e.g. WELCOME50"
+                      style={{
+                        flex: 1,
                         padding: '8px 12px',
                         borderRadius: '6px',
                         border: '1px solid #cbd5e1',
-                        fontSize: '0.88rem',
-                        fontWeight: 600,
-                        backgroundColor: '#ffffff'
+                        fontWeight: 800,
+                        fontSize: '0.85rem',
+                        fontFamily: 'monospace',
+                        textTransform: 'uppercase'
                       }}
-                    >
-                      {ALL_EXAMS.map((ex) => (
-                        <option key={ex.id} value={ex.id}>
-                          {ex.title} ({ex.language === 'english' ? 'English' : 'Hindi'} • {ex.targetSpeed} WPM)
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                )}
-              </div>
-
-              {/* STEP 2: PROMO CODE & COUPONS */}
-              <div style={{ marginBottom: '24px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
-                  <span
-                    style={{
-                      background: '#0284c7',
-                      color: '#ffffff',
-                      borderRadius: '50%',
-                      width: '24px',
-                      height: '24px',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      fontWeight: 800,
-                      fontSize: '0.78rem'
-                    }}
-                  >
-                    2
-                  </span>
-                  <h3 style={{ fontSize: '1.05rem', fontWeight: 800, color: '#0f172a', margin: 0 }}>
-                    Apply Coupon / Promo Code
-                  </h3>
-                </div>
-
-                <div style={{ display: 'flex', gap: '8px', maxWidth: '420px', marginBottom: '8px' }}>
-                  <input
-                    type="text"
-                    value={couponCode}
-                    onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
-                    placeholder="Enter Coupon (e.g. WELCOME50)"
-                    style={{
-                      flex: 1,
-                      padding: '9px 12px',
-                      borderRadius: '6px',
-                      border: '1px solid #cbd5e1',
-                      fontWeight: 700,
-                      textTransform: 'uppercase',
-                      letterSpacing: '0.05em'
-                    }}
-                  />
-                  <button
-                    type="button"
-                    onClick={() => handleApplyPromo()}
-                    className="btn btn-primary btn-sm"
-                    style={{ fontWeight: 700, padding: '0 18px', borderRadius: '6px' }}
-                  >
-                    Apply
-                  </button>
-                </div>
-
-                {promoError && (
-                  <div style={{ fontSize: '0.82rem', color: '#dc2626', fontWeight: 600, marginBottom: '8px' }}>
-                    ⚠️ {promoError}
-                  </div>
-                )}
-
-                {appliedPromo && (
-                  <div
-                    style={{
-                      fontSize: '0.85rem',
-                      color: '#15803d',
-                      background: '#f0fdf4',
-                      border: '1px solid #bbf7d0',
-                      padding: '6px 12px',
-                      borderRadius: '6px',
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: '6px',
-                      marginBottom: '8px'
-                    }}
-                  >
-                    <span>{appliedPromo.message}</span>
+                    />
                     <button
                       type="button"
-                      onClick={() => setAppliedPromo(null)}
-                      style={{ background: 'none', border: 'none', color: '#dc2626', cursor: 'pointer', fontWeight: 700 }}
-                    >
-                      ✕
-                    </button>
-                  </div>
-                )}
-
-                {/* Available Coupons Badges */}
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginTop: '6px' }}>
-                  <span style={{ fontSize: '0.76rem', color: '#64748b', alignSelf: 'center' }}>Available Coupons:</span>
-                  {availablePromoCodes.map((c) => (
-                    <button
-                      key={c.code}
-                      type="button"
-                      onClick={() => {
-                        setCouponCode(c.code);
-                        handleApplyPromo(c.code);
-                      }}
+                      onClick={() => handleApplyPromo()}
                       style={{
-                        background: '#f8fafc',
-                        border: '1px dashed #cbd5e1',
+                        background: 'linear-gradient(135deg, #0284c7 0%, #0369a1 100%)',
+                        color: '#ffffff',
+                        border: 'none',
                         borderRadius: '6px',
-                        padding: '3px 9px',
-                        fontSize: '0.74rem',
-                        fontWeight: 700,
-                        color: '#0284c7',
+                        fontWeight: 800,
+                        padding: '0 16px',
+                        fontSize: '0.82rem',
                         cursor: 'pointer'
                       }}
                     >
-                      🏷️ {c.code}
+                      Apply
                     </button>
-                  ))}
+                  </div>
+
+                  {promoError && (
+                    <div style={{ fontSize: '0.78rem', color: '#dc2626', fontWeight: 600, marginTop: '6px' }}>
+                      ⚠️ {promoError}
+                    </div>
+                  )}
+
+                  {appliedPromo && (
+                    <div
+                      style={{
+                        fontSize: '0.78rem',
+                        color: '#15803d',
+                        background: '#f0fdf4',
+                        border: '1px solid #bbf7d0',
+                        padding: '6px 10px',
+                        borderRadius: '6px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        marginTop: '8px'
+                      }}
+                    >
+                      <span>🎉 {appliedPromo.message}</span>
+                      <button
+                        type="button"
+                        onClick={() => setAppliedPromo(null)}
+                        style={{ background: 'none', border: 'none', color: '#dc2626', cursor: 'pointer', fontWeight: 800 }}
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  )}
+
+                  {/* Available Coupon Chips */}
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginTop: '8px' }}>
+                    {availablePromoCodes.map((c) => (
+                      <button
+                        key={c.code}
+                        type="button"
+                        onClick={() => {
+                          setCouponCode(c.code);
+                          handleApplyPromo(c.code);
+                        }}
+                        style={{
+                          background: '#f8fafc',
+                          border: '1px dashed #94a3b8',
+                          borderRadius: '4px',
+                          padding: '2px 8px',
+                          fontSize: '0.7rem',
+                          fontWeight: 700,
+                          color: '#0284c7',
+                          cursor: 'pointer'
+                        }}
+                      >
+                        🏷️ {c.code}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Section 3: Official Fintech Invoice Summary Receipt */}
+                <div
+                  style={{
+                    background: 'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)',
+                    borderRadius: '14px',
+                    padding: '18px',
+                    border: '1.5px solid #cbd5e1',
+                    boxShadow: '0 4px 14px rgba(0,0,0,0.04)'
+                  }}
+                >
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #e2e8f0', paddingBottom: '8px', marginBottom: '10px' }}>
+                    <span style={{ fontSize: '0.72rem', fontWeight: 800, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                      ORDER SUMMARY & INVOICE
+                    </span>
+                    <span style={{ fontSize: '0.7rem', fontWeight: 700, fontFamily: 'monospace', color: '#94a3b8' }}>
+                      #ET-{selectedPlan.durationDays}D
+                    </span>
+                  </div>
+
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.82rem', color: '#475569', marginBottom: '6px' }}>
+                    <span>Plan Item:</span>
+                    <span style={{ fontWeight: 700, color: '#0f172a' }}>{selectedPlan.name} ({selectedPlan.durationLabel})</span>
+                  </div>
+
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.82rem', color: '#475569', marginBottom: '6px' }}>
+                    <span>Base MRP:</span>
+                    <span style={{ textDecoration: 'line-through', color: '#94a3b8' }}>₹{selectedPlan.originalPrice}</span>
+                  </div>
+
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.82rem', color: '#16a34a', fontWeight: 700, marginBottom: '6px' }}>
+                    <span>Plan Discount:</span>
+                    <span>- ₹{selectedPlan.originalPrice - selectedPlan.discountedPrice}</span>
+                  </div>
+
+                  {currentDiscountAmount > 0 && (
+                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.82rem', color: '#16a34a', fontWeight: 700, marginBottom: '6px' }}>
+                      <span>Coupon ({appliedPromo?.code}):</span>
+                      <span>- ₹{currentDiscountAmount}</span>
+                    </div>
+                  )}
+
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.82rem', color: '#475569', marginBottom: '8px' }}>
+                    <span>Payment Gateway Fee:</span>
+                    <span style={{ color: '#16a34a', fontWeight: 700 }}>FREE (₹0.00)</span>
+                  </div>
+
+                  <div
+                    style={{
+                      borderTop: '2px solid #0f172a',
+                      paddingTop: '10px',
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'baseline'
+                    }}
+                  >
+                    <div>
+                      <div style={{ fontSize: '0.72rem', fontWeight: 800, color: '#64748b', textTransform: 'uppercase' }}>
+                        TOTAL PAYABLE
+                      </div>
+                      <div style={{ fontSize: '0.72rem', color: '#16a34a', fontWeight: 700 }}>
+                        🎉 You Save ₹{totalSavings} ({savingsPct}%)
+                      </div>
+                    </div>
+                    <div style={{ fontSize: '1.6rem', fontWeight: 900, color: '#0284c7' }}>
+                      ₹{finalPayable}
+                    </div>
+                  </div>
                 </div>
               </div>
 
-              {/* STEP 3 & 4: SCAN QR & SUBMIT UTR */}
-              <div
-                style={{
-                  background: '#f8fafc',
-                  border: '1.5px solid #e2e8f0',
-                  borderRadius: '14px',
-                  padding: '20px'
-                }}
-              >
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '24px' }}>
-                  
-                  {/* Left: PhonePe QR Card */}
-                  <div style={{ textAlign: 'center' }}>
-                    <div
+              {/* ============================================================
+                  RIGHT COLUMN: FINTECH UPI GATEWAY CONSOLE
+                  ============================================================ */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                {/* 1-Click Mobile UPI App Launchers */}
+                <div
+                  style={{
+                    background: '#ffffff',
+                    borderRadius: '14px',
+                    padding: '16px',
+                    border: '1px solid #e2e8f0',
+                    boxShadow: '0 2px 8px rgba(0,0,0,0.03)'
+                  }}
+                >
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+                    <div style={{ fontSize: '0.85rem', fontWeight: 800, color: '#0f172a', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <span>⚡</span>
+                      <span>1-Click Pay on Mobile (Instant UPI)</span>
+                    </div>
+                    <span style={{ fontSize: '0.68rem', color: '#16a34a', fontWeight: 800, background: '#dcfce7', padding: '2px 6px', borderRadius: '4px' }}>
+                      ZERO FEE
+                    </span>
+                  </div>
+
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '8px' }}>
+                    <button
+                      type="button"
+                      onClick={() => handleLaunchUpi('phonepe')}
                       style={{
-                        background: '#000000',
-                        padding: '16px',
-                        borderRadius: '12px',
-                        display: 'inline-block',
-                        boxShadow: '0 8px 20px rgba(0,0,0,0.15)',
-                        maxWidth: '240px'
+                        background: '#5f259f',
+                        color: '#ffffff',
+                        border: 'none',
+                        borderRadius: '8px',
+                        padding: '10px',
+                        fontWeight: 800,
+                        fontSize: '0.82rem',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '6px',
+                        boxShadow: '0 2px 8px rgba(95, 37, 159, 0.3)'
                       }}
                     >
-                      <img
-                        src={phonePeQrImg}
-                        alt="PhonePe QR Code - PURENDAR CHAUHAN"
+                      <span>🟣</span>
+                      <span>PhonePe</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => handleLaunchUpi('gpay')}
+                      style={{
+                        background: '#1a73e8',
+                        color: '#ffffff',
+                        border: 'none',
+                        borderRadius: '8px',
+                        padding: '10px',
+                        fontWeight: 800,
+                        fontSize: '0.82rem',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '6px',
+                        boxShadow: '0 2px 8px rgba(26, 115, 232, 0.3)'
+                      }}
+                    >
+                      <span>🔵</span>
+                      <span>Google Pay</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => handleLaunchUpi('paytm')}
+                      style={{
+                        background: '#00b9f1',
+                        color: '#ffffff',
+                        border: 'none',
+                        borderRadius: '8px',
+                        padding: '10px',
+                        fontWeight: 800,
+                        fontSize: '0.82rem',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '6px',
+                        boxShadow: '0 2px 8px rgba(0, 185, 241, 0.3)'
+                      }}
+                    >
+                      <span>🔷</span>
+                      <span>Paytm UPI</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => handleLaunchUpi('generic')}
+                      style={{
+                        background: '#0f172a',
+                        color: '#ffffff',
+                        border: 'none',
+                        borderRadius: '8px',
+                        padding: '10px',
+                        fontWeight: 800,
+                        fontSize: '0.82rem',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '6px'
+                      }}
+                    >
+                      <span>⚡</span>
+                      <span>Any UPI App</span>
+                    </button>
+                  </div>
+                  <div style={{ fontSize: '0.7rem', color: '#64748b', textAlign: 'center', marginTop: '6px' }}>
+                    Tapping opens your installed UPI app with ₹{finalPayable} pre-filled.
+                  </div>
+                </div>
+
+                {/* PhonePe QR Scanner & Copy UPI Card */}
+                <div
+                  style={{
+                    background: '#ffffff',
+                    borderRadius: '14px',
+                    padding: '18px',
+                    border: '1.5px solid #e2e8f0',
+                    textAlign: 'center',
+                    boxShadow: '0 2px 10px rgba(0,0,0,0.03)'
+                  }}
+                >
+                  <div style={{ fontSize: '0.84rem', fontWeight: 800, color: '#0f172a', marginBottom: '4px' }}>
+                    Or Scan Official Merchant QR Code
+                  </div>
+                  <div style={{ fontSize: '0.74rem', color: '#64748b', marginBottom: '12px' }}>
+                    Scan using PhonePe, GPay, Paytm, BHIM, CRED or any bank app
+                  </div>
+
+                  {/* QR Image Container with Fintech Border */}
+                  <div
+                    style={{
+                      background: '#000000',
+                      padding: '14px',
+                      borderRadius: '14px',
+                      display: 'inline-block',
+                      boxShadow: '0 8px 24px rgba(0,0,0,0.2)',
+                      maxWidth: '210px',
+                      border: '3px solid #38bdf8'
+                    }}
+                  >
+                    <img
+                      src={phonePeQrImg}
+                      alt="PhonePe QR Code - PURENDAR CHAUHAN"
+                      style={{
+                        width: '100%',
+                        height: 'auto',
+                        borderRadius: '8px',
+                        display: 'block'
+                      }}
+                    />
+                  </div>
+
+                  {/* Merchant VPA & Copy Button */}
+                  <div
+                    style={{
+                      marginTop: '12px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '8px',
+                      flexWrap: 'wrap'
+                    }}
+                  >
+                    <div
+                      style={{
+                        background: '#f1f5f9',
+                        padding: '6px 12px',
+                        borderRadius: '6px',
+                        fontFamily: 'monospace',
+                        fontWeight: 800,
+                        fontSize: '0.82rem',
+                        color: '#0f172a'
+                      }}
+                    >
+                      {upiConfig.upiId}
+                    </div>
+                    <button
+                      type="button"
+                      onClick={handleCopyUpi}
+                      style={{
+                        background: copiedUpi ? '#dcfce7' : '#0284c7',
+                        color: copiedUpi ? '#15803d' : '#ffffff',
+                        border: 'none',
+                        borderRadius: '6px',
+                        padding: '6px 12px',
+                        fontSize: '0.75rem',
+                        fontWeight: 800,
+                        cursor: 'pointer',
+                        transition: 'all 0.15s ease'
+                      }}
+                    >
+                      {copiedUpi ? '✓ Copied!' : '📋 Copy UPI ID'}
+                    </button>
+                  </div>
+
+                  <div style={{ fontSize: '0.74rem', color: '#64748b', marginTop: '6px' }}>
+                    Payee: <strong>{upiConfig.merchantName}</strong> &bull; Amount: <strong>₹{finalPayable}</strong>
+                  </div>
+                </div>
+
+                {/* Step 3: Verification & Activation Form */}
+                <div style={{ background: '#ffffff', borderRadius: '14px', padding: '18px', border: '1.5px solid #0284c7', boxShadow: '0 4px 14px rgba(2, 132, 199, 0.08)' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '14px' }}>
+                    <span
+                      style={{
+                        width: '22px',
+                        height: '22px',
+                        borderRadius: '50%',
+                        background: '#0284c7',
+                        color: '#ffffff',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontSize: '0.72rem',
+                        fontWeight: 800
+                      }}
+                    >
+                      3
+                    </span>
+                    <h3 style={{ margin: 0, fontSize: '0.98rem', fontWeight: 800, color: '#0f172a' }}>
+                      Submit UTR & Activate Membership
+                    </h3>
+                  </div>
+
+                  <form onSubmit={handleSubmitPayment} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                    <div>
+                      <label style={{ fontSize: '0.76rem', fontWeight: 700, color: '#334155', display: 'block', marginBottom: '3px' }}>
+                        Candidate Full Name *
+                      </label>
+                      <input
+                        type="text"
+                        required
+                        value={candidateName}
+                        onChange={(e) => setCandidateName(e.target.value)}
+                        placeholder="e.g. Ramesh Kumar"
                         style={{
                           width: '100%',
-                          height: 'auto',
-                          borderRadius: '8px',
-                          display: 'block'
+                          padding: '8px 10px',
+                          borderRadius: '6px',
+                          border: '1px solid #cbd5e1',
+                          fontSize: '0.85rem'
                         }}
                       />
                     </div>
 
-                    <div style={{ marginTop: '10px' }}>
-                      <div style={{ fontSize: '0.92rem', fontWeight: 800, color: '#0f172a' }}>
-                        PURENDAR CHAUHAN
-                      </div>
-                      <div style={{ fontSize: '0.78rem', color: '#64748b' }}>
-                        Accepted via PhonePe, Google Pay, Paytm, BHIM UPI
-                      </div>
-                    </div>
-
-                    {/* Payable Summary Box */}
-                    <div
-                      style={{
-                        marginTop: '14px',
-                        background: '#eff6ff',
-                        border: '1.5px solid #bfdbfe',
-                        borderRadius: '10px',
-                        padding: '12px',
-                        textAlign: 'left'
-                      }}
-                    >
-                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.82rem', color: '#475569', marginBottom: '4px' }}>
-                        <span>Plan Price:</span>
-                        <span>₹{selectedPlan.discountedPrice}</span>
-                      </div>
-                      {currentDiscountAmount > 0 && (
-                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.82rem', color: '#15803d', fontWeight: 700, marginBottom: '4px' }}>
-                          <span>Coupon ({appliedPromo?.code}):</span>
-                          <span>- ₹{currentDiscountAmount}</span>
-                        </div>
-                      )}
-                      <div
-                        style={{
-                          display: 'flex',
-                          justifyContent: 'space-between',
-                          fontSize: '1.05rem',
-                          fontWeight: 900,
-                          color: '#0f172a',
-                          borderTop: '1px solid #bfdbfe',
-                          paddingTop: '6px',
-                          marginTop: '4px'
-                        }}
-                      >
-                        <span>Final Amount to Pay:</span>
-                        <span style={{ color: '#0284c7' }}>₹{finalPayable}</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Right: Payment Verification Form */}
-                  <div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '14px' }}>
-                      <span
-                        style={{
-                          background: '#0284c7',
-                          color: '#ffffff',
-                          borderRadius: '50%',
-                          width: '24px',
-                          height: '24px',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          fontWeight: 800,
-                          fontSize: '0.78rem'
-                        }}
-                      >
-                        3
-                      </span>
-                      <h3 style={{ fontSize: '1.05rem', fontWeight: 800, color: '#0f172a', margin: 0 }}>
-                        Submit Payment Verification
-                      </h3>
-                    </div>
-
-                    <form onSubmit={handleSubmitPayment} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
                       <div>
-                        <label style={{ fontSize: '0.8rem', fontWeight: 700, color: '#334155', display: 'block', marginBottom: '4px' }}>
-                          Candidate Full Name *
+                        <label style={{ fontSize: '0.76rem', fontWeight: 700, color: '#334155', display: 'block', marginBottom: '3px' }}>
+                          Email Address *
                         </label>
                         <input
-                          type="text"
+                          type="email"
                           required
-                          value={candidateName}
-                          onChange={(e) => setCandidateName(e.target.value)}
-                          placeholder="e.g. Ramesh Kumar"
+                          value={candidateEmail}
+                          onChange={(e) => setCandidateEmail(e.target.value)}
+                          placeholder="name@gmail.com"
                           style={{
                             width: '100%',
-                            padding: '8px 12px',
+                            padding: '8px 10px',
                             borderRadius: '6px',
                             border: '1px solid #cbd5e1',
-                            fontSize: '0.88rem'
+                            fontSize: '0.85rem'
                           }}
                         />
                       </div>
-
-                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
-                        <div>
-                          <label style={{ fontSize: '0.8rem', fontWeight: 700, color: '#334155', display: 'block', marginBottom: '4px' }}>
-                            Email Address *
-                          </label>
-                          <input
-                            type="email"
-                            required
-                            value={candidateEmail}
-                            onChange={(e) => setCandidateEmail(e.target.value)}
-                            placeholder="name@gmail.com"
-                            style={{
-                              width: '100%',
-                              padding: '8px 12px',
-                              borderRadius: '6px',
-                              border: '1px solid #cbd5e1',
-                              fontSize: '0.88rem'
-                            }}
-                          />
-                        </div>
-                        <div>
-                          <label style={{ fontSize: '0.8rem', fontWeight: 700, color: '#334155', display: 'block', marginBottom: '4px' }}>
-                            WhatsApp / Phone
-                          </label>
-                          <input
-                            type="tel"
-                            value={candidatePhone}
-                            onChange={(e) => setCandidatePhone(e.target.value)}
-                            placeholder="10-digit mobile"
-                            style={{
-                              width: '100%',
-                              padding: '8px 12px',
-                              borderRadius: '6px',
-                              border: '1px solid #cbd5e1',
-                              fontSize: '0.88rem'
-                            }}
-                          />
-                        </div>
-                      </div>
-
                       <div>
-                        <label style={{ fontSize: '0.8rem', fontWeight: 700, color: '#334155', display: 'block', marginBottom: '4px' }}>
-                          UPI / UTR Transaction ID (12 Digits) *
+                        <label style={{ fontSize: '0.76rem', fontWeight: 700, color: '#334155', display: 'block', marginBottom: '3px' }}>
+                          WhatsApp Mobile
                         </label>
                         <input
-                          type="text"
-                          required
-                          value={utrNumber}
-                          onChange={(e) => setUtrNumber(e.target.value.trim())}
-                          placeholder="e.g. 423985721904"
+                          type="tel"
+                          value={candidatePhone}
+                          onChange={(e) => setCandidatePhone(e.target.value)}
+                          placeholder="10-digit mobile"
                           style={{
                             width: '100%',
-                            padding: '8px 12px',
+                            padding: '8px 10px',
                             borderRadius: '6px',
-                            border: '1.5px solid #0284c7',
-                            fontSize: '0.92rem',
-                            fontWeight: 700,
-                            fontFamily: 'monospace',
-                            letterSpacing: '0.05em'
+                            border: '1px solid #cbd5e1',
+                            fontSize: '0.85rem'
                           }}
                         />
-                        <span style={{ fontSize: '0.72rem', color: '#64748b' }}>
-                          Found in your PhonePe / GPay payment receipt details.
-                        </span>
                       </div>
+                    </div>
 
-                      <div>
-                        <label style={{ fontSize: '0.8rem', fontWeight: 700, color: '#334155', display: 'block', marginBottom: '4px' }}>
-                          Payment Screenshot *
+                    {/* UTR Input with Smart Counter */}
+                    <div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '3px' }}>
+                        <label style={{ fontSize: '0.76rem', fontWeight: 800, color: '#0f172a' }}>
+                          12-Digit UPI / UTR Transaction ID *
                         </label>
-                        <input
-                          type="file"
-                          accept="image/*"
-                          required
-                          onChange={handleImageChange}
+                        <span
                           style={{
-                            fontSize: '0.8rem',
-                            color: '#475569'
-                          }}
-                        />
-                        {screenshotPreview && (
-                          <div style={{ marginTop: '8px' }}>
-                            <img
-                              src={screenshotPreview}
-                              alt="Screenshot Preview"
-                              style={{
-                                maxHeight: '100px',
-                                borderRadius: '6px',
-                                border: '1px solid #cbd5e1'
-                              }}
-                            />
-                          </div>
-                        )}
-                      </div>
-
-                      {errorMessage && (
-                        <div style={{ fontSize: '0.82rem', color: '#dc2626', fontWeight: 600 }}>
-                          ⚠️ {errorMessage}
-                        </div>
-                      )}
-
-                      <button
-                        type="submit"
-                        disabled={isSubmitting}
-                        className="btn btn-primary"
-                        style={{
-                          marginTop: '6px',
-                          padding: '12px',
-                          fontWeight: 800,
-                          fontSize: '0.95rem',
-                          borderRadius: '8px',
-                          cursor: isSubmitting ? 'wait' : 'pointer'
-                        }}
-                      >
-                        {isSubmitting ? 'Submitting Verification...' : `Submit Payment Proof (₹${finalPayable}) →`}
-                      </button>
-
-                      <div
-                        style={{
-                          background: '#fff1f2',
-                          border: '1.5px solid #fecdd3',
-                          borderRadius: '8px',
-                          padding: '10px 12px',
-                          fontSize: '0.76rem',
-                          color: '#9f1239',
-                          lineHeight: 1.45,
-                          marginTop: '6px'
-                        }}
-                      >
-                        🚫 <strong>Strict No-Refund Policy:</strong> All subscription payments are <strong>strictly non-refundable under any circumstances</strong> once processed. Please ensure you have tested your device & keyboard using our <strong>7 Free Demo Tests</strong> before paying.
-                      </div>
-
-                      <div style={{ fontSize: '0.72rem', color: '#64748b', textAlign: 'center', marginTop: '2px' }}>
-                        🔒 100% Secure • Admin manually approves and activates plan within 15–30 minutes
-                      </div>
-
-                      <div style={{ fontSize: '0.70rem', color: '#64748b', textAlign: 'center' }}>
-                        By proceeding to pay, you agree that <strong>all sales are final & non-refundable under any circumstances</strong> per our{' '}
-                        <a href="#/terms" style={{ color: '#0284c7', textDecoration: 'underline' }}>Terms of Service</a>
-                        {' '}&bull;{' '}
-                        <a href="#/refund" style={{ color: '#0284c7', textDecoration: 'underline' }}>No-Refund Policy</a>.
-                      </div>
-
-                      <div
-                        style={{
-                          background: '#f0f9ff',
-                          border: '1px solid #bae6fd',
-                          borderRadius: '8px',
-                          padding: '8px 12px',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'space-between',
-                          gap: '8px',
-                          marginTop: '4px'
-                        }}
-                      >
-                        <div style={{ fontSize: '0.74rem', color: '#0369a1', lineHeight: 1.25 }}>
-                          💬 Need instant payment activation or facing UPI issues?
-                        </div>
-                        <a
-                          href="https://t.me/purendare"
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          style={{
-                            fontSize: '0.74rem',
+                            fontSize: '0.7rem',
                             fontWeight: 800,
-                            color: '#0284c7',
-                            textDecoration: 'none',
-                            whiteSpace: 'nowrap',
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '4px'
+                            color: utrNumber.trim().length === 12 ? '#16a34a' : '#64748b'
                           }}
                         >
-                          Chat Admin (@purendare) ↗
-                        </a>
+                          {utrNumber.trim().length === 12 ? '✓ 12 Digits Verified' : `${utrNumber.trim().length}/12 Digits`}
+                        </span>
                       </div>
-                    </form>
-                  </div>
+                      <input
+                        type="text"
+                        required
+                        value={utrNumber}
+                        onChange={(e) => setUtrNumber(e.target.value.trim())}
+                        placeholder="e.g. 423985721904"
+                        style={{
+                          width: '100%',
+                          padding: '8px 12px',
+                          borderRadius: '6px',
+                          border: utrNumber.trim().length === 12 ? '2px solid #16a34a' : '1.5px solid #0284c7',
+                          fontSize: '0.95rem',
+                          fontWeight: 800,
+                          fontFamily: 'monospace',
+                          letterSpacing: '0.08em',
+                          background: utrNumber.trim().length === 12 ? '#f0fdf4' : '#ffffff'
+                        }}
+                      />
+                      <div style={{ fontSize: '0.7rem', color: '#64748b', marginTop: '2px' }}>
+                        Found in your PhonePe / GPay / Paytm payment receipt details.
+                      </div>
+                    </div>
+
+                    {/* Payment Screenshot Upload */}
+                    <div>
+                      <label style={{ fontSize: '0.76rem', fontWeight: 700, color: '#334155', display: 'block', marginBottom: '3px' }}>
+                        Payment Screenshot *
+                      </label>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        required
+                        onChange={handleImageChange}
+                        style={{
+                          fontSize: '0.78rem',
+                          color: '#475569'
+                        }}
+                      />
+                      {screenshotPreview && (
+                        <div style={{ marginTop: '6px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                          <img
+                            src={screenshotPreview}
+                            alt="Screenshot Preview"
+                            style={{
+                              maxHeight: '75px',
+                              borderRadius: '6px',
+                              border: '1px solid #cbd5e1'
+                            }}
+                          />
+                          <button
+                            type="button"
+                            onClick={() => setScreenshotPreview('')}
+                            style={{
+                              background: '#fee2e2',
+                              color: '#dc2626',
+                              border: 'none',
+                              borderRadius: '4px',
+                              padding: '4px 8px',
+                              fontSize: '0.72rem',
+                              fontWeight: 700,
+                              cursor: 'pointer'
+                            }}
+                          >
+                            Remove ✕
+                          </button>
+                        </div>
+                      )}
+                    </div>
+
+                    {errorMessage && (
+                      <div style={{ fontSize: '0.8rem', color: '#dc2626', fontWeight: 700, background: '#fef2f2', padding: '6px 10px', borderRadius: '6px' }}>
+                        ⚠️ {errorMessage}
+                      </div>
+                    )}
+
+                    {/* Primary Fintech Pay Button */}
+                    <button
+                      type="submit"
+                      disabled={isSubmitting}
+                      style={{
+                        background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                        color: '#ffffff',
+                        border: 'none',
+                        borderRadius: '10px',
+                        padding: '13px',
+                        fontWeight: 900,
+                        fontSize: '0.98rem',
+                        cursor: isSubmitting ? 'wait' : 'pointer',
+                        boxShadow: '0 4px 14px rgba(16, 185, 129, 0.4)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '8px',
+                        marginTop: '4px'
+                      }}
+                    >
+                      <span>{isSubmitting ? '⏳' : '⚡'}</span>
+                      <span>
+                        {isSubmitting ? 'Submitting Verification...' : `Complete Payment & Activate Pro (₹${finalPayable}) →`}
+                      </span>
+                    </button>
+
+                    {/* Refund & Security Badges */}
+                    <div
+                      style={{
+                        background: '#fff1f2',
+                        border: '1px solid #fecdd3',
+                        borderRadius: '8px',
+                        padding: '8px 10px',
+                        fontSize: '0.72rem',
+                        color: '#9f1239',
+                        lineHeight: 1.35
+                      }}
+                    >
+                      🚫 <strong>Strict No-Refund Policy:</strong> All subscription payments are <strong>strictly non-refundable</strong> once processed. Please verify your typing device using our <strong>7 Free Demo Tests</strong> before paying.
+                    </div>
+
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', fontSize: '0.7rem', color: '#64748b' }}>
+                      <span>🔒 256-Bit SSL</span>
+                      <span>&bull;</span>
+                      <span>⏱️ 15–30 Min Activation</span>
+                      <span>&bull;</span>
+                      <span>🏛️ Exam Grade</span>
+                    </div>
+
+                    {/* Admin Telegram Direct Assistance */}
+                    <div
+                      style={{
+                        background: '#f0f9ff',
+                        border: '1px solid #bae6fd',
+                        borderRadius: '8px',
+                        padding: '6px 10px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        gap: '8px'
+                      }}
+                    >
+                      <span style={{ fontSize: '0.72rem', color: '#0369a1' }}>
+                        Facing UPI issues or need instant activation?
+                      </span>
+                      <a
+                        href="https://t.me/purendare"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        style={{
+                          fontSize: '0.72rem',
+                          fontWeight: 800,
+                          color: '#0284c7',
+                          textDecoration: 'none',
+                          whiteSpace: 'nowrap'
+                        }}
+                      >
+                        Chat Admin (@purendare) ↗
+                      </a>
+                    </div>
+                  </form>
                 </div>
               </div>
             </div>
