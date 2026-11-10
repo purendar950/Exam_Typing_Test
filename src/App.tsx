@@ -32,7 +32,7 @@ import {
   getTelegramConfig,
   TelegramConfig
 } from './services/telegramService';
-import { isTestLocked } from './services/paymentService';
+import { isTestLocked, syncPricingConfigFromCloud } from './services/paymentService';
 import { fetchPaidPassageText } from './services/passageService';
 import {
   subscribeToAuth,
@@ -304,6 +304,9 @@ export const App: React.FC = () => {
 
   // Automatically fetch today's 8 Daily Live Tests, Custom Passages and handle Telegram 1-click approvals
   useEffect(() => {
+    // Warm the pricing cache so the checkout opens with the admin's current plans
+    syncPricingConfigFromCloud();
+
     const todayIso = new Date().toISOString().split('T')[0];
     fetchDailyLivePassages(todayIso, PASSAGES).then((tests) => {
       if (tests && tests.length > 0) {

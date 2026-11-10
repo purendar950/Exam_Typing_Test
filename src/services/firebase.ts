@@ -55,6 +55,8 @@ export interface UserProfile {
   subscriptionApprovedAt?: string;
   subscriptionExamId?: string;
   subscriptionExamTitle?: string;
+  subscriptionExamSlug?: string;
+  subscriptionCategoryGroup?: string;
   createdAt: string;
 }
 

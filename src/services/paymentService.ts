@@ -8,8 +8,9 @@
  * 5. Syncs across Firebase Firestore and localStorage
  */
 
-import { collection, doc, getDocs, getDoc, setDoc, updateDoc, query, orderBy, limit } from 'firebase/firestore';
+import { collection, doc, getDocs, getDoc, setDoc, updateDoc, query, where, orderBy, limit } from 'firebase/firestore';
 import { db, UserProfile } from './firebase';
+import { ALL_EXAMS } from '../data/allExams';
 
 export interface PaymentPlan {
   id: string;
@@ -194,6 +195,7 @@ export const DEFAULT_PROMO_CODES: PromoCode[] = [
 const STORAGE_KEY_SUBMISSIONS = 'up_payment_submissions';
 const STORAGE_KEY_PROMO_CODES = 'up_promo_codes';
 const STORAGE_KEY_CUSTOM_PLANS = 'up_custom_payment_plans';
+const STORAGE_KEY_UPI_CONFIG = 'up_typing_upi_config';
 
 // 1. Promo Code Management
 export function getPromoCodes(): PromoCode[] {
@@ -201,7 +203,7 @@ export function getPromoCodes(): PromoCode[] {
     const saved = localStorage.getItem(STORAGE_KEY_PROMO_CODES);
     if (saved) {
       const parsed = JSON.parse(saved);
-      if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      if (Array.isArray(parsed)) return parsed;
     }
     return DEFAULT_PROMO_CODES;
   } catch {
@@ -209,12 +211,13 @@ export function getPromoCodes(): PromoCode[] {
   }
 }
 
-export function savePromoCodes(codes: PromoCode[]): void {
+export function savePromoCodes(codes: PromoCode[]): Promise<boolean> {
   try {
     localStorage.setItem(STORAGE_KEY_PROMO_CODES, JSON.stringify(codes));
   } catch {
     // Ignore
   }
+  return savePricingConfigToCloud({ promoCodes: codes });
 }
 
 export function validatePromoCode(
@@ -289,12 +292,13 @@ export function getPaymentPlans(): PaymentPlan[] {
   }
 }
 
-export function savePaymentPlans(plans: PaymentPlan[]): void {
+export function savePaymentPlans(plans: PaymentPlan[]): Promise<boolean> {
   try {
     localStorage.setItem(STORAGE_KEY_CUSTOM_PLANS, JSON.stringify(plans));
   } catch {
     // Ignore
   }
+  return savePricingConfigToCloud({ plans });
 }
 
 /**
@@ -451,13 +455,14 @@ export async function fetchUserPaymentSubmissions(userId: string): Promise<Payme
   const localUser = localAll.filter((s) => s.userId === userId);
 
   try {
-    const colRef = collection(db, 'payment_submissions');
+    // Security rules only let a candidate list their own submissions, so the query
+    // itself must be restricted to this user or Firestore rejects it.
+    const colRef = query(collection(db, 'payment_submissions'), where('userId', '==', userId));
     const snap = await getDocs(colRef);
     if (!snap.empty) {
       const cloudUser: PaymentSubmission[] = [];
       snap.forEach((d) => {
-        const sub = d.data() as PaymentSubmission;
-        if (sub.userId === userId) cloudUser.push(sub);
+        cloudUser.push(d.data() as PaymentSubmission);
       });
 
       // Merge local + cloud, cloud wins on conflict
@@ -476,6 +481,50 @@ export async function fetchUserPaymentSubmissions(userId: string): Promise<Payme
   return localUser.sort(
     (a, b) => new Date(b.submittedAt).getTime() - new Date(a.submittedAt).getTime()
   );
+}
+
+/**
+ * Fields the Firestore security rules use to decide which paid passages a plan covers.
+ * Single-exam plans are scoped to the purchased exam's slug and category group.
+ */
+function getSubscriptionScope(sub: PaymentSubmission): {
+  subscriptionExamSlug: string | null;
+  subscriptionCategoryGroup: string | null;
+} {
+  if (sub.planType !== 'single_exam' || !sub.selectedExamId) {
+    return { subscriptionExamSlug: null, subscriptionCategoryGroup: null };
+  }
+  const exam = ALL_EXAMS.find((e) => e.id === sub.selectedExamId || e.slug === sub.selectedExamId);
+  return {
+    subscriptionExamSlug: exam?.slug || null,
+    subscriptionCategoryGroup: exam?.categoryGroup || null
+  };
+}
+
+/**
+ * One-time repair for subscriptions approved before plan scope was stored on the
+ * user profile. Without these fields the security rules deny single-exam subscribers.
+ */
+export async function backfillSubscriptionScopes(submissions: PaymentSubmission[]): Promise<number> {
+  const latestApproved = new Map<string, PaymentSubmission>();
+  submissions
+    .filter((s) => s.status === 'approved' && s.userId)
+    .forEach((s) => {
+      const prev = latestApproved.get(s.userId);
+      const when = s.approvedAt || s.reviewedAt || s.submittedAt;
+      const prevWhen = prev ? prev.approvedAt || prev.reviewedAt || prev.submittedAt : '';
+      if (!prev || when > prevWhen) latestApproved.set(s.userId, s);
+    });
+
+  let updated = 0;
+  for (const sub of latestApproved.values()) {
+    if (sub.planType !== 'single_exam') continue;
+    const scope = getSubscriptionScope(sub);
+    if (!scope.subscriptionExamSlug) continue;
+    await setDoc(doc(db, 'users', sub.userId), scope, { merge: true });
+    updated++;
+  }
+  return updated;
 }
 
 // 4. Admin Approval & Rejection
@@ -516,6 +565,7 @@ export async function approvePaymentSubmission(
           subscriptionExpiresAt: expiryDate.toISOString(),
           subscriptionExamId: target.selectedExamId || null,
           subscriptionExamTitle: target.selectedExamTitle || null,
+          ...getSubscriptionScope(target),
           subscriptionApprovedAt: new Date().toISOString()
         },
         { merge: true }
@@ -547,6 +597,7 @@ export async function approvePaymentSubmission(
           activeUser.subscriptionExamId = target.selectedExamId;
           activeUser.subscriptionExamTitle = target.selectedExamTitle;
         }
+        Object.assign(activeUser, getSubscriptionScope(target));
         localStorage.setItem('up_typing_active_user', JSON.stringify(activeUser));
       }
     }
@@ -696,7 +747,7 @@ export const DEFAULT_UPI_CONFIG: UpiMerchantConfig = {
 
 export function getUpiMerchantConfig(): UpiMerchantConfig {
   if (typeof window !== 'undefined') {
-    const saved = localStorage.getItem('up_typing_upi_config');
+    const saved = localStorage.getItem(STORAGE_KEY_UPI_CONFIG);
     if (saved) {
       try {
         return { ...DEFAULT_UPI_CONFIG, ...JSON.parse(saved) };
@@ -708,9 +759,69 @@ export function getUpiMerchantConfig(): UpiMerchantConfig {
   return DEFAULT_UPI_CONFIG;
 }
 
-export function saveUpiMerchantConfig(config: UpiMerchantConfig): void {
+export function saveUpiMerchantConfig(config: UpiMerchantConfig): Promise<boolean> {
   if (typeof window !== 'undefined') {
-    localStorage.setItem('up_typing_upi_config', JSON.stringify(config));
+    localStorage.setItem(STORAGE_KEY_UPI_CONFIG, JSON.stringify(config));
+  }
+  return savePricingConfigToCloud({ upi: config });
+}
+
+/**
+ * Shared pricing configuration (plans, promo codes, UPI merchant).
+ * Source of truth is Firestore system_settings/pricing_config, written by the admin
+ * and readable by everyone. localStorage is only a cache so the checkout opens instantly.
+ */
+interface PricingConfigDoc {
+  plans?: PaymentPlan[];
+  promoCodes?: PromoCode[];
+  upi?: UpiMerchantConfig;
+  updatedAt?: string;
+}
+
+async function savePricingConfigToCloud(patch: PricingConfigDoc): Promise<boolean> {
+  try {
+    // JSON round-trip drops undefined fields, which Firestore rejects
+    const clean = JSON.parse(JSON.stringify(patch));
+    await setDoc(
+      doc(db, 'system_settings', 'pricing_config'),
+      { ...clean, updatedAt: new Date().toISOString() },
+      { merge: true }
+    );
+    return true;
+  } catch (err) {
+    console.error('Could not save pricing config to Firestore:', err);
+    return false;
+  }
+}
+
+function writePricingCache(key: string, value: unknown): boolean {
+  // A field the admin has never saved to the cloud leaves the cached value untouched
+  if (value === undefined) return false;
+  const next = JSON.stringify(value);
+  if (next === localStorage.getItem(key)) return false;
+  localStorage.setItem(key, next);
+  return true;
+}
+
+/**
+ * Pull the admin's pricing configuration from Firestore into the local cache.
+ * Resolves to true when the cached values changed.
+ */
+export async function syncPricingConfigFromCloud(): Promise<boolean> {
+  try {
+    const snap = await getDoc(doc(db, 'system_settings', 'pricing_config'));
+    const data: PricingConfigDoc = snap.exists() ? (snap.data() as PricingConfigDoc) : {};
+    const plans = Array.isArray(data.plans) && data.plans.length > 0 ? data.plans : undefined;
+    const promoCodes = Array.isArray(data.promoCodes) ? data.promoCodes : undefined;
+    const upi = data.upi && data.upi.upiId ? data.upi : undefined;
+
+    const changedPlans = writePricingCache(STORAGE_KEY_CUSTOM_PLANS, plans);
+    const changedPromos = writePricingCache(STORAGE_KEY_PROMO_CODES, promoCodes);
+    const changedUpi = writePricingCache(STORAGE_KEY_UPI_CONFIG, upi);
+    return changedPlans || changedPromos || changedUpi;
+  } catch (err) {
+    console.warn('Could not load pricing config from Firestore, using cached values:', err);
+    return false;
   }
 }
 

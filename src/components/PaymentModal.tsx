@@ -5,7 +5,8 @@ import {
   validatePromoCode,
   submitPaymentRequest,
   getPromoCodes,
-  getUpiMerchantConfig
+  getUpiMerchantConfig,
+  syncPricingConfigFromCloud
 } from '../services/paymentService';
 import { sendTelegramPaymentNotification } from '../services/telegramService';
 import { UserProfile } from '../services/firebase';
@@ -29,9 +30,22 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
   initialPlanId,
   onPaymentSubmitted
 }) => {
-  const plans = useMemo(() => getPaymentPlans(), []);
-  const upiConfig = useMemo(() => getUpiMerchantConfig(), []);
-  const availablePromoCodes = useMemo(() => getPromoCodes().filter((c) => c.isActive), []);
+  // Bumped whenever the admin's pricing config is refreshed from Firestore
+  const [pricingVersion, setPricingVersion] = useState(0);
+  useEffect(() => {
+    if (!isOpen) return;
+    let cancelled = false;
+    syncPricingConfigFromCloud().then((changed) => {
+      if (changed && !cancelled) setPricingVersion((v) => v + 1);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [isOpen]);
+
+  const plans = useMemo(() => getPaymentPlans(), [pricingVersion]);
+  const upiConfig = useMemo(() => getUpiMerchantConfig(), [pricingVersion]);
+  const availablePromoCodes = useMemo(() => getPromoCodes().filter((c) => c.isActive), [pricingVersion]);
 
   // Selected Plan state
   const [selectedPlanId, setSelectedPlanId] = useState<string>(() => {
@@ -120,7 +134,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
     if (!appliedPromo || selectedPlan.id === 'plan_single_15d' || selectedPlan.id === 'plan_exclusive_12') return 0;
     const reval = validatePromoCode(appliedPromo.code, selectedPlan.discountedPrice);
     return reval.valid ? reval.discountAmount : 0;
-  }, [appliedPromo, selectedPlan]);
+  }, [appliedPromo, selectedPlan, pricingVersion]);
 
   const finalPayable = (selectedPlan.id === 'plan_single_15d' || selectedPlan.id === 'plan_exclusive_12')
     ? 12

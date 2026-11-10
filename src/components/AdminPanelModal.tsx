@@ -57,6 +57,8 @@ import {
   UpiMerchantConfig,
   getUpiMerchantConfig,
   saveUpiMerchantConfig,
+  syncPricingConfigFromCloud,
+  backfillSubscriptionScopes,
   DEFAULT_UPI_CONFIG
 } from '../services/paymentService';
 import {
@@ -74,6 +76,11 @@ import {
 } from '../services/liveChatService';
 import { syncPaidPassagesToFirestore } from '../services/passageService';
 import appLogo from '../assets/logo.png';
+
+const PRICING_CLOUD_SAVE_FAILED =
+  '⚠️ Saved on this device only. Could not save to the cloud, so candidates still see the old pricing. Check that you are signed in as admin and online, then save again.';
+const PROMO_CLOUD_SAVE_FAILED =
+  'Saved on this device only. Could not save promo codes to the cloud, so candidates still see the old list. Check that you are signed in as admin and online, then try again.';
 
 interface AdminPanelModalProps {
   isOpen: boolean;
@@ -394,8 +401,25 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
     try {
       const subs = await fetchAllPaymentSubmissions();
       setPaymentsList(subs);
+
+      // Load the shared pricing config so this panel edits what candidates actually see
+      if (await syncPricingConfigFromCloud()) {
+        setPricingPlansList(getPaymentPlans());
+        setUpiMerchantConfig(getUpiMerchantConfig());
+      }
       const promos = getPromoCodes();
       setPromoCodesList(promos);
+
+      // One-time repair: older single-exam approvals did not store the exam scope
+      // that the Firestore paywall rules now require.
+      if (!localStorage.getItem('up_subscription_scope_backfill_v1')) {
+        try {
+          await backfillSubscriptionScopes(subs);
+          localStorage.setItem('up_subscription_scope_backfill_v1', new Date().toISOString());
+        } catch (err) {
+          console.warn('Subscription scope backfill failed, will retry next time:', err);
+        }
+      }
       const tg = await getTelegramConfig();
       setTelegramConfig(tg);
     } catch (err) {
@@ -515,24 +539,29 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
         isActive: true
       }
     ];
-    savePromoCodes(updated);
     setPromoCodesList(updated);
     setNewPromoCode('');
     setNewPromoDesc('');
-    alert(`Promo code ${code} created successfully!`);
+    savePromoCodes(updated).then((ok) => {
+      alert(ok ? `Promo code ${code} created successfully!` : PROMO_CLOUD_SAVE_FAILED);
+    });
   };
 
   const handleTogglePromoStatus = (code: string) => {
     const updated = promoCodesList.map((p) => (p.code === code ? { ...p, isActive: !p.isActive } : p));
-    savePromoCodes(updated);
     setPromoCodesList(updated);
+    savePromoCodes(updated).then((ok) => {
+      if (!ok) alert(PROMO_CLOUD_SAVE_FAILED);
+    });
   };
 
   const handleDeletePromoCode = (code: string) => {
     if (!window.confirm(`Delete promo code ${code}?`)) return;
     const updated = promoCodesList.filter((p) => p.code !== code);
-    savePromoCodes(updated);
     setPromoCodesList(updated);
+    savePromoCodes(updated).then((ok) => {
+      if (!ok) alert(PROMO_CLOUD_SAVE_FAILED);
+    });
   };
 
   // Pricing Plans Handlers
@@ -556,21 +585,34 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
     });
   };
 
-  const handleSavePricingPlans = () => {
-    savePaymentPlans(pricingPlansList);
-    saveUpiMerchantConfig(upiMerchantConfig);
-    setPricingSaveMessage('✅ Pricing plans and UPI Merchant settings saved successfully! All checkout modals will reflect these updated details.');
-    setTimeout(() => setPricingSaveMessage(null), 4000);
+  const handleSavePricingPlans = async () => {
+    const results = await Promise.all([
+      savePaymentPlans(pricingPlansList),
+      saveUpiMerchantConfig(upiMerchantConfig)
+    ]);
+    setPricingSaveMessage(
+      results.every(Boolean)
+        ? '✅ Pricing plans and UPI Merchant settings saved successfully! All checkout modals will reflect these updated details.'
+        : PRICING_CLOUD_SAVE_FAILED
+    );
+    setTimeout(() => setPricingSaveMessage(null), 6000);
   };
 
   const handleResetPricingPlans = () => {
     if (!window.confirm('Reset all 5 pricing tiers and UPI settings to factory defaults?')) return;
-    savePaymentPlans(DEFAULT_PAYMENT_PLANS);
     setPricingPlansList(DEFAULT_PAYMENT_PLANS);
-    saveUpiMerchantConfig(DEFAULT_UPI_CONFIG);
     setUpiMerchantConfig(DEFAULT_UPI_CONFIG);
-    setPricingSaveMessage('🔄 Pricing plans and UPI settings reset to factory defaults.');
-    setTimeout(() => setPricingSaveMessage(null), 4000);
+    Promise.all([
+      savePaymentPlans(DEFAULT_PAYMENT_PLANS),
+      saveUpiMerchantConfig(DEFAULT_UPI_CONFIG)
+    ]).then((results) => {
+      setPricingSaveMessage(
+        results.every(Boolean)
+          ? '🔄 Pricing plans and UPI settings reset to factory defaults.'
+          : PRICING_CLOUD_SAVE_FAILED
+      );
+      setTimeout(() => setPricingSaveMessage(null), 6000);
+    });
   };
 
   // AI Handlers

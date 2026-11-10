@@ -18,7 +18,47 @@ service cloud.firestore {
       return ['isAdmin', 'role', 'is_subscribed', 'subscriptionPlan', 'subscriptionPlanName',
               'subscriptionStatus', 'subscriptionPlanType',
               'subscriptionExpiresAt', 'subscriptionExamId', 'subscriptionExamTitle',
+              'subscriptionExamSlug', 'subscriptionCategoryGroup',
               'subscriptionApprovedAt'];
+    }
+
+    // Current server time as 'YYYY-MM-DDTHH:MM:SS' (UTC). subscriptionExpiresAt is stored
+    // as a UTC ISO string, so the two compare correctly as plain strings.
+    function pad2(n) { return n < 10 ? '0' + string(n) : string(n); }
+    function nowIso() {
+      return string(request.time.year()) + '-' + pad2(request.time.month()) + '-' + pad2(request.time.day())
+        + 'T' + pad2(request.time.hours()) + ':' + pad2(request.time.minutes()) + ':' + pad2(request.time.seconds());
+    }
+
+    // Subscribed AND not expired. A missing expiry date is treated as expired.
+    function subscriptionActive(u) {
+      return u.get('is_subscribed', false) == true
+        && u.get('subscriptionExpiresAt', '') is string
+        && u.get('subscriptionExpiresAt', '') > nowIso();
+    }
+
+    // Does the plan cover this passage?
+    //  - all_exams_pass: everything
+    //  - category_combo: passages of the purchased category group
+    //  - single_exam: passages tagged with the purchased exam, plus the untagged
+    //    passages shared by every exam in the same category group
+    function passageInPlan(u, p) {
+      return u.get('subscriptionPlanType', '') == 'all_exams_pass'
+        || (u.get('subscriptionPlanType', '') == 'category_combo'
+            && p.get('categoryGroup', '') != ''
+            && p.get('categoryGroup', '') == u.get('subscriptionExamId', ''))
+        || (u.get('subscriptionPlanType', '') == 'single_exam'
+            && (
+              (p.get('examSlug', '') != ''
+                && p.get('examSlug', '') == u.get('subscriptionExamSlug', ''))
+              || (p.get('examSlug', '') == ''
+                && p.get('categoryGroup', '') != ''
+                && p.get('categoryGroup', '') == u.get('subscriptionCategoryGroup', ''))
+            ));
+    }
+
+    function canReadPaidPassage(u, p) {
+      return subscriptionActive(u) && passageInPlan(u, p);
     }
 
     function validUserChatMessage(message) {
@@ -66,8 +106,9 @@ service cloud.firestore {
 
     // ── App settings ─────────────────────────────────────────
     // telegram_config (bot token) and ai_config (API key) are admin-only.
+    // pricing_config (plans, promo codes, UPI ID) is shown on the checkout page, so it is public.
     match /system_settings/{docId} {
-      allow read: if docId == 'exam_config' || isAdmin();
+      allow read: if docId == 'exam_config' || docId == 'pricing_config' || isAdmin();
       allow write: if isAdmin();
     }
 
@@ -140,11 +181,15 @@ service cloud.firestore {
       allow write: if isAdmin();
     }
 
-    // ── Paid passages (read only by active subscribers or admin; write and list only by admin) ─
+    // ── Paid passages (read only by admin, or by a subscriber whose plan is still
+    //    valid and covers this passage; write and list only by admin) ─
     match /paid_passages/{passageId} {
       allow get: if signedIn() && (
         isAdmin() ||
-        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.is_subscribed == true
+        canReadPaidPassage(
+          get(/databases/$(database)/documents/users/$(request.auth.uid)).data,
+          resource.data
+        )
       );
       allow list, write: if isAdmin();
     }
