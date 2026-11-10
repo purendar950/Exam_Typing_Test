@@ -1,7 +1,7 @@
 import React from 'react';
 import { TestSettings } from '../types';
 import { UserProfile, isUserAdmin } from '../services/firebase';
-import appLogo from '../assets/logo.png';
+import appLogo from '../assets/logo.webp';
 
 interface HeaderProps {
   currentTab: 'tests' | 'learn' | 'book';

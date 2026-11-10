@@ -7,7 +7,7 @@ import {
   resetUserPassword,
   UserProfile
 } from '../services/firebase';
-import appLogo from '../assets/logo.png';
+import appLogo from '../assets/logo.webp';
 
 interface AuthModalProps {
   isOpen: boolean;

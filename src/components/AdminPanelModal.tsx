@@ -75,7 +75,7 @@ import {
   markChatReadByAdmin
 } from '../services/liveChatService';
 import { syncPaidPassagesToFirestore } from '../services/passageService';
-import appLogo from '../assets/logo.png';
+import appLogo from '../assets/logo.webp';
 
 const PRICING_CLOUD_SAVE_FAILED =
   '⚠️ Saved on this device only. Could not save to the cloud, so candidates still see the old pricing. Check that you are signed in as admin and online, then save again.';

@@ -1,5 +1,5 @@
-// UP Police Typing Test Portal - Service Worker
-const CACHE_NAME = 'up-typing-cache-v3';
+// Exam Typing - Service Worker
+const CACHE_NAME = 'up-typing-cache-v4';
 
 const STATIC_ASSETS = [
   './',
@@ -34,38 +34,50 @@ self.addEventListener('activate', (event) => {
   );
 });
 
-// Fetch: Stale-While-Revalidate with offline fallback
-self.addEventListener('fetch', (event) => {
-  // Only handle GET requests
-  if (event.request.method !== 'GET') return;
+function putInCache(request, response) {
+  if (response && response.status === 200 && response.type === 'basic') {
+    const clone = response.clone();
+    caches.open(CACHE_NAME).then((cache) => cache.put(request, clone));
+  }
+  return response;
+}
 
-  const url = new URL(event.request.url);
+// Network first: always show the newest deploy, use the cache only when offline.
+function networkFirst(request, fallbackUrl) {
+  return fetch(request)
+    .then((response) => putInCache(request, response))
+    .catch(() =>
+      caches.match(request).then((cached) => cached || (fallbackUrl ? caches.match(fallbackUrl) : undefined))
+    )
+    .then((response) => response || Response.error());
+}
 
-  // Ignore chrome extensions or non-http
-  if (!url.protocol.startsWith('http')) return;
-
-  event.respondWith(
-    caches.match(event.request).then((cachedResponse) => {
-      // Fetch fresh version in background and update cache
-      const fetchPromise = fetch(event.request)
-        .then((networkResponse) => {
-          if (networkResponse && networkResponse.status === 200) {
-            const responseClone = networkResponse.clone();
-            caches.open(CACHE_NAME).then((cache) => {
-              cache.put(event.request, responseClone);
-            });
-          }
-          return networkResponse;
-        })
-        .catch(() => {
-          // If offline and not in cache, fallback to index.html for navigation
-          if (event.request.mode === 'navigate') {
-            return caches.match('./index.html') || caches.match('./');
-          }
-        });
-
-      // Return cached immediately if found, else wait for network
-      return cachedResponse || fetchPromise;
-    })
+// Cache first: only for build files whose name contains a content hash, so a
+// cached copy can never be out of date.
+function cacheFirst(request) {
+  return caches.match(request).then(
+    (cached) => cached || fetch(request).then((response) => putInCache(request, response))
   );
+}
+
+self.addEventListener('fetch', (event) => {
+  const request = event.request;
+  if (request.method !== 'GET') return;
+
+  const url = new URL(request.url);
+
+  // Leave Firebase, Google and every other third-party request to the browser
+  if (url.origin !== self.location.origin) return;
+
+  if (request.mode === 'navigate') {
+    event.respondWith(networkFirst(request, './index.html'));
+    return;
+  }
+
+  if (url.pathname.includes('/assets/')) {
+    event.respondWith(cacheFirst(request));
+    return;
+  }
+
+  event.respondWith(networkFirst(request));
 });

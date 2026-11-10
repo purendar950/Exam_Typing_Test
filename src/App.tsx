@@ -1,30 +1,18 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, lazy, Suspense } from 'react';
 import { Passage, TestSettings, EvaluationResult, ExamProfile } from './types';
 import { PASSAGES } from './data/passages';
 import { ALL_EXAMS } from './data/allExams';
 import { Header } from './components/Header';
 import { ChooseTest } from './components/ChooseTest';
 import { StartTest } from './components/StartTest';
-import { ResultScreen } from './components/ResultScreen';
-import { LearnScreen } from './components/LearnScreen';
-import { WordDocumentScreen } from './components/WordDocumentScreen';
-import { RulesModal } from './components/RulesModal';
-import { HistoryModal } from './components/HistoryModal';
 import { HindiHelperModal } from './components/HindiHelperModal';
-import { AuthModal } from './components/AuthModal';
-import { UserDashboardModal } from './components/UserDashboardModal';
-import { LeaderboardModal } from './components/LeaderboardModal';
-import { MyCoursesModal } from './components/MyCoursesModal';
 import { ExclusiveOfferBanner } from './components/ExclusiveOfferBanner';
-import { AiGeneratorModal } from './components/AiGeneratorModal';
-import { AdminPanelModal } from './components/AdminPanelModal';
-import { PaymentModal } from './components/PaymentModal';
-import { LegalPolicyModal, LegalTab } from './components/LegalPolicyModal';
+import type { LegalTab } from './components/LegalPolicyModal';
 import { TelegramSupportWidget } from './components/TelegramSupportWidget';
-import { TelegramAdminChatSheet } from './components/TelegramAdminChatSheet';
 import { PwaInstallPrompt } from './components/PwaInstallPrompt';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { audioEngine } from './utils/audioEngine';
+import appLogo from './assets/logo.webp';
 import { fetchDailyLivePassages, triggerAutoDailyGenerationIfDue } from './services/aiGenerator';
 import { fetchAllCustomPassages } from './services/adminService';
 import {
@@ -42,6 +30,54 @@ import {
   UserProfile,
   isUserAdmin
 } from './services/firebase';
+
+// After a new deploy the old chunk files no longer exist on the server. If a chunk fails
+// to load, reload once to pick up the new version instead of showing an error screen.
+const CHUNK_RELOAD_KEY = 'up_chunk_reload_at';
+function loadChunk<T>(importer: () => Promise<T>): Promise<T> {
+  return importer().catch((err) => {
+    const last = Number(sessionStorage.getItem(CHUNK_RELOAD_KEY) || 0);
+    if (navigator.onLine && Date.now() - last > 60000) {
+      sessionStorage.setItem(CHUNK_RELOAD_KEY, String(Date.now()));
+      window.location.reload();
+      return new Promise<T>(() => {});
+    }
+    throw err;
+  });
+}
+
+// Screens and dialogs that are not needed for the first paint are loaded on demand
+const ResultScreen = lazy(() => loadChunk(() => import('./components/ResultScreen')).then((m) => ({ default: m.ResultScreen })));
+const LearnScreen = lazy(() => loadChunk(() => import('./components/LearnScreen')).then((m) => ({ default: m.LearnScreen })));
+const WordDocumentScreen = lazy(() => loadChunk(() => import('./components/WordDocumentScreen')).then((m) => ({ default: m.WordDocumentScreen })));
+const RulesModal = lazy(() => loadChunk(() => import('./components/RulesModal')).then((m) => ({ default: m.RulesModal })));
+const HistoryModal = lazy(() => loadChunk(() => import('./components/HistoryModal')).then((m) => ({ default: m.HistoryModal })));
+const AuthModal = lazy(() => loadChunk(() => import('./components/AuthModal')).then((m) => ({ default: m.AuthModal })));
+const UserDashboardModal = lazy(() => loadChunk(() => import('./components/UserDashboardModal')).then((m) => ({ default: m.UserDashboardModal })));
+const LeaderboardModal = lazy(() => loadChunk(() => import('./components/LeaderboardModal')).then((m) => ({ default: m.LeaderboardModal })));
+const MyCoursesModal = lazy(() => loadChunk(() => import('./components/MyCoursesModal')).then((m) => ({ default: m.MyCoursesModal })));
+const AiGeneratorModal = lazy(() => loadChunk(() => import('./components/AiGeneratorModal')).then((m) => ({ default: m.AiGeneratorModal })));
+const AdminPanelModal = lazy(() => loadChunk(() => import('./components/AdminPanelModal')).then((m) => ({ default: m.AdminPanelModal })));
+const PaymentModal = lazy(() => loadChunk(() => import('./components/PaymentModal')).then((m) => ({ default: m.PaymentModal })));
+const TelegramAdminChatSheet = lazy(() => loadChunk(() => import('./components/TelegramAdminChatSheet')).then((m) => ({ default: m.TelegramAdminChatSheet })));
+const LegalPolicyModal = lazy(() => loadChunk(() => import('./components/LegalPolicyModal')).then((m) => ({ default: m.LegalPolicyModal })));
+
+// Mounts its children the first time `when` becomes true and keeps them mounted afterwards,
+// so a dialog's code is only downloaded once it is actually opened.
+const LazyMount: React.FC<{ when: boolean; children: React.ReactNode }> = ({ when, children }) => {
+  const [activated, setActivated] = useState(when);
+  useEffect(() => {
+    if (when) setActivated(true);
+  }, [when]);
+  if (!activated && !when) return null;
+  return <Suspense fallback={null}>{children}</Suspense>;
+};
+
+const ScreenLoader: React.FC = () => (
+  <div role="status" style={{ padding: '80px 20px', textAlign: 'center', color: '#64748b', fontWeight: 600 }}>
+    Loading…
+  </div>
+);
 
 const DEFAULT_SETTINGS: TestSettings = {
   highlightEnabled: false,
@@ -737,30 +773,36 @@ export const App: React.FC = () => {
         )}
 
         {currentView === 'result' && currentResult && (
-          <ResultScreen
-            result={currentResult}
-            onRetakeTest={handleRetakeTest}
-            onChooseAnother={returnToExamOrHome}
-            onPracticeWrongWords={handlePracticeWrongWords}
-            onOpenRules={openRulesModal}
-            onOpenDashboard={() => {
-              if (currentUser) {
-                setIsDashboardOpen(true);
-              } else {
-                setIsAuthOpen(true);
-              }
-            }}
-          />
+          <Suspense fallback={<ScreenLoader />}>
+            <ResultScreen
+              result={currentResult}
+              onRetakeTest={handleRetakeTest}
+              onChooseAnother={returnToExamOrHome}
+              onPracticeWrongWords={handlePracticeWrongWords}
+              onOpenRules={openRulesModal}
+              onOpenDashboard={() => {
+                if (currentUser) {
+                  setIsDashboardOpen(true);
+                } else {
+                  setIsAuthOpen(true);
+                }
+              }}
+            />
+          </Suspense>
         )}
 
         {currentView === 'learn' && (
-          <LearnScreen onBackToTests={returnToExamOrHome} />
+          <Suspense fallback={<ScreenLoader />}>
+            <LearnScreen onBackToTests={returnToExamOrHome} />
+          </Suspense>
         )}
 
         {currentView === 'book' && (
-          <WordDocumentScreen
-            onBackToTests={returnToExamOrHome}
-          />
+          <Suspense fallback={<ScreenLoader />}>
+            <WordDocumentScreen
+              onBackToTests={returnToExamOrHome}
+            />
+          </Suspense>
         )}
       </main>
 
@@ -789,7 +831,7 @@ export const App: React.FC = () => {
               <div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '12px' }}>
                   <img
-                    src="/logo.png"
+                    src={appLogo}
                     alt="Exam Typing Mentor"
                     style={{ height: '36px', width: 'auto', borderRadius: '6px' }}
                     onError={(e) => { (e.currentTarget as HTMLElement).style.display = 'none'; }}
@@ -970,19 +1012,23 @@ export const App: React.FC = () => {
         </footer>
       )}
 
-      <RulesModal
-        isOpen={isRulesOpen}
-        onClose={() => setIsRulesOpen(false)}
-        initialExamId={rulesTargetExamId || selectedExamProfile?.id}
-        initialCategoryGroup={rulesTargetGroup || selectedExamProfile?.categoryGroup}
-      />
+      <LazyMount when={isRulesOpen}>
+        <RulesModal
+          isOpen={isRulesOpen}
+          onClose={() => setIsRulesOpen(false)}
+          initialExamId={rulesTargetExamId || selectedExamProfile?.id}
+          initialCategoryGroup={rulesTargetGroup || selectedExamProfile?.categoryGroup}
+        />
+      </LazyMount>
 
-      <HistoryModal
-        isOpen={isHistoryOpen}
-        onClose={() => setIsHistoryOpen(false)}
-        history={history}
-        onClearHistory={handleClearHistory}
-      />
+      <LazyMount when={isHistoryOpen}>
+        <HistoryModal
+          isOpen={isHistoryOpen}
+          onClose={() => setIsHistoryOpen(false)}
+          history={history}
+          onClearHistory={handleClearHistory}
+        />
+      </LazyMount>
 
       <HindiHelperModal
         isOpen={isHindiHelperOpen}
@@ -990,138 +1036,154 @@ export const App: React.FC = () => {
         defaultLayout={selectedPassage?.language === 'hindi_kruti' ? 'kruti' : 'mangal'}
       />
 
-      <AuthModal
-        isOpen={isAuthOpen}
-        onClose={() => {
-          setIsAuthOpen(false);
-          sessionStorage.setItem('up_auth_dismissed', 'true');
-        }}
-        onLoginSuccess={(user) => {
-          setCurrentUser(user);
-          setIsAuthOpen(false);
-          sessionStorage.removeItem('up_auth_dismissed');
-          sessionStorage.removeItem('up_offer_banner_dismissed');
-          setShowOfferBanner(true);
-          setSettings((prev) => ({
-            ...prev,
-            candidateName: user.displayName
-          }));
-          if (isUserAdmin(user)) {
-            setIsAdminOpen(true);
-          }
-        }}
-      />
+      <LazyMount when={isAuthOpen}>
+        <AuthModal
+          isOpen={isAuthOpen}
+          onClose={() => {
+            setIsAuthOpen(false);
+            sessionStorage.setItem('up_auth_dismissed', 'true');
+          }}
+          onLoginSuccess={(user) => {
+            setCurrentUser(user);
+            setIsAuthOpen(false);
+            sessionStorage.removeItem('up_auth_dismissed');
+            sessionStorage.removeItem('up_offer_banner_dismissed');
+            setShowOfferBanner(true);
+            setSettings((prev) => ({
+              ...prev,
+              candidateName: user.displayName
+            }));
+            if (isUserAdmin(user)) {
+              setIsAdminOpen(true);
+            }
+          }}
+        />
+      </LazyMount>
 
       {currentUser && (
-        <UserDashboardModal
-          isOpen={isDashboardOpen}
-          onClose={() => setIsDashboardOpen(false)}
-          user={currentUser}
-          initialTab={dashboardInitialTab}
-          onLogout={async () => {
-            await logoutUser();
-            setCurrentUser(null);
-            setIsDashboardOpen(false);
-            sessionStorage.removeItem('up_auth_dismissed');
-            setIsAuthOpen(true);
+        <LazyMount when={isDashboardOpen}>
+          <UserDashboardModal
+            isOpen={isDashboardOpen}
+            onClose={() => setIsDashboardOpen(false)}
+            user={currentUser}
+            initialTab={dashboardInitialTab}
+            onLogout={async () => {
+              await logoutUser();
+              setCurrentUser(null);
+              setIsDashboardOpen(false);
+              sessionStorage.removeItem('up_auth_dismissed');
+              setIsAuthOpen(true);
+            }}
+            onViewScorecard={(res) => {
+              setCurrentResult(res);
+              setCurrentView('result');
+              setIsDashboardOpen(false);
+            }}
+            onPracticeWrongWords={(words) => {
+              setIsDashboardOpen(false);
+              handlePracticeWrongWords(words);
+            }}
+            onOpenPayment={(examId) => {
+              setIsDashboardOpen(false);
+              handleOpenPayment(examId);
+            }}
+            onNavigateToCourse={() => {
+              setCurrentView('choose');
+            }}
+            onOpenLeaderboard={() => {
+              setIsDashboardOpen(false);
+              setIsLeaderboardOpen(true);
+            }}
+          />
+        </LazyMount>
+      )}
+
+      <LazyMount when={isLeaderboardOpen}>
+        <LeaderboardModal
+          isOpen={isLeaderboardOpen}
+          onClose={() => setIsLeaderboardOpen(false)}
+          isSubscribed={currentUser?.is_subscribed ?? false}
+          currentUserId={currentUser?.uid}
+          onOpenPayment={() => {
+            setIsLeaderboardOpen(false);
+            handleOpenPayment();
           }}
-          onViewScorecard={(res) => {
-            setCurrentResult(res);
-            setCurrentView('result');
-            setIsDashboardOpen(false);
-          }}
-          onPracticeWrongWords={(words) => {
-            setIsDashboardOpen(false);
-            handlePracticeWrongWords(words);
-          }}
-          onOpenPayment={(examId) => {
-            setIsDashboardOpen(false);
-            handleOpenPayment(examId);
-          }}
+        />
+      </LazyMount>
+
+      <LazyMount when={isMyCoursesOpen}>
+        <MyCoursesModal
+          isOpen={isMyCoursesOpen}
+          onClose={() => setIsMyCoursesOpen(false)}
+          currentUser={currentUser}
+          onOpenAuth={() => setIsAuthOpen(true)}
+          onOpenPayment={(examId) => handleOpenPayment(examId)}
           onNavigateToCourse={() => {
             setCurrentView('choose');
           }}
-          onOpenLeaderboard={() => {
-            setIsDashboardOpen(false);
-            setIsLeaderboardOpen(true);
+        />
+      </LazyMount>
+
+
+
+      <LazyMount when={isAiGeneratorOpen}>
+        <AiGeneratorModal
+          isOpen={isAiGeneratorOpen}
+          onClose={() => setIsAiGeneratorOpen(false)}
+          onPassagesGenerated={(tests) => {
+            setDailyLivePassages(tests);
+          }}
+          existingPassages={PASSAGES}
+        />
+      </LazyMount>
+
+      <LazyMount when={isAdminOpen}>
+        <AdminPanelModal
+          isOpen={isAdminOpen}
+          onClose={() => setIsAdminOpen(false)}
+          passages={allPassages}
+          onPassagesUpdated={(updated) => {
+            setCustomPassages(updated.filter((p) => p.id.startsWith('custom-')));
+          }}
+          onDailyLiveGenerated={(tests) => {
+            setDailyLivePassages(tests);
+          }}
+          currentUser={currentUser}
+          onLoginSuccess={(user) => {
+            setCurrentUser(user);
+          }}
+          initialTab={adminInitialTab}
+          initialChatId={adminInitialChatId}
+        />
+      </LazyMount>
+
+      <LazyMount when={isPaymentOpen}>
+        <PaymentModal
+          isOpen={isPaymentOpen}
+          onClose={() => {
+            setIsPaymentOpen(false);
+            setPaymentInitialExamId(undefined);
+            setPaymentInitialPlanId(undefined);
+          }}
+          currentUser={currentUser}
+          initialSelectedExamId={paymentInitialExamId}
+          initialPlanId={paymentInitialPlanId}
+        />
+      </LazyMount>
+
+      <LazyMount when={isLegalOpen}>
+        <LegalPolicyModal
+          isOpen={isLegalOpen}
+          initialTab={legalInitialTab}
+          onClose={() => {
+            setIsLegalOpen(false);
+            const hash = window.location.hash || '';
+            if (['#/terms', '#/privacy', '#/refund', '#/copyright', '#/disclaimer', '#/contact'].some((h) => hash.startsWith(h))) {
+              returnToExamOrHome();
+            }
           }}
         />
-      )}
-
-      <LeaderboardModal
-        isOpen={isLeaderboardOpen}
-        onClose={() => setIsLeaderboardOpen(false)}
-        isSubscribed={currentUser?.is_subscribed ?? false}
-        currentUserId={currentUser?.uid}
-        onOpenPayment={() => {
-          setIsLeaderboardOpen(false);
-          handleOpenPayment();
-        }}
-      />
-
-      <MyCoursesModal
-        isOpen={isMyCoursesOpen}
-        onClose={() => setIsMyCoursesOpen(false)}
-        currentUser={currentUser}
-        onOpenAuth={() => setIsAuthOpen(true)}
-        onOpenPayment={(examId) => handleOpenPayment(examId)}
-        onNavigateToCourse={() => {
-          setCurrentView('choose');
-        }}
-      />
-
-
-
-      <AiGeneratorModal
-        isOpen={isAiGeneratorOpen}
-        onClose={() => setIsAiGeneratorOpen(false)}
-        onPassagesGenerated={(tests) => {
-          setDailyLivePassages(tests);
-        }}
-        existingPassages={PASSAGES}
-      />
-
-      <AdminPanelModal
-        isOpen={isAdminOpen}
-        onClose={() => setIsAdminOpen(false)}
-        passages={allPassages}
-        onPassagesUpdated={(updated) => {
-          setCustomPassages(updated.filter((p) => p.id.startsWith('custom-')));
-        }}
-        onDailyLiveGenerated={(tests) => {
-          setDailyLivePassages(tests);
-        }}
-        currentUser={currentUser}
-        onLoginSuccess={(user) => {
-          setCurrentUser(user);
-        }}
-        initialTab={adminInitialTab}
-        initialChatId={adminInitialChatId}
-      />
-
-      <PaymentModal
-        isOpen={isPaymentOpen}
-        onClose={() => {
-          setIsPaymentOpen(false);
-          setPaymentInitialExamId(undefined);
-          setPaymentInitialPlanId(undefined);
-        }}
-        currentUser={currentUser}
-        initialSelectedExamId={paymentInitialExamId}
-        initialPlanId={paymentInitialPlanId}
-      />
-
-      <LegalPolicyModal
-        isOpen={isLegalOpen}
-        initialTab={legalInitialTab}
-        onClose={() => {
-          setIsLegalOpen(false);
-          const hash = window.location.hash || '';
-          if (['#/terms', '#/privacy', '#/refund', '#/copyright', '#/disclaimer', '#/contact'].some((h) => hash.startsWith(h))) {
-            returnToExamOrHome();
-          }
-        }}
-      />
+      </LazyMount>
 
       {/* Floating Telegram Alert Toast from 1-Click Link */}
       {telegramToast && (
@@ -1174,20 +1236,22 @@ export const App: React.FC = () => {
 
       {/* Native Telegram In-App Admin Chat Reply Sheet */}
       {telegramAdminChatSessionId && (
-        <TelegramAdminChatSheet
-          sessionId={telegramAdminChatSessionId}
-          token={telegramAdminChatToken}
-          currentUser={currentUser}
-          onClose={() => {
-            setTelegramAdminChatSessionId(null);
-            try {
-              const u = new URL(window.location.href);
-              u.searchParams.delete('admin_chat');
-              u.searchParams.delete('token');
-              window.history.replaceState({}, document.title, u.pathname + (u.search ? u.search : ''));
-            } catch {}
-          }}
-        />
+        <LazyMount when={true}>
+          <TelegramAdminChatSheet
+            sessionId={telegramAdminChatSessionId}
+            token={telegramAdminChatToken}
+            currentUser={currentUser}
+            onClose={() => {
+              setTelegramAdminChatSessionId(null);
+              try {
+                const u = new URL(window.location.href);
+                u.searchParams.delete('admin_chat');
+                u.searchParams.delete('token');
+                window.history.replaceState({}, document.title, u.pathname + (u.search ? u.search : ''));
+              } catch {}
+            }}
+          />
+        </LazyMount>
       )}
 
       {/* Secure Test Loading Overlay */}

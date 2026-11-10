@@ -4,7 +4,7 @@ import { ALL_EXAMS, CATEGORY_GROUPS, CATEGORY_SUB_FILTERS, UNIFIED_EXAM_POSTS, E
 import { UserProfile } from '../services/firebase';
 import { isTestLocked, hasExamProAccess, isUserAdmin } from '../services/paymentService';
 import { getFallbackDailyPassages } from '../services/aiGenerator';
-import appLogo from '../assets/logo.png';
+import appLogo from '../assets/logo.webp';
 import { ExamLogo, getExamTheme, CardWatermark } from '../utils/examLogos';
 import { getExamBackspaceRule } from '../utils/examBackspaceRules';
 
