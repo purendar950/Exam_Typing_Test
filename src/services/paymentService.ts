@@ -388,15 +388,25 @@ export async function submitPaymentRequest(
   // security rules refuse the whole batch if either already exists. This
   // cannot be bypassed from the browser the way the local checks can.
   if (newSubmission.userId && !String(newSubmission.userId).startsWith('guest')) {
+    // If the marker collections are not in the published rules yet, reads on
+    // them are denied. Detect that and fall back to the simple write so
+    // students can still pay until the updated rules are published.
+    let markerMode = true;
+    let pendingMark: Awaited<ReturnType<typeof getDoc>> | null = null;
     try {
-      const pendingMark = await getDoc(doc(db, 'payment_pending', newSubmission.userId));
-      if (pendingMark.exists()) {
+      pendingMark = await getDoc(doc(db, 'payment_pending', newSubmission.userId));
+    } catch (err: any) {
+      markerMode = false;
+      console.warn('Payment marker collections unavailable — updated firestore.rules not published yet. Falling back to simple submission write.');
+    }
+
+    if (markerMode) {
+      if (pendingMark!.exists()) {
         throw new Error(
           'You already have a payment request awaiting review. Please wait until it is approved or rejected before submitting again. Check the Payments section or contact support on Telegram.'
         );
       }
 
-      const submissionRef = doc(db, 'payment_submissions', newSubmission.id);
       const includeScreenshot = compressedScreenshot && compressedScreenshot.length < 350000;
       const firestorePayload = includeScreenshot
         ? { ...newSubmission, hasScreenshot: true }
@@ -406,30 +416,44 @@ export async function submitPaymentRequest(
             return { ...rest, hasScreenshot: Boolean(compressedScreenshot) };
           })();
 
-      const batch = writeBatch(db);
-      batch.set(submissionRef, firestorePayload);
-      batch.set(doc(db, 'utr_claims', utrNorm), {
-        userId: newSubmission.userId,
-        submissionId: newSubmission.id,
-        utrNormalized: utrNorm,
-        createdAt: newSubmission.submittedAt
-      });
-      batch.set(doc(db, 'payment_pending', newSubmission.userId), {
-        userId: newSubmission.userId,
-        submissionId: newSubmission.id,
-        createdAt: newSubmission.submittedAt
-      });
-      await batch.commit();
-    } catch (err: any) {
-      if (err instanceof Error && /already have a payment request/.test(err.message)) {
-        throw err;
+      try {
+        const batch = writeBatch(db);
+        batch.set(doc(db, 'payment_submissions', newSubmission.id), firestorePayload);
+        batch.set(doc(db, 'utr_claims', utrNorm), {
+          userId: newSubmission.userId,
+          submissionId: newSubmission.id,
+          utrNormalized: utrNorm,
+          createdAt: newSubmission.submittedAt
+        });
+        batch.set(doc(db, 'payment_pending', newSubmission.userId), {
+          userId: newSubmission.userId,
+          submissionId: newSubmission.id,
+          createdAt: newSubmission.submittedAt
+        });
+        await batch.commit();
+      } catch (err: any) {
+        if (err?.code === 'permission-denied') {
+          throw new Error(
+            'This UTR number is already registered (submitted by you or another account), or you already have a pending payment request. Please check your payment history or contact support on Telegram.'
+          );
+        }
+        console.warn('Could not sync payment submission to Firestore:', err);
       }
-      if (err?.code === 'permission-denied') {
-        throw new Error(
-          'This UTR number is already registered (submitted by you or another account), or you already have a pending payment request. Please check your payment history or contact support on Telegram.'
-        );
+    } else {
+      // Old ruleset: no marker protection yet, but submissions must still work.
+      const includeScreenshot = compressedScreenshot && compressedScreenshot.length < 350000;
+      const firestorePayload = includeScreenshot
+        ? { ...newSubmission, hasScreenshot: true }
+        : (() => {
+            const { screenshotUrl: _ss, ...rest } = newSubmission;
+            void _ss;
+            return { ...rest, hasScreenshot: Boolean(compressedScreenshot) };
+          })();
+      try {
+        await setDoc(doc(db, 'payment_submissions', newSubmission.id), firestorePayload);
+      } catch (err) {
+        console.warn('Could not sync payment submission to Firestore:', err);
       }
-      console.warn('Could not sync payment submission to Firestore:', err);
     }
   } else if (newSubmission.userId) {
     // Guest users are blocked in the UI, but never create server markers for them.
