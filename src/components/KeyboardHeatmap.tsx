@@ -148,11 +148,11 @@ export const KeyboardHeatmap: React.FC<KeyboardHeatmapProps> = ({
         style={{
           width,
           height: '38px',
-          borderRadius: '6px',
+          borderRadius: 'var(--radius-sm)',
           border: isSelected ? '2px solid var(--tw-sky-600)' : '1px solid var(--bd-slate-300)',
           background: getKeyBgColor(k),
           color: getKeyTextColor(k),
-          fontWeight: 800,
+          fontWeight: 600,
           fontSize: '0.8rem',
           display: 'flex',
           flexDirection: 'column',
@@ -196,7 +196,7 @@ export const KeyboardHeatmap: React.FC<KeyboardHeatmapProps> = ({
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
           <span style={{ fontSize: '1.25rem' }}>⌨️</span>
           <div>
-            <h4 style={{ margin: 0, fontSize: '0.95rem', fontWeight: 800, color: 'var(--fg-slate-900)' }}>
+            <h4 style={{ margin: 0, fontSize: '0.95rem', fontWeight: 600, color: 'var(--fg-slate-900)' }}>
               Keyboard Error Heatmap (गलतियों का नक्शा)
             </h4>
             <div style={{ fontSize: '0.75rem', color: 'var(--fg-slate-500)' }}>
@@ -207,11 +207,11 @@ export const KeyboardHeatmap: React.FC<KeyboardHeatmapProps> = ({
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.75rem', color: 'var(--fg-slate-500)' }}>
           <span>Low</span>
-          <span style={{ width: '12px', height: '12px', borderRadius: '3px', background: 'var(--surface)', border: '1px solid var(--bd-slate-300)' }} />
-          <span style={{ width: '12px', height: '12px', borderRadius: '3px', background: 'var(--bg-yellow-200)' }} />
-          <span style={{ width: '12px', height: '12px', borderRadius: '3px', background: 'var(--tw-amber-400)' }} />
-          <span style={{ width: '12px', height: '12px', borderRadius: '3px', background: 'var(--tw-orange-500)' }} />
-          <span style={{ width: '12px', height: '12px', borderRadius: '3px', background: 'var(--tw-red-500)' }} />
+          <span style={{ width: '12px', height: '12px', borderRadius: 'var(--radius-sm)', background: 'var(--surface)', border: '1px solid var(--bd-slate-300)' }} />
+          <span style={{ width: '12px', height: '12px', borderRadius: 'var(--radius-sm)', background: 'var(--bg-yellow-200)' }} />
+          <span style={{ width: '12px', height: '12px', borderRadius: 'var(--radius-sm)', background: 'var(--tw-amber-400)' }} />
+          <span style={{ width: '12px', height: '12px', borderRadius: 'var(--radius-sm)', background: 'var(--tw-orange-500)' }} />
+          <span style={{ width: '12px', height: '12px', borderRadius: 'var(--radius-sm)', background: 'var(--tw-red-500)' }} />
           <span>High Mistakes</span>
         </div>
       </div>
@@ -221,7 +221,7 @@ export const KeyboardHeatmap: React.FC<KeyboardHeatmapProps> = ({
         style={{
           background: 'var(--bg-slate-100)',
           padding: '16px 12px',
-          borderRadius: '10px',
+          borderRadius: 'var(--radius-md)',
           border: '1px solid var(--bd-slate-200)',
           overflowX: 'auto',
           marginBottom: '16px'
@@ -254,7 +254,7 @@ export const KeyboardHeatmap: React.FC<KeyboardHeatmapProps> = ({
               style={{
                 width: '180px',
                 height: '28px',
-                borderRadius: '6px',
+                borderRadius: 'var(--radius-sm)',
                 border: '1px solid var(--bd-slate-300)',
                 background: 'var(--surface)',
                 display: 'flex',
@@ -262,7 +262,7 @@ export const KeyboardHeatmap: React.FC<KeyboardHeatmapProps> = ({
                 justifyContent: 'center',
                 fontSize: '0.75rem',
                 color: 'var(--tw-slate-400)',
-                fontWeight: 700
+                fontWeight: 600
               }}
             >
               SPACEBAR
@@ -277,7 +277,7 @@ export const KeyboardHeatmap: React.FC<KeyboardHeatmapProps> = ({
           style={{
             background: 'var(--bg-slate-50)',
             border: '1.5px solid var(--tw-sky-600)',
-            borderRadius: '8px',
+            borderRadius: 'var(--radius-md)',
             padding: '10px 14px',
             marginBottom: '14px',
             display: 'flex',
@@ -292,20 +292,20 @@ export const KeyboardHeatmap: React.FC<KeyboardHeatmapProps> = ({
               style={{
                 width: '36px',
                 height: '36px',
-                borderRadius: '6px',
+                borderRadius: 'var(--radius-sm)',
                 background: 'var(--tw-sky-600)',
                 color: '#fff',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                fontWeight: 900,
+                fontWeight: 700,
                 fontSize: '1.1rem'
               }}
             >
               {selectedKey.key.toUpperCase()}
             </span>
             <div>
-              <div style={{ fontWeight: 800, fontSize: '0.875rem', color: 'var(--fg-slate-900)' }}>
+              <div style={{ fontWeight: 600, fontSize: '0.875rem', color: 'var(--fg-slate-900)' }}>
                 Key <strong>{selectedKey.key.toUpperCase()}</strong>: {selectedKey.count} Recorded Mistake{selectedKey.count === 1 ? '' : 's'}
               </div>
               <div style={{ fontSize: '0.75rem', color: 'var(--fg-slate-500)' }}>
@@ -338,7 +338,7 @@ export const KeyboardHeatmap: React.FC<KeyboardHeatmapProps> = ({
       {/* Weakest Characters Ranking */}
       <div>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
-          <h5 style={{ margin: 0, fontSize: '0.875rem', fontWeight: 800, color: 'var(--fg-slate-900)' }}>
+          <h5 style={{ margin: 0, fontSize: '0.875rem', fontWeight: 600, color: 'var(--fg-slate-900)' }}>
             🎯 Top Focus Characters ({weakCharsList.length})
           </h5>
           {onPracticeWords && weakCharsList.length > 0 && (
@@ -346,13 +346,13 @@ export const KeyboardHeatmap: React.FC<KeyboardHeatmapProps> = ({
               type="button"
               onClick={handlePracticeWeak}
               style={{
-                background: 'linear-gradient(135deg, var(--tw-sky-600) 0%, var(--tw-sky-700) 100%)',
+                background: 'var(--tw-sky-600)',
                 color: '#fff',
                 border: 'none',
-                borderRadius: '6px',
+                borderRadius: 'var(--radius-sm)',
                 padding: '4px 10px',
                 fontSize: '0.75rem',
-                fontWeight: 800,
+                fontWeight: 600,
                 cursor: 'pointer'
               }}
             >
@@ -379,7 +379,7 @@ export const KeyboardHeatmap: React.FC<KeyboardHeatmapProps> = ({
                 style={{
                   background: 'var(--bg-slate-50)',
                   border: '1px solid var(--bd-slate-200)',
-                  borderRadius: '6px',
+                  borderRadius: 'var(--radius-sm)',
                   padding: '8px 10px',
                   display: 'flex',
                   alignItems: 'center',
@@ -390,10 +390,10 @@ export const KeyboardHeatmap: React.FC<KeyboardHeatmapProps> = ({
                   style={{
                     width: '32px',
                     height: '32px',
-                    borderRadius: '6px',
+                    borderRadius: 'var(--radius-sm)',
                     background: idx < 3 ? 'var(--bg-red-100)' : 'var(--bg-slate-100)',
                     color: idx < 3 ? 'var(--fg-red-600)' : 'var(--fg-slate-900)',
-                    fontWeight: 900,
+                    fontWeight: 600,
                     fontSize: '1rem',
                     display: 'flex',
                     alignItems: 'center',
@@ -404,7 +404,7 @@ export const KeyboardHeatmap: React.FC<KeyboardHeatmapProps> = ({
                   {item.character}
                 </div>
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontSize: '0.8rem', fontWeight: 800, color: 'var(--fg-slate-900)' }}>
+                  <div style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--fg-slate-900)' }}>
                     {item.mistakeCount} error{item.mistakeCount === 1 ? '' : 's'}
                   </div>
                   <div style={{ fontSize: '0.75rem', color: 'var(--fg-slate-500)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>

@@ -1,6 +1,7 @@
 import React from 'react';
 import { TestSettings } from '../types';
 import { UserProfile, isUserAdmin } from '../services/firebase';
+import { Ico } from './Ico';
 import appLogo from '../assets/logo.webp';
 
 interface HeaderProps {
@@ -56,7 +57,7 @@ export const Header: React.FC<HeaderProps> = ({
                 height: '42px',
                 borderRadius: '50%',
                 objectFit: 'cover',
-                boxShadow: '0 2px 6px rgba(2, 132, 199, 0.35)',
+                boxShadow: 'var(--shadow-md)',
                 border: '1.5px solid var(--tw-sky-400)',
                 flexShrink: 0
               }}
@@ -103,7 +104,7 @@ export const Header: React.FC<HeaderProps> = ({
                   border: '1px solid transparent'
                 }}
               >
-                {isDarkMode ? '☀️' : '🌙'}
+                <Ico n={isDarkMode ? 'sun' : 'moon'} size={17} />
               </button>
             )}
 
@@ -111,10 +112,10 @@ export const Header: React.FC<HeaderProps> = ({
               <button
                 className="nav-btn admin-portal-btn"
                 onClick={onOpenAdmin}
-                title="Administrative Control Suite"
+                title="Admin panel"
               >
-                <span>🛡️</span>
-                <span className="admin-portal-text">Admin Suite</span>
+                <Ico n="shield-check" size={16} />
+                <span className="admin-portal-text">Admin</span>
               </button>
             )}
 
@@ -124,24 +125,24 @@ export const Header: React.FC<HeaderProps> = ({
                 onClick={onOpenPayment}
                 style={{
                   background: currentUser?.is_subscribed
-                    ? 'linear-gradient(135deg, var(--tw-emerald-500) 0%, var(--tw-emerald-600) 100%)'
-                    : 'linear-gradient(135deg, var(--tw-amber-500) 0%, var(--tw-amber-600) 100%)',
+                    ? 'var(--tw-emerald-500)'
+                    : 'var(--tw-amber-500)',
                   color: '#ffffff',
                   border: 'none',
-                  fontWeight: 700,
+                  fontWeight: 600,
                   fontSize: '0.8rem',
                   display: 'flex',
                   alignItems: 'center',
                   gap: '5px',
                   padding: '6px 12px',
-                  borderRadius: '18px',
+                  borderRadius: 'var(--radius-lg)',
                   cursor: 'pointer',
-                  boxShadow: '0 2px 6px rgba(217, 119, 6, 0.3)',
+                  boxShadow: 'var(--shadow-md)',
                   whiteSpace: 'nowrap'
                 }}
                 title={currentUser?.is_subscribed ? 'Pro Member Active • View Subscription' : 'Upgrade to Pro • Single Exam / All 129 Pass'}
               >
-                <span>👑</span>
+                <Ico n="crown" size={16} />
                 <span className="header-text-full">{currentUser?.is_subscribed ? 'Pro Active' : 'Plans & Pricing'}</span>
                 <span className="header-text-short">{currentUser?.is_subscribed ? 'Pro' : 'Plans'}</span>
               </button>
@@ -155,19 +156,19 @@ export const Header: React.FC<HeaderProps> = ({
                   background: 'linear-gradient(135deg, var(--tw-violet-600) 0%, var(--tw-indigo-600) 100%)',
                   color: '#ffffff',
                   border: 'none',
-                  fontWeight: 700,
+                  fontWeight: 600,
                   fontSize: '0.8rem',
                   display: 'flex',
                   alignItems: 'center',
                   gap: '5px',
                   padding: '6px 12px',
-                  borderRadius: '18px',
+                  borderRadius: 'var(--radius-lg)',
                   cursor: 'pointer',
                   whiteSpace: 'nowrap'
                 }}
                 title="My Purchased Courses — View plan status & validity"
               >
-                <span>🎓</span>
+                <Ico n="graduation" size={16} />
                 <span className="header-text-full">My Courses</span>
                 <span className="header-text-short">Courses</span>
               </button>
@@ -177,7 +178,7 @@ export const Header: React.FC<HeaderProps> = ({
               <button
                 className={`nav-btn candidate-profile-btn ${isUserAdmin(currentUser) ? 'is-admin' : ''}`}
                 onClick={onOpenDashboard}
-                title={`User: ${currentUser.displayName} (${currentUser.rollNumber}) • View Stats & Examination Dossier`}
+                title={`User: ${currentUser.displayName} (${currentUser.rollNumber}) • View your stats`}
               >
                 {currentUser.photoURL ? (
                   <img
@@ -186,7 +187,7 @@ export const Header: React.FC<HeaderProps> = ({
                     className="candidate-avatar"
                   />
                 ) : (
-                  <span className="candidate-avatar-placeholder">{isUserAdmin(currentUser) ? '🛡️' : '👤'}</span>
+                  <span className="candidate-avatar-placeholder"><Ico n={isUserAdmin(currentUser) ? 'shield-check' : 'user'} size={15} /></span>
                 )}
                 <span className="candidate-name">
                   {currentUser.displayName}
@@ -201,7 +202,7 @@ export const Header: React.FC<HeaderProps> = ({
                 onClick={onOpenAuth}
                 title="Login / Sign In (लॉगिन)"
               >
-                <span style={{ fontSize: '0.95rem' }}>🔑</span>
+                <Ico n="login" size={16} />
                 <span>Login</span>
               </button>
             )}
@@ -248,7 +249,7 @@ export const Header: React.FC<HeaderProps> = ({
             title="Hindi Character & Conjuncts Helper (संयुक्ताक्षर गाइड)"
             style={{ color: 'var(--fg-amber-600)', fontWeight: 600 }}
           >
-            <span style={{ fontSize: '0.95rem', marginRight: '4px' }}>⌨️</span>
+            <Ico n="keyboard" size={16} />
             Hindi Keys
           </button>
 
@@ -270,10 +271,10 @@ export const Header: React.FC<HeaderProps> = ({
             <button
               className="nav-btn"
               onClick={onOpenLeaderboard}
-              title="Official Examination Hall of Fame (लीडरबोर्ड)"
+              title="Leaderboard (लीडरबोर्ड)"
               style={{ color: 'var(--fg-sky-600)', fontWeight: 700 }}
             >
-              <span style={{ fontSize: '0.95rem', marginRight: '4px' }}>🏅</span>
+              <Ico n="award" size={16} />
               Leaderboard
             </button>
           )}

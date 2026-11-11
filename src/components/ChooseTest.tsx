@@ -1,5 +1,6 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { Ico, EmojiIco } from './Ico';
+import { WelcomeSection } from './WelcomeSection';
 import { Passage, Language, ExamCategory, TestSettings, EvaluationResult, UnifiedExamPost } from '../types';
 import { ALL_EXAMS, CATEGORY_GROUPS, CATEGORY_SUB_FILTERS, UNIFIED_EXAM_POSTS, ExamProfile } from '../data/allExams';
 import { UserProfile } from '../services/firebase';
@@ -140,7 +141,7 @@ const ExamBenchmarkTestCard: React.FC<ExamBenchmarkTestCardProps> = ({
         isolation: 'isolate',
         background: cardTheme.bg,
         border: isLocked ? '1.5px solid var(--bd-orange-200)' : `1.5px solid ${cardTheme.border}`,
-        borderRadius: '14px',
+        borderRadius: 'var(--radius-lg)',
         padding: '16px',
         display: 'flex',
         flexDirection: 'column',
@@ -176,9 +177,9 @@ const ExamBenchmarkTestCard: React.FC<ExamBenchmarkTestCardProps> = ({
             )}
             <span style={{
               fontSize: '0.75rem',
-              fontWeight: 700,
+              fontWeight: 600,
               padding: '2px 7px',
-              borderRadius: '4px',
+              borderRadius: 'var(--radius-sm)',
               background: 'var(--bg-slate-100)',
               color: 'var(--fg-slate-600)',
               whiteSpace: 'nowrap',
@@ -200,9 +201,9 @@ const ExamBenchmarkTestCard: React.FC<ExamBenchmarkTestCardProps> = ({
             {isDemo && (
               <span style={{
                 fontSize: '0.75rem',
-                fontWeight: 800,
+                fontWeight: 600,
                 padding: '2px 7px',
-                borderRadius: '4px',
+                borderRadius: 'var(--radius-sm)',
                 background: 'var(--bg-green-100)',
                 color: 'var(--fg-green-700)',
                 border: '1px solid var(--bd-green-300)',
@@ -214,9 +215,9 @@ const ExamBenchmarkTestCard: React.FC<ExamBenchmarkTestCardProps> = ({
             {isLocked && (
               <span style={{
                 fontSize: '0.75rem',
-                fontWeight: 800,
+                fontWeight: 600,
                 padding: '2px 7px',
-                borderRadius: '4px',
+                borderRadius: 'var(--radius-sm)',
                 background: 'var(--bg-amber-100)',
                 color: 'var(--fg-amber-700)',
                 border: '1px solid var(--bd-amber-200)',
@@ -228,9 +229,9 @@ const ExamBenchmarkTestCard: React.FC<ExamBenchmarkTestCardProps> = ({
             {extraBadge && (
               <span style={{
                 fontSize: '0.75rem',
-                fontWeight: 700,
+                fontWeight: 600,
                 padding: '2px 6px',
-                borderRadius: '4px',
+                borderRadius: 'var(--radius-sm)',
                 background: extraBadge.bg,
                 color: extraBadge.color,
                 border: extraBadge.border ? `1px solid ${extraBadge.border}` : 'none',
@@ -241,9 +242,9 @@ const ExamBenchmarkTestCard: React.FC<ExamBenchmarkTestCardProps> = ({
             )}
             <span style={{
               fontSize: '0.75rem',
-              fontWeight: 700,
+              fontWeight: 600,
               padding: '2px 8px',
-              borderRadius: '4px',
+              borderRadius: 'var(--radius-sm)',
               background: langStyle.bg,
               color: langStyle.color,
               border: `1px solid ${langStyle.border}`,
@@ -257,7 +258,7 @@ const ExamBenchmarkTestCard: React.FC<ExamBenchmarkTestCardProps> = ({
         {/* Title */}
         <h3 style={{
           fontSize: '1rem',
-          fontWeight: 800,
+          fontWeight: 600,
           color: 'var(--fg-slate-900)',
           margin: '0 0 10px 0',
           lineHeight: 1.35,
@@ -272,11 +273,11 @@ const ExamBenchmarkTestCard: React.FC<ExamBenchmarkTestCardProps> = ({
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginBottom: '14px', alignItems: 'center', minWidth: 0 }}>
           <span style={{
             fontSize: '0.75rem',
-            fontWeight: 700,
+            fontWeight: 600,
             background: 'var(--bg-green-50)',
             color: 'var(--fg-green-600)',
             padding: '3px 8px',
-            borderRadius: '6px',
+            borderRadius: 'var(--radius-sm)',
             border: '1px solid var(--bd-green-200)',
             display: 'inline-flex',
             alignItems: 'center',
@@ -287,11 +288,11 @@ const ExamBenchmarkTestCard: React.FC<ExamBenchmarkTestCardProps> = ({
 
           <span style={{
             fontSize: '0.75rem',
-            fontWeight: 700,
+            fontWeight: 600,
             background: 'var(--bg-slate-50)',
             color: 'var(--fg-slate-600)',
             padding: '3px 8px',
-            borderRadius: '6px',
+            borderRadius: 'var(--radius-sm)',
             border: '1px solid var(--bd-slate-200)',
             display: 'inline-flex',
             alignItems: 'center',
@@ -302,11 +303,11 @@ const ExamBenchmarkTestCard: React.FC<ExamBenchmarkTestCardProps> = ({
 
           <span style={{
             fontSize: '0.75rem',
-            fontWeight: 700,
+            fontWeight: 600,
             background: 'var(--bg-amber-50)',
             color: 'var(--fg-amber-700)',
             padding: '3px 8px',
-            borderRadius: '6px',
+            borderRadius: 'var(--radius-sm)',
             border: '1px solid var(--bd-amber-200)',
             display: 'inline-flex',
             alignItems: 'center',
@@ -318,7 +319,7 @@ const ExamBenchmarkTestCard: React.FC<ExamBenchmarkTestCardProps> = ({
           <span style={{
             fontSize: '0.75rem',
             color: 'var(--fg-slate-500)',
-            fontWeight: 600,
+            fontWeight: 500,
             padding: '3px 6px',
             display: 'inline-flex',
             alignItems: 'center',
@@ -333,10 +334,10 @@ const ExamBenchmarkTestCard: React.FC<ExamBenchmarkTestCardProps> = ({
           <div style={{
             background: 'var(--bg-amber-50)',
             border: '1px solid var(--bd-amber-200)',
-            borderRadius: '6px',
+            borderRadius: 'var(--radius-sm)',
             padding: '6px 10px',
             fontSize: '0.75rem',
-            fontWeight: 700,
+            fontWeight: 600,
             color: 'var(--fg-amber-800)',
             marginBottom: '12px',
             display: 'flex',
@@ -358,10 +359,10 @@ const ExamBenchmarkTestCard: React.FC<ExamBenchmarkTestCardProps> = ({
             background: pastAttempt.isQualified ? 'var(--bg-green-50)' : 'var(--bg-amber-50)',
             border: `1px solid ${pastAttempt.isQualified ? 'var(--bd-green-200)' : 'var(--bd-amber-200)'}`,
             color: pastAttempt.isQualified ? 'var(--fg-green-700)' : 'var(--fg-amber-700)',
-            borderRadius: '6px',
+            borderRadius: 'var(--radius-sm)',
             padding: '5px 10px',
             fontSize: '0.75rem',
-            fontWeight: 700,
+            fontWeight: 600,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
@@ -397,19 +398,19 @@ const ExamBenchmarkTestCard: React.FC<ExamBenchmarkTestCardProps> = ({
                 flex: 1,
                 padding: '8px 12px',
                 fontSize: '0.875rem',
-                fontWeight: 800,
+                fontWeight: 600,
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 gap: '6px',
                 cursor: 'pointer',
-                background: 'linear-gradient(135deg, var(--tw-amber-500) 0%, var(--tw-amber-600) 100%)',
+                background: 'var(--tw-amber-500)',
                 color: '#ffffff',
                 border: 'none',
-                borderRadius: '8px',
-                boxShadow: '0 2px 6px rgba(217, 119, 6, 0.25)'
+                borderRadius: 'var(--radius-md)',
+                boxShadow: 'var(--shadow-md)'
               }}
-              title="Unlock full official test series with Pro access"
+              title="Unlock all tests with Pro"
             >
               <span><Ico n="lock" /></span>
               <span>Unlock with Pro</span>
@@ -421,7 +422,7 @@ const ExamBenchmarkTestCard: React.FC<ExamBenchmarkTestCardProps> = ({
               style={{
                 padding: '8px 14px',
                 fontSize: '0.875rem',
-                fontWeight: 700,
+                fontWeight: 600,
                 whiteSpace: 'nowrap',
                 display: 'flex',
                 alignItems: 'center',
@@ -444,14 +445,14 @@ const ExamBenchmarkTestCard: React.FC<ExamBenchmarkTestCardProps> = ({
                 flex: 1,
                 padding: '8px 12px',
                 fontSize: '0.875rem',
-                fontWeight: 700,
+                fontWeight: 600,
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 gap: '5px',
                 cursor: 'pointer'
               }}
-              title={`Start official ${durationMinutes}-minute test with ${targetSpeed} WPM speed cutoff`}
+              title={`Start ${durationMinutes}-minute test with ${targetSpeed} WPM speed cutoff`}
             >
               <Ico n={isDemo ? 'gift' : 'zap'} />
               <span>{startBtnText || (isDemo ? `Start Free Demo (${durationMinutes}m)` : `Start Mock (${durationMinutes}m)`)}</span>
@@ -463,7 +464,7 @@ const ExamBenchmarkTestCard: React.FC<ExamBenchmarkTestCardProps> = ({
               style={{
                 padding: '8px 14px',
                 fontSize: '0.875rem',
-                fontWeight: 600,
+                fontWeight: 500,
                 whiteSpace: 'nowrap',
                 display: 'flex',
                 alignItems: 'center',
@@ -539,13 +540,13 @@ const ExamTypePostCard: React.FC<{
         isolation: 'isolate',
         background: postTheme.bg,
         border: `1.5px solid ${postTheme.border}`,
-        borderRadius: '14px',
+        borderRadius: 'var(--radius-lg)',
         padding: '16px',
         display: 'flex',
         flexDirection: 'column',
         justifyContent: 'space-between',
         cursor: 'pointer',
-        boxShadow: '0 2px 4px rgba(0,0,0,0.03)',
+        boxShadow: 'var(--shadow-sm)',
         transition: 'all 0.18s ease',
         minWidth: 0,
         maxWidth: '100%',
@@ -571,9 +572,9 @@ const ExamTypePostCard: React.FC<{
             <ExamLogo identifier={post.id} categoryGroup={post.categoryGroup} size={32} />
             <span style={{
               fontSize: '0.75rem',
-              fontWeight: 700,
+              fontWeight: 600,
               padding: '2px 7px',
-              borderRadius: '4px',
+              borderRadius: 'var(--radius-sm)',
               background: 'var(--bg-slate-50)',
               color: 'var(--fg-slate-700)',
               border: '1px solid var(--bd-slate-200)',
@@ -595,24 +596,24 @@ const ExamTypePostCard: React.FC<{
                 }}
                 style={{
                   fontSize: '0.75rem',
-                  fontWeight: 700,
+                  fontWeight: 600,
                   padding: '2px 7px',
-                  borderRadius: '4px',
+                  borderRadius: 'var(--radius-sm)',
                   background: 'var(--bg-sky-50)',
                   color: 'var(--fg-sky-700)',
                   border: '1px solid var(--bd-sky-200)',
                   cursor: 'pointer'
                 }}
-                title="View official recruitment notification typing speed & instructions"
+                title="View the required typing speed and instructions"
               >
                 <Ico n="clipboard" /> Rules
               </button>
             )}
             <span style={{
               fontSize: '0.75rem',
-              fontWeight: 700,
+              fontWeight: 600,
               padding: '2px 8px',
-              borderRadius: '4px',
+              borderRadius: 'var(--radius-sm)',
               background: badgeStyle.bg,
               color: badgeStyle.color,
               border: `1px solid ${badgeStyle.border}`,
@@ -626,7 +627,7 @@ const ExamTypePostCard: React.FC<{
         {/* Post Title */}
         <h3 style={{
           fontSize: '1rem',
-          fontWeight: 800,
+          fontWeight: 600,
           color: 'var(--fg-slate-900)',
           margin: '0 0 10px 0',
           lineHeight: 1.35,
@@ -639,11 +640,11 @@ const ExamTypePostCard: React.FC<{
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginBottom: '14px', alignItems: 'center' }}>
           <span style={{
             fontSize: '0.75rem',
-            fontWeight: 700,
+            fontWeight: 600,
             background: 'var(--bg-green-50)',
             color: 'var(--fg-green-600)',
             padding: '3px 8px',
-            borderRadius: '6px',
+            borderRadius: 'var(--radius-sm)',
             border: '1px solid var(--bd-green-200)',
             display: 'inline-flex',
             alignItems: 'center',
@@ -654,11 +655,11 @@ const ExamTypePostCard: React.FC<{
 
           <span style={{
             fontSize: '0.75rem',
-            fontWeight: 700,
+            fontWeight: 600,
             background: 'var(--bg-slate-50)',
             color: 'var(--fg-slate-600)',
             padding: '3px 8px',
-            borderRadius: '6px',
+            borderRadius: 'var(--radius-sm)',
             border: '1px solid var(--bd-slate-200)',
             display: 'inline-flex',
             alignItems: 'center',
@@ -669,11 +670,11 @@ const ExamTypePostCard: React.FC<{
 
           <span style={{
             fontSize: '0.75rem',
-            fontWeight: 700,
+            fontWeight: 600,
             background: 'var(--bg-amber-50)',
             color: 'var(--fg-amber-700)',
             padding: '3px 8px',
-            borderRadius: '6px',
+            borderRadius: 'var(--radius-sm)',
             border: '1px solid var(--bd-amber-200)',
             display: 'inline-flex',
             alignItems: 'center',
@@ -685,7 +686,7 @@ const ExamTypePostCard: React.FC<{
           <span style={{
             fontSize: '0.75rem',
             color: 'var(--fg-slate-500)',
-            fontWeight: 600,
+            fontWeight: 500,
             padding: '3px 6px',
             display: 'inline-flex',
             alignItems: 'center',
@@ -696,11 +697,11 @@ const ExamTypePostCard: React.FC<{
 
           <span style={{
             fontSize: '0.75rem',
-            fontWeight: 700,
+            fontWeight: 600,
             background: 'var(--bg-emerald-50)',
             color: 'var(--fg-emerald-700)',
             padding: '3px 8px',
-            borderRadius: '6px',
+            borderRadius: 'var(--radius-sm)',
             border: '1px solid var(--bd-emerald-200)',
             display: 'inline-flex',
             alignItems: 'center',
@@ -717,11 +718,11 @@ const ExamTypePostCard: React.FC<{
                 title={`${bsRule.title}\n${bsRule.fullRule}`}
                 style={{
                   fontSize: '0.75rem',
-                  fontWeight: 700,
+                  fontWeight: 600,
                   background: bsRule.badgeBg,
                   color: bsRule.badgeText,
                   padding: '3px 8px',
-                  borderRadius: '6px',
+                  borderRadius: 'var(--radius-sm)',
                   border: `1px solid ${bsRule.badgeBorder}`,
                   display: 'inline-flex',
                   alignItems: 'center',
@@ -749,8 +750,8 @@ const ExamTypePostCard: React.FC<{
                 background: 'var(--bg-blue-50)',
                 color: 'var(--fg-blue-700)',
                 padding: '4px 8px',
-                borderRadius: '6px',
-                fontWeight: 700,
+                borderRadius: 'var(--radius-sm)',
+                fontWeight: 600,
                 border: '1px solid var(--bd-blue-200)',
                 display: 'inline-flex',
                 alignItems: 'center',
@@ -776,8 +777,8 @@ const ExamTypePostCard: React.FC<{
                 background: 'var(--bg-amber-100)',
                 color: 'var(--fg-amber-700)',
                 padding: '4px 8px',
-                borderRadius: '6px',
-                fontWeight: 700,
+                borderRadius: 'var(--radius-sm)',
+                fontWeight: 600,
                 border: '1px solid var(--bd-amber-200)',
                 display: 'inline-flex',
                 alignItems: 'center',
@@ -802,8 +803,8 @@ const ExamTypePostCard: React.FC<{
               background: 'var(--bg-orange-50)',
               color: 'var(--fg-orange-700)',
               padding: '4px 8px',
-              borderRadius: '6px',
-              fontWeight: 700,
+              borderRadius: 'var(--radius-sm)',
+              fontWeight: 600,
               border: '1px solid var(--bd-orange-200)',
               display: 'inline-flex',
               alignItems: 'center',
@@ -827,8 +828,8 @@ const ExamTypePostCard: React.FC<{
               background: 'var(--bg-purple-50)',
               color: 'var(--fg-purple-700)',
               padding: '4px 8px',
-              borderRadius: '6px',
-              fontWeight: 700,
+              borderRadius: 'var(--radius-sm)',
+              fontWeight: 600,
               border: '1px solid var(--bd-purple-200)',
               display: 'inline-flex',
               alignItems: 'center',
@@ -860,14 +861,14 @@ const ExamTypePostCard: React.FC<{
             flex: 1,
             padding: '8px 12px',
             fontSize: '0.875rem',
-            fontWeight: 700,
+            fontWeight: 600,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             gap: '5px',
             cursor: 'pointer'
           }}
-          title={`Start official ${duration}-min free demo test`}
+          title={`Start ${duration}-min free demo test`}
         >
           <span><Ico n="gift" /></span>
           <span>Start Free Demo ({duration}m)</span>
@@ -879,7 +880,7 @@ const ExamTypePostCard: React.FC<{
           style={{
             padding: '8px 14px',
             fontSize: '0.875rem',
-            fontWeight: 600,
+            fontWeight: 500,
             whiteSpace: 'nowrap',
             display: 'flex',
             alignItems: 'center',
@@ -1414,7 +1415,7 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
         badge: `${coCount} Tests Available`,
         passingBenchmark: 'Hindi 25 WPM • English 30 WPM • 85% Acc',
         categoryFilter: 'up_police_co',
-        description: 'Official Grade-A & ASI test series on Mangal Inscript, Kruti Dev & English.'
+        description: 'Grade-A & ASI test series on Mangal Inscript, Kruti Dev & English.'
       },
       {
         id: 'up_police_asi',
@@ -1468,13 +1469,13 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
       },
       {
         id: 'mock15',
-        title: 'UP Police Full Length 15-Minute Official Mocks',
-        shortTitle: '15-Min Official Exam Mocks',
+        title: 'UP Police Full Length 15-Minute Mocks',
+        shortTitle: '15-Min Exam Mocks',
         emblemEmoji: '⏱️',
         badge: `${mock15Count} Full Mocks`,
         passingBenchmark: '15:00 Strict Timer • 85% Accuracy',
         categoryFilter: 'mock15',
-        description: 'Official 15-minute simulated exam hall environment with real evaluation.'
+        description: '15-minute tests on an exam-style screen with full evaluation.'
       },
       {
         id: 'drills',
@@ -1507,7 +1508,7 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
         badge: `${activePost.variants.length} Mediums Available`,
         passingBenchmark: parts.join(' • '),
         categoryFilter: 'all' as ExamCategory | 'all',
-        description: `Official ${activePost.organization} examination test series.`
+        description: `${activePost.organization} practice test series.`
       };
     }
     return EXAM_COURSES.find((e) => e.id === activeExamId) || EXAM_COURSES[0];
@@ -1533,7 +1534,7 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
         badge: `${activeEngCount > 0 ? activeEngCount : engCount} Tests • ${spd} WPM Target`,
         badgeColor: 'var(--fg-blue-700)',
         badgeBg: 'var(--bg-blue-100)',
-        description: `Official ${spd} WPM qualifying passages for ${activePost?.postTitle || 'Exam'}.`,
+        description: `${spd} WPM qualifying passages for ${activePost?.postTitle || 'Exam'}.`,
         languageFilter: 'english',
         durationFilter: dur
       });
@@ -1552,7 +1553,7 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
         badge: `${activeMangalCount > 0 ? activeMangalCount : mangalCount} Tests • ${spd} WPM Target`,
         badgeColor: 'var(--fg-amber-700)',
         badgeBg: 'var(--bg-amber-100)',
-        description: `Official Mangal Inscript layout at ${spd} WPM benchmark speed.`,
+        description: `Mangal Inscript layout at ${spd} WPM benchmark speed.`,
         languageFilter: 'hindi_mangal',
         durationFilter: dur
       });
@@ -1567,7 +1568,7 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
         badge: `${activeKrutiCount > 0 ? activeKrutiCount : krutiCount} Tests • ${spd} WPM Target`,
         badgeColor: 'var(--fg-green-700)',
         badgeBg: 'var(--bg-green-100)',
-        description: 'Traditional Remington Hindi layout with authentic character codes.',
+        description: 'Traditional Remington Hindi layout with standard character codes.',
         languageFilter: 'hindi_kruti',
         durationFilter: dur
       });
@@ -1626,10 +1627,10 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
       icon: '📖',
       bg: 'var(--bg-slate-50)',
       border: 'var(--bd-slate-300)',
-      badge: 'Official Rules & Cutoffs',
+      badge: 'Rules & Cutoffs',
       badgeColor: 'var(--fg-slate-700)',
       badgeBg: 'var(--bg-slate-200)',
-      description: `Official ${activePost?.organization || 'Department'} evaluation rules & keyboard codes.`,
+      description: `${activePost?.organization || 'Department'} evaluation rules & keyboard codes.`,
       languageFilter: 'all',
       durationFilter: postDur
     });
@@ -1922,6 +1923,15 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
             ======================================================== */}
         {navLevel === 1 && (
           <div>
+            {!currentUser && (
+              <WelcomeSection
+                examCount={UNIFIED_EXAM_POSTS.length}
+                testCount={passages.length}
+                onBrowseTests={() => document.getElementById('exam-catalog')?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
+                onOpenPayment={() => onOpenPayment?.()}
+                onOpenAuth={() => onOpenAuth?.()}
+              />
+            )}
             {/* Top Brand & Stats Bar */}
             <div className="examportal-trust-bar">
           <div className="examportal-brand-info">
@@ -1933,7 +1943,7 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
                 height: '54px',
                 borderRadius: '50%',
                 objectFit: 'cover',
-                boxShadow: '0 3px 10px rgba(2, 132, 199, 0.35)',
+                boxShadow: 'var(--shadow-md)',
                 border: '2px solid var(--tw-sky-400)',
                 flexShrink: 0
               }}
@@ -1941,7 +1951,7 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
             <div>
               <div className="examportal-brand-title">Exam Typing</div>
               <div className="examportal-brand-sub">
-                Typing Practice for Competitive Exams • UP Police & Government Aspirants
+                Typing practice for government exam skill tests
               </div>
             </div>
           </div>
@@ -1950,7 +1960,7 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
             <div className="examportal-metric-pill">
               <span style={{ fontSize: '1.25rem' }}><Ico n="library" /></span>
               <div>
-                <div className="examportal-metric-val">{passages.length} Official Tests</div>
+                <div className="examportal-metric-val">{passages.length} Practice Tests</div>
                 <div className="examportal-metric-lbl">Passage Bank Available</div>
               </div>
             </div>
@@ -1962,7 +1972,7 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
                   {kpiStats.totalAttempted > 0 ? `${kpiStats.totalAttempted} Attempted` : '85% Accuracy'}
                 </div>
                 <div className="examportal-metric-lbl">
-                  {kpiStats.totalAttempted > 0 ? `${kpiStats.passedTestsCount} Tests Passed` : 'UPPRPB Benchmark'}
+                  {kpiStats.totalAttempted > 0 ? `${kpiStats.passedTestsCount} Tests Passed` : 'Qualifying accuracy'}
                 </div>
               </div>
             </div>
@@ -1985,7 +1995,7 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
                 className="examportal-metric-pill"
                 onClick={onOpenDashboard}
                 style={{ cursor: 'pointer', background: 'var(--bg-green-50)', borderColor: 'var(--bd-green-300)' }}
-                title="Click to view candidate statistics & examination dossier"
+                title="View your stats"
               >
                 <span style={{ fontSize: '1.25rem' }}><Ico n="user" /></span>
                 <div>
@@ -1993,7 +2003,7 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
                     {currentUser.displayName}
                   </div>
                   <div className="examportal-metric-lbl" style={{ color: 'var(--fg-green-700)' }}>
-                    Roll: {currentUser.rollNumber} • Dossier →
+                    Roll: {currentUser.rollNumber} • Profile →
                   </div>
                 </div>
               </div>
@@ -2001,7 +2011,7 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
               <button
                 onClick={onOpenAuth}
                 className="btn btn-sm btn-primary"
-                style={{ borderRadius: '10px', padding: '8px 16px', fontWeight: 700 }}
+                style={{ borderRadius: 'var(--radius-md)', padding: '8px 16px', fontWeight: 700 }}
               >
                 Login / Sign In <Ico n="key" />
               </button>
@@ -2017,7 +2027,7 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
                     cursor: 'pointer',
                     background: 'var(--bg-green-50)',
                     borderColor: 'var(--tw-green-500)',
-                    boxShadow: '0 2px 6px rgba(34, 197, 94, 0.2)'
+                    boxShadow: 'var(--shadow-md)'
                   }}
                   title={`Pro Member: ${currentUser.subscriptionPlan || 'Active'} • Tap to view plan`}
                 >
@@ -2035,18 +2045,18 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
                 <button
                   onClick={() => onOpenPayment()}
                   style={{
-                    background: 'linear-gradient(135deg, var(--tw-amber-500) 0%, var(--tw-amber-600) 100%)',
+                    background: 'var(--tw-amber-500)',
                     color: '#ffffff',
                     border: 'none',
                     padding: '8px 16px',
-                    borderRadius: '10px',
-                    fontWeight: 800,
+                    borderRadius: 'var(--radius-md)',
+                    fontWeight: 600,
                     fontSize: '0.8rem',
                     cursor: 'pointer',
                     display: 'flex',
                     alignItems: 'center',
                     gap: '6px',
-                    boxShadow: '0 2px 8px rgba(217, 119, 6, 0.35)',
+                    boxShadow: 'var(--shadow-md)',
                     whiteSpace: 'nowrap'
                   }}
                   title="Unlock Full 129 Exams, All Mock Tests, and Answer Keys"
@@ -2061,7 +2071,7 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
             <button
               onClick={() => setNavLevel('classic_form')}
               className="btn btn-sm btn-secondary"
-              style={{ borderRadius: '10px', padding: '8px 14px', fontWeight: 600, fontSize: '0.8rem' }}
+              style={{ borderRadius: 'var(--radius-md)', padding: '8px 14px', fontWeight: 500, fontSize: '0.8rem' }}
               title="Switch to classic date-wise passage selector"
             >
               <Ico n="calendar" /> Classic Date Selector <Ico n="menu" />
@@ -2069,14 +2079,15 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
           </div>
         </div>
             {/* Candidate Performance KPI Strip */}
+            {(currentUser || kpiStats.totalAttempted > 0) && (
             <section className="exam-hero-banner" style={{ padding: '22px 26px', marginBottom: '24px' }}>
               <div className="exam-hero-top" style={{ marginBottom: '14px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px' }}>
                 <div>
                   <h2 className="exam-hero-title" style={{ fontSize: '1.25rem' }}>
-                    <span><Ico n="target" /></span> Examination Performance Overview
+                    <span><Ico n="target" /></span> Your progress
                   </h2>
                   <div className="exam-hero-sub">
-                    <span>Target: UP Police Computer Operator Grade-A & ASI (2024-2026)</span>
+                    <span>Your results across all the tests you have taken</span>
                   </div>
                 </div>
 
@@ -2087,20 +2098,20 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
                       setNavLevel(3);
                     }}
                     style={{
-                      background: 'linear-gradient(135deg, var(--tw-green-800) 0%, var(--tw-green-700) 100%)',
+                      background: 'var(--tw-green-800)',
                       color: '#ffffff',
                       border: 'none',
                       padding: '7px 14px',
-                      borderRadius: '8px',
+                      borderRadius: 'var(--radius-md)',
                       fontSize: '0.8rem',
-                      fontWeight: 700,
+                      fontWeight: 600,
                       cursor: 'pointer',
                       display: 'flex',
                       alignItems: 'center',
                       gap: '6px',
-                      boxShadow: '0 2px 4px rgba(22, 101, 52, 0.25)'
+                      boxShadow: 'var(--shadow-sm)'
                     }}
-                    title="View Today's 8 AI Live Examination Tests"
+                    title="View Today's 8 AI Live Exam Tests"
                   >
                     <span><Ico n="flame" /></span>
                     <span>Today's Live Tests (8 Active) →</span>
@@ -2110,18 +2121,18 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
                     <button
                       onClick={onOpenAiGenerator}
                       style={{
-                        background: 'linear-gradient(135deg, var(--tw-sky-600) 0%, var(--tw-sky-700) 100%)',
+                        background: 'var(--tw-sky-600)',
                         color: '#ffffff',
                         border: 'none',
                         padding: '7px 14px',
-                        borderRadius: '8px',
+                        borderRadius: 'var(--radius-md)',
                         fontSize: '0.8rem',
-                        fontWeight: 700,
+                        fontWeight: 600,
                         cursor: 'pointer',
                         display: 'flex',
                         alignItems: 'center',
                         gap: '6px',
-                        boxShadow: '0 2px 4px rgba(2, 132, 199, 0.25)'
+                        boxShadow: 'var(--shadow-sm)'
                       }}
                       title="AI Test Generator (AR Typing Standard)"
                     >
@@ -2138,9 +2149,9 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
                         color: 'var(--tw-sky-400)',
                         border: '1px solid var(--tw-slate-700)',
                         padding: '7px 14px',
-                        borderRadius: '8px',
+                        borderRadius: 'var(--radius-md)',
                         fontSize: '0.8rem',
-                        fontWeight: 700,
+                        fontWeight: 600,
                         cursor: 'pointer',
                         display: 'flex',
                         alignItems: 'center',
@@ -2182,7 +2193,7 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
                 </div>
 
                 <div className="exam-kpi-card">
-                  <div className="exam-kpi-label">UPPRPB Status</div>
+                  <div className="exam-kpi-label">Your status</div>
                   <div
                     className="exam-kpi-value"
                     style={{
@@ -2192,19 +2203,20 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
                   >
                     {kpiStats.isQualified ? 'QUALIFIED' : kpiStats.totalAttempted > 0 ? 'PREPARING' : 'READY TO TEST'}
                   </div>
-                  <div className="exam-kpi-hint">Official UPPRPB benchmark</div>
+                  <div className="exam-kpi-hint">Exam qualifying standard</div>
                 </div>
               </div>
             </section>
+            )}
 
             {/* "All 129 Exams" Header */}
             <div className="examportal-courses-header" style={{ marginBottom: '16px' }}>
               <div>
                 <h2 className="examportal-courses-title">
-                  <span><Ico n="landmark" /></span> All 129 Government Typing Examinations & Test Series
+                  <span><Ico n="landmark" /></span> All 129 Government Typing Exams & Test Series
                 </h2>
-                <span style={{ fontSize: '0.875rem', color: 'var(--fg-slate-500)', fontWeight: 600 }}>
-                  Practice with exact official benchmarks: target speeds (15–50 WPM), 5–20 min timers, and error cutoffs
+                <span style={{ fontSize: '0.875rem', color: 'var(--fg-slate-500)', fontWeight: 500 }}>
+                  Practice with each exam’s own requirements: target speeds (15–50 WPM), 5–20 min timers, and error cutoffs
                 </span>
               </div>
             </div>
@@ -2237,9 +2249,9 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
                       color: isSelected ? '#ffffff' : 'var(--fg-slate-700)',
                       border: isSelected ? '1px solid var(--primary)' : '1px solid var(--bd-slate-300)',
                       padding: '7px 14px',
-                      borderRadius: '20px',
+                      borderRadius: 'var(--radius-lg)',
                       fontSize: '0.8rem',
-                      fontWeight: isSelected ? 700 : 600,
+                      fontWeight: isSelected ? 600 : 500,
                       cursor: 'pointer',
                       whiteSpace: 'nowrap',
                       display: 'flex',
@@ -2255,9 +2267,9 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
                       background: isSelected ? 'rgba(255,255,255,0.25)' : 'var(--bg-slate-100)',
                       color: isSelected ? '#ffffff' : 'var(--fg-slate-500)',
                       padding: '1px 6px',
-                      borderRadius: '10px',
+                      borderRadius: 'var(--radius-md)',
                       fontSize: '0.75rem',
-                      fontWeight: 700
+                      fontWeight: 600
                     }}>
                       {count}
                     </span>
@@ -2280,7 +2292,7 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
                 <span style={{
                   fontSize: '0.8rem',
                   color: 'var(--fg-slate-600)',
-                  fontWeight: 700,
+                  fontWeight: 600,
                   whiteSpace: 'nowrap',
                   display: 'flex',
                   alignItems: 'center',
@@ -2304,9 +2316,9 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
                         color: isSubActive ? '#ffffff' : 'var(--fg-slate-700)',
                         border: isSubActive ? '1px solid var(--tw-slate-900)' : '1px solid var(--bd-slate-200)',
                         padding: '5px 12px',
-                        borderRadius: '16px',
+                        borderRadius: 'var(--radius-lg)',
                         fontSize: '0.8rem',
-                        fontWeight: isSubActive ? 700 : 600,
+                        fontWeight: isSubActive ? 600 : 500,
                         cursor: 'pointer',
                         whiteSpace: 'nowrap',
                         display: 'flex',
@@ -2321,9 +2333,9 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
                         background: isSubActive ? 'rgba(255,255,255,0.22)' : 'var(--bg-slate-200)',
                         color: isSubActive ? '#ffffff' : 'var(--fg-slate-500)',
                         padding: '1px 5px',
-                        borderRadius: '10px',
+                        borderRadius: 'var(--radius-md)',
                         fontSize: '0.75rem',
-                        fontWeight: 700
+                        fontWeight: 600
                       }}>
                         {count}
                       </span>
@@ -2334,7 +2346,8 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
             )}
 
             {/* Search and Language Filter Controls */}
-            <div style={{
+            <div id="exam-catalog" style={{
+              scrollMarginTop: '90px',
               display: 'flex',
               justifyContent: 'space-between',
               alignItems: 'center',
@@ -2356,7 +2369,7 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
                     width: '100%',
                     padding: '9px 14px',
                     paddingLeft: '34px',
-                    borderRadius: '8px',
+                    borderRadius: 'var(--radius-md)',
                     border: '1px solid var(--bd-slate-300)',
                     fontSize: '0.875rem',
                     boxSizing: 'border-box'
@@ -2388,15 +2401,15 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
               {/* Language Medium & View Mode Controls */}
               <div style={{ display: 'flex', gap: '10px', alignItems: 'center', flexWrap: 'wrap' }}>
                 {/* View Switcher */}
-                <div style={{ display: 'flex', background: 'var(--bg-slate-100)', borderRadius: '8px', padding: '3px', border: '1px solid var(--bd-slate-200)' }}>
+                <div style={{ display: 'flex', background: 'var(--bg-slate-100)', borderRadius: 'var(--radius-md)', padding: '3px', border: '1px solid var(--bd-slate-200)' }}>
                   <button
                     onClick={() => setLevel1ViewMode('posts')}
                     style={{
                       padding: '5px 12px',
                       border: 'none',
-                      borderRadius: '6px',
+                      borderRadius: 'var(--radius-sm)',
                       fontSize: '0.8rem',
-                      fontWeight: 700,
+                      fontWeight: 600,
                       cursor: 'pointer',
                       background: level1ViewMode === 'posts' ? 'var(--tw-slate-900)' : 'transparent',
                       color: level1ViewMode === 'posts' ? '#ffffff' : 'var(--fg-slate-500)',
@@ -2410,9 +2423,9 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
                     style={{
                       padding: '5px 12px',
                       border: 'none',
-                      borderRadius: '6px',
+                      borderRadius: 'var(--radius-sm)',
                       fontSize: '0.8rem',
-                      fontWeight: 700,
+                      fontWeight: 600,
                       cursor: 'pointer',
                       background: level1ViewMode === 'individual' ? 'var(--tw-slate-900)' : 'transparent',
                       color: level1ViewMode === 'individual' ? '#ffffff' : 'var(--fg-slate-500)',
@@ -2425,7 +2438,7 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
 
                 {/* Medium Filter */}
                 <div style={{ display: 'flex', gap: '6px', alignItems: 'center', flexWrap: 'wrap' }}>
-                  <span style={{ fontSize: '0.8rem', color: 'var(--fg-slate-500)', fontWeight: 600 }}>Medium:</span>
+                  <span style={{ fontSize: '0.8rem', color: 'var(--fg-slate-500)', fontWeight: 500 }}>Medium:</span>
                   {(['all', 'english', 'hindi'] as const).map((lang) => (
                     <button
                       key={lang}
@@ -2435,9 +2448,9 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
                         color: selectedExamLanguageFilter === lang ? '#ffffff' : 'var(--fg-slate-600)',
                         border: '1px solid var(--bd-slate-300)',
                         padding: '5px 12px',
-                        borderRadius: '6px',
+                        borderRadius: 'var(--radius-sm)',
                         fontSize: '0.8rem',
-                        fontWeight: 600,
+                        fontWeight: 500,
                         cursor: 'pointer'
                       }}
                     >
@@ -2496,8 +2509,8 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
                   style={{
                     padding: '10px 24px',
                     fontSize: '0.875rem',
-                    fontWeight: 700,
-                    borderRadius: '8px'
+                    fontWeight: 600,
+                    borderRadius: 'var(--radius-md)'
                   }}
                 >
                   Load More ({ (level1ViewMode === 'posts' ? filteredUnifiedPosts.length : filteredAllExams.length) - visibleExamsCount } remaining) ↓
@@ -2508,9 +2521,9 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
             {/* Yearly Pass / Feature Banner */}
             <div
               style={{
-                background: 'linear-gradient(135deg, var(--bg-green-50) 0%, var(--bg-green-100) 100%)',
+                background: 'var(--bg-green-50)',
                 border: '1.5px solid var(--bd-green-300)',
-                borderRadius: '16px',
+                borderRadius: 'var(--radius-lg)',
                 padding: '28px 32px',
                 display: 'flex',
                 alignItems: 'center',
@@ -2528,15 +2541,15 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
                     background: 'var(--tw-green-800)',
                     color: '#ffffff',
                     padding: '3px 10px',
-                    borderRadius: '12px',
+                    borderRadius: 'var(--radius-md)',
                     fontSize: '0.75rem',
-                    fontWeight: 700,
+                    fontWeight: 600,
                     marginBottom: '8px'
                   }}
                 >
                   <Ico n="trophy" /> UP POLICE COMPUTER OPERATOR (GRADE-A) TYPING PASS
                 </div>
-                <h3 style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--fg-green-900)', marginBottom: '6px' }}>
+                <h3 style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--fg-green-900)', marginBottom: '6px' }}>
                   Complete Exam Hall Typing Preparation
                 </h3>
                 <p style={{ color: 'var(--fg-green-800)', fontSize: '0.875rem', maxWidth: '640px', lineHeight: 1.5 }}>
@@ -2551,7 +2564,7 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
                   const coPost = UNIFIED_EXAM_POSTS.find((p) => p.id === 'up-police-co-asi') || UNIFIED_EXAM_POSTS[0];
                   handleEnterExam(coPost);
                 }}
-                style={{ padding: '12px 28px', fontWeight: 800, fontSize: '0.95rem' }}
+                style={{ padding: '12px 28px', fontWeight: 600, fontSize: '0.95rem' }}
               >
                 Explore UP Police CO Series →
               </button>
@@ -2577,7 +2590,7 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
                 <button
                   onClick={() => setNavLevel('classic_form')}
                   className="btn btn-sm btn-secondary"
-                  style={{ borderRadius: '8px', padding: '6px 14px', fontSize: '0.8rem', fontWeight: 600 }}
+                  style={{ borderRadius: 'var(--radius-md)', padding: '6px 14px', fontSize: '0.8rem', fontWeight: 500 }}
                   title="Switch to classic date-based test selector"
                 >
                   <Ico n="calendar" /> Classic Date Selector <Ico n="menu" />
@@ -2593,10 +2606,10 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
                 </div>
                 <div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px', flexWrap: 'wrap' }}>
-                    <span style={{ fontSize: '0.75rem', fontWeight: 700, padding: '3px 10px', borderRadius: '6px', background: 'rgba(255, 255, 255, 0.15)', color: '#ffffff', border: '1px solid rgba(255, 255, 255, 0.25)' }}>
+                    <span style={{ fontSize: '0.75rem', fontWeight: 600, padding: '3px 10px', borderRadius: 'var(--radius-sm)', background: 'rgba(255, 255, 255, 0.15)', color: '#ffffff', border: '1px solid rgba(255, 255, 255, 0.25)' }}>
                       <Ico n="landmark" /> {activePost.organization}
                     </span>
-                    <span style={{ fontSize: '0.75rem', fontWeight: 700, padding: '3px 10px', borderRadius: '6px', background: 'var(--tw-sky-400)', color: 'var(--tw-slate-900)', border: '1px solid var(--bd-sky-300)' }}>
+                    <span style={{ fontSize: '0.75rem', fontWeight: 600, padding: '3px 10px', borderRadius: 'var(--radius-sm)', background: 'var(--tw-sky-400)', color: 'var(--tw-slate-900)', border: '1px solid var(--bd-sky-300)' }}>
                       {activePost.examTypeLabel}
                     </span>
                   </div>
@@ -2633,22 +2646,22 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
                     className="btn btn-sm"
                     onClick={() => onOpenRules(activePost.id, activePost.categoryGroup)}
                     style={{
-                      background: 'linear-gradient(135deg, var(--tw-sky-600) 0%, var(--tw-sky-700) 100%)',
+                      background: 'var(--tw-sky-600)',
                       color: '#ffffff',
                       fontWeight: 700,
-                      borderRadius: '10px',
+                      borderRadius: 'var(--radius-md)',
                       padding: '10px 16px',
                       border: '1px solid var(--tw-sky-400)',
                       display: 'flex',
                       alignItems: 'center',
                       gap: '6px',
                       cursor: 'pointer',
-                      boxShadow: '0 4px 12px rgba(2, 132, 199, 0.35)'
+                      boxShadow: 'var(--shadow-md)'
                     }}
-                    title="View official recruitment speed cutoff, calculation formula, and exam instructions"
+                    title="View the speed cutoff, calculation formula and exam instructions"
                   >
                     <span><Ico n="clipboard" /></span>
-                    <span>Official Instructions & Guidelines</span>
+                    <span>Instructions & Guidelines</span>
                   </button>
                 )}
                 <button
@@ -2656,7 +2669,7 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
                   onClick={() => setNavLevel(1)}
                   style={{
                     fontWeight: 700,
-                    borderRadius: '10px',
+                    borderRadius: 'var(--radius-md)',
                     padding: '10px 18px',
                     background: 'rgba(255, 255, 255, 0.14)',
                     color: '#ffffff',
@@ -2671,7 +2684,7 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
 
             {/* Modes Header */}
             <div style={{ marginBottom: '18px' }}>
-              <h3 style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--fg-slate-900)', marginBottom: '4px' }}>
+              <h3 style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--fg-slate-900)', marginBottom: '4px' }}>
                 Select Medium or Practice Mode
               </h3>
               <p style={{ fontSize: '0.875rem', color: 'var(--fg-slate-500)', margin: 0 }}>
@@ -2725,14 +2738,14 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
                     <span className="mode-section-icon"><Ico n="target" /></span>
                     <div>
                       <h4 className="mode-section-title">Core Qualifying Mediums</h4>
-                      <p className="mode-section-sub">Official examination passages calibrated to recruitment board syllabus & speed thresholds</p>
+                      <p className="mode-section-sub">Practice passages matched to the exam syllabus and speed requirements</p>
                     </div>
                   </div>
-                  <span className="mode-section-tag">Official Syllabus</span>
+                  <span className="mode-section-tag">Exam Syllabus</span>
                 </div>
                 <div className="level2-lang-grid">
                   {languageModes.map((mode) => {
-                    const tag = mode.id === 'english' ? 'QWERTY • Official Passages' : mode.id === 'hindi_mangal' ? 'Unicode Inscript • 25 WPM' : 'Remington CBI • Kruti 010';
+                    const tag = mode.id === 'english' ? 'QWERTY • Practice Passages' : mode.id === 'hindi_mangal' ? 'Unicode Inscript • 25 WPM' : 'Remington CBI • Kruti 010';
                     const cta = mode.id === 'english' ? 'Start English Practice →' : mode.id === 'hindi_mangal' ? 'Start Mangal Practice →' : 'Start Kruti Practice →';
                     return (
                       <div
@@ -2767,7 +2780,7 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
                             <div style={{ flex: 1, minWidth: 0 }}>
                               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px', flexWrap: 'wrap', marginBottom: '4px' }}>
                                 <div className="level2-mode-title">{mode.title}</div>
-                                <span style={{ fontSize: '0.75rem', fontWeight: 700, padding: '2px 8px', borderRadius: '6px', background: 'var(--bg-slate-100)', color: 'var(--fg-slate-600)' }}>
+                                <span style={{ fontSize: '0.75rem', fontWeight: 600, padding: '2px 8px', borderRadius: 'var(--radius-sm)', background: 'var(--bg-slate-100)', color: 'var(--fg-slate-600)' }}>
                                   {tag}
                                 </span>
                               </div>
@@ -2833,7 +2846,7 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
                             <div style={{ flex: 1, minWidth: 0 }}>
                               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px', flexWrap: 'wrap', marginBottom: '4px' }}>
                                 <div className="level2-mode-title">{mode.title}</div>
-                                <span style={{ fontSize: '0.75rem', fontWeight: 700, padding: '2px 8px', borderRadius: '6px', background: 'var(--bg-red-100)', color: 'var(--fg-red-700)' }}>
+                                <span style={{ fontSize: '0.75rem', fontWeight: 600, padding: '2px 8px', borderRadius: 'var(--radius-sm)', background: 'var(--bg-red-100)', color: 'var(--fg-red-700)' }}>
                                   {tag}
                                 </span>
                               </div>
@@ -2868,7 +2881,7 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
                     <span className="mode-section-icon"><Ico n="zap" /></span>
                     <div>
                       <h4 className="mode-section-title">Skill Boosters & Reference Materials</h4>
-                      <p className="mode-section-sub">Targeted weak-key drills, number row practice, and official keyboard code tables</p>
+                      <p className="mode-section-sub">Targeted weak-key drills, number row practice, and keyboard code tables</p>
                     </div>
                   </div>
                   <span className="mode-section-tag">Practice & Reference</span>
@@ -2904,7 +2917,7 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
                             <div style={{ flex: 1, minWidth: 0 }}>
                               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px', flexWrap: 'wrap', marginBottom: '4px' }}>
                                 <div className="level2-mode-title">{mode.title}</div>
-                                <span style={{ fontSize: '0.75rem', fontWeight: 700, padding: '2px 8px', borderRadius: '6px', background: 'var(--bg-slate-100)', color: 'var(--fg-slate-600)' }}>
+                                <span style={{ fontSize: '0.75rem', fontWeight: 600, padding: '2px 8px', borderRadius: 'var(--radius-sm)', background: 'var(--bg-slate-100)', color: 'var(--fg-slate-600)' }}>
                                   {tag}
                                 </span>
                               </div>
@@ -2954,9 +2967,9 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
             {/* Active Exam Profile Banner */}
             <div
               style={{
-                background: 'linear-gradient(135deg, var(--bg-blue-50) 0%, var(--bg-blue-100) 100%)',
+                background: 'var(--bg-blue-50)',
                 border: '1.5px solid var(--bd-blue-300)',
-                borderRadius: '12px',
+                borderRadius: 'var(--radius-md)',
                 padding: '14px 20px',
                 marginBottom: '16px',
                 display: 'flex',
@@ -2971,13 +2984,13 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
                 <div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                     <strong style={{ color: 'var(--fg-blue-800)', fontSize: '1rem' }}>{activePost.postTitle}</strong>
-                    <span style={{ background: 'var(--tw-blue-500)', color: '#ffffff', fontSize: '0.75rem', fontWeight: 800, padding: '2px 8px', borderRadius: '10px' }}>
+                    <span style={{ background: 'var(--tw-blue-500)', color: '#ffffff', fontSize: '0.75rem', fontWeight: 600, padding: '2px 8px', borderRadius: 'var(--radius-md)' }}>
                       Active Target Exam
                     </span>
                   </div>
                   <div style={{ fontSize: '0.8rem', color: 'var(--fg-blue-600)', marginTop: '2px', display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
                     <span>
-                      Official Benchmark: <strong>{selectedExamProfile ? selectedExamProfile.targetSpeed : (engVariant?.targetSpeed || 30)} WPM Speed</strong> &bull; Timer: <strong>{selectedDuration} Mins</strong> &bull; Min Accuracy: <strong>{selectedExamProfile?.minAccuracy || 85}%</strong> &bull; Mode: <strong>{currentMode.title}</strong>
+                      Target: <strong>{selectedExamProfile ? selectedExamProfile.targetSpeed : (engVariant?.targetSpeed || 30)} WPM Speed</strong> &bull; Timer: <strong>{selectedDuration} Mins</strong> &bull; Min Accuracy: <strong>{selectedExamProfile?.minAccuracy || 85}%</strong> &bull; Mode: <strong>{currentMode.title}</strong>
                     </span>
                     {(() => {
                       const bsRule = getExamBackspaceRule(selectedExamProfile || activePost);
@@ -2986,11 +2999,11 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
                           title={`${bsRule.title}\n${bsRule.fullRule}`}
                           style={{
                             fontSize: '0.75rem',
-                            fontWeight: 700,
+                            fontWeight: 600,
                             background: bsRule.badgeBg,
                             color: bsRule.badgeText,
                             padding: '2px 8px',
-                            borderRadius: '6px',
+                            borderRadius: 'var(--radius-sm)',
                             border: `1px solid ${bsRule.badgeBorder}`,
                             display: 'inline-flex',
                             alignItems: 'center',
@@ -3015,18 +3028,18 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
                       color: '#ffffff',
                       fontWeight: 700,
                       border: 'none',
-                      borderRadius: '6px',
+                      borderRadius: 'var(--radius-sm)',
                       display: 'flex',
                       alignItems: 'center',
                       gap: '5px',
                       cursor: 'pointer',
                       padding: '6px 12px',
-                      boxShadow: '0 2px 4px rgba(2, 132, 199, 0.25)'
+                      boxShadow: 'var(--shadow-sm)'
                     }}
-                    title="View official recruitment notification speed, formulas and exam day instructions"
+                    title="View the required speed, formulas and exam day instructions"
                   >
                     <span><Ico n="clipboard" /></span>
-                    <span>Official Instructions</span>
+                    <span>Instructions</span>
                   </button>
                 )}
                 <button
@@ -3054,7 +3067,7 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
               style={{
                 background: currentMode.bg,
                 border: `1.5px solid ${currentMode.border}`,
-                borderRadius: '12px',
+                borderRadius: 'var(--radius-md)',
                 padding: '18px 24px',
                 marginBottom: '20px',
                 display: 'flex',
@@ -3067,7 +3080,7 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
               <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                 <span style={{ fontSize: '2.1rem' }}><EmojiIco e={currentMode.icon} /></span>
                 <div>
-                  <h2 style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--fg-slate-900)', marginBottom: '2px' }}>
+                  <h2 style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--fg-slate-900)', marginBottom: '2px' }}>
                     {currentMode.title} - Test Material
                   </h2>
                   <div style={{ fontSize: '0.875rem', color: 'var(--fg-slate-600)' }}>
@@ -3100,13 +3113,13 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
                 className="card"
                 style={{
                   background: 'var(--surface)',
-                  borderRadius: '12px',
+                  borderRadius: 'var(--radius-md)',
                   padding: '28px',
                   border: '1px solid var(--bd-slate-200)',
                   marginBottom: '24px'
                 }}
               >
-                <h3 style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--fg-slate-900)', marginBottom: '14px' }}>
+                <h3 style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--fg-slate-900)', marginBottom: '14px' }}>
                   <Ico n="book" /> UP Police Computer Operator & ASI Typing Rules & Evaluation Formula
                 </h3>
 
@@ -3118,7 +3131,7 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
                     marginBottom: '24px'
                   }}
                 >
-                  <div style={{ background: 'var(--bg-slate-50)', padding: '16px', borderRadius: '8px', border: '1px solid var(--bd-slate-200)' }}>
+                  <div style={{ background: 'var(--bg-slate-50)', padding: '16px', borderRadius: 'var(--radius-md)', border: '1px solid var(--bd-slate-200)' }}>
                     <div style={{ fontWeight: 700, color: 'var(--fg-slate-900)', marginBottom: '6px' }}>
                       <Ico n="zap" /> Speed Calculation Formula
                     </div>
@@ -3130,7 +3143,7 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
                     </p>
                   </div>
 
-                  <div style={{ background: 'var(--bg-slate-50)', padding: '16px', borderRadius: '8px', border: '1px solid var(--bd-slate-200)' }}>
+                  <div style={{ background: 'var(--bg-slate-50)', padding: '16px', borderRadius: 'var(--radius-md)', border: '1px solid var(--bd-slate-200)' }}>
                     <div style={{ fontWeight: 700, color: 'var(--fg-slate-900)', marginBottom: '6px' }}>
                       <Ico n="target" /> Accuracy & Penalty Rules
                     </div>
@@ -3142,7 +3155,7 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
                   </div>
                 </div>
 
-                <h4 style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--fg-slate-900)', marginBottom: '10px' }}>
+                <h4 style={{ fontSize: '1rem', fontWeight: 600, color: 'var(--fg-slate-900)', marginBottom: '10px' }}>
                   ⌨️ Frequent Kruti Dev 010 & Mangal Inscript Special ALT Codes:
                 </h4>
                 <div
@@ -3170,7 +3183,7 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
                       style={{
                         background: 'var(--bg-slate-100)',
                         padding: '8px 12px',
-                        borderRadius: '6px',
+                        borderRadius: 'var(--radius-sm)',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'space-between',
@@ -3209,12 +3222,12 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
                 {(currentMode.id === 'daily_live' || currentMode.id === 'live_mock') && (
                   <section
                     style={{
-                      background: 'linear-gradient(135deg, var(--surface) 0%, var(--bg-green-50) 100%)',
+                      background: 'var(--bg-green-50)',
                       border: '1.5px solid var(--bd-green-300)',
-                      borderRadius: '16px',
+                      borderRadius: 'var(--radius-lg)',
                       padding: '20px 24px',
                       marginBottom: '24px',
-                      boxShadow: '0 4px 15px -3px rgba(22, 101, 52, 0.08)',
+                      boxShadow: 'var(--shadow-md)',
                       overflow: 'hidden',
                       width: '100%',
                       boxSizing: 'border-box'
@@ -3236,17 +3249,17 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
                         <span style={{ fontSize: '1.8rem' }}><Ico n="flame" /></span>
                         <div>
                           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-                            <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 800, color: 'var(--fg-green-900)' }}>
-                              Today's AI Live Examination Tests (दैनिक लाइव टेस्ट)
+                            <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 700, color: 'var(--fg-green-900)' }}>
+                              Today's AI Live Exam Tests (दैनिक लाइव टेस्ट)
                             </h3>
                             <span
                               style={{
                                 background: 'var(--bg-red-100)',
                                 color: 'var(--fg-red-600)',
                                 fontSize: '0.75rem',
-                                fontWeight: 800,
+                                fontWeight: 600,
                                 padding: '2px 8px',
-                                borderRadius: '12px',
+                                borderRadius: 'var(--radius-md)',
                                 border: '1px solid var(--bd-red-300)'
                               }}
                             >
@@ -3254,21 +3267,21 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
                             </span>
                           </div>
                           <p style={{ margin: '3px 0 0 0', fontSize: '0.8rem', color: 'var(--fg-green-800)' }}>
-                            8 Official Daily Tests calibrated to AR Typing Medium & Hard standards (4 English + 4 Hindi • 15:00 Strict Countdown)
+                            8 Daily Tests calibrated to AR Typing Medium & Hard standards (4 English + 4 Hindi • 15:00 Strict Countdown)
                           </p>
                         </div>
                       </div>
 
                       <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
-                        <div style={{ display: 'flex', background: 'var(--bg-green-100)', borderRadius: '8px', padding: '3px' }}>
+                        <div style={{ display: 'flex', background: 'var(--bg-green-100)', borderRadius: 'var(--radius-md)', padding: '3px' }}>
                           <button
                             onClick={() => setDailyTab('all')}
                             style={{
                               padding: '4px 10px',
                               border: 'none',
-                              borderRadius: '6px',
+                              borderRadius: 'var(--radius-sm)',
                               fontSize: '0.75rem',
-                              fontWeight: 700,
+                              fontWeight: 600,
                               cursor: 'pointer',
                               background: dailyTab === 'all' ? 'var(--tw-green-800)' : 'transparent',
                               color: dailyTab === 'all' ? '#ffffff' : 'var(--fg-green-800)'
@@ -3281,9 +3294,9 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
                             style={{
                               padding: '4px 10px',
                               border: 'none',
-                              borderRadius: '6px',
+                              borderRadius: 'var(--radius-sm)',
                               fontSize: '0.75rem',
-                              fontWeight: 700,
+                              fontWeight: 600,
                               cursor: 'pointer',
                               background: dailyTab === 'english' ? 'var(--tw-green-800)' : 'transparent',
                               color: dailyTab === 'english' ? '#ffffff' : 'var(--fg-green-800)'
@@ -3296,9 +3309,9 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
                             style={{
                               padding: '4px 10px',
                               border: 'none',
-                              borderRadius: '6px',
+                              borderRadius: 'var(--radius-sm)',
                               fontSize: '0.75rem',
-                              fontWeight: 700,
+                              fontWeight: 600,
                               cursor: 'pointer',
                               background: dailyTab === 'hindi' ? 'var(--tw-green-800)' : 'transparent',
                               color: dailyTab === 'hindi' ? '#ffffff' : 'var(--fg-green-800)'
@@ -3312,18 +3325,18 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
                           <button
                             onClick={onOpenAiGenerator}
                             style={{
-                              background: 'linear-gradient(135deg, var(--tw-sky-600) 0%, var(--tw-sky-700) 100%)',
+                              background: 'var(--tw-sky-600)',
                               color: '#ffffff',
                               border: 'none',
                               padding: '7px 14px',
-                              borderRadius: '8px',
+                              borderRadius: 'var(--radius-md)',
                               fontSize: '0.8rem',
-                              fontWeight: 700,
+                              fontWeight: 600,
                               cursor: 'pointer',
                               display: 'flex',
                               alignItems: 'center',
                               gap: '6px',
-                              boxShadow: '0 2px 4px rgba(2, 132, 199, 0.25)'
+                              boxShadow: 'var(--shadow-sm)'
                             }}
                           >
                             <span><Ico n="zap" /></span>
@@ -3343,12 +3356,12 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
                 {currentMode.id === 'english' && englishLiveTests.length > 0 && (
                   <section
                     style={{
-                      background: 'linear-gradient(135deg, var(--surface) 0%, var(--bg-blue-50) 100%)',
+                      background: 'var(--bg-blue-50)',
                       border: '1.5px solid var(--bd-blue-300)',
-                      borderRadius: '16px',
+                      borderRadius: 'var(--radius-lg)',
                       padding: '20px 24px',
                       marginBottom: '24px',
-                      boxShadow: '0 4px 15px -3px rgba(29, 78, 216, 0.08)',
+                      boxShadow: 'var(--shadow-md)',
                       overflow: 'hidden',
                       width: '100%',
                       boxSizing: 'border-box'
@@ -3370,17 +3383,17 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
                         <span style={{ fontSize: '1.8rem' }}>🇬🇧</span>
                         <div>
                           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-                            <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 800, color: 'var(--fg-blue-900)' }}>
-                              Today's English AI Live Examination Tests (4 Live Tests)
+                            <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 700, color: 'var(--fg-blue-900)' }}>
+                              Today's English AI Live Exam Tests (4 Live Tests)
                             </h3>
                             <span
                               style={{
                                 background: 'var(--bg-blue-100)',
                                 color: 'var(--fg-blue-700)',
                                 fontSize: '0.75rem',
-                                fontWeight: 800,
+                                fontWeight: 600,
                                 padding: '2px 8px',
-                                borderRadius: '12px',
+                                borderRadius: 'var(--radius-md)',
                                 border: '1px solid var(--bd-blue-200)'
                               }}
                             >
@@ -3388,7 +3401,7 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
                             </span>
                           </div>
                           <p style={{ margin: '3px 0 0 0', fontSize: '0.8rem', color: 'var(--fg-blue-700)' }}>
-                            4 Official English Tests calibrated to AR Typing Medium & Hard standards (2 Medium + 2 Hard • 520–580 Words)
+                            4 English Tests calibrated to AR Typing Medium & Hard standards (2 Medium + 2 Hard • 520–580 Words)
                           </p>
                         </div>
                       </div>
@@ -3401,9 +3414,9 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
                             color: '#ffffff',
                             border: 'none',
                             padding: '6px 12px',
-                            borderRadius: '8px',
+                            borderRadius: 'var(--radius-md)',
                             fontSize: '0.8rem',
-                            fontWeight: 700,
+                            fontWeight: 600,
                             cursor: 'pointer',
                             display: 'flex',
                             alignItems: 'center',
@@ -3426,12 +3439,12 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
                 {currentMode.id === 'hindi_mangal' && hindiMangalLiveTests.length > 0 && (
                   <section
                     style={{
-                      background: 'linear-gradient(135deg, var(--surface) 0%, var(--bg-amber-100) 100%)',
+                      background: 'var(--bg-amber-100)',
                       border: '1.5px solid var(--bd-amber-300)',
-                      borderRadius: '16px',
+                      borderRadius: 'var(--radius-lg)',
                       padding: '20px 24px',
                       marginBottom: '24px',
-                      boxShadow: '0 4px 15px -3px rgba(180, 83, 9, 0.08)',
+                      boxShadow: 'var(--shadow-md)',
                       overflow: 'hidden',
                       width: '100%',
                       boxSizing: 'border-box'
@@ -3453,7 +3466,7 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
                         <span style={{ fontSize: '1.8rem' }}>🇮🇳</span>
                         <div>
                           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-                            <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 800, color: 'var(--fg-amber-900)' }}>
+                            <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 700, color: 'var(--fg-amber-900)' }}>
                               Today's हिंदी मंगल (Mangal Inscript) AI Live Tests (4 Live Tests)
                             </h3>
                             <span
@@ -3461,9 +3474,9 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
                                 background: 'var(--bg-amber-100)',
                                 color: 'var(--fg-amber-700)',
                                 fontSize: '0.75rem',
-                                fontWeight: 800,
+                                fontWeight: 600,
                                 padding: '2px 8px',
-                                borderRadius: '12px',
+                                borderRadius: 'var(--radius-md)',
                                 border: '1px solid var(--bd-amber-200)'
                               }}
                             >
@@ -3471,7 +3484,7 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
                             </span>
                           </div>
                           <p style={{ margin: '3px 0 0 0', fontSize: '0.8rem', color: 'var(--fg-amber-800)' }}>
-                            4 Official Hindi Mangal Inscript Tests calibrated to AR Typing Medium & Hard (25 WPM • 85% Accuracy)
+                            4 Hindi Mangal Inscript Tests calibrated to AR Typing Medium & Hard (25 WPM • 85% Accuracy)
                           </p>
                         </div>
                       </div>
@@ -3484,9 +3497,9 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
                             color: '#ffffff',
                             border: 'none',
                             padding: '6px 12px',
-                            borderRadius: '8px',
+                            borderRadius: 'var(--radius-md)',
                             fontSize: '0.8rem',
-                            fontWeight: 700,
+                            fontWeight: 600,
                             cursor: 'pointer',
                             display: 'flex',
                             alignItems: 'center',
@@ -3509,12 +3522,12 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
                 {currentMode.id === 'hindi_kruti' && krutiLiveTests.length > 0 && (
                   <section
                     style={{
-                      background: 'linear-gradient(135deg, var(--surface) 0%, var(--bg-green-50) 100%)',
+                      background: 'var(--bg-green-50)',
                       border: '1.5px solid var(--bd-green-300)',
-                      borderRadius: '16px',
+                      borderRadius: 'var(--radius-lg)',
                       padding: '20px 24px',
                       marginBottom: '24px',
-                      boxShadow: '0 4px 15px -3px rgba(22, 101, 52, 0.08)',
+                      boxShadow: 'var(--shadow-md)',
                       overflow: 'hidden',
                       width: '100%',
                       boxSizing: 'border-box'
@@ -3536,7 +3549,7 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
                         <span style={{ fontSize: '1.8rem' }}>🇮🇳</span>
                         <div>
                           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-                            <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 800, color: 'var(--fg-green-900)' }}>
+                            <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 700, color: 'var(--fg-green-900)' }}>
                               Today's हिंदी कुर्ती देव (Kruti Dev 010) Live Tests
                             </h3>
                             <span
@@ -3544,9 +3557,9 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
                                 background: 'var(--bg-green-100)',
                                 color: 'var(--fg-green-800)',
                                 fontSize: '0.75rem',
-                                fontWeight: 800,
+                                fontWeight: 600,
                                 padding: '2px 8px',
-                                borderRadius: '12px',
+                                borderRadius: 'var(--radius-md)',
                                 border: '1px solid var(--bd-green-200)'
                               }}
                             >
@@ -3554,7 +3567,7 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
                             </span>
                           </div>
                           <p style={{ margin: '3px 0 0 0', fontSize: '0.8rem', color: 'var(--fg-green-800)' }}>
-                            Remington Keyboard Layout • Authentic Kruti Dev 010 High-Difficulty Exam Tests (25 WPM Target)
+                            Remington Keyboard Layout • Kruti Dev 010 High-Difficulty Exam Tests (25 WPM Target)
                           </p>
                         </div>
                       </div>
@@ -3571,7 +3584,7 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
                   <div className="exam-toolbar-row">
                     {/* Difficulty Chips */}
                     <div className="exam-filter-group">
-                      <span style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--fg-slate-500)', marginRight: '4px' }}>
+                      <span style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--fg-slate-500)', marginRight: '4px' }}>
                         Difficulty:
                       </span>
                       <button
@@ -3602,7 +3615,7 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
 
                     {/* Sort Order Selector */}
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <span style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--fg-slate-500)' }}>
+                      <span style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--fg-slate-500)' }}>
                         Order:
                       </span>
                       <select
@@ -3610,10 +3623,10 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
                         onChange={(e) => setLevel3SortBy(e.target.value as 'number' | 'date_desc' | 'difficulty')}
                         style={{
                           padding: '6px 12px',
-                          borderRadius: '6px',
+                          borderRadius: 'var(--radius-sm)',
                           border: '1px solid var(--bd-slate-300)',
                           fontSize: '0.875rem',
-                          fontWeight: 600,
+                          fontWeight: 500,
                           color: 'var(--fg-slate-900)',
                           background: 'var(--surface)',
                           outline: 'none'
@@ -3627,7 +3640,7 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
 
                     {/* Timer Selector */}
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <span style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--fg-slate-500)' }}>
+                      <span style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--fg-slate-500)' }}>
                         Timer:
                       </span>
                       <select
@@ -3635,16 +3648,16 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
                         onChange={(e) => setSelectedDuration(Number(e.target.value))}
                         style={{
                           padding: '6px 12px',
-                          borderRadius: '6px',
+                          borderRadius: 'var(--radius-sm)',
                           border: '1px solid var(--bd-slate-300)',
                           fontSize: '0.875rem',
-                          fontWeight: 600,
+                          fontWeight: 500,
                           color: 'var(--fg-slate-900)',
                           background: 'var(--surface)',
                           outline: 'none'
                         }}
                       >
-                        <option value={15}>15 Min (UPPRPB Official)</option>
+                        <option value={15}>15 Min (UP Police standard)</option>
                         <option value={10}>10 Min</option>
                         <option value={5}>5 Min (Speed Drill)</option>
                         <option value={2}>2 Min (Sprint)</option>
@@ -3698,9 +3711,9 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
 
                 {/* Free Demo & Pro Access Banner */}
                 <div style={{
-                  background: 'linear-gradient(135deg, var(--bg-green-50) 0%, var(--bg-green-100) 100%)',
+                  background: 'var(--bg-green-50)',
                   border: '1.5px solid var(--bd-green-300)',
-                  borderRadius: '12px',
+                  borderRadius: 'var(--radius-md)',
                   padding: '14px 18px',
                   marginBottom: '18px',
                   display: 'flex',
@@ -3719,17 +3732,17 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
-                      boxShadow: '0 2px 4px rgba(0,0,0,0.05)',
+                      boxShadow: 'var(--shadow-sm)',
                       flexShrink: 0
                     }}>
                       <Ico n="gift" />
                     </div>
                     <div>
-                      <div style={{ fontWeight: 800, color: 'var(--fg-green-800)', fontSize: '0.95rem' }}>
+                      <div style={{ fontWeight: 600, color: 'var(--fg-green-800)', fontSize: '0.95rem' }}>
                         Free Demo Unlocked: Tests #01 to #07 are 100% FREE for Everyone
                       </div>
                       <div style={{ fontSize: '0.8rem', color: 'var(--fg-green-700)', marginTop: '2px' }}>
-                        Practice full exam timer & cutoffs with zero restriction. Tests #08+ are full official exam series unlocked with a Pro Pass.
+                        Practice full exam timer & cutoffs with zero restriction. Tests #08+ are the full test series unlocked with a Pro Pass.
                       </div>
                     </div>
                   </div>
@@ -3742,13 +3755,13 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
                       style={{
                         padding: '8px 18px',
                         fontSize: '0.875rem',
-                        fontWeight: 800,
-                        background: 'linear-gradient(135deg, var(--tw-amber-500) 0%, var(--tw-amber-600) 100%)',
+                        fontWeight: 600,
+                        background: 'var(--tw-amber-500)',
                         color: '#ffffff',
                         border: 'none',
-                        borderRadius: '8px',
+                        borderRadius: 'var(--radius-md)',
                         cursor: 'pointer',
-                        boxShadow: '0 2px 6px rgba(217, 119, 6, 0.25)',
+                        boxShadow: 'var(--shadow-md)',
                         display: 'flex',
                         alignItems: 'center',
                         gap: '6px'
@@ -3769,7 +3782,7 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
                     marginBottom: '16px'
                   }}
                 >
-                  <div style={{ fontSize: '0.95rem', fontWeight: 700, color: 'var(--fg-slate-700)' }}>
+                  <div style={{ fontSize: '0.95rem', fontWeight: 600, color: 'var(--fg-slate-700)' }}>
                     Available Tests in {currentMode.title} ({filteredLevel3Passages.length})
                   </div>
                   <div style={{ fontSize: '0.8rem', color: 'var(--fg-slate-500)' }}>
@@ -3782,7 +3795,7 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
                   <div
                     style={{
                       background: 'var(--surface)',
-                      borderRadius: '12px',
+                      borderRadius: 'var(--radius-md)',
                       padding: '48px 24px',
                       textAlign: 'center',
                       border: '1px solid var(--bd-slate-200)'
@@ -3873,7 +3886,7 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
                       style={{
                         fontWeight: 700,
                         padding: '10px 28px',
-                        borderRadius: '8px'
+                        borderRadius: 'var(--radius-md)'
                       }}
                     >
                       Load More Tests ({filteredLevel3Passages.length - visibleCount} remaining) ↓
@@ -3904,9 +3917,9 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
               className="card"
               style={{
                 background: 'var(--surface)',
-                borderRadius: '12px',
+                borderRadius: 'var(--radius-md)',
                 padding: '32px 28px',
-                boxShadow: '0 4px 12px rgba(0, 0, 0, 0.05)',
+                boxShadow: 'var(--shadow-md)',
                 border: '1px solid var(--bd-slate-200)'
               }}
             >
@@ -3917,11 +3930,11 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
                   style={{
                     backgroundColor: 'var(--tw-sky-600)',
                     color: '#ffffff',
-                    fontWeight: 700,
+                    fontWeight: 600,
                     fontSize: '1rem',
                     padding: '12px 28px',
-                    borderRadius: '8px',
-                    boxShadow: '0 2px 4px rgba(2, 132, 199, 0.25)',
+                    borderRadius: 'var(--radius-md)',
+                    boxShadow: 'var(--shadow-sm)',
                     cursor: 'pointer',
                     border: 'none',
                     transition: 'all 0.2s ease'
@@ -3938,7 +3951,7 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
                   textAlign: 'center',
                   margin: '20px 0',
                   color: 'var(--fg-slate-500)',
-                  fontWeight: 700,
+                  fontWeight: 600,
                   fontSize: '0.875rem'
                 }}
               >
@@ -3977,7 +3990,7 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
               <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
                 {/* 1. Select Language */}
                 <div style={{ display: 'grid', gridTemplateColumns: '160px 1fr', alignItems: 'center', gap: '16px' }}>
-                  <label style={{ fontWeight: 700, color: 'var(--fg-slate-800)', fontSize: '0.95rem' }}>
+                  <label style={{ fontWeight: 600, color: 'var(--fg-slate-800)', fontSize: '0.95rem' }}>
                     Select Language:
                   </label>
                   <select
@@ -3985,13 +3998,13 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
                     onChange={(e) => handleClassicLanguageChange(e.target.value as Language)}
                     style={{
                       padding: '10px 14px',
-                      borderRadius: '6px',
+                      borderRadius: 'var(--radius-sm)',
                       border: '1px solid var(--bd-slate-300)',
                       fontSize: '0.95rem',
                       fontFamily: 'inherit',
                       backgroundColor: 'var(--surface)',
                       outline: 'none',
-                      fontWeight: 600,
+                      fontWeight: 500,
                       color: 'var(--fg-slate-900)'
                     }}
                   >
@@ -4003,7 +4016,7 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
 
                 {/* 2. Select Date */}
                 <div style={{ display: 'grid', gridTemplateColumns: '160px 1fr', alignItems: 'center', gap: '16px' }}>
-                  <label style={{ fontWeight: 700, color: 'var(--fg-slate-800)', fontSize: '0.95rem' }}>
+                  <label style={{ fontWeight: 600, color: 'var(--fg-slate-800)', fontSize: '0.95rem' }}>
                     Select Date:
                   </label>
                   <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
@@ -4013,13 +4026,13 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
                       onChange={(e) => handleClassicDateChange(e.target.value)}
                       style={{
                         padding: '10px 14px',
-                        borderRadius: '6px',
+                        borderRadius: 'var(--radius-sm)',
                         border: '1px solid var(--bd-slate-300)',
                         fontSize: '0.95rem',
                         fontFamily: 'inherit',
                         backgroundColor: 'var(--surface)',
                         outline: 'none',
-                        fontWeight: 600,
+                        fontWeight: 500,
                         color: 'var(--fg-slate-900)',
                         flex: '1 1 180px'
                       }}
@@ -4029,13 +4042,13 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
                       onChange={(e) => handleClassicDateChange(e.target.value)}
                       style={{
                         padding: '10px 14px',
-                        borderRadius: '6px',
+                        borderRadius: 'var(--radius-sm)',
                         border: '1px solid var(--bd-slate-300)',
                         fontSize: '0.875rem',
                         fontFamily: 'inherit',
                         backgroundColor: 'var(--bg-slate-50)',
                         outline: 'none',
-                        fontWeight: 600,
+                        fontWeight: 500,
                         color: 'var(--fg-slate-800)',
                         flex: '1 1 200px'
                       }}
@@ -4051,7 +4064,7 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
 
                 {/* 3. Select Passage */}
                 <div style={{ display: 'grid', gridTemplateColumns: '160px 1fr', alignItems: 'flex-start', gap: '16px' }}>
-                  <label style={{ fontWeight: 700, color: 'var(--fg-slate-800)', fontSize: '0.95rem', paddingTop: '10px' }}>
+                  <label style={{ fontWeight: 600, color: 'var(--fg-slate-800)', fontSize: '0.95rem', paddingTop: '10px' }}>
                     Select Passage:
                   </label>
                   <div style={{ position: 'relative' }}>
@@ -4059,7 +4072,7 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
                       onClick={() => !isLoadingPassages && setIsClassicDropdownOpen(!isClassicDropdownOpen)}
                       style={{
                         padding: '12px 14px',
-                        borderRadius: '6px',
+                        borderRadius: 'var(--radius-sm)',
                         border: '1px solid var(--bd-slate-300)',
                         fontSize: '0.95rem',
                         backgroundColor: isLoadingPassages ? 'var(--bg-slate-100)' : 'var(--surface)',
@@ -4067,7 +4080,7 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'space-between',
-                        fontWeight: currentClassicSelectedPassage ? 700 : 500,
+                        fontWeight: currentClassicSelectedPassage ? 600 : 500,
                         color: currentClassicSelectedPassage ? 'var(--fg-slate-900)' : 'var(--fg-slate-500)',
                         boxShadow: isClassicDropdownOpen ? '0 0 0 2px rgba(2, 132, 199, 0.2)' : 'none'
                       }}
@@ -4091,9 +4104,9 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
                           right: 0,
                           marginTop: '4px',
                           backgroundColor: 'var(--surface)',
-                          borderRadius: '8px',
+                          borderRadius: 'var(--radius-md)',
                           border: '1px solid var(--bd-slate-300)',
-                          boxShadow: '0 10px 25px rgba(0,0,0,0.1)',
+                          boxShadow: 'var(--shadow-lg)',
                           zIndex: 50,
                           maxHeight: '260px',
                           overflowY: 'auto'
@@ -4135,12 +4148,12 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
                                   {p.title}
                                 </span>
                                 {access.isDemo && (
-                                  <span style={{ fontSize: '0.75rem', fontWeight: 800, padding: '1px 6px', borderRadius: '4px', background: 'var(--bg-green-100)', color: 'var(--fg-green-700)' }}>
+                                  <span style={{ fontSize: '0.75rem', fontWeight: 600, padding: '1px 6px', borderRadius: 'var(--radius-sm)', background: 'var(--bg-green-100)', color: 'var(--fg-green-700)' }}>
                                     DEMO
                                   </span>
                                 )}
                                 {access.isLocked && (
-                                  <span style={{ fontSize: '0.75rem', fontWeight: 800, padding: '1px 6px', borderRadius: '4px', background: 'var(--bg-amber-100)', color: 'var(--fg-amber-700)' }}>
+                                  <span style={{ fontSize: '0.75rem', fontWeight: 600, padding: '1px 6px', borderRadius: 'var(--radius-sm)', background: 'var(--bg-amber-100)', color: 'var(--fg-amber-700)' }}>
                                     <Ico n="lock" /> PRO
                                   </span>
                                 )}
@@ -4158,7 +4171,7 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
 
                 {/* 4. Select Duration */}
                 <div style={{ display: 'grid', gridTemplateColumns: '160px 1fr', alignItems: 'center', gap: '16px' }}>
-                  <label style={{ fontWeight: 700, color: 'var(--fg-slate-800)', fontSize: '0.95rem' }}>
+                  <label style={{ fontWeight: 600, color: 'var(--fg-slate-800)', fontSize: '0.95rem' }}>
                     Select Duration:
                   </label>
                   <select
@@ -4166,17 +4179,17 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
                     onChange={(e) => setClassicDuration(Number(e.target.value))}
                     style={{
                       padding: '10px 14px',
-                      borderRadius: '6px',
+                      borderRadius: 'var(--radius-sm)',
                       border: '1px solid var(--bd-slate-300)',
                       fontSize: '0.95rem',
                       fontFamily: 'inherit',
                       backgroundColor: 'var(--surface)',
                       outline: 'none',
-                      fontWeight: 600,
+                      fontWeight: 500,
                       color: 'var(--fg-slate-900)'
                     }}
                   >
-                    <option value={15}>15:00 min (Official UP Police Benchmark)</option>
+                    <option value={15}>15:00 min (UP Police standard)</option>
                     <option value={10}>10:00 min</option>
                     <option value={5}>05:00 min (Quick Drill)</option>
                   </select>
@@ -4184,7 +4197,7 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
 
                 {/* 5. Input Limit */}
                 <div style={{ display: 'grid', gridTemplateColumns: '160px 1fr', alignItems: 'center', gap: '16px' }}>
-                  <label style={{ fontWeight: 700, color: 'var(--fg-slate-800)', fontSize: '0.95rem' }}>
+                  <label style={{ fontWeight: 600, color: 'var(--fg-slate-800)', fontSize: '0.95rem' }}>
                     Input Limit:
                   </label>
                   <select
@@ -4192,17 +4205,17 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
                     onChange={(e) => setClassicInputLimit(e.target.value)}
                     style={{
                       padding: '10px 14px',
-                      borderRadius: '6px',
+                      borderRadius: 'var(--radius-sm)',
                       border: '1px solid var(--bd-slate-300)',
                       fontSize: '0.95rem',
                       fontFamily: 'inherit',
                       backgroundColor: 'var(--surface)',
                       outline: 'none',
-                      fontWeight: 600,
+                      fontWeight: 500,
                       color: 'var(--fg-slate-900)'
                     }}
                   >
-                    <option value="Words">Words (Official Exam Mode)</option>
+                    <option value="Words">Words (Exam Mode)</option>
                     <option value="Full Passage">Full Passage</option>
                   </select>
                 </div>
@@ -4234,8 +4247,8 @@ export const ChooseTest: React.FC<ChooseTestProps> = ({
                     style={{
                       padding: '12px 36px',
                       fontSize: '1rem',
-                      fontWeight: 700,
-                      borderRadius: '8px'
+                      fontWeight: 600,
+                      borderRadius: 'var(--radius-md)'
                     }}
                   >
                     {classicPassageId ? 'Start Typing Test →' : 'Start Latest Test →'}

@@ -149,9 +149,9 @@ export const MyCoursesModal: React.FC<MyCoursesModalProps> = ({
           display: 'flex',
           flexDirection: 'column',
           padding: 0,
-          borderRadius: '16px',
+          borderRadius: 'var(--radius-lg)',
           overflow: 'hidden',
-          boxShadow: '0 25px 50px -12px rgba(15, 23, 42, 0.45)',
+          boxShadow: 'var(--shadow-lg)',
           background: 'var(--surface)'
         }}
       >
@@ -168,13 +168,13 @@ export const MyCoursesModal: React.FC<MyCoursesModalProps> = ({
             <div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '4px' }}>
                 <span style={{ fontSize: '1.6rem' }}>🎓</span>
-                <h2 style={{ margin: 0, fontSize: '1.4rem', fontWeight: 900, letterSpacing: '-0.3px' }}>
+                <h2 style={{ margin: 0, fontSize: '1.4rem', fontWeight: 700, letterSpacing: '-0.3px' }}>
                   My Enrolled Courses & Test Series
                 </h2>
               </div>
               <p style={{ margin: 0, fontSize: '0.875rem', color: 'var(--tw-indigo-200)', lineHeight: 1.4 }}>
                 {currentUser
-                  ? `Candidate: ${currentUser.displayName} (${currentUser.rollNumber}) • Access your purchased exam passes & mock tests`
+                  ? `Name: ${currentUser.displayName} (${currentUser.rollNumber}) • Access your purchased exam passes & mock tests`
                   : 'Sign in to access your purchased typing courses & test series'}
               </p>
             </div>
@@ -187,15 +187,15 @@ export const MyCoursesModal: React.FC<MyCoursesModalProps> = ({
                     onOpenPayment();
                   }}
                   style={{
-                    background: 'linear-gradient(135deg, var(--tw-amber-500) 0%, var(--tw-amber-600) 100%)',
+                    background: 'var(--tw-amber-500)',
                     color: '#ffffff',
                     border: 'none',
-                    borderRadius: '20px',
+                    borderRadius: 'var(--radius-lg)',
                     padding: '7px 14px',
                     fontSize: '0.8rem',
-                    fontWeight: 800,
+                    fontWeight: 600,
                     cursor: 'pointer',
-                    boxShadow: '0 2px 8px rgba(217, 119, 6, 0.35)',
+                    boxShadow: 'var(--shadow-md)',
                     display: 'flex',
                     alignItems: 'center',
                     gap: '5px',
@@ -237,25 +237,25 @@ export const MyCoursesModal: React.FC<MyCoursesModalProps> = ({
                 marginTop: '16px',
                 background: 'rgba(15, 23, 42, 0.45)',
                 padding: '10px 14px',
-                borderRadius: '10px',
+                borderRadius: 'var(--radius-md)',
                 border: '1px solid rgba(255, 255, 255, 0.1)'
               }}
             >
               <div style={{ textAlign: 'center' }}>
-                <div style={{ fontSize: '1.25rem', fontWeight: 900, color: 'var(--tw-sky-400)' }}>{courses.length}</div>
-                <div style={{ fontSize: '0.75rem', color: 'var(--tw-slate-400)', textTransform: 'uppercase', fontWeight: 700 }}>
+                <div style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--tw-sky-400)' }}>{courses.length}</div>
+                <div style={{ fontSize: '0.75rem', color: 'var(--tw-slate-400)', textTransform: 'uppercase', fontWeight: 600 }}>
                   Total Orders
                 </div>
               </div>
               <div style={{ textAlign: 'center', borderLeft: '1px solid rgba(255,255,255,0.1)', borderRight: '1px solid rgba(255,255,255,0.1)' }}>
-                <div style={{ fontSize: '1.25rem', fontWeight: 900, color: 'var(--tw-green-400)' }}>{activeCount}</div>
-                <div style={{ fontSize: '0.75rem', color: 'var(--tw-slate-400)', textTransform: 'uppercase', fontWeight: 700 }}>
+                <div style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--tw-green-400)' }}>{activeCount}</div>
+                <div style={{ fontSize: '0.75rem', color: 'var(--tw-slate-400)', textTransform: 'uppercase', fontWeight: 600 }}>
                   Active Passes
                 </div>
               </div>
               <div style={{ textAlign: 'center' }}>
-                <div style={{ fontSize: '1.25rem', fontWeight: 900, color: 'var(--tw-yellow-400)' }}>{pendingCount}</div>
-                <div style={{ fontSize: '0.75rem', color: 'var(--tw-slate-400)', textTransform: 'uppercase', fontWeight: 700 }}>
+                <div style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--tw-yellow-400)' }}>{pendingCount}</div>
+                <div style={{ fontSize: '0.75rem', color: 'var(--tw-slate-400)', textTransform: 'uppercase', fontWeight: 600 }}>
                   Pending Verification
                 </div>
               </div>
@@ -279,13 +279,13 @@ export const MyCoursesModal: React.FC<MyCoursesModalProps> = ({
               onClick={() => setFilterTab('all')}
               style={{
                 padding: '6px 14px',
-                borderRadius: '20px',
+                borderRadius: 'var(--radius-lg)',
                 border: '1px solid',
                 borderColor: filterTab === 'all' ? 'var(--tw-indigo-600)' : 'var(--bd-slate-300)',
                 background: filterTab === 'all' ? 'var(--bg-indigo-100)' : 'var(--surface)',
                 color: filterTab === 'all' ? 'var(--fg-indigo-800)' : 'var(--fg-slate-600)',
                 fontSize: '0.8rem',
-                fontWeight: 700,
+                fontWeight: 600,
                 cursor: 'pointer'
               }}
             >
@@ -295,13 +295,13 @@ export const MyCoursesModal: React.FC<MyCoursesModalProps> = ({
               onClick={() => setFilterTab('active')}
               style={{
                 padding: '6px 14px',
-                borderRadius: '20px',
+                borderRadius: 'var(--radius-lg)',
                 border: '1px solid',
                 borderColor: filterTab === 'active' ? 'var(--tw-green-600)' : 'var(--bd-slate-300)',
                 background: filterTab === 'active' ? 'var(--bg-green-100)' : 'var(--surface)',
                 color: filterTab === 'active' ? 'var(--fg-green-800)' : 'var(--fg-slate-600)',
                 fontSize: '0.8rem',
-                fontWeight: 700,
+                fontWeight: 600,
                 cursor: 'pointer'
               }}
             >
@@ -311,13 +311,13 @@ export const MyCoursesModal: React.FC<MyCoursesModalProps> = ({
               onClick={() => setFilterTab('pending')}
               style={{
                 padding: '6px 14px',
-                borderRadius: '20px',
+                borderRadius: 'var(--radius-lg)',
                 border: '1px solid',
                 borderColor: filterTab === 'pending' ? 'var(--tw-amber-600)' : 'var(--bd-slate-300)',
                 background: filterTab === 'pending' ? 'var(--bg-amber-100)' : 'var(--surface)',
                 color: filterTab === 'pending' ? 'var(--fg-amber-800)' : 'var(--fg-slate-600)',
                 fontSize: '0.8rem',
-                fontWeight: 700,
+                fontWeight: 600,
                 cursor: 'pointer'
               }}
             >
@@ -328,13 +328,13 @@ export const MyCoursesModal: React.FC<MyCoursesModalProps> = ({
                 onClick={() => setFilterTab('expired')}
                 style={{
                   padding: '6px 14px',
-                  borderRadius: '20px',
+                  borderRadius: 'var(--radius-lg)',
                   border: '1px solid',
                   borderColor: filterTab === 'expired' ? 'var(--tw-red-600)' : 'var(--bd-slate-300)',
                   background: filterTab === 'expired' ? 'var(--bg-red-100)' : 'var(--surface)',
                   color: filterTab === 'expired' ? 'var(--fg-red-800)' : 'var(--fg-slate-600)',
                   fontSize: '0.8rem',
-                  fontWeight: 700,
+                  fontWeight: 600,
                   cursor: 'pointer'
                 }}
               >
@@ -354,15 +354,15 @@ export const MyCoursesModal: React.FC<MyCoursesModalProps> = ({
                 padding: '48px 24px',
                 background: 'var(--surface)',
                 border: '1.5px dashed var(--bd-slate-300)',
-                borderRadius: '12px'
+                borderRadius: 'var(--radius-md)'
               }}
             >
               <div style={{ fontSize: '3rem', marginBottom: '12px' }}>🔒</div>
-              <h3 style={{ margin: '0 0 6px', fontSize: '1.25rem', fontWeight: 800, color: 'var(--fg-slate-900)' }}>
+              <h3 style={{ margin: '0 0 6px', fontSize: '1.25rem', fontWeight: 700, color: 'var(--fg-slate-900)' }}>
                 Please Sign In to View Your Courses
               </h3>
               <p style={{ margin: '0 0 20px', fontSize: '0.875rem', color: 'var(--fg-slate-500)', maxWidth: '420px', marginLeft: 'auto', marginRight: 'auto' }}>
-                Your purchases, mock test series passes, and payment verification records are linked to your candidate account.
+                Your purchases, mock test series passes, and payment verification records are linked to your account.
               </p>
               <button
                 onClick={() => {
@@ -370,15 +370,15 @@ export const MyCoursesModal: React.FC<MyCoursesModalProps> = ({
                   onOpenAuth();
                 }}
                 style={{
-                  background: 'linear-gradient(135deg, var(--tw-sky-600) 0%, var(--tw-sky-700) 100%)',
+                  background: 'var(--tw-sky-600)',
                   color: '#ffffff',
                   border: 'none',
-                  borderRadius: '8px',
+                  borderRadius: 'var(--radius-md)',
                   padding: '10px 24px',
                   fontSize: '0.875rem',
-                  fontWeight: 800,
+                  fontWeight: 600,
                   cursor: 'pointer',
-                  boxShadow: '0 2px 8px rgba(2, 132, 199, 0.35)'
+                  boxShadow: 'var(--shadow-md)'
                 }}
               >
                 🔑 Login / Sign In (लॉगिन करें)
@@ -387,7 +387,7 @@ export const MyCoursesModal: React.FC<MyCoursesModalProps> = ({
           ) : loading ? (
             <div style={{ textAlign: 'center', padding: '50px 20px', color: 'var(--fg-slate-500)' }}>
               <div style={{ fontSize: '2.1rem', marginBottom: '10px', animation: 'spin 1.5s linear infinite' }}>⏳</div>
-              <div style={{ fontWeight: 700, fontSize: '0.95rem' }}>Loading your courses and passes...</div>
+              <div style={{ fontWeight: 600, fontSize: '0.95rem' }}>Loading your courses and passes...</div>
             </div>
           ) : courses.length === 0 ? (
             /* Empty State */
@@ -397,16 +397,16 @@ export const MyCoursesModal: React.FC<MyCoursesModalProps> = ({
                 padding: '44px 20px',
                 background: 'var(--surface)',
                 border: '1.5px dashed var(--bd-slate-300)',
-                borderRadius: '14px',
-                boxShadow: '0 2px 8px rgba(0,0,0,0.03)'
+                borderRadius: 'var(--radius-lg)',
+                boxShadow: 'var(--shadow-md)'
               }}
             >
               <div style={{ fontSize: '3rem', marginBottom: '12px' }}>🎯</div>
-              <h3 style={{ margin: '0 0 6px', fontSize: '1.25rem', fontWeight: 900, color: 'var(--fg-slate-900)' }}>
+              <h3 style={{ margin: '0 0 6px', fontSize: '1.25rem', fontWeight: 700, color: 'var(--fg-slate-900)' }}>
                 No Enrolled Courses Found
               </h3>
               <p style={{ margin: '0 0 20px', fontSize: '0.875rem', color: 'var(--fg-slate-500)', maxWidth: '460px', marginLeft: 'auto', marginRight: 'auto', lineHeight: 1.5 }}>
-                You have not purchased any examination passes yet. Unlock official mock test series, bilingual typing simulators, and benchmark accuracy grading.
+                You have not purchased any exam passes yet. Unlock mock test series, bilingual typing simulators, and benchmark accuracy grading.
               </p>
               <button
                 onClick={() => {
@@ -417,12 +417,12 @@ export const MyCoursesModal: React.FC<MyCoursesModalProps> = ({
                   background: 'linear-gradient(135deg, var(--tw-violet-600) 0%, var(--tw-indigo-600) 100%)',
                   color: '#ffffff',
                   border: 'none',
-                  borderRadius: '10px',
+                  borderRadius: 'var(--radius-md)',
                   padding: '12px 28px',
                   fontSize: '0.95rem',
-                  fontWeight: 800,
+                  fontWeight: 600,
                   cursor: 'pointer',
-                  boxShadow: '0 4px 14px rgba(79, 70, 229, 0.35)',
+                  boxShadow: 'var(--shadow-md)',
                   display: 'inline-flex',
                   alignItems: 'center',
                   gap: '8px'
@@ -495,7 +495,7 @@ export const MyCoursesModal: React.FC<MyCoursesModalProps> = ({
                     style={{
                       background: 'var(--surface)',
                       border: c.isApproved && !c.isExpired ? '2px solid var(--bd-green-300)' : '1px solid var(--bd-slate-200)',
-                      borderRadius: '14px',
+                      borderRadius: 'var(--radius-lg)',
                       padding: '18px 20px',
                       boxShadow: c.isApproved && !c.isExpired
                         ? '0 4px 16px rgba(34, 197, 94, 0.12)'
@@ -513,7 +513,7 @@ export const MyCoursesModal: React.FC<MyCoursesModalProps> = ({
                           style={{
                             width: '46px',
                             height: '46px',
-                            borderRadius: '12px',
+                            borderRadius: 'var(--radius-md)',
                             background: c.isApproved && !c.isExpired ? 'var(--bg-green-50)' : 'var(--bg-slate-50)',
                             border: `1.5px solid ${c.isApproved && !c.isExpired ? 'var(--bd-green-300)' : 'var(--bd-slate-300)'}`,
                             display: 'flex',
@@ -527,7 +527,7 @@ export const MyCoursesModal: React.FC<MyCoursesModalProps> = ({
                         </div>
                         <div>
                           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-                            <h3 style={{ margin: 0, fontSize: '1rem', fontWeight: 900, color: 'var(--fg-slate-900)' }}>
+                            <h3 style={{ margin: 0, fontSize: '1rem', fontWeight: 600, color: 'var(--fg-slate-900)' }}>
                               {dest.examTitle || c.planName}
                             </h3>
                             {dest.badge && (
@@ -536,9 +536,9 @@ export const MyCoursesModal: React.FC<MyCoursesModalProps> = ({
                                   background: 'var(--bg-sky-100)',
                                   color: 'var(--fg-sky-600)',
                                   fontSize: '0.75rem',
-                                  fontWeight: 800,
+                                  fontWeight: 600,
                                   padding: '2px 8px',
-                                  borderRadius: '6px'
+                                  borderRadius: 'var(--radius-sm)'
                                 }}
                               >
                                 {dest.badge}
@@ -562,21 +562,21 @@ export const MyCoursesModal: React.FC<MyCoursesModalProps> = ({
                             border: `1px solid ${statusBadge.border}`,
                             color: statusBadge.text,
                             padding: '4px 12px',
-                            borderRadius: '20px',
+                            borderRadius: 'var(--radius-lg)',
                             fontSize: '0.75rem',
-                            fontWeight: 900,
+                            fontWeight: 600,
                             letterSpacing: '0.5px'
                           }}
                         >
                           {statusBadge.label}
                         </span>
                         {c.isApproved && !c.isExpired && c.daysRemaining !== null && (
-                          <span style={{ fontSize: '0.75rem', color: 'var(--fg-green-600)', fontWeight: 700 }}>
+                          <span style={{ fontSize: '0.75rem', color: 'var(--fg-green-600)', fontWeight: 600 }}>
                             ⏳ {c.daysRemaining} days left {expiryFormatted ? `(till ${expiryFormatted})` : ''}
                           </span>
                         )}
                         {c.isExpired && expiryFormatted && (
-                          <span style={{ fontSize: '0.75rem', color: 'var(--fg-red-600)', fontWeight: 700 }}>
+                          <span style={{ fontSize: '0.75rem', color: 'var(--fg-red-600)', fontWeight: 600 }}>
                             Expired on {expiryFormatted}
                           </span>
                         )}
@@ -591,22 +591,22 @@ export const MyCoursesModal: React.FC<MyCoursesModalProps> = ({
                         gap: '8px 16px',
                         background: 'var(--bg-slate-50)',
                         padding: '10px 14px',
-                        borderRadius: '8px',
+                        borderRadius: 'var(--radius-md)',
                         fontSize: '0.8rem',
                         color: 'var(--fg-slate-600)'
                       }}
                     >
                       <span style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-                        <span style={{ color: 'var(--fg-green-600)', fontWeight: 900 }}>✓</span> Full Mock Test Series
+                        <span style={{ color: 'var(--fg-green-600)', fontWeight: 700 }}>✓</span> Full Mock Test Series
                       </span>
                       <span style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-                        <span style={{ color: 'var(--fg-green-600)', fontWeight: 900 }}>✓</span> Official Accuracy & Net WPM Grading
+                        <span style={{ color: 'var(--fg-green-600)', fontWeight: 700 }}>✓</span> Accuracy and net WPM scoring
                       </span>
                       <span style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-                        <span style={{ color: 'var(--fg-green-600)', fontWeight: 900 }}>✓</span> AI-Calibrated Passages
+                        <span style={{ color: 'var(--fg-green-600)', fontWeight: 700 }}>✓</span> AI-Calibrated Passages
                       </span>
                       <span style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-                        <span style={{ color: 'var(--fg-green-600)', fontWeight: 900 }}>✓</span> Instant Scorecard & Keystroke Audit
+                        <span style={{ color: 'var(--fg-green-600)', fontWeight: 700 }}>✓</span> Instant Scorecard & Keystroke Audit
                       </span>
                     </div>
 
@@ -664,7 +664,7 @@ export const MyCoursesModal: React.FC<MyCoursesModalProps> = ({
                         style={{
                           background: 'var(--bg-red-50)',
                           border: '1px solid var(--bd-red-300)',
-                          borderRadius: '8px',
+                          borderRadius: 'var(--radius-md)',
                           padding: '10px 14px',
                           fontSize: '0.8rem',
                           color: 'var(--fg-red-700)'
@@ -680,7 +680,7 @@ export const MyCoursesModal: React.FC<MyCoursesModalProps> = ({
                         style={{
                           background: 'var(--bg-amber-50)',
                           border: '1px solid var(--bd-amber-200)',
-                          borderRadius: '8px',
+                          borderRadius: 'var(--radius-md)',
                           padding: '10px 14px',
                           fontSize: '0.8rem',
                           color: 'var(--fg-amber-800)',
@@ -703,10 +703,10 @@ export const MyCoursesModal: React.FC<MyCoursesModalProps> = ({
                               background: 'var(--tw-blue-600)',
                               color: '#ffffff',
                               padding: '5px 12px',
-                              borderRadius: '6px',
+                              borderRadius: 'var(--radius-sm)',
                               textDecoration: 'none',
                               fontSize: '0.75rem',
-                              fontWeight: 800,
+                              fontWeight: 600,
                               display: 'inline-flex',
                               alignItems: 'center',
                               gap: '4px'
@@ -725,18 +725,18 @@ export const MyCoursesModal: React.FC<MyCoursesModalProps> = ({
                           <button
                             onClick={() => handleDirectOpenCourse(c)}
                             style={{
-                              background: 'linear-gradient(135deg, var(--tw-green-600) 0%, var(--tw-green-700) 100%)',
+                              background: 'var(--tw-green-600)',
                               color: '#ffffff',
                               border: 'none',
-                              borderRadius: '10px',
+                              borderRadius: 'var(--radius-md)',
                               padding: '11px 22px',
                               fontSize: '0.95rem',
-                              fontWeight: 900,
+                              fontWeight: 600,
                               cursor: 'pointer',
                               display: 'inline-flex',
                               alignItems: 'center',
                               gap: '8px',
-                              boxShadow: '0 4px 14px rgba(22, 163, 74, 0.35)',
+                              boxShadow: 'var(--shadow-md)',
                               flex: '1 1 200px',
                               justifyContent: 'center'
                             }}
@@ -751,10 +751,10 @@ export const MyCoursesModal: React.FC<MyCoursesModalProps> = ({
                               background: 'var(--surface)',
                               border: '1.5px solid var(--tw-sky-600)',
                               color: 'var(--fg-sky-600)',
-                              borderRadius: '10px',
+                              borderRadius: 'var(--radius-md)',
                               padding: '11px 18px',
                               fontSize: '0.875rem',
-                              fontWeight: 800,
+                              fontWeight: 600,
                               cursor: 'pointer',
                               display: 'inline-flex',
                               alignItems: 'center',
@@ -773,13 +773,13 @@ export const MyCoursesModal: React.FC<MyCoursesModalProps> = ({
                             onOpenPayment(c.selectedExamId);
                           }}
                           style={{
-                            background: 'linear-gradient(135deg, var(--tw-amber-500) 0%, var(--tw-amber-600) 100%)',
+                            background: 'var(--tw-amber-500)',
                             color: '#ffffff',
                             border: 'none',
-                            borderRadius: '10px',
+                            borderRadius: 'var(--radius-md)',
                             padding: '10px 20px',
                             fontSize: '0.875rem',
-                            fontWeight: 800,
+                            fontWeight: 600,
                             cursor: 'pointer',
                             display: 'inline-flex',
                             alignItems: 'center',
@@ -799,10 +799,10 @@ export const MyCoursesModal: React.FC<MyCoursesModalProps> = ({
                             background: 'var(--tw-red-600)',
                             color: '#ffffff',
                             border: 'none',
-                            borderRadius: '10px',
+                            borderRadius: 'var(--radius-md)',
                             padding: '10px 20px',
                             fontSize: '0.875rem',
-                            fontWeight: 800,
+                            fontWeight: 600,
                             cursor: 'pointer',
                             display: 'inline-flex',
                             alignItems: 'center',
@@ -849,9 +849,9 @@ export const MyCoursesModal: React.FC<MyCoursesModalProps> = ({
                 border: '1px solid var(--bd-slate-300)',
                 color: 'var(--fg-slate-700)',
                 padding: '8px 18px',
-                borderRadius: '8px',
+                borderRadius: 'var(--radius-md)',
                 fontSize: '0.875rem',
-                fontWeight: 700,
+                fontWeight: 600,
                 cursor: 'pointer'
               }}
             >

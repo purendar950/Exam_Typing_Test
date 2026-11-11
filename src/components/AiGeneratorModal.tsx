@@ -233,13 +233,13 @@ export const AiGeneratorModal: React.FC<AiGeneratorModalProps> = ({
       <div
         style={{
           backgroundColor: 'var(--surface)',
-          borderRadius: '16px',
+          borderRadius: 'var(--radius-lg)',
           width: '100%',
           maxWidth: '780px',
           maxHeight: '90vh',
           display: 'flex',
           flexDirection: 'column',
-          boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+          boxShadow: 'var(--shadow-lg)',
           overflow: 'hidden'
         }}
         onClick={(e) => e.stopPropagation()}
@@ -248,7 +248,7 @@ export const AiGeneratorModal: React.FC<AiGeneratorModalProps> = ({
         <div
           style={{
             padding: '18px 24px',
-            background: 'linear-gradient(135deg, var(--tw-sky-600) 0%, var(--tw-sky-700) 100%)',
+            background: 'var(--tw-sky-600)',
             color: '#ffffff',
             display: 'flex',
             alignItems: 'center',
@@ -262,7 +262,7 @@ export const AiGeneratorModal: React.FC<AiGeneratorModalProps> = ({
                 AI Live Test Generator (AR Typing Standard)
               </h2>
               <p style={{ margin: '2px 0 0 0', fontSize: '0.8rem', color: 'var(--tw-sky-100)' }}>
-                Generate 8 Daily Official Tests • 4 English & 4 Hindi (Medium & Hard) • 520–580 Words
+                Generate 8 Daily Practice Tests • 4 English & 4 Hindi (Medium & Hard) • 520–580 Words
               </p>
             </div>
           </div>
@@ -302,7 +302,7 @@ export const AiGeneratorModal: React.FC<AiGeneratorModalProps> = ({
               border: 'none',
               background: 'transparent',
               fontSize: '0.875rem',
-              fontWeight: 600,
+              fontWeight: 500,
               cursor: 'pointer',
               borderBottom: activeTab === 'generate' ? '2.5px solid var(--tw-sky-600)' : '2.5px solid transparent',
               color: activeTab === 'generate' ? 'var(--fg-sky-600)' : 'var(--fg-slate-500)'
@@ -317,7 +317,7 @@ export const AiGeneratorModal: React.FC<AiGeneratorModalProps> = ({
               border: 'none',
               background: 'transparent',
               fontSize: '0.875rem',
-              fontWeight: 600,
+              fontWeight: 500,
               cursor: 'pointer',
               borderBottom: activeTab === 'single' ? '2.5px solid var(--tw-sky-600)' : '2.5px solid transparent',
               color: activeTab === 'single' ? 'var(--fg-sky-600)' : 'var(--fg-slate-500)'
@@ -332,7 +332,7 @@ export const AiGeneratorModal: React.FC<AiGeneratorModalProps> = ({
               border: 'none',
               background: 'transparent',
               fontSize: '0.875rem',
-              fontWeight: 600,
+              fontWeight: 500,
               cursor: 'pointer',
               borderBottom: activeTab === 'settings' ? '2.5px solid var(--tw-sky-600)' : '2.5px solid transparent',
               color: activeTab === 'settings' ? 'var(--fg-sky-600)' : 'var(--fg-slate-500)'
@@ -351,22 +351,22 @@ export const AiGeneratorModal: React.FC<AiGeneratorModalProps> = ({
                 style={{
                   background: 'var(--bg-sky-50)',
                   border: '1px solid var(--bd-sky-200)',
-                  borderRadius: '12px',
+                  borderRadius: 'var(--radius-md)',
                   padding: '16px',
                   marginBottom: '20px'
                 }}
               >
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '10px' }}>
                   <div>
-                    <h3 style={{ margin: 0, fontSize: '1rem', fontWeight: 700, color: 'var(--fg-sky-700)' }}>
-                      📅 Daily Live Examination Schedule
+                    <h3 style={{ margin: 0, fontSize: '1rem', fontWeight: 600, color: 'var(--fg-sky-700)' }}>
+                      📅 Daily Live Exam Schedule
                     </h3>
                     <p style={{ margin: '4px 0 0 0', fontSize: '0.8rem', color: 'var(--fg-sky-600)' }}>
                       8 Tests daily calibrated to official UP Police CO & ASI hall benchmark.
                     </p>
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <label style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--fg-slate-700)' }}>Exam Date:</label>
+                    <label style={{ fontSize: '0.8rem', fontWeight: 500, color: 'var(--fg-slate-700)' }}>Exam Date:</label>
                     <input
                       type="date"
                       value={selectedDate}
@@ -374,9 +374,9 @@ export const AiGeneratorModal: React.FC<AiGeneratorModalProps> = ({
                       style={{
                         padding: '6px 10px',
                         border: '1.5px solid var(--bd-slate-300)',
-                        borderRadius: '6px',
+                        borderRadius: 'var(--radius-sm)',
                         fontSize: '0.875rem',
-                        fontWeight: 600
+                        fontWeight: 500
                       }}
                     />
                   </div>
@@ -400,7 +400,7 @@ export const AiGeneratorModal: React.FC<AiGeneratorModalProps> = ({
                         style={{
                           background: 'var(--surface)',
                           border: '1px solid var(--bd-slate-200)',
-                          borderRadius: '8px',
+                          borderRadius: 'var(--radius-md)',
                           padding: '8px 10px',
                           fontSize: '0.8rem'
                         }}
@@ -413,8 +413,8 @@ export const AiGeneratorModal: React.FC<AiGeneratorModalProps> = ({
                             style={{
                               fontSize: '0.75rem',
                               padding: '2px 6px',
-                              borderRadius: '4px',
-                              fontWeight: 700,
+                              borderRadius: 'var(--radius-sm)',
+                              fontWeight: 600,
                               background: isHard ? 'var(--bg-red-100)' : 'var(--bg-blue-100)',
                               color: isHard ? 'var(--fg-red-800)' : 'var(--fg-blue-800)'
                             }}
@@ -435,16 +435,16 @@ export const AiGeneratorModal: React.FC<AiGeneratorModalProps> = ({
                   style={{
                     background: 'var(--bg-amber-100)',
                     border: '1px solid var(--bd-amber-200)',
-                    borderRadius: '12px',
+                    borderRadius: 'var(--radius-md)',
                     padding: '16px',
                     marginBottom: '20px'
                   }}
                 >
                   <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
-                    <span style={{ fontSize: '0.875rem', fontWeight: 700, color: 'var(--fg-amber-800)' }}>
+                    <span style={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--fg-amber-800)' }}>
                       ⚡ Generating Tests ({generationProgress.completed} / {generationProgress.total})
                     </span>
-                    <span style={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--fg-amber-800)' }}>
+                    <span style={{ fontSize: '0.875rem', fontWeight: 500, color: 'var(--fg-amber-800)' }}>
                       {Math.round((generationProgress.completed / generationProgress.total) * 100)}%
                     </span>
                   </div>
@@ -452,7 +452,7 @@ export const AiGeneratorModal: React.FC<AiGeneratorModalProps> = ({
                     style={{
                       height: '8px',
                       background: 'var(--bg-amber-200)',
-                      borderRadius: '4px',
+                      borderRadius: 'var(--radius-sm)',
                       overflow: 'hidden',
                       marginBottom: '8px'
                     }}
@@ -478,19 +478,19 @@ export const AiGeneratorModal: React.FC<AiGeneratorModalProps> = ({
                   style={{
                     flex: 1,
                     minWidth: '220px',
-                    background: isGenerating ? 'var(--tw-slate-400)' : 'linear-gradient(135deg, var(--tw-sky-600) 0%, var(--tw-sky-700) 100%)',
+                    background: isGenerating ? 'var(--tw-slate-400)' : 'var(--tw-sky-600)',
                     color: '#ffffff',
                     border: 'none',
-                    borderRadius: '10px',
+                    borderRadius: 'var(--radius-md)',
                     padding: '12px 20px',
                     fontSize: '0.95rem',
-                    fontWeight: 700,
+                    fontWeight: 600,
                     cursor: isGenerating ? 'not-allowed' : 'pointer',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
                     gap: '8px',
-                    boxShadow: '0 4px 6px -1px rgba(2, 132, 199, 0.3)'
+                    boxShadow: 'var(--shadow-md)'
                   }}
                 >
                   <span>⚡</span>
@@ -503,10 +503,10 @@ export const AiGeneratorModal: React.FC<AiGeneratorModalProps> = ({
                     background: 'var(--bg-slate-50)',
                     color: 'var(--fg-slate-700)',
                     border: '1.5px solid var(--bd-slate-300)',
-                    borderRadius: '10px',
+                    borderRadius: 'var(--radius-md)',
                     padding: '12px 18px',
                     fontSize: '0.875rem',
-                    fontWeight: 600,
+                    fontWeight: 500,
                     cursor: 'pointer',
                     display: 'flex',
                     alignItems: 'center',
@@ -520,7 +520,7 @@ export const AiGeneratorModal: React.FC<AiGeneratorModalProps> = ({
 
               {/* Current Active Tests Preview */}
               <div>
-                <h4 style={{ margin: '0 0 10px 0', fontSize: '0.875rem', fontWeight: 700, color: 'var(--fg-slate-700)' }}>
+                <h4 style={{ margin: '0 0 10px 0', fontSize: '0.875rem', fontWeight: 600, color: 'var(--fg-slate-700)' }}>
                   📋 Tests for {selectedDate} ({generatedPassages.length} Available)
                 </h4>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
@@ -537,13 +537,13 @@ export const AiGeneratorModal: React.FC<AiGeneratorModalProps> = ({
                           padding: '10px 14px',
                           background: 'var(--bg-slate-50)',
                           border: '1px solid var(--bd-slate-200)',
-                          borderRadius: '8px'
+                          borderRadius: 'var(--radius-md)'
                         }}
                       >
                         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                           <span style={{ fontSize: '1.25rem' }}>{isHindi ? '🇮🇳' : '🇬🇧'}</span>
                           <div>
-                            <div style={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--fg-slate-800)' }}>
+                            <div style={{ fontSize: '0.875rem', fontWeight: 500, color: 'var(--fg-slate-800)' }}>
                               #{idx + 1}. {p.title}
                             </div>
                             <div style={{ fontSize: '0.75rem', color: 'var(--fg-slate-500)' }}>
@@ -555,9 +555,9 @@ export const AiGeneratorModal: React.FC<AiGeneratorModalProps> = ({
                         <span
                           style={{
                             fontSize: '0.75rem',
-                            fontWeight: 700,
+                            fontWeight: 600,
                             padding: '3px 8px',
-                            borderRadius: '6px',
+                            borderRadius: 'var(--radius-sm)',
                             background: isHard ? 'var(--bg-red-50)' : 'var(--bg-blue-50)',
                             color: isHard ? 'var(--fg-red-600)' : 'var(--fg-blue-600)'
                           }}
@@ -577,16 +577,16 @@ export const AiGeneratorModal: React.FC<AiGeneratorModalProps> = ({
                 style={{
                   background: 'linear-gradient(135deg, var(--bg-green-50) 0%, var(--bg-emerald-50) 100%)',
                   border: '1.5px solid var(--bd-green-300)',
-                  borderRadius: '12px',
+                  borderRadius: 'var(--radius-md)',
                   padding: '16px 20px',
                   marginBottom: '20px'
                 }}
               >
-                <h3 style={{ margin: 0, fontSize: '1rem', fontWeight: 800, color: 'var(--fg-green-900)' }}>
+                <h3 style={{ margin: 0, fontSize: '1rem', fontWeight: 600, color: 'var(--fg-green-900)' }}>
                   ⚡ AR Typing Single Test Generator (Medium & Hard Calibrated)
                 </h3>
                 <p style={{ margin: '4px 0 0 0', fontSize: '0.8rem', color: 'var(--fg-green-800)', lineHeight: 1.4 }}>
-                  Generate on-demand 15-minute examination tests calibrated strictly to official UP Police CO & ASI standards.
+                  Generate on-demand 15-minute exam tests calibrated strictly to official UP Police CO & ASI standards.
                   Medium passages provide balanced 500–540 word administrative prose; Hard passages feature 520–580 words of legal, forensic, and high-vocabulary complexity.
                 </p>
               </div>
@@ -595,7 +595,7 @@ export const AiGeneratorModal: React.FC<AiGeneratorModalProps> = ({
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '14px', marginBottom: '16px' }}>
                 {/* Language */}
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 700, color: 'var(--fg-slate-700)', marginBottom: '6px' }}>
+                  <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: 'var(--fg-slate-700)', marginBottom: '6px' }}>
                     Language & Keyboard Layout:
                   </label>
                   <select
@@ -604,10 +604,10 @@ export const AiGeneratorModal: React.FC<AiGeneratorModalProps> = ({
                     style={{
                       width: '100%',
                       padding: '9px 12px',
-                      borderRadius: '8px',
+                      borderRadius: 'var(--radius-md)',
                       border: '1.5px solid var(--bd-slate-300)',
                       fontSize: '0.875rem',
-                      fontWeight: 600,
+                      fontWeight: 500,
                       background: 'var(--surface)',
                       color: 'var(--fg-slate-900)'
                     }}
@@ -620,7 +620,7 @@ export const AiGeneratorModal: React.FC<AiGeneratorModalProps> = ({
 
                 {/* Difficulty */}
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 700, color: 'var(--fg-slate-700)', marginBottom: '6px' }}>
+                  <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: 'var(--fg-slate-700)', marginBottom: '6px' }}>
                     Difficulty Standard (AR Typing):
                   </label>
                   <select
@@ -635,23 +635,23 @@ export const AiGeneratorModal: React.FC<AiGeneratorModalProps> = ({
                     style={{
                       width: '100%',
                       padding: '9px 12px',
-                      borderRadius: '8px',
+                      borderRadius: 'var(--radius-md)',
                       border: singleDifficulty === 'hard' ? '1.5px solid var(--tw-red-400)' : '1.5px solid var(--bd-slate-300)',
                       fontSize: '0.875rem',
-                      fontWeight: 700,
+                      fontWeight: 600,
                       background: singleDifficulty === 'hard' ? 'var(--bg-red-50)' : 'var(--surface)',
                       color: singleDifficulty === 'hard' ? 'var(--fg-red-700)' : 'var(--fg-slate-900)'
                     }}
                   >
-                    <option value="medium">🟡 MEDIUM (Balanced Official Exam Standard)</option>
+                    <option value="medium">🟡 MEDIUM (Balanced Exam Standard)</option>
                     <option value="hard">🔴 HARD (AR Typing Kathin: Longer Words 8–16+ letters, AWL ≥ 7.2)</option>
                   </select>
                 </div>
 
                 {/* Exam Category */}
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 700, color: 'var(--fg-slate-700)', marginBottom: '6px' }}>
-                    Target Examination Series:
+                  <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: 'var(--fg-slate-700)', marginBottom: '6px' }}>
+                    Target Exam Series:
                   </label>
                   <select
                     value={singleCategory}
@@ -659,10 +659,10 @@ export const AiGeneratorModal: React.FC<AiGeneratorModalProps> = ({
                     style={{
                       width: '100%',
                       padding: '9px 12px',
-                      borderRadius: '8px',
+                      borderRadius: 'var(--radius-md)',
                       border: '1.5px solid var(--bd-slate-300)',
                       fontSize: '0.875rem',
-                      fontWeight: 600,
+                      fontWeight: 500,
                       background: 'var(--surface)',
                       color: 'var(--fg-slate-900)'
                     }}
@@ -682,7 +682,7 @@ export const AiGeneratorModal: React.FC<AiGeneratorModalProps> = ({
                         color: 'var(--fg-sky-700)',
                         background: 'var(--bg-sky-50)',
                         border: '1px solid var(--bd-sky-200)',
-                        borderRadius: '6px',
+                        borderRadius: 'var(--radius-sm)',
                         padding: '5px 8px'
                       }}
                     >
@@ -693,7 +693,7 @@ export const AiGeneratorModal: React.FC<AiGeneratorModalProps> = ({
 
                 {/* Word Count */}
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 700, color: 'var(--fg-slate-700)', marginBottom: '6px' }}>
+                  <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: 'var(--fg-slate-700)', marginBottom: '6px' }}>
                     Target Words: <span style={{ color: 'var(--fg-sky-600)' }}>{singleWords} words</span>
                   </label>
                   <input
@@ -716,7 +716,7 @@ export const AiGeneratorModal: React.FC<AiGeneratorModalProps> = ({
 
               {/* Topic Input */}
               <div style={{ marginBottom: '14px' }}>
-                <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 700, color: 'var(--fg-slate-700)', marginBottom: '6px' }}>
+                <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: 'var(--fg-slate-700)', marginBottom: '6px' }}>
                   Passage Topic / Theme:
                 </label>
                 <input
@@ -727,7 +727,7 @@ export const AiGeneratorModal: React.FC<AiGeneratorModalProps> = ({
                   style={{
                     width: '100%',
                     padding: '10px 14px',
-                    borderRadius: '8px',
+                    borderRadius: 'var(--radius-md)',
                     border: '1.5px solid var(--bd-slate-300)',
                     fontSize: '0.875rem',
                     fontWeight: 500,
@@ -737,7 +737,7 @@ export const AiGeneratorModal: React.FC<AiGeneratorModalProps> = ({
 
                 {/* Topic Suggestion Chips */}
                 <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginTop: '8px' }}>
-                  <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--fg-slate-500)', alignSelf: 'center' }}>
+                  <span style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--fg-slate-500)', alignSelf: 'center' }}>
                     Suggested ({selectedCatOption?.label.split(' ')[1] || 'Exam'}):
                   </span>
                   {currentSuggestedTopics.map((sugg) => (
@@ -748,10 +748,10 @@ export const AiGeneratorModal: React.FC<AiGeneratorModalProps> = ({
                       style={{
                         background: 'var(--bg-slate-100)',
                         border: '1px solid var(--bd-slate-300)',
-                        borderRadius: '16px',
+                        borderRadius: 'var(--radius-lg)',
                         padding: '3px 10px',
                         fontSize: '0.75rem',
-                        fontWeight: 600,
+                        fontWeight: 500,
                         color: 'var(--fg-slate-700)',
                         cursor: 'pointer'
                       }}
@@ -767,9 +767,9 @@ export const AiGeneratorModal: React.FC<AiGeneratorModalProps> = ({
                 <div
                   style={{
                     padding: '10px 14px',
-                    borderRadius: '8px',
+                    borderRadius: 'var(--radius-md)',
                     fontSize: '0.875rem',
-                    fontWeight: 600,
+                    fontWeight: 500,
                     marginBottom: '14px',
                     background: singleMessage.includes('❌') ? 'var(--bg-red-50)' : singleMessage.includes('⏳') ? 'var(--bg-amber-100)' : 'var(--bg-green-50)',
                     color: singleMessage.includes('❌') ? 'var(--fg-red-700)' : singleMessage.includes('⏳') ? 'var(--fg-amber-800)' : 'var(--fg-green-700)',
@@ -784,18 +784,18 @@ export const AiGeneratorModal: React.FC<AiGeneratorModalProps> = ({
                 onClick={handleGenerateSingleTest}
                 disabled={isGeneratingSingle}
                 style={{
-                  background: isGeneratingSingle ? 'var(--tw-slate-400)' : 'linear-gradient(135deg, var(--tw-sky-600) 0%, var(--tw-sky-700) 100%)',
+                  background: isGeneratingSingle ? 'var(--tw-slate-400)' : 'var(--tw-sky-600)',
                   color: '#ffffff',
                   border: 'none',
                   padding: '12px 24px',
-                  borderRadius: '8px',
+                  borderRadius: 'var(--radius-md)',
                   fontSize: '0.95rem',
-                  fontWeight: 700,
+                  fontWeight: 600,
                   cursor: isGeneratingSingle ? 'not-allowed' : 'pointer',
                   display: 'flex',
                   alignItems: 'center',
                   gap: '8px',
-                  boxShadow: '0 4px 6px -1px rgba(2, 132, 199, 0.25)',
+                  boxShadow: 'var(--shadow-md)',
                   marginBottom: '20px'
                 }}
               >
@@ -809,7 +809,7 @@ export const AiGeneratorModal: React.FC<AiGeneratorModalProps> = ({
                   style={{
                     background: 'var(--bg-slate-50)',
                     border: '1.5px solid var(--bd-slate-300)',
-                    borderRadius: '12px',
+                    borderRadius: 'var(--radius-md)',
                     padding: '18px',
                     marginTop: '16px'
                   }}
@@ -817,7 +817,7 @@ export const AiGeneratorModal: React.FC<AiGeneratorModalProps> = ({
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px', flexWrap: 'wrap', gap: '8px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                       <span style={{ fontSize: '1.25rem' }}>{singleResult.language.startsWith('hindi') ? '🇮🇳' : '🇬🇧'}</span>
-                      <h4 style={{ margin: 0, fontSize: '1rem', fontWeight: 800, color: 'var(--fg-slate-900)' }}>
+                      <h4 style={{ margin: 0, fontSize: '1rem', fontWeight: 600, color: 'var(--fg-slate-900)' }}>
                         {singleResult.title}
                       </h4>
                     </div>
@@ -825,19 +825,19 @@ export const AiGeneratorModal: React.FC<AiGeneratorModalProps> = ({
                       <span
                         style={{
                           fontSize: '0.75rem',
-                          fontWeight: 700,
+                          fontWeight: 600,
                           padding: '3px 8px',
-                          borderRadius: '6px',
+                          borderRadius: 'var(--radius-sm)',
                           background: singleResult.difficulty === 'hard' ? 'var(--bg-red-100)' : 'var(--bg-green-50)',
                           color: singleResult.difficulty === 'hard' ? 'var(--fg-red-700)' : 'var(--fg-green-700)'
                         }}
                       >
                         {singleResult.difficulty === 'hard' ? 'HARD • LONG WORDS' : 'MEDIUM'}
                       </span>
-                      <span style={{ fontSize: '0.75rem', fontWeight: 700, padding: '3px 8px', borderRadius: '6px', background: 'var(--bg-sky-100)', color: 'var(--fg-sky-700)' }}>
+                      <span style={{ fontSize: '0.75rem', fontWeight: 600, padding: '3px 8px', borderRadius: 'var(--radius-sm)', background: 'var(--bg-sky-100)', color: 'var(--fg-sky-700)' }}>
                         {singleResult.wordCount} words
                       </span>
-                      <span style={{ fontSize: '0.75rem', fontWeight: 700, padding: '3px 8px', borderRadius: '6px', background: 'var(--bg-slate-100)', color: 'var(--fg-slate-600)' }}>
+                      <span style={{ fontSize: '0.75rem', fontWeight: 600, padding: '3px 8px', borderRadius: 'var(--radius-sm)', background: 'var(--bg-slate-100)', color: 'var(--fg-slate-600)' }}>
                         ⏱️ 15:00
                       </span>
                     </div>
@@ -850,7 +850,7 @@ export const AiGeneratorModal: React.FC<AiGeneratorModalProps> = ({
                       padding: '12px',
                       background: 'var(--surface)',
                       border: '1px solid var(--bd-slate-200)',
-                      borderRadius: '8px',
+                      borderRadius: 'var(--radius-md)',
                       fontSize: '0.875rem',
                       lineHeight: 1.6,
                       color: 'var(--fg-slate-700)'
@@ -859,7 +859,7 @@ export const AiGeneratorModal: React.FC<AiGeneratorModalProps> = ({
                     {singleResult.text}
                   </div>
 
-                  <div style={{ marginTop: '12px', fontSize: '0.8rem', color: 'var(--fg-green-700)', fontWeight: 600 }}>
+                  <div style={{ marginTop: '12px', fontSize: '0.8rem', color: 'var(--fg-green-700)', fontWeight: 500 }}>
                     ✅ Test has been added to your local library and synced. You can find it in the test list!
                   </div>
                 </div>
@@ -869,7 +869,7 @@ export const AiGeneratorModal: React.FC<AiGeneratorModalProps> = ({
             <div>
               {/* Presets Row */}
               <div style={{ marginBottom: '16px' }}>
-                <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 700, color: 'var(--fg-slate-600)', marginBottom: '8px' }}>
+                <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: 'var(--fg-slate-600)', marginBottom: '8px' }}>
                   ⚡ Quick Provider Presets:
                 </label>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '8px' }}>
@@ -881,9 +881,9 @@ export const AiGeneratorModal: React.FC<AiGeneratorModalProps> = ({
                         padding: '8px 12px',
                         background: config.baseUrl === preset.baseUrl ? 'var(--bg-sky-100)' : 'var(--bg-slate-50)',
                         border: config.baseUrl === preset.baseUrl ? '1.5px solid var(--tw-sky-600)' : '1px solid var(--bd-slate-200)',
-                        borderRadius: '8px',
+                        borderRadius: 'var(--radius-md)',
                         fontSize: '0.8rem',
-                        fontWeight: 600,
+                        fontWeight: 500,
                         color: config.baseUrl === preset.baseUrl ? 'var(--fg-sky-700)' : 'var(--fg-slate-700)',
                         textAlign: 'left',
                         cursor: 'pointer'
@@ -899,7 +899,7 @@ export const AiGeneratorModal: React.FC<AiGeneratorModalProps> = ({
               {/* Form Inputs */}
               <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 700, color: 'var(--fg-slate-700)', marginBottom: '4px' }}>
+                  <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: 'var(--fg-slate-700)', marginBottom: '4px' }}>
                     API Base URL (OpenAI-Compatible endpoint):
                   </label>
                   <input
@@ -911,7 +911,7 @@ export const AiGeneratorModal: React.FC<AiGeneratorModalProps> = ({
                       width: '100%',
                       padding: '8px 12px',
                       border: '1.5px solid var(--bd-slate-300)',
-                      borderRadius: '8px',
+                      borderRadius: 'var(--radius-md)',
                       fontSize: '0.875rem'
                     }}
                   />
@@ -921,7 +921,7 @@ export const AiGeneratorModal: React.FC<AiGeneratorModalProps> = ({
                 </div>
 
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 700, color: 'var(--fg-slate-700)', marginBottom: '4px' }}>
+                  <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: 'var(--fg-slate-700)', marginBottom: '4px' }}>
                     API Key:
                   </label>
                   <div style={{ position: 'relative' }}>
@@ -934,7 +934,7 @@ export const AiGeneratorModal: React.FC<AiGeneratorModalProps> = ({
                         width: '100%',
                         padding: '8px 45px 8px 12px',
                         border: '1.5px solid var(--bd-slate-300)',
-                        borderRadius: '8px',
+                        borderRadius: 'var(--radius-md)',
                         fontSize: '0.875rem'
                       }}
                     />
@@ -962,7 +962,7 @@ export const AiGeneratorModal: React.FC<AiGeneratorModalProps> = ({
                 </div>
 
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 700, color: 'var(--fg-slate-700)', marginBottom: '4px' }}>
+                  <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: 'var(--fg-slate-700)', marginBottom: '4px' }}>
                     AI Model Identifier:
                   </label>
                   <input
@@ -974,7 +974,7 @@ export const AiGeneratorModal: React.FC<AiGeneratorModalProps> = ({
                       width: '100%',
                       padding: '8px 12px',
                       border: '1.5px solid var(--bd-slate-300)',
-                      borderRadius: '8px',
+                      borderRadius: 'var(--radius-md)',
                       fontSize: '0.875rem'
                     }}
                   />
@@ -985,9 +985,9 @@ export const AiGeneratorModal: React.FC<AiGeneratorModalProps> = ({
                   <div
                     style={{
                       padding: '10px 14px',
-                      borderRadius: '8px',
+                      borderRadius: 'var(--radius-md)',
                       fontSize: '0.8rem',
-                      fontWeight: 600,
+                      fontWeight: 500,
                       background: testStatus.success ? 'var(--bg-green-100)' : 'var(--bg-red-100)',
                       color: testStatus.success ? 'var(--fg-green-700)' : 'var(--fg-red-800)',
                       border: testStatus.success ? '1px solid var(--bd-green-300)' : '1px solid var(--bd-red-300)'
@@ -1001,9 +1001,9 @@ export const AiGeneratorModal: React.FC<AiGeneratorModalProps> = ({
                   <div
                     style={{
                       padding: '10px 14px',
-                      borderRadius: '8px',
+                      borderRadius: 'var(--radius-md)',
                       fontSize: '0.8rem',
-                      fontWeight: 600,
+                      fontWeight: 500,
                       background: 'var(--bg-green-100)',
                       color: 'var(--fg-green-700)',
                       border: '1px solid var(--bd-green-300)'
@@ -1022,9 +1022,9 @@ export const AiGeneratorModal: React.FC<AiGeneratorModalProps> = ({
                       padding: '10px 16px',
                       background: 'var(--bg-slate-100)',
                       border: '1.5px solid var(--bd-slate-300)',
-                      borderRadius: '8px',
+                      borderRadius: 'var(--radius-md)',
                       fontSize: '0.875rem',
-                      fontWeight: 600,
+                      fontWeight: 500,
                       cursor: 'pointer'
                     }}
                   >
@@ -1039,9 +1039,9 @@ export const AiGeneratorModal: React.FC<AiGeneratorModalProps> = ({
                       background: 'var(--tw-sky-600)',
                       color: '#ffffff',
                       border: 'none',
-                      borderRadius: '8px',
+                      borderRadius: 'var(--radius-md)',
                       fontSize: '0.875rem',
-                      fontWeight: 700,
+                      fontWeight: 600,
                       cursor: 'pointer'
                     }}
                   >

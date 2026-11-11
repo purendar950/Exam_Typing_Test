@@ -88,7 +88,7 @@ export const WpmProgressChart: React.FC<WpmProgressChartProps> = ({
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
           <span style={{ fontSize: '1.25rem' }}>📊</span>
           <div>
-            <h4 style={{ margin: 0, fontSize: '0.95rem', fontWeight: 800, color: 'var(--fg-slate-900)' }}>
+            <h4 style={{ margin: 0, fontSize: '0.95rem', fontWeight: 600, color: 'var(--fg-slate-900)' }}>
               Speed Trajectory (Last {data.length} Tests)
             </h4>
             <div style={{ fontSize: '0.75rem', color: 'var(--fg-slate-500)' }}>
@@ -100,17 +100,17 @@ export const WpmProgressChart: React.FC<WpmProgressChartProps> = ({
         <div style={{ display: 'flex', alignItems: 'center', gap: '14px', fontSize: '0.8rem' }}>
           <div>
             <span style={{ color: 'var(--fg-slate-500)' }}>Average: </span>
-            <strong style={{ color: 'var(--fg-sky-600)', fontWeight: 800 }}>{avgWpm} WPM</strong>
+            <strong style={{ color: 'var(--fg-sky-600)', fontWeight: 700 }}>{avgWpm} WPM</strong>
           </div>
           <div>
             <span style={{ color: 'var(--fg-slate-500)' }}>Peak: </span>
-            <strong style={{ color: 'var(--fg-green-600)', fontWeight: 800 }}>{highestWpm} WPM</strong>
+            <strong style={{ color: 'var(--fg-green-600)', fontWeight: 700 }}>{highestWpm} WPM</strong>
           </div>
           <div
             style={{
               padding: '2px 8px',
-              borderRadius: '12px',
-              fontWeight: 800,
+              borderRadius: 'var(--radius-md)',
+              fontWeight: 600,
               fontSize: '0.75rem',
               background: delta >= 0 ? 'var(--bg-green-100)' : 'var(--bg-red-100)',
               color: delta >= 0 ? 'var(--fg-green-700)' : 'var(--fg-red-700)'

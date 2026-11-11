@@ -17,7 +17,7 @@ export const ExclusiveOfferBanner: React.FC<ExclusiveOfferBannerProps> = ({
         background: 'linear-gradient(135deg, var(--tw-indigo-950) 0%, var(--tw-indigo-900) 35%, var(--tw-indigo-700) 70%, var(--tw-indigo-500) 100%)',
         color: '#ffffff',
         padding: '12px 16px',
-        boxShadow: '0 4px 20px rgba(49, 46, 129, 0.35)',
+        boxShadow: 'var(--shadow-lg)',
         position: 'relative',
         zIndex: 50,
         borderBottom: '2px solid var(--tw-amber-400)',
@@ -41,14 +41,14 @@ export const ExclusiveOfferBanner: React.FC<ExclusiveOfferBannerProps> = ({
             style={{
               width: '44px',
               height: '44px',
-              borderRadius: '12px',
-              background: 'linear-gradient(135deg, var(--tw-amber-400) 0%, var(--tw-amber-500) 100%)',
+              borderRadius: 'var(--radius-md)',
+              background: 'var(--tw-amber-400)',
               color: 'var(--tw-slate-900)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               fontSize: '1.6rem',
-              boxShadow: '0 2px 10px rgba(245, 158, 11, 0.4)',
+              boxShadow: 'var(--shadow-md)',
               flexShrink: 0
             }}
           >
@@ -62,21 +62,21 @@ export const ExclusiveOfferBanner: React.FC<ExclusiveOfferBannerProps> = ({
                   background: 'var(--tw-amber-400)',
                   color: 'var(--tw-slate-900)',
                   fontSize: '0.75rem',
-                  fontWeight: 900,
+                  fontWeight: 600,
                   padding: '2px 8px',
-                  borderRadius: '12px',
+                  borderRadius: 'var(--radius-md)',
                   letterSpacing: '0.5px',
                   textTransform: 'uppercase'
                 }}
               >
                 SPECIAL WELCOME OFFER
               </span>
-              <span style={{ fontSize: '0.75rem', color: 'var(--tw-indigo-200)', fontWeight: 600 }}>
-                {userName ? `Welcome, ${userName}! ` : ''}Exclusive Candidate Pricing
+              <span style={{ fontSize: '0.75rem', color: 'var(--tw-indigo-200)', fontWeight: 500 }}>
+                {userName ? `Welcome, ${userName}! ` : ''}Welcome offer
               </span>
             </div>
 
-            <div style={{ fontSize: '1rem', fontWeight: 800, color: '#ffffff', lineHeight: 1.3 }}>
+            <div style={{ fontSize: '1rem', fontWeight: 600, color: '#ffffff', lineHeight: 1.3 }}>
               <span>Unlock </span>
               <strong style={{ color: 'var(--tw-yellow-300)', textDecoration: 'underline' }}>ANY 1 Exam for 15 Days</strong>
               <span> at just </span>
@@ -97,18 +97,18 @@ export const ExclusiveOfferBanner: React.FC<ExclusiveOfferBannerProps> = ({
           <button
             onClick={onClaim}
             style={{
-              background: 'linear-gradient(135deg, var(--tw-green-500) 0%, var(--tw-green-600) 100%)',
+              background: 'var(--tw-green-500)',
               color: '#ffffff',
               border: 'none',
-              borderRadius: '24px',
+              borderRadius: 'var(--radius-lg)',
               padding: '8px 18px',
               fontSize: '0.875rem',
-              fontWeight: 800,
+              fontWeight: 600,
               cursor: 'pointer',
               display: 'inline-flex',
               alignItems: 'center',
               gap: '6px',
-              boxShadow: '0 2px 10px rgba(34, 197, 94, 0.45)',
+              boxShadow: 'var(--shadow-md)',
               transition: 'transform 0.15s ease',
               whiteSpace: 'nowrap'
             }}

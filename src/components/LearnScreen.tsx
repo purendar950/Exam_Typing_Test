@@ -100,14 +100,14 @@ export const LearnScreen: React.FC<LearnScreenProps> = ({ onBackToTests }) => {
       <div
         className="card"
         style={{
-          background: 'linear-gradient(135deg, var(--tw-sky-600) 0%, var(--tw-sky-700) 100%)',
+          background: 'var(--tw-sky-600)',
           color: 'white',
           marginBottom: '24px'
         }}
       >
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
           <div>
-            <h1 style={{ fontSize: '1.6rem', fontWeight: 800, marginBottom: '6px' }}>
+            <h1 style={{ fontSize: '1.6rem', fontWeight: 700, marginBottom: '6px' }}>
               Guided Finger & Muscle Memory Trainer
             </h1>
             <p style={{ opacity: 0.9, fontSize: '0.875rem' }}>
@@ -155,7 +155,7 @@ export const LearnScreen: React.FC<LearnScreenProps> = ({ onBackToTests }) => {
       <div style={{ display: 'grid', gridTemplateColumns: '260px 1fr', gap: '20px' }}>
         {/* Lesson List */}
         <div className="card" style={{ padding: '16px' }}>
-          <h3 style={{ fontSize: '0.95rem', fontWeight: 700, marginBottom: '12px', color: 'var(--text-muted)' }}>
+          <h3 style={{ fontSize: '0.95rem', fontWeight: 600, marginBottom: '12px', color: 'var(--text-muted)' }}>
             CHOOSE LESSON
           </h3>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
@@ -211,9 +211,9 @@ export const LearnScreen: React.FC<LearnScreenProps> = ({ onBackToTests }) => {
                   style={{
                     backgroundColor: isCurrent ? 'var(--bg-sky-200)' : isWrong ? 'var(--bg-red-100)' : 'transparent',
                     color: isCorrect ? 'var(--fg-green-600)' : isWrong ? 'var(--fg-red-600)' : isCurrent ? 'var(--fg-sky-700)' : 'var(--fg-slate-500)',
-                    borderRadius: '3px',
+                    borderRadius: 'var(--radius-sm)',
                     padding: '2px 3px',
-                    fontWeight: isCurrent ? 800 : 500,
+                    fontWeight: isCurrent ? 700 : 500,
                     textDecoration: isWrong ? 'underline' : 'none'
                   }}
                 >
@@ -259,7 +259,7 @@ export const LearnScreen: React.FC<LearnScreenProps> = ({ onBackToTests }) => {
                 textAlign: 'center'
               }}
             >
-              <h4 style={{ color: 'var(--fg-green-700)', fontWeight: 800, fontSize: '1.25rem', marginBottom: '4px' }}>
+              <h4 style={{ color: 'var(--fg-green-700)', fontWeight: 700, fontSize: '1.25rem', marginBottom: '4px' }}>
                 Drill Completed! 🎉
               </h4>
               <p style={{ color: 'var(--fg-green-800)', fontSize: '0.875rem', marginBottom: '12px' }}>

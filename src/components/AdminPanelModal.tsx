@@ -1138,15 +1138,15 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
             />
             <div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <h2 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 800, color: 'var(--tw-slate-50)', letterSpacing: '-0.3px' }}>
+                <h2 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 700, color: 'var(--tw-slate-50)', letterSpacing: '-0.3px' }}>
                   UPPRPB Examination Control Suite
                 </h2>
                 <span
                   style={{
                     fontSize: '0.75rem',
-                    fontWeight: 800,
+                    fontWeight: 600,
                     padding: '2px 8px',
-                    borderRadius: '12px',
+                    borderRadius: 'var(--radius-md)',
                     background: 'var(--tw-sky-700)',
                     color: 'var(--tw-sky-100)',
                     border: '1px solid var(--tw-sky-400)'
@@ -1180,7 +1180,7 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                       background: 'var(--tw-slate-800)',
                       border: '1px solid var(--tw-slate-700)',
                       padding: '4px 10px',
-                      borderRadius: '16px'
+                      borderRadius: 'var(--radius-lg)'
                     }}
                   >
                     <span>🛡️</span>
@@ -1196,9 +1196,9 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                     border: '1px solid var(--tw-red-500)',
                     color: 'var(--tw-red-300)',
                     padding: '5px 12px',
-                    borderRadius: '6px',
+                    borderRadius: 'var(--radius-sm)',
                     fontSize: '0.8rem',
-                    fontWeight: 600,
+                    fontWeight: 500,
                     cursor: 'pointer'
                   }}
                 >
@@ -1213,11 +1213,11 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
               style={{
                 background: isFullscreen ? 'rgba(56, 189, 248, 0.2)' : 'rgba(255, 255, 255, 0.1)',
                 border: '1px solid ' + (isFullscreen ? 'var(--tw-sky-400)' : 'rgba(255, 255, 255, 0.2)'),
-                borderRadius: '6px',
+                borderRadius: 'var(--radius-sm)',
                 padding: '5px 10px',
                 color: isFullscreen ? 'var(--tw-sky-400)' : '#ffffff',
                 fontSize: '0.8rem',
-                fontWeight: 600,
+                fontWeight: 500,
                 cursor: 'pointer',
                 display: 'flex',
                 alignItems: 'center',
@@ -1268,11 +1268,11 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
               style={{
                 background: 'var(--tw-slate-900)',
                 border: '1px solid var(--tw-slate-800)',
-                borderRadius: '16px',
+                borderRadius: 'var(--radius-lg)',
                 padding: '32px',
                 maxWidth: '480px',
                 width: '100%',
-                boxShadow: '0 20px 40px rgba(0,0,0,0.6)'
+                boxShadow: 'var(--shadow-lg)'
               }}
             >
               <div style={{ textAlign: 'center', marginBottom: '20px' }}>
@@ -1281,18 +1281,18 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                     width: '60px',
                     height: '60px',
                     borderRadius: '50%',
-                    background: 'linear-gradient(135deg, var(--tw-sky-600) 0%, var(--tw-sky-700) 100%)',
+                    background: 'var(--tw-sky-600)',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
                     fontSize: '1.8rem',
                     margin: '0 auto 14px auto',
-                    boxShadow: '0 8px 16px rgba(2, 132, 199, 0.35)'
+                    boxShadow: 'var(--shadow-lg)'
                   }}
                 >
                   🛡️
                 </div>
-                <h3 style={{ margin: '0 0 6px 0', fontSize: '1.25rem', fontWeight: 800, color: 'var(--tw-slate-50)' }}>
+                <h3 style={{ margin: '0 0 6px 0', fontSize: '1.25rem', fontWeight: 700, color: 'var(--tw-slate-50)' }}>
                   Firebase Admin Authentication
                 </h3>
                 <p style={{ margin: 0, fontSize: '0.8rem', color: 'var(--tw-slate-400)' }}>
@@ -1308,7 +1308,7 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                     border: '1px solid var(--tw-red-500)',
                     color: 'var(--tw-red-300)',
                     padding: '12px 14px',
-                    borderRadius: '8px',
+                    borderRadius: 'var(--radius-md)',
                     fontSize: '0.8rem',
                     marginBottom: '16px',
                     lineHeight: 1.4
@@ -1325,7 +1325,7 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                     border: '1px solid var(--tw-emerald-500)',
                     color: 'var(--tw-emerald-300)',
                     padding: '12px 14px',
-                    borderRadius: '8px',
+                    borderRadius: 'var(--radius-md)',
                     fontSize: '0.8rem',
                     marginBottom: '16px',
                     lineHeight: 1.4
@@ -1346,8 +1346,8 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                   background: 'var(--surface)',
                   color: 'var(--fg-slate-900)',
                   border: 'none',
-                  borderRadius: '8px',
-                  fontWeight: 700,
+                  borderRadius: 'var(--radius-md)',
+                  fontWeight: 600,
                   fontSize: '0.875rem',
                   cursor: fbAuthLoading ? 'not-allowed' : 'pointer',
                   display: 'flex',
@@ -1355,7 +1355,7 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                   justifyContent: 'center',
                   gap: '10px',
                   marginBottom: '16px',
-                  boxShadow: '0 2px 6px rgba(0,0,0,0.2)'
+                  boxShadow: 'var(--shadow-md)'
                 }}
               >
                 <svg width="18" height="18" viewBox="0 0 24 24">
@@ -1369,7 +1369,7 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
 
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px', margin: '16px 0' }}>
                 <div style={{ flex: 1, height: '1px', background: 'var(--tw-slate-700)' }} />
-                <span style={{ fontSize: '0.75rem', color: 'var(--fg-slate-500)', fontWeight: 700, letterSpacing: '0.5px' }}>
+                <span style={{ fontSize: '0.75rem', color: 'var(--fg-slate-500)', fontWeight: 600, letterSpacing: '0.5px' }}>
                   OR OFFICIAL ADMIN PASSWORD
                 </span>
                 <div style={{ flex: 1, height: '1px', background: 'var(--tw-slate-700)' }} />
@@ -1378,7 +1378,7 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
               {/* Email & Password Admin Form */}
               <form onSubmit={handleFirebaseAdminLogin} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 700, color: 'var(--tw-slate-300)', marginBottom: '5px' }}>
+                  <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: 'var(--tw-slate-300)', marginBottom: '5px' }}>
                     Admin Email Address:
                   </label>
                   <input
@@ -1392,7 +1392,7 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                       padding: '11px 12px',
                       background: 'var(--tw-slate-800)',
                       border: '1.5px solid var(--tw-slate-700)',
-                      borderRadius: '8px',
+                      borderRadius: 'var(--radius-md)',
                       color: '#ffffff',
                       fontSize: '0.875rem',
                       outline: 'none'
@@ -1402,7 +1402,7 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
 
                 <div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '5px' }}>
-                    <label style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--tw-slate-300)' }}>
+                    <label style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--tw-slate-300)' }}>
                       Admin Password:
                     </label>
                     <button
@@ -1414,7 +1414,7 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                         border: 'none',
                         color: 'var(--tw-sky-400)',
                         fontSize: '0.75rem',
-                        fontWeight: 600,
+                        fontWeight: 500,
                         cursor: isSendingReset ? 'not-allowed' : 'pointer',
                         padding: 0,
                         textDecoration: 'underline'
@@ -1435,7 +1435,7 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                         padding: '11px 40px 11px 12px',
                         background: 'var(--tw-slate-800)',
                         border: '1.5px solid var(--tw-slate-700)',
-                        borderRadius: '8px',
+                        borderRadius: 'var(--radius-md)',
                         color: '#ffffff',
                         fontSize: '0.875rem',
                         outline: 'none'
@@ -1468,15 +1468,15 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                   disabled={fbAuthLoading}
                   style={{
                     padding: '12px',
-                    background: fbAuthLoading ? 'var(--tw-slate-500)' : 'linear-gradient(135deg, var(--tw-sky-600) 0%, var(--tw-sky-700) 100%)',
+                    background: fbAuthLoading ? 'var(--tw-slate-500)' : 'var(--tw-sky-600)',
                     border: 'none',
-                    borderRadius: '8px',
+                    borderRadius: 'var(--radius-md)',
                     color: '#ffffff',
-                    fontWeight: 700,
+                    fontWeight: 600,
                     fontSize: '0.95rem',
                     cursor: fbAuthLoading ? 'not-allowed' : 'pointer',
                     marginTop: '6px',
-                    boxShadow: '0 4px 12px rgba(2, 132, 199, 0.3)'
+                    boxShadow: 'var(--shadow-md)'
                   }}
                 >
                   {fbAuthLoading ? 'Verifying Admin Credentials...' : '🔒 Authorize Admin Session →'}
@@ -1526,7 +1526,7 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                     border: 'none',
                     background: 'transparent',
                     fontSize: '0.875rem',
-                    fontWeight: 700,
+                    fontWeight: 600,
                     cursor: 'pointer',
                     whiteSpace: 'nowrap',
                     borderBottom: activeTab === tab.id ? '2.5px solid var(--tw-sky-400)' : '2.5px solid transparent',
@@ -1553,64 +1553,64 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                       marginBottom: '24px'
                     }}
                   >
-                    <div style={{ background: 'var(--surface)', border: '1px solid var(--bd-slate-200)', borderRadius: '12px', padding: '18px' }}>
-                      <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--fg-slate-500)', textTransform: 'uppercase' }}>
+                    <div style={{ background: 'var(--surface)', border: '1px solid var(--bd-slate-200)', borderRadius: 'var(--radius-md)', padding: '18px' }}>
+                      <div style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--fg-slate-500)', textTransform: 'uppercase' }}>
                         Question Bank Pool
                       </div>
-                      <div style={{ fontSize: '1.8rem', fontWeight: 800, color: 'var(--fg-slate-900)', margin: '4px 0' }}>
+                      <div style={{ fontSize: '1.8rem', fontWeight: 700, color: 'var(--fg-slate-900)', margin: '4px 0' }}>
                         {passages.length} Tests
                       </div>
-                      <div style={{ fontSize: '0.75rem', color: 'var(--fg-sky-600)', fontWeight: 600 }}>
+                      <div style={{ fontSize: '0.75rem', color: 'var(--fg-sky-600)', fontWeight: 500 }}>
                         234 Core + {customPassagesList.length} Custom Tests
                       </div>
                     </div>
 
-                    <div style={{ background: 'var(--surface)', border: '1px solid var(--bd-slate-200)', borderRadius: '12px', padding: '18px' }}>
-                      <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--fg-slate-500)', textTransform: 'uppercase' }}>
+                    <div style={{ background: 'var(--surface)', border: '1px solid var(--bd-slate-200)', borderRadius: 'var(--radius-md)', padding: '18px' }}>
+                      <div style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--fg-slate-500)', textTransform: 'uppercase' }}>
                         Registered Candidates
                       </div>
-                      <div style={{ fontSize: '1.8rem', fontWeight: 800, color: 'var(--fg-slate-900)', margin: '4px 0' }}>
+                      <div style={{ fontSize: '1.8rem', fontWeight: 700, color: 'var(--fg-slate-900)', margin: '4px 0' }}>
                         {candidatesList.length}
                       </div>
-                      <div style={{ fontSize: '0.75rem', color: 'var(--fg-emerald-500)', fontWeight: 600 }}>
+                      <div style={{ fontSize: '0.75rem', color: 'var(--fg-emerald-500)', fontWeight: 500 }}>
                         UP Police CO & ASI Registered
                       </div>
                     </div>
 
-                    <div style={{ background: 'var(--surface)', border: '1px solid var(--bd-slate-200)', borderRadius: '12px', padding: '18px' }}>
-                      <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--fg-slate-500)', textTransform: 'uppercase' }}>
+                    <div style={{ background: 'var(--surface)', border: '1px solid var(--bd-slate-200)', borderRadius: 'var(--radius-md)', padding: '18px' }}>
+                      <div style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--fg-slate-500)', textTransform: 'uppercase' }}>
                         Active AI Model
                       </div>
-                      <div style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--fg-slate-900)', margin: '8px 0' }}>
+                      <div style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--fg-slate-900)', margin: '8px 0' }}>
                         {aiConfig.model}
                       </div>
-                      <div style={{ fontSize: '0.75rem', color: aiConfig.apiKey ? 'var(--fg-emerald-500)' : 'var(--fg-amber-500)', fontWeight: 600 }}>
+                      <div style={{ fontSize: '0.75rem', color: aiConfig.apiKey ? 'var(--fg-emerald-500)' : 'var(--fg-amber-500)', fontWeight: 500 }}>
                         {aiConfig.apiKey ? '● Key Configured & Ready' : '⚠️ Missing API Key'}
                       </div>
                     </div>
 
-                    <div style={{ background: 'var(--surface)', border: '1px solid var(--bd-slate-200)', borderRadius: '12px', padding: '18px' }}>
-                      <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--fg-slate-500)', textTransform: 'uppercase' }}>
+                    <div style={{ background: 'var(--surface)', border: '1px solid var(--bd-slate-200)', borderRadius: 'var(--radius-md)', padding: '18px' }}>
+                      <div style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--fg-slate-500)', textTransform: 'uppercase' }}>
                         Firebase Admin Status
                       </div>
-                      <div style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--fg-slate-900)', margin: '8px 0' }}>
+                      <div style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--fg-slate-900)', margin: '8px 0' }}>
                         AUTHENTICATED 🛡️
                       </div>
-                      <div style={{ fontSize: '0.75rem', color: 'var(--fg-emerald-500)', fontWeight: 600 }}>
+                      <div style={{ fontSize: '0.75rem', color: 'var(--fg-emerald-500)', fontWeight: 500 }}>
                         {activeAdminUser?.email || 'Cloud Master Admin'}
                       </div>
                     </div>
                   </div>
 
                   {/* System Diagnostics Table */}
-                  <div style={{ background: 'var(--surface)', border: '1px solid var(--bd-slate-200)', borderRadius: '12px', padding: '20px', marginBottom: '20px' }}>
-                    <h3 style={{ margin: '0 0 14px 0', fontSize: '1rem', fontWeight: 800, color: 'var(--fg-slate-900)' }}>
+                  <div style={{ background: 'var(--surface)', border: '1px solid var(--bd-slate-200)', borderRadius: 'var(--radius-md)', padding: '20px', marginBottom: '20px' }}>
+                    <h3 style={{ margin: '0 0 14px 0', fontSize: '1rem', fontWeight: 600, color: 'var(--fg-slate-900)' }}>
                       ⚙️ Firebase Cloud Infrastructure & Diagnostic Telemetry
                     </h3>
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '14px' }}>
-                      <div style={{ padding: '12px', background: 'var(--bg-slate-50)', borderRadius: '8px', border: '1px solid var(--bd-slate-200)' }}>
-                        <div style={{ fontSize: '0.75rem', color: 'var(--fg-slate-500)', fontWeight: 700 }}>FIREBASE PROJECT ID</div>
-                        <div style={{ fontSize: '0.875rem', fontWeight: 700, color: 'var(--fg-slate-900)', marginTop: '2px' }}>
+                      <div style={{ padding: '12px', background: 'var(--bg-slate-50)', borderRadius: 'var(--radius-md)', border: '1px solid var(--bd-slate-200)' }}>
+                        <div style={{ fontSize: '0.75rem', color: 'var(--fg-slate-500)', fontWeight: 600 }}>FIREBASE PROJECT ID</div>
+                        <div style={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--fg-slate-900)', marginTop: '2px' }}>
                           upp-typing (Official UP Police Typing Mentor)
                         </div>
                         <div style={{ fontSize: '0.75rem', color: 'var(--fg-emerald-500)', marginTop: '4px' }}>
@@ -1618,9 +1618,9 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                         </div>
                       </div>
 
-                      <div style={{ padding: '12px', background: 'var(--bg-slate-50)', borderRadius: '8px', border: '1px solid var(--bd-slate-200)' }}>
-                        <div style={{ fontSize: '0.75rem', color: 'var(--fg-slate-500)', fontWeight: 700 }}>AI PROVIDER ENDPOINT</div>
-                        <div style={{ fontSize: '0.875rem', fontWeight: 700, color: 'var(--fg-slate-900)', marginTop: '2px', wordBreak: 'break-all' }}>
+                      <div style={{ padding: '12px', background: 'var(--bg-slate-50)', borderRadius: 'var(--radius-md)', border: '1px solid var(--bd-slate-200)' }}>
+                        <div style={{ fontSize: '0.75rem', color: 'var(--fg-slate-500)', fontWeight: 600 }}>AI PROVIDER ENDPOINT</div>
+                        <div style={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--fg-slate-900)', marginTop: '2px', wordBreak: 'break-all' }}>
                           {aiConfig.baseUrl}
                         </div>
                         <div style={{ fontSize: '0.75rem', color: 'var(--fg-sky-600)', marginTop: '4px' }}>
@@ -1639,7 +1639,7 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                 <div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
                     <div>
-                      <h3 style={{ margin: 0, fontSize: '1.25rem', fontWeight: 800, color: 'var(--fg-slate-900)' }}>
+                      <h3 style={{ margin: 0, fontSize: '1.25rem', fontWeight: 700, color: 'var(--fg-slate-900)' }}>
                         💬 Live Support Desk & Candidate Helpdesk
                       </h3>
                       <div style={{ fontSize: '0.8rem', color: 'var(--fg-slate-500)', marginTop: '2px' }}>
@@ -1652,10 +1652,10 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                           background: 'var(--tw-red-500)',
                           color: '#ffffff',
                           padding: '4px 10px',
-                          borderRadius: '12px',
+                          borderRadius: 'var(--radius-md)',
                           fontSize: '0.75rem',
-                          fontWeight: 800,
-                          boxShadow: '0 2px 8px rgba(239, 68, 68, 0.35)'
+                          fontWeight: 600,
+                          boxShadow: 'var(--shadow-md)'
                         }}
                       >
                         🚨 {unreadLiveChatsCount} UNREAD CONVERSATION{unreadLiveChatsCount > 1 ? 'S' : ''}
@@ -1670,9 +1670,9 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                       height: '620px',
                       maxHeight: 'calc(100vh - 240px)',
                       background: 'var(--surface)',
-                      borderRadius: '14px',
+                      borderRadius: 'var(--radius-lg)',
                       border: '1px solid var(--bd-slate-200)',
-                      boxShadow: '0 4px 16px rgba(0,0,0,0.04)',
+                      boxShadow: 'var(--shadow-lg)',
                       overflow: 'hidden'
                     }}
                   >
@@ -1696,7 +1696,7 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                           style={{
                             width: '100%',
                             padding: '8px 12px',
-                            borderRadius: '8px',
+                            borderRadius: 'var(--radius-md)',
                             border: '1px solid var(--bd-slate-300)',
                             fontSize: '0.8rem',
                             outline: 'none'
@@ -1734,7 +1734,7 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                                   }}
                                   style={{
                                     padding: '12px 14px',
-                                    borderRadius: '10px',
+                                    borderRadius: 'var(--radius-md)',
                                     marginBottom: '6px',
                                     cursor: 'pointer',
                                     background: isSelected ? 'var(--bg-sky-100)' : chat.unreadByAdmin ? 'var(--bg-red-50)' : 'var(--surface)',
@@ -1743,7 +1743,7 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                                   }}
                                 >
                                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '3px' }}>
-                                    <span style={{ fontWeight: 800, fontSize: '0.875rem', color: isSelected ? 'var(--fg-sky-700)' : 'var(--fg-slate-900)' }}>
+                                    <span style={{ fontWeight: 600, fontSize: '0.875rem', color: isSelected ? 'var(--fg-sky-700)' : 'var(--fg-slate-900)' }}>
                                       {chat.userName || 'Candidate'}
                                     </span>
                                     <span style={{ fontSize: '0.75rem', color: 'var(--tw-slate-400)' }}>
@@ -1755,7 +1755,7 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                                     style={{
                                       fontSize: '0.75rem',
                                       color: chat.unreadByAdmin ? 'var(--fg-red-700)' : 'var(--fg-slate-500)',
-                                      fontWeight: chat.unreadByAdmin ? 700 : 400,
+                                      fontWeight: chat.unreadByAdmin ? 600 : 400,
                                       whiteSpace: 'nowrap',
                                       overflow: 'hidden',
                                       textOverflow: 'ellipsis'
@@ -1774,9 +1774,9 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                                           background: 'var(--tw-red-500)',
                                           color: '#ffffff',
                                           padding: '1px 6px',
-                                          borderRadius: '8px',
+                                          borderRadius: 'var(--radius-md)',
                                           fontSize: '0.75rem',
-                                          fontWeight: 800
+                                          fontWeight: 600
                                         }}
                                       >
                                         NEW
@@ -1797,7 +1797,7 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                         return (
                           <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', color: 'var(--tw-slate-400)', gap: '8px' }}>
                             <div style={{ fontSize: '2.5rem' }}>💬</div>
-                            <div style={{ fontWeight: 700, fontSize: '0.95rem' }}>Select a candidate conversation</div>
+                            <div style={{ fontWeight: 600, fontSize: '0.95rem' }}>Select a candidate conversation</div>
                             <div style={{ fontSize: '0.8rem' }}>Click any candidate on the left to review their messages and send replies.</div>
                           </div>
                         );
@@ -1818,7 +1818,7 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                           >
                             <div>
                               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                <h4 style={{ margin: 0, fontSize: '0.95rem', fontWeight: 800, color: 'var(--fg-slate-900)' }}>
+                                <h4 style={{ margin: 0, fontSize: '0.95rem', fontWeight: 600, color: 'var(--fg-slate-900)' }}>
                                   {activeChat.userName || 'Candidate'}
                                 </h4>
                                 <span
@@ -1826,9 +1826,9 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                                     background: 'var(--bg-green-100)',
                                     color: 'var(--fg-green-700)',
                                     padding: '2px 8px',
-                                    borderRadius: '10px',
+                                    borderRadius: 'var(--radius-md)',
                                     fontSize: '0.75rem',
-                                    fontWeight: 700
+                                    fontWeight: 600
                                   }}
                                 >
                                   Active Thread
@@ -1847,10 +1847,10 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                               style={{
                                 background: 'var(--bg-slate-100)',
                                 border: '1px solid var(--bd-slate-300)',
-                                borderRadius: '6px',
+                                borderRadius: 'var(--radius-sm)',
                                 padding: '5px 10px',
                                 fontSize: '0.75rem',
-                                fontWeight: 700,
+                                fontWeight: 600,
                                 cursor: 'pointer',
                                 color: 'var(--fg-slate-600)'
                               }}
@@ -1885,7 +1885,7 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                                   <div
                                     style={{
                                       fontSize: '0.75rem',
-                                      fontWeight: 700,
+                                      fontWeight: 600,
                                       color: 'var(--fg-slate-500)',
                                       marginBottom: '3px',
                                       display: 'flex',
@@ -1898,9 +1898,9 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                                         background: isAdminMsg ? 'var(--tw-sky-600)' : 'var(--tw-slate-500)',
                                         color: '#ffffff',
                                         padding: '1px 5px',
-                                        borderRadius: '4px',
+                                        borderRadius: 'var(--radius-sm)',
                                         fontSize: '0.75rem',
-                                        fontWeight: 800
+                                        fontWeight: 600
                                       }}
                                     >
                                       {isAdminMsg ? 'YOU (ADMIN)' : 'CANDIDATE'}
@@ -1924,7 +1924,7 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                                       color: isAdminMsg ? '#ffffff' : 'var(--fg-slate-900)',
                                       fontSize: '0.875rem',
                                       lineHeight: 1.45,
-                                      boxShadow: '0 2px 6px rgba(0,0,0,0.06)',
+                                      boxShadow: 'var(--shadow-md)',
                                       border: isAdminMsg ? 'none' : '1px solid var(--bd-slate-200)',
                                       wordBreak: 'break-word'
                                     }}
@@ -1948,7 +1948,7 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                               alignItems: 'center'
                             }}
                           >
-                            <span style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--fg-slate-500)', whiteSpace: 'nowrap' }}>
+                            <span style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--fg-slate-500)', whiteSpace: 'nowrap' }}>
                               ⚡ Quick Replies:
                             </span>
                             {[
@@ -1964,10 +1964,10 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                                 style={{
                                   background: 'var(--bg-slate-100)',
                                   border: '1px solid var(--bd-slate-300)',
-                                  borderRadius: '14px',
+                                  borderRadius: 'var(--radius-lg)',
                                   padding: '4px 9px',
                                   fontSize: '0.75rem',
-                                  fontWeight: 700,
+                                  fontWeight: 600,
                                   color: 'var(--fg-slate-700)',
                                   cursor: 'pointer',
                                   whiteSpace: 'nowrap'
@@ -2020,7 +2020,7 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                               style={{
                                 flex: 1,
                                 padding: '10px 14px',
-                                borderRadius: '8px',
+                                borderRadius: 'var(--radius-md)',
                                 border: '1.5px solid var(--bd-slate-300)',
                                 fontSize: '0.875rem',
                                 outline: 'none'
@@ -2035,10 +2035,10 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                                 background: adminReplyText.trim() && !isSendingReply ? 'var(--tw-sky-600)' : 'var(--tw-slate-400)',
                                 color: '#ffffff',
                                 border: 'none',
-                                borderRadius: '8px',
+                                borderRadius: 'var(--radius-md)',
                                 padding: '10px 18px',
                                 fontSize: '0.875rem',
-                                fontWeight: 800,
+                                fontWeight: 600,
                                 cursor: adminReplyText.trim() && !isSendingReply ? 'pointer' : 'default',
                                 display: 'flex',
                                 alignItems: 'center',
@@ -2062,17 +2062,17 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
               {activeTab === 'ai_engine' && (
                 <div>
                   {/* SECTION 1: Active AI Provider & Model Discovery (Directly in Admin Panel & Saved to Firebase) */}
-                  <div style={{ background: 'var(--surface)', border: '1px solid var(--bd-slate-300)', borderRadius: '12px', padding: '20px', marginBottom: '24px', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
+                  <div style={{ background: 'var(--surface)', border: '1px solid var(--bd-slate-300)', borderRadius: 'var(--radius-md)', padding: '20px', marginBottom: '24px', boxShadow: 'var(--shadow-sm)' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px', marginBottom: '14px' }}>
                       <div>
-                        <h3 style={{ margin: 0, fontSize: '1rem', fontWeight: 800, color: 'var(--fg-slate-900)' }}>
+                        <h3 style={{ margin: 0, fontSize: '1rem', fontWeight: 600, color: 'var(--fg-slate-900)' }}>
                           ⚡ Primary AI Provider Endpoint &amp; Model Discovery
                         </h3>
                         <p style={{ margin: '4px 0 0 0', fontSize: '0.8rem', color: 'var(--fg-slate-500)' }}>
                           Directly configure your active AI credentials. Click <b>Auto-Detect</b> or <b>Verify Replying</b> to discover working models, and save directly to Firebase Firestore.
                         </p>
                       </div>
-                      <span style={{ fontSize: '0.75rem', background: 'var(--bg-sky-100)', color: 'var(--fg-sky-700)', padding: '3px 8px', borderRadius: '6px', fontWeight: 700 }}>
+                      <span style={{ fontSize: '0.75rem', background: 'var(--bg-sky-100)', color: 'var(--fg-sky-700)', padding: '3px 8px', borderRadius: 'var(--radius-sm)', fontWeight: 600 }}>
                         🔥 Saves to Firebase Cloud
                       </span>
                     </div>
@@ -2080,7 +2080,7 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                     {/* Presets Grid */}
                     <div style={{ marginBottom: '16px' }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                        <label style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--fg-slate-700)' }}>
+                        <label style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--fg-slate-700)' }}>
                           1-Click AI Provider Presets (Auto-configures Base URL &amp; Default Model):
                         </label>
                         <span style={{ fontSize: '0.75rem', color: 'var(--fg-slate-500)' }}>
@@ -2100,20 +2100,20 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                                 textAlign: 'left',
                                 background: isSelected ? 'var(--bg-blue-50)' : 'var(--bg-slate-50)',
                                 border: isSelected ? '1.5px solid var(--tw-sky-600)' : '1px solid var(--bd-slate-300)',
-                                borderRadius: '8px',
+                                borderRadius: 'var(--radius-md)',
                                 cursor: 'pointer',
                                 transition: 'all 0.15s ease'
                               }}
                             >
                               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '4px', marginBottom: '2px' }}>
-                                <div style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--fg-slate-900)' }}>{p.name}</div>
+                                <div style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--fg-slate-900)' }}>{p.name}</div>
                                 {isSelected && (
-                                  <span style={{ fontSize: '0.75rem', color: 'var(--fg-sky-600)', background: 'var(--bg-blue-100)', padding: '1px 6px', borderRadius: '4px', fontWeight: 700 }}>
+                                  <span style={{ fontSize: '0.75rem', color: 'var(--fg-sky-600)', background: 'var(--bg-blue-100)', padding: '1px 6px', borderRadius: 'var(--radius-sm)', fontWeight: 600 }}>
                                     Active
                                   </span>
                                 )}
                               </div>
-                              <div style={{ fontSize: '0.75rem', color: 'var(--fg-sky-700)', fontWeight: 600, marginBottom: '3px' }}>
+                              <div style={{ fontSize: '0.75rem', color: 'var(--fg-sky-700)', fontWeight: 500, marginBottom: '3px' }}>
                                 {p.badge}
                               </div>
                               <div style={{ fontSize: '0.75rem', color: 'var(--fg-slate-500)', fontFamily: 'monospace', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
@@ -2128,7 +2128,7 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                     {/* Base URL and API Key Inputs */}
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', marginBottom: '16px' }}>
                       <div>
-                        <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 700, color: 'var(--fg-slate-700)', marginBottom: '4px' }}>
+                        <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: 'var(--fg-slate-700)', marginBottom: '4px' }}>
                           Base URL (OpenAI-compatible Endpoint):
                         </label>
                         <input
@@ -2136,12 +2136,12 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                           value={aiConfig.baseUrl}
                           onChange={(e) => setAiConfig({ ...aiConfig, baseUrl: e.target.value })}
                           placeholder="https://generativelanguage.googleapis.com/v1beta/openai/ or https://api.groq.com/openai/v1"
-                          style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1.5px solid var(--bd-slate-300)', fontSize: '0.875rem', fontFamily: 'monospace' }}
+                          style={{ width: '100%', padding: '9px 12px', borderRadius: 'var(--radius-md)', border: '1.5px solid var(--bd-slate-300)', fontSize: '0.875rem', fontFamily: 'monospace' }}
                         />
                       </div>
 
                       <div>
-                        <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 700, color: 'var(--fg-slate-700)', marginBottom: '4px' }}>
+                        <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: 'var(--fg-slate-700)', marginBottom: '4px' }}>
                           API Key:
                         </label>
                         <div style={{ position: 'relative' }}>
@@ -2150,7 +2150,7 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                             value={aiConfig.apiKey}
                             onChange={(e) => setAiConfig({ ...aiConfig, apiKey: e.target.value })}
                             placeholder="Enter AI API Key (AIzaSy... or sk-...)"
-                            style={{ width: '100%', padding: '9px 40px 9px 12px', borderRadius: '8px', border: '1.5px solid var(--bd-slate-300)', fontSize: '0.875rem', fontFamily: 'monospace' }}
+                            style={{ width: '100%', padding: '9px 40px 9px 12px', borderRadius: 'var(--radius-md)', border: '1.5px solid var(--bd-slate-300)', fontSize: '0.875rem', fontFamily: 'monospace' }}
                           />
                           <button
                             type="button"
@@ -2165,21 +2165,21 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                       {/* Model Identifier & Auto-Detection Tools */}
                       <div>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px', marginBottom: '6px' }}>
-                          <label style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--fg-slate-700)' }}>
+                          <label style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--fg-slate-700)' }}>
                             Model Identifier &amp; Auto-Detection:
                           </label>
 
                           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
                             {/* Filter: All vs Free vs Replying */}
-                            <div style={{ display: 'inline-flex', background: 'var(--bg-slate-200)', padding: '2px', borderRadius: '6px' }}>
+                            <div style={{ display: 'inline-flex', background: 'var(--bg-slate-200)', padding: '2px', borderRadius: 'var(--radius-sm)' }}>
                               <button
                                 type="button"
                                 onClick={() => setModelFilterType('all')}
                                 style={{
                                   padding: '4px 10px',
                                   fontSize: '0.75rem',
-                                  fontWeight: 700,
-                                  borderRadius: '5px',
+                                  fontWeight: 600,
+                                  borderRadius: 'var(--radius-sm)',
                                   border: 'none',
                                   cursor: 'pointer',
                                   background: modelFilterType === 'all' ? 'var(--tw-slate-900)' : 'transparent',
@@ -2194,8 +2194,8 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                                 style={{
                                   padding: '4px 10px',
                                   fontSize: '0.75rem',
-                                  fontWeight: 700,
-                                  borderRadius: '5px',
+                                  fontWeight: 600,
+                                  borderRadius: 'var(--radius-sm)',
                                   border: 'none',
                                   cursor: 'pointer',
                                   background: modelFilterType === 'free' ? 'var(--tw-green-600)' : 'transparent',
@@ -2210,8 +2210,8 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                                 style={{
                                   padding: '4px 10px',
                                   fontSize: '0.75rem',
-                                  fontWeight: 700,
-                                  borderRadius: '5px',
+                                  fontWeight: 600,
+                                  borderRadius: 'var(--radius-sm)',
                                   border: 'none',
                                   cursor: 'pointer',
                                   background: modelFilterType === 'replying' ? 'var(--tw-sky-600)' : 'transparent',
@@ -2235,9 +2235,9 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                                 background: isDetectingModels ? 'var(--tw-slate-400)' : 'var(--tw-sky-600)',
                                 color: '#ffffff',
                                 border: 'none',
-                                borderRadius: '6px',
+                                borderRadius: 'var(--radius-sm)',
                                 fontSize: '0.75rem',
-                                fontWeight: 700,
+                                fontWeight: 600,
                                 cursor: isDetectingModels ? 'not-allowed' : 'pointer'
                               }}
                             >
@@ -2259,9 +2259,9 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                                 background: isVerifyingModels ? 'var(--tw-slate-400)' : (!aiConfig.apiKey.trim() ? 'var(--bg-slate-300)' : 'var(--tw-emerald-600)'),
                                 color: '#ffffff',
                                 border: 'none',
-                                borderRadius: '6px',
+                                borderRadius: 'var(--radius-sm)',
                                 fontSize: '0.75rem',
-                                fontWeight: 700,
+                                fontWeight: 600,
                                 cursor: isVerifyingModels || !aiConfig.apiKey.trim() ? 'not-allowed' : 'pointer'
                               }}
                             >
@@ -2276,9 +2276,9 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                           <div
                             style={{
                               padding: '8px 12px',
-                              borderRadius: '6px',
+                              borderRadius: 'var(--radius-sm)',
                               fontSize: '0.75rem',
-                              fontWeight: 600,
+                              fontWeight: 500,
                               marginBottom: '8px',
                               background: detectStatus.startsWith('✅') ? 'var(--bg-green-50)' : 'var(--bg-amber-50)',
                               color: detectStatus.startsWith('✅') ? 'var(--fg-green-800)' : 'var(--fg-amber-800)',
@@ -2292,7 +2292,7 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                         {/* Model Dropdown from Auto-Detected / Preset List */}
                         {displayedModels.length > 0 && (
                           <div style={{ marginBottom: '8px' }}>
-                            <label style={{ display: 'block', fontSize: '0.75rem', color: 'var(--fg-slate-500)', fontWeight: 600, marginBottom: '3px' }}>
+                            <label style={{ display: 'block', fontSize: '0.75rem', color: 'var(--fg-slate-500)', fontWeight: 500, marginBottom: '3px' }}>
                               Choose from {modelFilterType === 'replying' ? '✅ Verified Replying' : (modelFilterType === 'free' ? '🎁 Free-Tier' : 'Available')} Models ({displayedModels.length} available):
                             </label>
                             <select
@@ -2311,11 +2311,11 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                               style={{
                                 width: '100%',
                                 padding: '9px 12px',
-                                borderRadius: '8px',
+                                borderRadius: 'var(--radius-md)',
                                 border: '1.5px solid var(--tw-sky-600)',
                                 background: 'var(--bg-slate-50)',
                                 fontSize: '0.875rem',
-                                fontWeight: 600,
+                                fontWeight: 500,
                                 color: 'var(--fg-slate-900)'
                               }}
                             >
@@ -2343,9 +2343,9 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                           <div
                             style={{
                               padding: '6px 12px',
-                              borderRadius: '6px',
+                              borderRadius: 'var(--radius-sm)',
                               fontSize: '0.75rem',
-                              fontWeight: 700,
+                              fontWeight: 600,
                               marginBottom: '8px',
                               display: 'flex',
                               alignItems: 'center',
@@ -2362,7 +2362,7 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
 
                         {/* Custom / Active Model Input */}
                         <div>
-                          <label style={{ display: 'block', fontSize: '0.75rem', color: 'var(--fg-slate-500)', fontWeight: 600, marginBottom: '3px' }}>
+                          <label style={{ display: 'block', fontSize: '0.75rem', color: 'var(--fg-slate-500)', fontWeight: 500, marginBottom: '3px' }}>
                             Active Model Identifier (Custom or Selected):
                           </label>
                           <input
@@ -2376,7 +2376,7 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                             style={{
                               width: '100%',
                               padding: '9px 12px',
-                              borderRadius: '8px',
+                              borderRadius: 'var(--radius-md)',
                               border: '1.5px solid var(--bd-slate-300)',
                               fontSize: '0.875rem',
                               fontFamily: 'monospace'
@@ -2395,8 +2395,8 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                             padding: '9px 15px',
                             background: 'var(--bg-slate-100)',
                             border: '1.5px solid var(--bd-slate-300)',
-                            borderRadius: '8px',
-                            fontWeight: 700,
+                            borderRadius: 'var(--radius-md)',
+                            fontWeight: 600,
                             fontSize: '0.8rem',
                             cursor: 'pointer'
                           }}
@@ -2412,8 +2412,8 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                             background: 'var(--bg-blue-50)',
                             color: 'var(--fg-blue-700)',
                             border: '1.5px solid var(--bd-blue-300)',
-                            borderRadius: '8px',
-                            fontWeight: 700,
+                            borderRadius: 'var(--radius-md)',
+                            fontWeight: 600,
                             fontSize: '0.8rem',
                             cursor: 'pointer'
                           }}
@@ -2431,8 +2431,8 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                             background: 'var(--tw-sky-600)',
                             color: '#ffffff',
                             border: 'none',
-                            borderRadius: '8px',
-                            fontWeight: 700,
+                            borderRadius: 'var(--radius-md)',
+                            fontWeight: 600,
                             fontSize: '0.875rem',
                             cursor: 'pointer'
                           }}
@@ -2444,10 +2444,10 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                   </div>
 
                   {/* SECTION 2: Multi-Model Failover Backup Chain (Automatic Failover if on Fail) */}
-                  <div style={{ background: 'var(--surface)', border: '1px solid var(--bd-slate-200)', borderRadius: '12px', padding: '20px', marginBottom: '24px' }}>
+                  <div style={{ background: 'var(--surface)', border: '1px solid var(--bd-slate-200)', borderRadius: 'var(--radius-md)', padding: '20px', marginBottom: '24px' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px', marginBottom: '14px' }}>
                       <div>
-                        <h3 style={{ margin: 0, fontSize: '1rem', fontWeight: 800, color: 'var(--fg-slate-900)' }}>
+                        <h3 style={{ margin: 0, fontSize: '1rem', fontWeight: 600, color: 'var(--fg-slate-900)' }}>
                           🛡️ Multi-Model Failover Backup Chain (Auto-Switch On Failure)
                         </h3>
                         <p style={{ margin: '4px 0 0 0', fontSize: '0.8rem', color: 'var(--fg-slate-500)' }}>
@@ -2457,17 +2457,17 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                     </div>
 
                     {/* Live Failover Pipeline Breadcrumbs */}
-                    <div style={{ background: 'var(--bg-slate-50)', border: '1px solid var(--bd-slate-200)', borderRadius: '8px', padding: '10px 14px', marginBottom: '16px', display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
-                      <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--fg-slate-600)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                    <div style={{ background: 'var(--bg-slate-50)', border: '1px solid var(--bd-slate-200)', borderRadius: 'var(--radius-md)', padding: '10px 14px', marginBottom: '16px', display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
+                      <span style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--fg-slate-600)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
                         Active Failover Route:
                       </span>
                       {/* Active Primary Chip */}
                       <span
                         style={{
                           fontSize: '0.75rem',
-                          fontWeight: 700,
+                          fontWeight: 600,
                           padding: '4px 8px',
-                          borderRadius: '6px',
+                          borderRadius: 'var(--radius-sm)',
                           background: aiConfig.apiKey ? 'var(--bg-blue-100)' : 'var(--bg-slate-100)',
                           color: aiConfig.apiKey ? 'var(--fg-blue-800)' : 'var(--tw-slate-400)',
                           border: aiConfig.apiKey ? '1px solid var(--bd-blue-300)' : '1px dashed var(--bd-slate-300)',
@@ -2486,13 +2486,13 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                         const isReady = p.enabled && p.apiKey.trim().length > 0;
                         return (
                           <React.Fragment key={p.id}>
-                            <span style={{ color: 'var(--tw-slate-400)', fontSize: '0.8rem', fontWeight: 800 }}>➔</span>
+                            <span style={{ color: 'var(--tw-slate-400)', fontSize: '0.8rem', fontWeight: 600 }}>➔</span>
                             <span
                               style={{
                                 fontSize: '0.75rem',
-                                fontWeight: 700,
+                                fontWeight: 600,
                                 padding: '4px 8px',
-                                borderRadius: '6px',
+                                borderRadius: 'var(--radius-sm)',
                                 background: isReady ? 'var(--bg-green-50)' : 'var(--bg-slate-100)',
                                 color: isReady ? 'var(--fg-green-800)' : 'var(--tw-slate-400)',
                                 border: isReady ? '1px solid var(--bd-green-300)' : '1px dashed var(--bd-slate-300)',
@@ -2520,7 +2520,7 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                             style={{
                               background: p.enabled ? 'var(--surface)' : 'var(--bg-slate-50)',
                               border: p.enabled ? '1.5px solid var(--bd-slate-300)' : '1.5px dashed var(--bd-slate-300)',
-                              borderRadius: '10px',
+                              borderRadius: 'var(--radius-md)',
                               padding: '16px',
                               transition: 'all 0.15s ease'
                             }}
@@ -2533,9 +2533,9 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                                     background: 'var(--tw-slate-600)',
                                     color: '#ffffff',
                                     fontSize: '0.75rem',
-                                    fontWeight: 800,
+                                    fontWeight: 600,
                                     padding: '2px 8px',
-                                    borderRadius: '4px',
+                                    borderRadius: 'var(--radius-sm)',
                                     letterSpacing: '0.04em'
                                   }}
                                 >
@@ -2547,11 +2547,11 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                                   onChange={(e) => handleUpdateProvider(p.id, 'name', e.target.value)}
                                   placeholder="Provider Name (e.g. Groq Cloud Llama 3.3)"
                                   style={{
-                                    fontWeight: 700,
+                                    fontWeight: 600,
                                     fontSize: '0.875rem',
                                     color: 'var(--fg-slate-900)',
                                     border: '1px solid transparent',
-                                    borderRadius: '4px',
+                                    borderRadius: 'var(--radius-sm)',
                                     padding: '2px 6px',
                                     background: 'transparent'
                                   }}
@@ -2566,8 +2566,8 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                                   style={{
                                     padding: '4px 10px',
                                     fontSize: '0.75rem',
-                                    fontWeight: 700,
-                                    borderRadius: '6px',
+                                    fontWeight: 600,
+                                    borderRadius: 'var(--radius-sm)',
                                     border: 'none',
                                     cursor: 'pointer',
                                     background: p.enabled ? 'var(--bg-green-100)' : 'var(--bg-red-100)',
@@ -2586,8 +2586,8 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                                   style={{
                                     padding: '4px 8px',
                                     fontSize: '0.75rem',
-                                    fontWeight: 700,
-                                    borderRadius: '6px',
+                                    fontWeight: 600,
+                                    borderRadius: 'var(--radius-sm)',
                                     border: '1px solid var(--bd-slate-300)',
                                     background: index === 0 ? 'var(--bg-slate-100)' : 'var(--surface)',
                                     color: index === 0 ? 'var(--tw-slate-400)' : 'var(--fg-slate-800)',
@@ -2606,8 +2606,8 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                                   style={{
                                     padding: '4px 8px',
                                     fontSize: '0.75rem',
-                                    fontWeight: 700,
-                                    borderRadius: '6px',
+                                    fontWeight: 600,
+                                    borderRadius: 'var(--radius-sm)',
                                     border: '1px solid var(--bd-slate-300)',
                                     background: index === (aiConfig.providers?.length || 0) - 1 ? 'var(--bg-slate-100)' : 'var(--surface)',
                                     color: index === (aiConfig.providers?.length || 0) - 1 ? 'var(--tw-slate-400)' : 'var(--fg-slate-800)',
@@ -2629,8 +2629,8 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                                   style={{
                                     padding: '4px 8px',
                                     fontSize: '0.75rem',
-                                    fontWeight: 700,
-                                    borderRadius: '6px',
+                                    fontWeight: 600,
+                                    borderRadius: 'var(--radius-sm)',
                                     border: '1px solid var(--bd-red-200)',
                                     background: 'var(--bg-rose-50)',
                                     color: 'var(--fg-rose-700)',
@@ -2645,7 +2645,7 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                             {/* Card Inputs Grid: Base URL, Model, API Key */}
                             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '10px', marginBottom: '10px' }}>
                               <div>
-                                <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: 'var(--fg-slate-600)', marginBottom: '3px' }}>
+                                <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: 'var(--fg-slate-600)', marginBottom: '3px' }}>
                                   Base URL (OpenAI-compatible):
                                 </label>
                                 <input
@@ -2653,12 +2653,12 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                                   value={p.baseUrl}
                                   onChange={(e) => handleUpdateProvider(p.id, 'baseUrl', e.target.value)}
                                   placeholder="https://api.groq.com/openai/v1"
-                                  style={{ width: '100%', padding: '7px 10px', borderRadius: '6px', border: '1px solid var(--bd-slate-300)', fontSize: '0.8rem', fontFamily: 'monospace' }}
+                                  style={{ width: '100%', padding: '7px 10px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--bd-slate-300)', fontSize: '0.8rem', fontFamily: 'monospace' }}
                                 />
                               </div>
 
                               <div>
-                                <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: 'var(--fg-slate-600)', marginBottom: '3px' }}>
+                                <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: 'var(--fg-slate-600)', marginBottom: '3px' }}>
                                   Model Identifier:
                                 </label>
                                 <input
@@ -2666,12 +2666,12 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                                   value={p.model}
                                   onChange={(e) => handleUpdateProvider(p.id, 'model', e.target.value)}
                                   placeholder="e.g. llama-3.3-70b-versatile, gemini-2.0-flash"
-                                  style={{ width: '100%', padding: '7px 10px', borderRadius: '6px', border: '1px solid var(--bd-slate-300)', fontSize: '0.8rem', fontFamily: 'monospace' }}
+                                  style={{ width: '100%', padding: '7px 10px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--bd-slate-300)', fontSize: '0.8rem', fontFamily: 'monospace' }}
                                 />
                               </div>
 
                               <div>
-                                <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: 'var(--fg-slate-600)', marginBottom: '3px' }}>
+                                <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: 'var(--fg-slate-600)', marginBottom: '3px' }}>
                                   API Key:
                                 </label>
                                 <div style={{ position: 'relative' }}>
@@ -2680,7 +2680,7 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                                     value={p.apiKey}
                                     onChange={(e) => handleUpdateProvider(p.id, 'apiKey', e.target.value)}
                                     placeholder="Enter API Key (sk-... or AIzaSy...)"
-                                    style={{ width: '100%', padding: '7px 32px 7px 10px', borderRadius: '6px', border: '1px solid var(--bd-slate-300)', fontSize: '0.8rem', fontFamily: 'monospace' }}
+                                    style={{ width: '100%', padding: '7px 32px 7px 10px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--bd-slate-300)', fontSize: '0.8rem', fontFamily: 'monospace' }}
                                   />
                                   <button
                                     type="button"
@@ -2710,7 +2710,7 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                                       }
                                     }
                                   }}
-                                  style={{ padding: '3px 8px', fontSize: '0.75rem', borderRadius: '4px', border: '1px solid var(--bd-slate-300)', background: 'var(--surface)', color: 'var(--fg-slate-700)' }}
+                                  style={{ padding: '3px 8px', fontSize: '0.75rem', borderRadius: 'var(--radius-sm)', border: '1px solid var(--bd-slate-300)', background: 'var(--surface)', color: 'var(--fg-slate-700)' }}
                                 >
                                   <option value="">-- Apply Preset --</option>
                                   {AI_PRESETS.map((pr) => (
@@ -2724,9 +2724,9 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                                   <span
                                     style={{
                                       fontSize: '0.75rem',
-                                      fontWeight: 700,
+                                      fontWeight: 600,
                                       padding: '2px 8px',
-                                      borderRadius: '4px',
+                                      borderRadius: 'var(--radius-sm)',
                                       background: providerTestResults[p.id].success ? 'var(--bg-emerald-50)' : 'var(--bg-red-50)',
                                       color: providerTestResults[p.id].success ? 'var(--fg-emerald-700)' : 'var(--fg-red-700)',
                                       border: providerTestResults[p.id].success ? '1px solid var(--bd-emerald-200)' : '1px solid var(--bd-red-200)'
@@ -2743,8 +2743,8 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                                   style={{
                                     padding: '4px 10px',
                                     fontSize: '0.75rem',
-                                    fontWeight: 700,
-                                    borderRadius: '5px',
+                                    fontWeight: 600,
+                                    borderRadius: 'var(--radius-sm)',
                                     border: '1px solid var(--tw-sky-600)',
                                     background: testingProviderId === p.id ? 'var(--tw-slate-400)' : 'var(--bg-sky-50)',
                                     color: 'var(--fg-sky-700)',
@@ -2761,50 +2761,50 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                     </div>
 
                     {/* Add Provider Preset Bar */}
-                    <div style={{ background: 'var(--bg-slate-50)', border: '1.5px dashed var(--bd-slate-300)', borderRadius: '10px', padding: '12px 14px', marginBottom: '16px' }}>
-                      <div style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--fg-slate-700)', marginBottom: '8px' }}>
+                    <div style={{ background: 'var(--bg-slate-50)', border: '1.5px dashed var(--bd-slate-300)', borderRadius: 'var(--radius-md)', padding: '12px 14px', marginBottom: '16px' }}>
+                      <div style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--fg-slate-700)', marginBottom: '8px' }}>
                         ➕ Add Fallback Model / Endpoint using Base URL &amp; API Key:
                       </div>
                       <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
                         <button
                           type="button"
                           onClick={() => handleAddProvider('groq')}
-                          style={{ padding: '6px 12px', fontSize: '0.75rem', fontWeight: 700, borderRadius: '6px', border: '1px solid var(--bd-slate-300)', background: 'var(--surface)', color: 'var(--fg-slate-800)', cursor: 'pointer' }}
+                          style={{ padding: '6px 12px', fontSize: '0.75rem', fontWeight: 600, borderRadius: 'var(--radius-sm)', border: '1px solid var(--bd-slate-300)', background: 'var(--surface)', color: 'var(--fg-slate-800)', cursor: 'pointer' }}
                         >
                           + Groq Cloud (Llama 3.3)
                         </button>
                         <button
                           type="button"
                           onClick={() => handleAddProvider('openrouter')}
-                          style={{ padding: '6px 12px', fontSize: '0.75rem', fontWeight: 700, borderRadius: '6px', border: '1px solid var(--bd-slate-300)', background: 'var(--surface)', color: 'var(--fg-slate-800)', cursor: 'pointer' }}
+                          style={{ padding: '6px 12px', fontSize: '0.75rem', fontWeight: 600, borderRadius: 'var(--radius-sm)', border: '1px solid var(--bd-slate-300)', background: 'var(--surface)', color: 'var(--fg-slate-800)', cursor: 'pointer' }}
                         >
                           + OpenRouter (Free/Pro)
                         </button>
                         <button
                           type="button"
                           onClick={() => handleAddProvider('gemini')}
-                          style={{ padding: '6px 12px', fontSize: '0.75rem', fontWeight: 700, borderRadius: '6px', border: '1px solid var(--bd-slate-300)', background: 'var(--surface)', color: 'var(--fg-slate-800)', cursor: 'pointer' }}
+                          style={{ padding: '6px 12px', fontSize: '0.75rem', fontWeight: 600, borderRadius: 'var(--radius-sm)', border: '1px solid var(--bd-slate-300)', background: 'var(--surface)', color: 'var(--fg-slate-800)', cursor: 'pointer' }}
                         >
                           + Google Gemini
                         </button>
                         <button
                           type="button"
                           onClick={() => handleAddProvider('openai')}
-                          style={{ padding: '6px 12px', fontSize: '0.75rem', fontWeight: 700, borderRadius: '6px', border: '1px solid var(--bd-slate-300)', background: 'var(--surface)', color: 'var(--fg-slate-800)', cursor: 'pointer' }}
+                          style={{ padding: '6px 12px', fontSize: '0.75rem', fontWeight: 600, borderRadius: 'var(--radius-sm)', border: '1px solid var(--bd-slate-300)', background: 'var(--surface)', color: 'var(--fg-slate-800)', cursor: 'pointer' }}
                         >
                           + OpenAI (GPT-4o)
                         </button>
                         <button
                           type="button"
                           onClick={() => handleAddProvider('deepseek')}
-                          style={{ padding: '6px 12px', fontSize: '0.75rem', fontWeight: 700, borderRadius: '6px', border: '1px solid var(--bd-slate-300)', background: 'var(--surface)', color: 'var(--fg-slate-800)', cursor: 'pointer' }}
+                          style={{ padding: '6px 12px', fontSize: '0.75rem', fontWeight: 600, borderRadius: 'var(--radius-sm)', border: '1px solid var(--bd-slate-300)', background: 'var(--surface)', color: 'var(--fg-slate-800)', cursor: 'pointer' }}
                         >
                           + DeepSeek AI
                         </button>
                         <button
                           type="button"
                           onClick={() => handleAddProvider()}
-                          style={{ padding: '6px 12px', fontSize: '0.75rem', fontWeight: 700, borderRadius: '6px', border: '1px solid var(--tw-sky-600)', background: 'var(--bg-sky-50)', color: 'var(--fg-sky-700)', cursor: 'pointer' }}
+                          style={{ padding: '6px 12px', fontSize: '0.75rem', fontWeight: 600, borderRadius: 'var(--radius-sm)', border: '1px solid var(--tw-sky-600)', background: 'var(--bg-sky-50)', color: 'var(--fg-sky-700)', cursor: 'pointer' }}
                         >
                           + Custom Endpoint (Base URL + Key)
                         </button>
@@ -2816,9 +2816,9 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                       <div
                         style={{
                           padding: '10px 14px',
-                          borderRadius: '8px',
+                          borderRadius: 'var(--radius-md)',
                           fontSize: '0.8rem',
-                          fontWeight: 600,
+                          fontWeight: 500,
                           marginBottom: '10px',
                           background: aiTestStatus.success ? 'var(--bg-green-100)' : 'var(--bg-red-100)',
                           color: aiTestStatus.success ? 'var(--fg-green-700)' : 'var(--fg-red-800)',
@@ -2830,7 +2830,7 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                     )}
 
                     {aiSaveStatus && (
-                      <div style={{ padding: '10px 14px', borderRadius: '8px', fontSize: '0.8rem', fontWeight: 600, marginBottom: '10px', background: 'var(--bg-green-100)', color: 'var(--fg-green-700)', border: '1px solid var(--bd-green-300)' }}>
+                      <div style={{ padding: '10px 14px', borderRadius: 'var(--radius-md)', fontSize: '0.8rem', fontWeight: 500, marginBottom: '10px', background: 'var(--bg-green-100)', color: 'var(--fg-green-700)', border: '1px solid var(--bd-green-300)' }}>
                         {aiSaveStatus}
                       </div>
                     )}
@@ -2841,14 +2841,14 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                         type="button"
                         onClick={handleTestConnection}
                         disabled={aiTestStatus.loading}
-                        style={{ padding: '10px 16px', background: 'var(--bg-slate-100)', border: '1.5px solid var(--bd-slate-300)', borderRadius: '8px', fontWeight: 700, fontSize: '0.875rem', cursor: 'pointer' }}
+                        style={{ padding: '10px 16px', background: 'var(--bg-slate-100)', border: '1.5px solid var(--bd-slate-300)', borderRadius: 'var(--radius-md)', fontWeight: 600, fontSize: '0.875rem', cursor: 'pointer' }}
                       >
                         {aiTestStatus.loading ? 'Testing Chain...' : '🔌 Test Full Failover Chain'}
                       </button>
                       <button
                         type="button"
                         onClick={handleSaveAiConfig}
-                        style={{ flex: 1, padding: '10px 16px', background: 'var(--tw-sky-600)', color: '#ffffff', border: 'none', borderRadius: '8px', fontWeight: 700, fontSize: '0.875rem', cursor: 'pointer' }}
+                        style={{ flex: 1, padding: '10px 16px', background: 'var(--tw-sky-600)', color: '#ffffff', border: 'none', borderRadius: 'var(--radius-md)', fontWeight: 600, fontSize: '0.875rem', cursor: 'pointer' }}
                       >
                         💾 Save All to Firebase Firestore &amp; Cloud Sync
                       </button>
@@ -2856,10 +2856,10 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                   </div>
 
                   {/* 10 Daily Balanced Multi-Exam Live Tests Section */}
-                  <div style={{ background: 'var(--surface)', border: '1.5px solid var(--bd-green-300)', borderRadius: '12px', padding: '20px', marginBottom: '24px' }}>
+                  <div style={{ background: 'var(--surface)', border: '1.5px solid var(--bd-green-300)', borderRadius: 'var(--radius-md)', padding: '20px', marginBottom: '24px' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px', marginBottom: '14px' }}>
                       <div>
-                        <h3 style={{ margin: 0, fontSize: '1rem', fontWeight: 800, color: 'var(--fg-green-900)' }}>
+                        <h3 style={{ margin: 0, fontSize: '1rem', fontWeight: 600, color: 'var(--fg-green-900)' }}>
                           🔥 Daily Multi-Exam Live Tests Generator (10 Balanced Slots)
                         </h3>
                         <p style={{ margin: '4px 0 0 0', fontSize: '0.8rem', color: 'var(--fg-green-800)' }}>
@@ -2867,12 +2867,12 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                         </p>
                       </div>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <label style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--fg-slate-700)' }}>Target Date:</label>
+                        <label style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--fg-slate-700)' }}>Target Date:</label>
                         <input
                           type="date"
                           value={selectedDate}
                           onChange={(e) => setSelectedDate(e.target.value)}
-                          style={{ padding: '6px 10px', borderRadius: '6px', border: '1.5px solid var(--bd-slate-300)', fontSize: '0.875rem', fontWeight: 600 }}
+                          style={{ padding: '6px 10px', borderRadius: 'var(--radius-sm)', border: '1.5px solid var(--bd-slate-300)', fontSize: '0.875rem', fontWeight: 500 }}
                         />
                       </div>
                     </div>
@@ -2885,19 +2885,19 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                           style={{
                             background: 'var(--bg-slate-50)',
                             border: '1px solid var(--bd-slate-200)',
-                            borderRadius: '8px',
+                            borderRadius: 'var(--radius-md)',
                             padding: '8px 10px',
                             fontSize: '0.75rem'
                           }}
                         >
                           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '3px' }}>
-                            <span style={{ fontWeight: 800, color: 'var(--fg-slate-900)' }}>Slot #{slot.slot}: {slot.examTitle}</span>
+                            <span style={{ fontWeight: 700, color: 'var(--fg-slate-900)' }}>Slot #{slot.slot}: {slot.examTitle}</span>
                             <span
                               style={{
                                 padding: '1px 5px',
-                                borderRadius: '4px',
+                                borderRadius: 'var(--radius-sm)',
                                 fontSize: '0.75rem',
-                                fontWeight: 700,
+                                fontWeight: 600,
                                 background: slot.difficulty === 'hard' ? 'var(--bg-red-100)' : 'var(--bg-amber-100)',
                                 color: slot.difficulty === 'hard' ? 'var(--fg-red-700)' : 'var(--fg-amber-800)'
                               }}
@@ -2913,12 +2913,12 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                     </div>
 
                     {isGeneratingDaily && (
-                      <div style={{ background: 'var(--bg-amber-100)', border: '1px solid var(--bd-amber-200)', borderRadius: '8px', padding: '14px', marginBottom: '14px' }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', fontWeight: 700, color: 'var(--fg-amber-800)', marginBottom: '6px' }}>
+                      <div style={{ background: 'var(--bg-amber-100)', border: '1px solid var(--bd-amber-200)', borderRadius: 'var(--radius-md)', padding: '14px', marginBottom: '14px' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', fontWeight: 600, color: 'var(--fg-amber-800)', marginBottom: '6px' }}>
                           <span>Generating Daily Tests ({dailyProgress.completed} / {dailyProgress.total})</span>
                           <span>{Math.round((dailyProgress.completed / dailyProgress.total) * 100)}%</span>
                         </div>
-                        <div style={{ height: '8px', background: 'var(--bg-amber-200)', borderRadius: '4px', overflow: 'hidden', marginBottom: '6px' }}>
+                        <div style={{ height: '8px', background: 'var(--bg-amber-200)', borderRadius: 'var(--radius-sm)', overflow: 'hidden', marginBottom: '6px' }}>
                           <div style={{ width: `${(dailyProgress.completed / dailyProgress.total) * 100}%`, height: '100%', background: 'var(--tw-amber-600)', transition: 'width 0.3s ease' }} />
                         </div>
                         <div style={{ fontSize: '0.8rem', color: 'var(--fg-amber-900)' }}>{dailyProgress.message}</div>
@@ -2931,11 +2931,11 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                       disabled={isGeneratingDaily}
                       style={{
                         padding: '12px 20px',
-                        background: isGeneratingDaily ? 'var(--tw-slate-400)' : 'linear-gradient(135deg, var(--tw-green-800) 0%, var(--tw-green-700) 100%)',
+                        background: isGeneratingDaily ? 'var(--tw-slate-400)' : 'var(--tw-green-800)',
                         color: '#ffffff',
                         border: 'none',
-                        borderRadius: '8px',
-                        fontWeight: 700,
+                        borderRadius: 'var(--radius-md)',
+                        fontWeight: 600,
                         fontSize: '0.875rem',
                         cursor: isGeneratingDaily ? 'not-allowed' : 'pointer'
                       }}
@@ -2945,8 +2945,8 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                   </div>
 
                   {/* Single Custom Passage Generator */}
-                  <div style={{ background: 'var(--surface)', border: '1px solid var(--bd-slate-200)', borderRadius: '12px', padding: '20px' }}>
-                    <h3 style={{ margin: '0 0 8px 0', fontSize: '1rem', fontWeight: 800, color: 'var(--fg-slate-900)' }}>
+                  <div style={{ background: 'var(--surface)', border: '1px solid var(--bd-slate-200)', borderRadius: 'var(--radius-md)', padding: '20px' }}>
+                    <h3 style={{ margin: '0 0 8px 0', fontSize: '1rem', fontWeight: 600, color: 'var(--fg-slate-900)' }}>
                       ✨ Generate Custom AI Passage (Any Topic)
                     </h3>
                     <p style={{ margin: '0 0 16px 0', fontSize: '0.8rem', color: 'var(--fg-slate-500)' }}>
@@ -2955,11 +2955,11 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
 
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '12px', marginBottom: '12px' }}>
                       <div>
-                        <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: 'var(--fg-slate-600)', marginBottom: '4px' }}>Language & Layout:</label>
+                        <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: 'var(--fg-slate-600)', marginBottom: '4px' }}>Language & Layout:</label>
                         <select
                           value={customLanguage}
                           onChange={(e) => handleAdminLanguageChange(e.target.value as Language)}
-                          style={{ width: '100%', padding: '8px', borderRadius: '6px', border: '1px solid var(--bd-slate-300)', fontSize: '0.875rem' }}
+                          style={{ width: '100%', padding: '8px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--bd-slate-300)', fontSize: '0.875rem' }}
                         >
                           <option value="english">🇬🇧 English (QWERTY)</option>
                           <option value="hindi_mangal">🇮🇳 हिंदी मंगल (Mangal Inscript)</option>
@@ -2968,7 +2968,7 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                       </div>
 
                       <div>
-                        <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: 'var(--fg-slate-600)', marginBottom: '4px' }}>Difficulty Standard:</label>
+                        <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: 'var(--fg-slate-600)', marginBottom: '4px' }}>Difficulty Standard:</label>
                         <select
                           value={customDifficulty}
                           onChange={(e) => {
@@ -2978,7 +2978,7 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                             const base = customLanguage.startsWith('hindi') ? (meta?.defaultHindiWords || 430) : (meta?.defaultEnglishWords || 520);
                             setCustomTargetWords(diff === 'hard' ? base + 20 : base);
                           }}
-                          style={{ width: '100%', padding: '8px', borderRadius: '6px', border: '1px solid var(--bd-slate-300)', fontSize: '0.875rem' }}
+                          style={{ width: '100%', padding: '8px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--bd-slate-300)', fontSize: '0.875rem' }}
                         >
                           <option value="medium">🟡 Medium (Balanced Standard)</option>
                           <option value="hard">🔴 Hard (AR Typing Kathin: AWL ≥ 7.2)</option>
@@ -2986,11 +2986,11 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                       </div>
 
                       <div>
-                        <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: 'var(--fg-slate-600)', marginBottom: '4px' }}>Target Examination Series:</label>
+                        <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: 'var(--fg-slate-600)', marginBottom: '4px' }}>Target Examination Series:</label>
                         <select
                           value={customCategory}
                           onChange={(e) => handleAdminCategoryChange(e.target.value)}
-                          style={{ width: '100%', padding: '8px', borderRadius: '6px', border: '1px solid var(--bd-slate-300)', fontSize: '0.875rem' }}
+                          style={{ width: '100%', padding: '8px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--bd-slate-300)', fontSize: '0.875rem' }}
                         >
                           {EXAM_CATEGORY_OPTIONS.map((opt) => (
                             <option key={opt.id} value={opt.id}>
@@ -3007,7 +3007,7 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                               color: 'var(--fg-sky-700)',
                               background: 'var(--bg-sky-50)',
                               border: '1px solid var(--bd-sky-200)',
-                              borderRadius: '5px',
+                              borderRadius: 'var(--radius-sm)',
                               padding: '4px 6px'
                             }}
                           >
@@ -3017,18 +3017,18 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                       </div>
 
                       <div>
-                        <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: 'var(--fg-slate-600)', marginBottom: '4px' }}>Target Words:</label>
+                        <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: 'var(--fg-slate-600)', marginBottom: '4px' }}>Target Words:</label>
                         <input
                           type="number"
                           value={customTargetWords}
                           onChange={(e) => setCustomTargetWords(Number(e.target.value))}
-                          style={{ width: '100%', padding: '8px', borderRadius: '6px', border: '1px solid var(--bd-slate-300)', fontSize: '0.875rem' }}
+                          style={{ width: '100%', padding: '8px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--bd-slate-300)', fontSize: '0.875rem' }}
                         />
                       </div>
                     </div>
 
                     <div style={{ marginBottom: '14px' }}>
-                      <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: 'var(--fg-slate-600)', marginBottom: '4px' }}>
+                      <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: 'var(--fg-slate-600)', marginBottom: '4px' }}>
                         Custom Subject / Topic:
                       </label>
                       <input
@@ -3036,12 +3036,12 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                         value={customTopic}
                         onChange={(e) => setCustomTopic(e.target.value)}
                         placeholder="e.g. Cyber Forensics in Uttar Pradesh Police or High Court Writ Jurisdiction..."
-                        style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1.5px solid var(--bd-slate-300)', fontSize: '0.875rem' }}
+                        style={{ width: '100%', padding: '9px 12px', borderRadius: 'var(--radius-md)', border: '1.5px solid var(--bd-slate-300)', fontSize: '0.875rem' }}
                       />
 
                       {/* Topic Recommendation Chips */}
                       <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginTop: '8px' }}>
-                        <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--fg-slate-500)', alignSelf: 'center' }}>
+                        <span style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--fg-slate-500)', alignSelf: 'center' }}>
                           Suggested:
                         </span>
                         {adminSuggestedTopics.map((sugg) => (
@@ -3052,10 +3052,10 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                             style={{
                               background: 'var(--bg-slate-100)',
                               border: '1px solid var(--bd-slate-300)',
-                              borderRadius: '14px',
+                              borderRadius: 'var(--radius-lg)',
                               padding: '2px 8px',
                               fontSize: '0.75rem',
-                              fontWeight: 600,
+                              fontWeight: 500,
                               color: 'var(--fg-slate-700)',
                               cursor: 'pointer'
                             }}
@@ -3070,9 +3070,9 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                       <div
                         style={{
                           padding: '10px 14px',
-                          borderRadius: '8px',
+                          borderRadius: 'var(--radius-md)',
                           fontSize: '0.8rem',
-                          fontWeight: 600,
+                          fontWeight: 500,
                           marginBottom: '12px',
                           background: customGenMessage.includes('🎉') ? 'var(--bg-green-100)' : 'var(--bg-red-100)',
                           color: customGenMessage.includes('🎉') ? 'var(--fg-green-700)' : 'var(--fg-red-800)'
@@ -3090,8 +3090,8 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                         background: isGeneratingCustom ? 'var(--tw-slate-400)' : 'var(--tw-sky-600)',
                         color: '#ffffff',
                         border: 'none',
-                        borderRadius: '8px',
-                        fontWeight: 700,
+                        borderRadius: 'var(--radius-md)',
+                        fontWeight: 600,
                         fontSize: '0.875rem',
                         cursor: isGeneratingCustom ? 'not-allowed' : 'pointer'
                       }}
@@ -3114,12 +3114,12 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                         value={passageSearch}
                         onChange={(e) => setPassageSearch(e.target.value)}
                         placeholder="🔍 Search passages by title or ID..."
-                        style={{ padding: '8px 14px', borderRadius: '8px', border: '1px solid var(--bd-slate-300)', fontSize: '0.875rem', width: '260px' }}
+                        style={{ padding: '8px 14px', borderRadius: 'var(--radius-md)', border: '1px solid var(--bd-slate-300)', fontSize: '0.875rem', width: '260px' }}
                       />
                       <select
                         value={passageLangFilter}
                         onChange={(e) => setPassageLangFilter(e.target.value)}
-                        style={{ padding: '8px 12px', borderRadius: '8px', border: '1px solid var(--bd-slate-300)', fontSize: '0.875rem' }}
+                        style={{ padding: '8px 12px', borderRadius: 'var(--radius-md)', border: '1px solid var(--bd-slate-300)', fontSize: '0.875rem' }}
                       >
                         <option value="all">All Languages</option>
                         <option value="english">English Only</option>
@@ -3137,8 +3137,8 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                           background: isFullscreen ? 'rgba(2, 132, 199, 0.15)' : 'var(--bg-slate-100)',
                           border: isFullscreen ? '1px solid var(--tw-sky-600)' : '1px solid var(--bd-slate-300)',
                           color: isFullscreen ? 'var(--fg-sky-600)' : 'var(--fg-slate-700)',
-                          borderRadius: '8px',
-                          fontWeight: 700,
+                          borderRadius: 'var(--radius-md)',
+                          fontWeight: 600,
                           fontSize: '0.8rem',
                           cursor: 'pointer',
                           display: 'flex',
@@ -3163,17 +3163,17 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                         disabled={isSyncingPaidPassages}
                         style={{
                           padding: '8px 14px',
-                          background: isSyncingPaidPassages ? 'var(--tw-slate-400)' : 'linear-gradient(135deg, var(--tw-emerald-600) 0%, var(--tw-emerald-700) 100%)',
+                          background: isSyncingPaidPassages ? 'var(--tw-slate-400)' : 'var(--tw-emerald-600)',
                           color: '#ffffff',
                           border: 'none',
-                          borderRadius: '8px',
-                          fontWeight: 700,
+                          borderRadius: 'var(--radius-md)',
+                          fontWeight: 600,
                           fontSize: '0.8rem',
                           cursor: isSyncingPaidPassages ? 'wait' : 'pointer',
                           display: 'flex',
                           alignItems: 'center',
                           gap: '6px',
-                          boxShadow: '0 2px 6px rgba(5, 150, 105, 0.3)'
+                          boxShadow: 'var(--shadow-md)'
                         }}
                       >
                         <span>{isSyncingPaidPassages ? '⏳' : '☁️'}</span>
@@ -3187,8 +3187,8 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                           background: isCreatingManual ? 'var(--tw-slate-500)' : 'var(--tw-sky-600)',
                           color: '#ffffff',
                           border: 'none',
-                          borderRadius: '8px',
-                          fontWeight: 700,
+                          borderRadius: 'var(--radius-md)',
+                          fontWeight: 600,
                           fontSize: '0.8rem',
                           cursor: 'pointer'
                         }}
@@ -3202,11 +3202,11 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                   {syncStatusMsg && (
                     <div style={{
                       padding: '10px 16px',
-                      borderRadius: '8px',
+                      borderRadius: 'var(--radius-md)',
                       background: syncStatusMsg.startsWith('❌') ? 'var(--bg-red-50)' : syncStatusMsg.startsWith('🎉') ? 'var(--bg-green-50)' : 'var(--bg-blue-50)',
                       border: syncStatusMsg.startsWith('❌') ? '1px solid var(--tw-red-400)' : syncStatusMsg.startsWith('🎉') ? '1px solid var(--bd-green-300)' : '1px solid var(--bd-blue-300)',
                       color: syncStatusMsg.startsWith('❌') ? 'var(--fg-red-800)' : syncStatusMsg.startsWith('🎉') ? 'var(--fg-green-800)' : 'var(--fg-blue-800)',
-                      fontWeight: 600,
+                      fontWeight: 500,
                       fontSize: '0.875rem',
                       marginBottom: '14px',
                       display: 'flex',
@@ -3225,17 +3225,17 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
 
                   {/* Manual Creation Drawer */}
                   {isCreatingManual && (
-                    <div style={{ background: 'var(--surface)', border: '1.5px solid var(--tw-sky-600)', borderRadius: '12px', padding: '18px', marginBottom: '20px' }}>
-                      <h4 style={{ margin: '0 0 12px 0', fontSize: '0.95rem', fontWeight: 800, color: 'var(--fg-sky-700)' }}>
+                    <div style={{ background: 'var(--surface)', border: '1.5px solid var(--tw-sky-600)', borderRadius: 'var(--radius-md)', padding: '18px', marginBottom: '20px' }}>
+                      <h4 style={{ margin: '0 0 12px 0', fontSize: '0.95rem', fontWeight: 600, color: 'var(--fg-sky-700)' }}>
                         ➕ Create New Official Examination Passage
                       </h4>
                       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '10px', marginBottom: '12px' }}>
                         <div>
-                          <label style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--fg-slate-600)' }}>Language:</label>
+                          <label style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--fg-slate-600)' }}>Language:</label>
                           <select
                             value={manualLanguage}
                             onChange={(e) => setManualLanguage(e.target.value as Language)}
-                            style={{ width: '100%', padding: '7px', borderRadius: '6px', border: '1px solid var(--bd-slate-300)', fontSize: '0.8rem' }}
+                            style={{ width: '100%', padding: '7px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--bd-slate-300)', fontSize: '0.8rem' }}
                           >
                             <option value="english">English</option>
                             <option value="hindi_mangal">Hindi Mangal</option>
@@ -3243,22 +3243,22 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                           </select>
                         </div>
                         <div>
-                          <label style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--fg-slate-600)' }}>Difficulty:</label>
+                          <label style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--fg-slate-600)' }}>Difficulty:</label>
                           <select
                             value={manualDifficulty}
                             onChange={(e) => setManualDifficulty(e.target.value as 'medium' | 'hard')}
-                            style={{ width: '100%', padding: '7px', borderRadius: '6px', border: '1px solid var(--bd-slate-300)', fontSize: '0.8rem' }}
+                            style={{ width: '100%', padding: '7px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--bd-slate-300)', fontSize: '0.8rem' }}
                           >
                             <option value="medium">Medium</option>
                             <option value="hard">Hard (Long Words)</option>
                           </select>
                         </div>
                         <div>
-                          <label style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--fg-slate-600)' }}>Category:</label>
+                          <label style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--fg-slate-600)' }}>Category:</label>
                           <select
                             value={manualCategory}
                             onChange={(e) => setManualCategory(e.target.value as ExamCategory)}
-                            style={{ width: '100%', padding: '7px', borderRadius: '6px', border: '1px solid var(--bd-slate-300)', fontSize: '0.8rem' }}
+                            style={{ width: '100%', padding: '7px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--bd-slate-300)', fontSize: '0.8rem' }}
                           >
                             <option value="up_police_co">UP Police Computer Operator</option>
                             <option value="up_police_asi">UP Police ASI</option>
@@ -3272,7 +3272,7 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                           value={manualTitle}
                           onChange={(e) => setManualTitle(e.target.value)}
                           placeholder="Passage Title..."
-                          style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid var(--bd-slate-300)', fontSize: '0.875rem', fontWeight: 600 }}
+                          style={{ width: '100%', padding: '8px 12px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--bd-slate-300)', fontSize: '0.875rem', fontWeight: 500 }}
                         />
                       </div>
 
@@ -3282,7 +3282,7 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                           value={manualText}
                           onChange={(e) => setManualText(e.target.value)}
                           placeholder="Type or paste the complete passage text here..."
-                          style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid var(--bd-slate-300)', fontSize: '0.875rem', fontFamily: 'inherit' }}
+                          style={{ width: '100%', padding: '10px', borderRadius: 'var(--radius-md)', border: '1px solid var(--bd-slate-300)', fontSize: '0.875rem', fontFamily: 'inherit' }}
                         />
                         <div style={{ fontSize: '0.75rem', color: 'var(--fg-slate-500)', textAlign: 'right' }}>
                           Word Count: {manualText.split(/\s+/).filter(Boolean).length} words
@@ -3291,7 +3291,7 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
 
                       <button
                         onClick={handleSaveManualPassage}
-                        style={{ padding: '8px 16px', background: 'var(--tw-sky-600)', color: '#ffffff', border: 'none', borderRadius: '6px', fontWeight: 700, fontSize: '0.8rem', cursor: 'pointer' }}
+                        style={{ padding: '8px 16px', background: 'var(--tw-sky-600)', color: '#ffffff', border: 'none', borderRadius: 'var(--radius-sm)', fontWeight: 600, fontSize: '0.8rem', cursor: 'pointer' }}
                       >
                         💾 Save Passage to Database
                       </button>
@@ -3299,8 +3299,8 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                   )}
 
                   {/* Passages Table */}
-                  <div style={{ background: 'var(--surface)', border: '1px solid var(--bd-slate-200)', borderRadius: '12px', overflow: 'hidden' }}>
-                    <div style={{ padding: '12px 16px', background: 'var(--bg-slate-50)', borderBottom: '1px solid var(--bd-slate-200)', display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', fontWeight: 700, color: 'var(--fg-slate-500)' }}>
+                  <div style={{ background: 'var(--surface)', border: '1px solid var(--bd-slate-200)', borderRadius: 'var(--radius-md)', overflow: 'hidden' }}>
+                    <div style={{ padding: '12px 16px', background: 'var(--bg-slate-50)', borderBottom: '1px solid var(--bd-slate-200)', display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', fontWeight: 600, color: 'var(--fg-slate-500)' }}>
                       <span>Showing {studioPassages.length} of {passages.length} Total Passages</span>
                       <span>Target: 15-Minute Exam Hall Standard</span>
                     </div>
@@ -3327,12 +3327,12 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                                   {p.title}
                                 </td>
                                 <td style={{ padding: '10px 14px' }}>
-                                  <span style={{ fontSize: '0.75rem', fontWeight: 700, padding: '2px 6px', borderRadius: '4px', background: p.language === 'english' ? 'var(--bg-blue-100)' : 'var(--bg-amber-100)', color: p.language === 'english' ? 'var(--fg-blue-800)' : 'var(--fg-amber-700)' }}>
+                                  <span style={{ fontSize: '0.75rem', fontWeight: 600, padding: '2px 6px', borderRadius: 'var(--radius-sm)', background: p.language === 'english' ? 'var(--bg-blue-100)' : 'var(--bg-amber-100)', color: p.language === 'english' ? 'var(--fg-blue-800)' : 'var(--fg-amber-700)' }}>
                                     {p.language}
                                   </span>
                                 </td>
                                 <td style={{ padding: '10px 14px' }}>
-                                  <span style={{ fontSize: '0.75rem', fontWeight: 700, padding: '2px 6px', borderRadius: '4px', background: p.difficulty === 'hard' ? 'var(--bg-red-100)' : 'var(--bg-green-50)', color: p.difficulty === 'hard' ? 'var(--fg-red-800)' : 'var(--fg-green-800)' }}>
+                                  <span style={{ fontSize: '0.75rem', fontWeight: 600, padding: '2px 6px', borderRadius: 'var(--radius-sm)', background: p.difficulty === 'hard' ? 'var(--bg-red-100)' : 'var(--bg-green-50)', color: p.difficulty === 'hard' ? 'var(--fg-red-800)' : 'var(--fg-green-800)' }}>
                                     {p.difficulty.toUpperCase()}
                                   </span>
                                 </td>
@@ -3347,9 +3347,9 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                                         border: '1px solid var(--bd-blue-200)',
                                         color: 'var(--fg-blue-700)',
                                         padding: '3px 8px',
-                                        borderRadius: '4px',
+                                        borderRadius: 'var(--radius-sm)',
                                         fontSize: '0.75rem',
-                                        fontWeight: 700,
+                                        fontWeight: 600,
                                         cursor: 'pointer'
                                       }}
                                     >
@@ -3359,7 +3359,7 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                                       <button
                                         type="button"
                                         onClick={() => handleDeleteCustomPassage(p.id)}
-                                        style={{ background: 'var(--bg-red-100)', border: '1px solid var(--bd-red-300)', color: 'var(--fg-red-800)', padding: '3px 8px', borderRadius: '4px', fontSize: '0.75rem', fontWeight: 700, cursor: 'pointer' }}
+                                        style={{ background: 'var(--bg-red-100)', border: '1px solid var(--bd-red-300)', color: 'var(--fg-red-800)', padding: '3px 8px', borderRadius: 'var(--radius-sm)', fontSize: '0.75rem', fontWeight: 600, cursor: 'pointer' }}
                                       >
                                         Delete
                                       </button>
@@ -3389,14 +3389,14 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                       value={candidateSearch}
                       onChange={(e) => setCandidateSearch(e.target.value)}
                       placeholder="🔍 Search candidate by name, roll number, or email..."
-                      style={{ padding: '8px 14px', borderRadius: '8px', border: '1px solid var(--bd-slate-300)', fontSize: '0.875rem', width: '320px' }}
+                      style={{ padding: '8px 14px', borderRadius: 'var(--radius-md)', border: '1px solid var(--bd-slate-300)', fontSize: '0.875rem', width: '320px' }}
                     />
                     <div style={{ fontSize: '0.8rem', color: 'var(--fg-slate-500)' }}>
                       {filteredCandidates.length} Registered Accounts in Firebase
                     </div>
                   </div>
 
-                  <div style={{ background: 'var(--surface)', border: '1px solid var(--bd-slate-200)', borderRadius: '12px', overflow: 'hidden' }}>
+                  <div style={{ background: 'var(--surface)', border: '1px solid var(--bd-slate-200)', borderRadius: 'var(--radius-md)', overflow: 'hidden' }}>
                     <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.8rem' }}>
                       <thead>
                         <tr style={{ background: 'var(--bg-slate-50)', color: 'var(--fg-slate-600)', borderBottom: '1px solid var(--bd-slate-200)' }}>
@@ -3420,7 +3420,7 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                                 {c.displayName || 'Candidate'}
                               </td>
                               <td style={{ padding: '10px 14px' }}>
-                                <span style={{ fontSize: '0.75rem', fontWeight: 700, padding: '2px 6px', borderRadius: '4px', background: 'var(--bg-green-100)', color: 'var(--fg-green-700)' }}>
+                                <span style={{ fontSize: '0.75rem', fontWeight: 600, padding: '2px 6px', borderRadius: 'var(--radius-sm)', background: 'var(--bg-green-100)', color: 'var(--fg-green-700)' }}>
                                   {c.category === 'up_police_co' ? 'Computer Operator' : 'ASI Ministerial'}
                                 </span>
                               </td>
@@ -3428,9 +3428,9 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                                 <span
                                   style={{
                                     fontSize: '0.75rem',
-                                    fontWeight: 700,
+                                    fontWeight: 600,
                                     padding: '2px 8px',
-                                    borderRadius: '12px',
+                                    borderRadius: 'var(--radius-md)',
                                     background: isCandAdmin ? 'var(--bg-blue-50)' : 'var(--bg-slate-100)',
                                     color: isCandAdmin ? 'var(--fg-blue-700)' : 'var(--fg-slate-500)',
                                     border: isCandAdmin ? '1px solid var(--bd-blue-200)' : '1px solid var(--bd-slate-300)'
@@ -3448,9 +3448,9 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                                   onClick={() => handleToggleAdminRole(c.uid, isCandAdmin)}
                                   style={{
                                     padding: '4px 10px',
-                                    borderRadius: '6px',
+                                    borderRadius: 'var(--radius-sm)',
                                     fontSize: '0.75rem',
-                                    fontWeight: 700,
+                                    fontWeight: 600,
                                     cursor: 'pointer',
                                     border: isCandAdmin ? '1px solid var(--bd-red-300)' : '1px solid var(--bd-green-300)',
                                     background: isCandAdmin ? 'var(--bg-red-100)' : 'var(--bg-green-50)',
@@ -3479,11 +3479,11 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                     <div
                       style={{
                         padding: '12px 16px',
-                        borderRadius: '10px',
+                        borderRadius: 'var(--radius-md)',
                         background: paymentFeedback.type === 'success' ? 'var(--bg-green-50)' : 'var(--bg-red-50)',
                         border: `1px solid ${paymentFeedback.type === 'success' ? 'var(--bd-green-300)' : 'var(--bd-red-200)'}`,
                         color: paymentFeedback.type === 'success' ? 'var(--fg-green-800)' : 'var(--fg-red-800)',
-                        fontWeight: 700,
+                        fontWeight: 600,
                         fontSize: '0.875rem',
                         display: 'flex',
                         justifyContent: 'space-between',
@@ -3508,11 +3508,11 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                       gap: '16px'
                     }}
                   >
-                    <div style={{ background: 'var(--surface)', border: '1px solid var(--bd-slate-200)', borderRadius: '12px', padding: '18px' }}>
-                      <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--fg-slate-500)', textTransform: 'uppercase' }}>
+                    <div style={{ background: 'var(--surface)', border: '1px solid var(--bd-slate-200)', borderRadius: 'var(--radius-md)', padding: '18px' }}>
+                      <div style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--fg-slate-500)', textTransform: 'uppercase' }}>
                         Total Submissions
                       </div>
-                      <div style={{ fontSize: '1.8rem', fontWeight: 800, color: 'var(--fg-slate-900)', margin: '4px 0' }}>
+                      <div style={{ fontSize: '1.8rem', fontWeight: 700, color: 'var(--fg-slate-900)', margin: '4px 0' }}>
                         {paymentsList.length}
                       </div>
                       <div style={{ fontSize: '0.75rem', color: 'var(--fg-slate-500)' }}>QR UPI Candidate Transactions</div>
@@ -3522,54 +3522,54 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                       style={{
                         background: pendingPaymentsCount > 0 ? 'var(--bg-amber-50)' : 'var(--surface)',
                         border: pendingPaymentsCount > 0 ? '1.5px solid var(--tw-amber-500)' : '1px solid var(--bd-slate-200)',
-                        borderRadius: '12px',
+                        borderRadius: 'var(--radius-md)',
                         padding: '18px'
                       }}
                     >
-                      <div style={{ fontSize: '0.75rem', fontWeight: 700, color: pendingPaymentsCount > 0 ? 'var(--fg-amber-700)' : 'var(--fg-slate-500)', textTransform: 'uppercase' }}>
+                      <div style={{ fontSize: '0.75rem', fontWeight: 600, color: pendingPaymentsCount > 0 ? 'var(--fg-amber-700)' : 'var(--fg-slate-500)', textTransform: 'uppercase' }}>
                         Pending Approvals
                       </div>
-                      <div style={{ fontSize: '1.8rem', fontWeight: 800, color: pendingPaymentsCount > 0 ? 'var(--fg-amber-600)' : 'var(--fg-slate-900)', margin: '4px 0' }}>
+                      <div style={{ fontSize: '1.8rem', fontWeight: 700, color: pendingPaymentsCount > 0 ? 'var(--fg-amber-600)' : 'var(--fg-slate-900)', margin: '4px 0' }}>
                         {pendingPaymentsCount}
                       </div>
-                      <div style={{ fontSize: '0.75rem', color: pendingPaymentsCount > 0 ? 'var(--fg-amber-700)' : 'var(--fg-slate-500)', fontWeight: 600 }}>
+                      <div style={{ fontSize: '0.75rem', color: pendingPaymentsCount > 0 ? 'var(--fg-amber-700)' : 'var(--fg-slate-500)', fontWeight: 500 }}>
                         {pendingPaymentsCount > 0 ? '🚨 Action Required: Review UTR' : 'All transactions reviewed'}
                       </div>
                     </div>
 
-                    <div style={{ background: 'var(--surface)', border: '1px solid var(--bd-slate-200)', borderRadius: '12px', padding: '18px' }}>
-                      <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--fg-slate-500)', textTransform: 'uppercase' }}>
+                    <div style={{ background: 'var(--surface)', border: '1px solid var(--bd-slate-200)', borderRadius: 'var(--radius-md)', padding: '18px' }}>
+                      <div style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--fg-slate-500)', textTransform: 'uppercase' }}>
                         Approved Pro Subscriptions
                       </div>
-                      <div style={{ fontSize: '1.8rem', fontWeight: 800, color: 'var(--fg-green-600)', margin: '4px 0' }}>
+                      <div style={{ fontSize: '1.8rem', fontWeight: 700, color: 'var(--fg-green-600)', margin: '4px 0' }}>
                         {paymentsList.filter((p) => p.status === 'approved').length}
                       </div>
-                      <div style={{ fontSize: '0.75rem', color: 'var(--fg-green-700)', fontWeight: 600 }}>Active Subscribed Candidates</div>
+                      <div style={{ fontSize: '0.75rem', color: 'var(--fg-green-700)', fontWeight: 500 }}>Active Subscribed Candidates</div>
                     </div>
 
-                    <div style={{ background: 'var(--surface)', border: '1px solid var(--bd-slate-200)', borderRadius: '12px', padding: '18px' }}>
-                      <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--fg-slate-500)', textTransform: 'uppercase' }}>
+                    <div style={{ background: 'var(--surface)', border: '1px solid var(--bd-slate-200)', borderRadius: 'var(--radius-md)', padding: '18px' }}>
+                      <div style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--fg-slate-500)', textTransform: 'uppercase' }}>
                         Total Verified Revenue
                       </div>
-                      <div style={{ fontSize: '1.8rem', fontWeight: 800, color: 'var(--fg-sky-600)', margin: '4px 0' }}>
+                      <div style={{ fontSize: '1.8rem', fontWeight: 700, color: 'var(--fg-sky-600)', margin: '4px 0' }}>
                         ₹{approvedPaymentsRevenue}
                       </div>
-                      <div style={{ fontSize: '0.75rem', color: 'var(--fg-sky-700)', fontWeight: 600 }}>From Approved QR Payments</div>
+                      <div style={{ fontSize: '0.75rem', color: 'var(--fg-sky-700)', fontWeight: 500 }}>From Approved QR Payments</div>
                     </div>
 
-                    <div style={{ background: 'var(--surface)', border: '1px solid var(--bd-slate-200)', borderRadius: '12px', padding: '18px' }}>
-                      <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--fg-slate-500)', textTransform: 'uppercase' }}>
+                    <div style={{ background: 'var(--surface)', border: '1px solid var(--bd-slate-200)', borderRadius: 'var(--radius-md)', padding: '18px' }}>
+                      <div style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--fg-slate-500)', textTransform: 'uppercase' }}>
                         Active Promo Codes
                       </div>
-                      <div style={{ fontSize: '1.8rem', fontWeight: 800, color: 'var(--fg-violet-500)', margin: '4px 0' }}>
+                      <div style={{ fontSize: '1.8rem', fontWeight: 700, color: 'var(--fg-violet-500)', margin: '4px 0' }}>
                         {promoCodesList.filter((p) => p.isActive).length}
                       </div>
-                      <div style={{ fontSize: '0.75rem', color: 'var(--fg-violet-600)', fontWeight: 600 }}>Discount Coupons Live</div>
+                      <div style={{ fontSize: '0.75rem', color: 'var(--fg-violet-600)', fontWeight: 500 }}>Discount Coupons Live</div>
                     </div>
                   </div>
 
                   {/* Submissions Management Section */}
-                  <div style={{ background: 'var(--surface)', border: '1px solid var(--bd-slate-200)', borderRadius: '12px', padding: '20px' }}>
+                  <div style={{ background: 'var(--surface)', border: '1px solid var(--bd-slate-200)', borderRadius: 'var(--radius-md)', padding: '20px' }}>
                     <div
                       style={{
                         display: 'flex',
@@ -3581,7 +3581,7 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                       }}
                     >
                       <div>
-                        <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 800, color: 'var(--fg-slate-900)' }}>
+                        <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 700, color: 'var(--fg-slate-900)' }}>
                           💳 Candidate Payment Submissions & Approvals
                         </h3>
                         <p style={{ margin: '4px 0 0 0', fontSize: '0.8rem', color: 'var(--fg-slate-500)' }}>
@@ -3597,12 +3597,12 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                             onClick={() => setPaymentFilterStatus(st)}
                             style={{
                               padding: '6px 12px',
-                              borderRadius: '8px',
+                              borderRadius: 'var(--radius-md)',
                               border: paymentFilterStatus === st ? '2px solid var(--tw-sky-600)' : '1px solid var(--bd-slate-300)',
                               background: paymentFilterStatus === st ? 'var(--bg-sky-100)' : 'var(--surface)',
                               color: paymentFilterStatus === st ? 'var(--fg-sky-600)' : 'var(--fg-slate-600)',
                               fontSize: '0.75rem',
-                              fontWeight: 700,
+                              fontWeight: 600,
                               cursor: 'pointer',
                               textTransform: 'uppercase'
                             }}
@@ -3616,12 +3616,12 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                           disabled={isLoadingPayments}
                           style={{
                             padding: '6px 12px',
-                            borderRadius: '8px',
+                            borderRadius: 'var(--radius-md)',
                             border: '1px solid var(--bd-slate-300)',
                             background: 'var(--bg-slate-50)',
                             color: 'var(--fg-slate-700)',
                             fontSize: '0.75rem',
-                            fontWeight: 700,
+                            fontWeight: 600,
                             cursor: 'pointer',
                             display: 'flex',
                             alignItems: 'center',
@@ -3654,7 +3654,7 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                             <tr>
                               <td colSpan={8} style={{ padding: '36px', textAlign: 'center', color: 'var(--fg-slate-500)' }}>
                                 <div style={{ fontSize: '2.1rem', marginBottom: '8px' }}>💳</div>
-                                <div style={{ fontWeight: 700, fontSize: '0.95rem' }}>No payment submissions found</div>
+                                <div style={{ fontWeight: 600, fontSize: '0.95rem' }}>No payment submissions found</div>
                                 <div style={{ fontSize: '0.8rem', color: 'var(--tw-slate-400)' }}>
                                   When candidates pay via PhonePe QR code and submit their UTR transaction ID, they will appear here for review.
                                 </div>
@@ -3706,10 +3706,10 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
 
                                   {/* Plan & Exam */}
                                   <td style={{ padding: '10px 12px' }}>
-                                    <div style={{ display: 'inline-block', fontWeight: 800, color: 'var(--fg-indigo-700)', background: 'var(--bg-indigo-100)', padding: '2px 6px', borderRadius: '4px', fontSize: '0.75rem', marginBottom: '2px' }}>
+                                    <div style={{ display: 'inline-block', fontWeight: 600, color: 'var(--fg-indigo-700)', background: 'var(--bg-indigo-100)', padding: '2px 6px', borderRadius: 'var(--radius-sm)', fontSize: '0.75rem', marginBottom: '2px' }}>
                                       {sub.planName}
                                     </div>
-                                    <div style={{ fontWeight: 600, color: 'var(--fg-slate-700)', fontSize: '0.8rem' }}>
+                                    <div style={{ fontWeight: 500, color: 'var(--fg-slate-700)', fontSize: '0.8rem' }}>
                                       {sub.selectedExamTitle || sub.examTitle || 'All 129 Exams Combo'}
                                     </div>
                                     <div style={{ fontSize: '0.75rem', color: 'var(--fg-slate-500)' }}>
@@ -3719,11 +3719,11 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
 
                                   {/* Amount */}
                                   <td style={{ padding: '10px 12px', whiteSpace: 'nowrap' }}>
-                                    <div style={{ fontSize: '1rem', fontWeight: 800, color: 'var(--fg-slate-900)' }}>
+                                    <div style={{ fontSize: '1rem', fontWeight: 600, color: 'var(--fg-slate-900)' }}>
                                       ₹{sub.finalAmount || sub.finalAmountPaid || 0}
                                     </div>
                                     {sub.discountAmount && sub.discountAmount > 0 ? (
-                                      <div style={{ fontSize: '0.75rem', color: 'var(--fg-green-600)', fontWeight: 700 }}>
+                                      <div style={{ fontSize: '0.75rem', color: 'var(--fg-green-600)', fontWeight: 600 }}>
                                         🎟️ {sub.promoCodeApplied || sub.promoCodeUsed} (-₹{sub.discountAmount})
                                       </div>
                                     ) : (
@@ -3742,12 +3742,12 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                                       }}
                                       style={{
                                         fontFamily: 'monospace',
-                                        fontWeight: 800,
+                                        fontWeight: 600,
                                         fontSize: '0.875rem',
                                         color: 'var(--fg-slate-900)',
                                         background: 'var(--bg-slate-100)',
                                         padding: '4px 8px',
-                                        borderRadius: '6px',
+                                        borderRadius: 'var(--radius-sm)',
                                         cursor: 'pointer',
                                         display: 'inline-block',
                                         border: '1px solid var(--bd-slate-300)'
@@ -3781,12 +3781,12 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                                             width: '42px',
                                             height: '42px',
                                             objectFit: 'cover',
-                                            borderRadius: '6px',
+                                            borderRadius: 'var(--radius-sm)',
                                             border: '1.5px solid var(--tw-sky-600)',
-                                            boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+                                            boxShadow: 'var(--shadow-sm)'
                                           }}
                                         />
-                                        <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--fg-sky-600)' }}>
+                                        <span style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--fg-sky-600)' }}>
                                           View 🔍
                                         </span>
                                       </div>
@@ -3803,10 +3803,10 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                                       <span
                                         style={{
                                           padding: '4px 10px',
-                                          borderRadius: '20px',
+                                          borderRadius: 'var(--radius-lg)',
                                           background: 'var(--bg-amber-50)',
                                           color: 'var(--fg-amber-700)',
-                                          fontWeight: 800,
+                                          fontWeight: 600,
                                           fontSize: '0.75rem',
                                           border: '1px solid var(--bd-amber-200)',
                                           display: 'inline-block'
@@ -3820,10 +3820,10 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                                         <span
                                           style={{
                                             padding: '4px 10px',
-                                            borderRadius: '20px',
+                                            borderRadius: 'var(--radius-lg)',
                                             background: 'var(--bg-green-50)',
                                             color: 'var(--fg-green-800)',
-                                            fontWeight: 800,
+                                            fontWeight: 600,
                                             fontSize: '0.75rem',
                                             border: '1px solid var(--bd-green-200)',
                                             display: 'inline-block'
@@ -3843,10 +3843,10 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                                         <span
                                           style={{
                                             padding: '4px 10px',
-                                            borderRadius: '20px',
+                                            borderRadius: 'var(--radius-lg)',
                                             background: 'var(--bg-red-50)',
                                             color: 'var(--fg-red-800)',
-                                            fontWeight: 800,
+                                            fontWeight: 600,
                                             fontSize: '0.75rem',
                                             border: '1px solid var(--bd-red-200)',
                                             display: 'inline-block'
@@ -3875,8 +3875,8 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                                             color: '#ffffff',
                                             border: 'none',
                                             padding: '6px 12px',
-                                            borderRadius: '6px',
-                                            fontWeight: 700,
+                                            borderRadius: 'var(--radius-sm)',
+                                            fontWeight: 600,
                                             fontSize: '0.75rem',
                                             cursor: isActing ? 'not-allowed' : 'pointer'
                                           }}
@@ -3893,8 +3893,8 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                                             color: '#ffffff',
                                             border: 'none',
                                             padding: '6px 10px',
-                                            borderRadius: '6px',
-                                            fontWeight: 700,
+                                            borderRadius: 'var(--radius-sm)',
+                                            fontWeight: 600,
                                             fontSize: '0.75rem',
                                             cursor: isActing ? 'not-allowed' : 'pointer'
                                           }}
@@ -3914,8 +3914,8 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                                           color: 'var(--fg-red-600)',
                                           border: '1px solid var(--bd-red-300)',
                                           padding: '4px 8px',
-                                          borderRadius: '6px',
-                                          fontWeight: 600,
+                                          borderRadius: 'var(--radius-sm)',
+                                          fontWeight: 500,
                                           fontSize: '0.75rem',
                                           cursor: isActing ? 'not-allowed' : 'pointer'
                                         }}
@@ -3934,8 +3934,8 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                                           color: 'var(--fg-green-600)',
                                           border: '1px solid var(--bd-green-300)',
                                           padding: '4px 8px',
-                                          borderRadius: '6px',
-                                          fontWeight: 600,
+                                          borderRadius: 'var(--radius-sm)',
+                                          fontWeight: 500,
                                           fontSize: '0.75rem',
                                           cursor: isActing ? 'not-allowed' : 'pointer'
                                         }}
@@ -3957,9 +3957,9 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                   {/* Quick Shortcut to Dedicated Pricing & Promos Studio */}
                   <div
                     style={{
-                      background: 'linear-gradient(135deg, var(--bg-blue-50) 0%, var(--bg-blue-100) 100%)',
+                      background: 'var(--bg-blue-50)',
                       border: '1.5px solid var(--bd-blue-200)',
-                      borderRadius: '12px',
+                      borderRadius: 'var(--radius-md)',
                       padding: '14px 18px',
                       display: 'flex',
                       justifyContent: 'space-between',
@@ -3969,7 +3969,7 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                     }}
                   >
                     <div>
-                      <div style={{ fontWeight: 800, fontSize: '0.95rem', color: 'var(--fg-blue-800)' }}>
+                      <div style={{ fontWeight: 600, fontSize: '0.95rem', color: 'var(--fg-blue-800)' }}>
                         🏷️ Dedicated Pricing Plans & Promos Studio Active
                       </div>
                       <div style={{ fontSize: '0.8rem', color: 'var(--fg-slate-600)' }}>
@@ -3980,14 +3980,14 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                       onClick={() => setActiveTab('pricing' as any)}
                       style={{
                         padding: '8px 16px',
-                        borderRadius: '8px',
+                        borderRadius: 'var(--radius-md)',
                         background: 'var(--tw-blue-600)',
                         color: '#ffffff',
                         border: 'none',
-                        fontWeight: 700,
+                        fontWeight: 600,
                         fontSize: '0.8rem',
                         cursor: 'pointer',
-                        boxShadow: '0 2px 6px rgba(37, 99, 235, 0.3)'
+                        boxShadow: 'var(--shadow-md)'
                       }}
                     >
                       Open Pricing & Promos Studio →
@@ -4003,10 +4003,10 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                     }}
                   >
                     {/* Active Promo Codes List */}
-                    <div style={{ background: 'var(--surface)', border: '1px solid var(--bd-slate-200)', borderRadius: '12px', padding: '20px' }}>
+                    <div style={{ background: 'var(--surface)', border: '1px solid var(--bd-slate-200)', borderRadius: 'var(--radius-md)', padding: '20px' }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
                         <div>
-                          <h3 style={{ margin: 0, fontSize: '1rem', fontWeight: 800, color: 'var(--fg-slate-900)' }}>
+                          <h3 style={{ margin: 0, fontSize: '1rem', fontWeight: 600, color: 'var(--fg-slate-900)' }}>
                             🎟️ Live Discount Promo Codes ({promoCodesList.length})
                           </h3>
                           <div style={{ fontSize: '0.75rem', color: 'var(--fg-slate-500)' }}>
@@ -4024,7 +4024,7 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                               justifyContent: 'space-between',
                               alignItems: 'center',
                               padding: '10px 14px',
-                              borderRadius: '8px',
+                              borderRadius: 'var(--radius-md)',
                               background: promo.isActive ? 'var(--bg-slate-50)' : 'var(--bg-slate-100)',
                               border: '1px solid var(--bd-slate-200)',
                               opacity: promo.isActive ? 1 : 0.65
@@ -4035,12 +4035,12 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                                 <span
                                   style={{
                                     fontFamily: 'monospace',
-                                    fontWeight: 800,
+                                    fontWeight: 600,
                                     fontSize: '0.875rem',
                                     color: 'var(--fg-indigo-700)',
                                     background: 'var(--bg-indigo-100)',
                                     padding: '2px 8px',
-                                    borderRadius: '4px'
+                                    borderRadius: 'var(--radius-sm)'
                                   }}
                                 >
                                   {promo.code}
@@ -4048,11 +4048,11 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                                 <span
                                   style={{
                                     fontSize: '0.75rem',
-                                    fontWeight: 700,
+                                    fontWeight: 600,
                                     color: promo.discountType === 'percentage' ? 'var(--fg-emerald-700)' : 'var(--fg-sky-700)',
                                     background: promo.discountType === 'percentage' ? 'var(--bg-emerald-100)' : 'var(--bg-sky-100)',
                                     padding: '2px 6px',
-                                    borderRadius: '4px'
+                                    borderRadius: 'var(--radius-sm)'
                                   }}
                                 >
                                   {promo.discountType === 'percentage' ? `${promo.discountValue}% OFF` : `₹${promo.discountValue} FLAT OFF`}
@@ -4069,10 +4069,10 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                                 onClick={() => handleTogglePromoStatus(promo.code)}
                                 style={{
                                   padding: '4px 8px',
-                                  borderRadius: '6px',
+                                  borderRadius: 'var(--radius-sm)',
                                   border: 'none',
                                   fontSize: '0.75rem',
-                                  fontWeight: 700,
+                                  fontWeight: 600,
                                   cursor: 'pointer',
                                   background: promo.isActive ? 'var(--bg-green-100)' : 'var(--bg-red-100)',
                                   color: promo.isActive ? 'var(--fg-green-700)' : 'var(--fg-red-800)'
@@ -4085,10 +4085,10 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                                 onClick={() => handleDeletePromoCode(promo.code)}
                                 style={{
                                   padding: '4px 8px',
-                                  borderRadius: '6px',
+                                  borderRadius: 'var(--radius-sm)',
                                   border: '1px solid var(--bd-red-200)',
                                   fontSize: '0.75rem',
-                                  fontWeight: 700,
+                                  fontWeight: 600,
                                   cursor: 'pointer',
                                   background: 'var(--surface)',
                                   color: 'var(--fg-red-600)'
@@ -4104,14 +4104,14 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                     </div>
 
                     {/* Create New Promo Code Form */}
-                    <div style={{ background: 'var(--surface)', border: '1px solid var(--bd-slate-200)', borderRadius: '12px', padding: '20px' }}>
-                      <h3 style={{ margin: '0 0 14px 0', fontSize: '1rem', fontWeight: 800, color: 'var(--fg-slate-900)' }}>
+                    <div style={{ background: 'var(--surface)', border: '1px solid var(--bd-slate-200)', borderRadius: 'var(--radius-md)', padding: '20px' }}>
+                      <h3 style={{ margin: '0 0 14px 0', fontSize: '1rem', fontWeight: 600, color: 'var(--fg-slate-900)' }}>
                         ➕ Create New Promo Code
                       </h3>
 
                       <form onSubmit={handleCreatePromoCode} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                         <div>
-                          <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: 'var(--fg-slate-600)', marginBottom: '4px' }}>
+                          <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: 'var(--fg-slate-600)', marginBottom: '4px' }}>
                             Promo Code Name (Uppercase):
                           </label>
                           <input
@@ -4123,18 +4123,18 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                             style={{
                               width: '100%',
                               padding: '8px 12px',
-                              borderRadius: '8px',
+                              borderRadius: 'var(--radius-md)',
                               border: '1px solid var(--bd-slate-300)',
                               fontSize: '0.875rem',
                               fontFamily: 'monospace',
-                              fontWeight: 700
+                              fontWeight: 600
                             }}
                           />
                         </div>
 
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
                           <div>
-                            <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: 'var(--fg-slate-600)', marginBottom: '4px' }}>
+                            <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: 'var(--fg-slate-600)', marginBottom: '4px' }}>
                               Discount Type:
                             </label>
                             <select
@@ -4143,7 +4143,7 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                               style={{
                                 width: '100%',
                                 padding: '8px 10px',
-                                borderRadius: '8px',
+                                borderRadius: 'var(--radius-md)',
                                 border: '1px solid var(--bd-slate-300)',
                                 fontSize: '0.875rem'
                               }}
@@ -4154,7 +4154,7 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                           </div>
 
                           <div>
-                            <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: 'var(--fg-slate-600)', marginBottom: '4px' }}>
+                            <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: 'var(--fg-slate-600)', marginBottom: '4px' }}>
                               Discount Value:
                             </label>
                             <input
@@ -4166,10 +4166,10 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                               style={{
                                 width: '100%',
                                 padding: '8px 10px',
-                                borderRadius: '8px',
+                                borderRadius: 'var(--radius-md)',
                                 border: '1px solid var(--bd-slate-300)',
                                 fontSize: '0.875rem',
-                                fontWeight: 700
+                                fontWeight: 600
                               }}
                             />
                           </div>
@@ -4177,7 +4177,7 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
 
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
                           <div>
-                            <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: 'var(--fg-slate-600)', marginBottom: '4px' }}>
+                            <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: 'var(--fg-slate-600)', marginBottom: '4px' }}>
                               Min Order Amount (₹):
                             </label>
                             <input
@@ -4188,7 +4188,7 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                               style={{
                                 width: '100%',
                                 padding: '8px 10px',
-                                borderRadius: '8px',
+                                borderRadius: 'var(--radius-md)',
                                 border: '1px solid var(--bd-slate-300)',
                                 fontSize: '0.875rem'
                               }}
@@ -4197,7 +4197,7 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
 
                           {newPromoType === 'percentage' && (
                             <div>
-                              <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: 'var(--fg-slate-600)', marginBottom: '4px' }}>
+                              <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: 'var(--fg-slate-600)', marginBottom: '4px' }}>
                                 Max Discount Cap (₹):
                               </label>
                               <input
@@ -4208,7 +4208,7 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                                 style={{
                                   width: '100%',
                                   padding: '8px 10px',
-                                  borderRadius: '8px',
+                                  borderRadius: 'var(--radius-md)',
                                   border: '1px solid var(--bd-slate-300)',
                                   fontSize: '0.875rem'
                                 }}
@@ -4218,7 +4218,7 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                         </div>
 
                         <div>
-                          <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: 'var(--fg-slate-600)', marginBottom: '4px' }}>
+                          <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: 'var(--fg-slate-600)', marginBottom: '4px' }}>
                             Description:
                           </label>
                           <input
@@ -4229,7 +4229,7 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                             style={{
                               width: '100%',
                               padding: '8px 12px',
-                              borderRadius: '8px',
+                              borderRadius: 'var(--radius-md)',
                               border: '1px solid var(--bd-slate-300)',
                               fontSize: '0.875rem'
                             }}
@@ -4240,11 +4240,11 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                           type="submit"
                           style={{
                             padding: '10px 16px',
-                            background: 'linear-gradient(135deg, var(--tw-sky-600) 0%, var(--tw-sky-700) 100%)',
+                            background: 'var(--tw-sky-600)',
                             color: '#ffffff',
                             border: 'none',
-                            borderRadius: '8px',
-                            fontWeight: 700,
+                            borderRadius: 'var(--radius-md)',
+                            fontWeight: 600,
                             fontSize: '0.875rem',
                             cursor: 'pointer',
                             marginTop: '6px'
@@ -4257,27 +4257,27 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                   </div>
 
                   {/* Telegram Bot Integration Suite */}
-                  <div style={{ background: 'var(--surface)', border: '1.5px solid var(--tw-sky-400)', borderRadius: '12px', padding: '20px', boxShadow: '0 4px 12px rgba(56, 189, 248, 0.08)' }}>
+                  <div style={{ background: 'var(--surface)', border: '1.5px solid var(--tw-sky-400)', borderRadius: 'var(--radius-md)', padding: '20px', boxShadow: 'var(--shadow-md)' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '12px', marginBottom: '16px' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                         <div
                           style={{
                             width: '42px',
                             height: '42px',
-                            borderRadius: '10px',
+                            borderRadius: 'var(--radius-md)',
                             background: 'linear-gradient(135deg, #2aabee 0%, #229ed9 100%)',
                             color: '#ffffff',
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
                             fontSize: '1.4rem',
-                            boxShadow: '0 4px 10px rgba(34, 158, 217, 0.35)'
+                            boxShadow: 'var(--shadow-md)'
                           }}
                         >
                           ✈️
                         </div>
                         <div>
-                          <h3 style={{ margin: 0, fontSize: '1rem', fontWeight: 800, color: 'var(--fg-slate-900)' }}>
+                          <h3 style={{ margin: 0, fontSize: '1rem', fontWeight: 600, color: 'var(--fg-slate-900)' }}>
                             🤖 Telegram Admin Bot & 1-Click Instant Approvals
                           </h3>
                           <div style={{ fontSize: '0.8rem', color: 'var(--fg-slate-500)' }}>
@@ -4287,7 +4287,7 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                       </div>
 
                       <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <label style={{ display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer', fontSize: '0.875rem', fontWeight: 700, color: 'var(--fg-slate-900)' }}>
+                        <label style={{ display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer', fontSize: '0.875rem', fontWeight: 600, color: 'var(--fg-slate-900)' }}>
                           <input
                             type="checkbox"
                             checked={telegramConfig.enabled}
@@ -4302,13 +4302,13 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                       <div
                         style={{
                           padding: '10px 14px',
-                          borderRadius: '8px',
+                          borderRadius: 'var(--radius-md)',
                           marginBottom: '16px',
                           background: telegramStatus.success ? 'var(--bg-green-50)' : 'var(--bg-red-50)',
                           border: `1px solid ${telegramStatus.success ? 'var(--bd-green-300)' : 'var(--bd-red-200)'}`,
                           color: telegramStatus.success ? 'var(--fg-green-800)' : 'var(--fg-red-800)',
                           fontSize: '0.875rem',
-                          fontWeight: 700
+                          fontWeight: 600
                         }}
                       >
                         {telegramStatus.message}
@@ -4319,7 +4319,7 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '14px' }}>
                         {/* Bot Token */}
                         <div>
-                          <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: 'var(--fg-slate-600)', marginBottom: '4px' }}>
+                          <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: 'var(--fg-slate-600)', marginBottom: '4px' }}>
                             Telegram Bot Token (from @BotFather):
                           </label>
                           <div style={{ display: 'flex', gap: '6px' }}>
@@ -4331,7 +4331,7 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                               style={{
                                 flex: 1,
                                 padding: '8px 12px',
-                                borderRadius: '8px',
+                                borderRadius: 'var(--radius-md)',
                                 border: '1px solid var(--bd-slate-300)',
                                 fontSize: '0.875rem',
                                 fontFamily: 'monospace'
@@ -4342,7 +4342,7 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                               onClick={() => setShowTelegramToken(!showTelegramToken)}
                               style={{
                                 padding: '8px 12px',
-                                borderRadius: '8px',
+                                borderRadius: 'var(--radius-md)',
                                 border: '1px solid var(--bd-slate-300)',
                                 background: 'var(--bg-slate-50)',
                                 cursor: 'pointer',
@@ -4356,7 +4356,7 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
 
                         {/* Admin Chat ID */}
                         <div>
-                          <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: 'var(--fg-slate-600)', marginBottom: '4px' }}>
+                          <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: 'var(--fg-slate-600)', marginBottom: '4px' }}>
                             Admin Chat ID / Channel ID (from @userinfobot):
                           </label>
                           <input
@@ -4367,7 +4367,7 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                             style={{
                               width: '100%',
                               padding: '8px 12px',
-                              borderRadius: '8px',
+                              borderRadius: 'var(--radius-md)',
                               border: '1px solid var(--bd-slate-300)',
                               fontSize: '0.875rem',
                               fontFamily: 'monospace'
@@ -4379,7 +4379,7 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '14px' }}>
                         {/* Approval Secret Token */}
                         <div>
-                          <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: 'var(--fg-slate-600)', marginBottom: '4px' }}>
+                          <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: 'var(--fg-slate-600)', marginBottom: '4px' }}>
                             1-Click Approval Security Secret:
                           </label>
                           <div style={{ display: 'flex', gap: '6px' }}>
@@ -4390,7 +4390,7 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                               style={{
                                 flex: 1,
                                 padding: '8px 12px',
-                                borderRadius: '8px',
+                                borderRadius: 'var(--radius-md)',
                                 border: '1px solid var(--bd-slate-300)',
                                 fontSize: '0.875rem',
                                 fontFamily: 'monospace'
@@ -4401,12 +4401,12 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                               onClick={() => setTelegramConfig({ ...telegramConfig, approvalSecretToken: 'adm_' + Math.random().toString(36).substring(2, 12) })}
                               style={{
                                 padding: '8px 12px',
-                                borderRadius: '8px',
+                                borderRadius: 'var(--radius-md)',
                                 border: '1px solid var(--bd-slate-300)',
                                 background: 'var(--bg-slate-50)',
                                 cursor: 'pointer',
                                 fontSize: '0.75rem',
-                                fontWeight: 700
+                                fontWeight: 600
                               }}
                               title="Generate new secret token"
                             >
@@ -4417,7 +4417,7 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
 
                         {/* Community Broadcast Channel URL */}
                         <div>
-                          <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: 'var(--fg-slate-600)', marginBottom: '4px' }}>
+                          <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: 'var(--fg-slate-600)', marginBottom: '4px' }}>
                             📢 Official Telegram Broadcast Channel:
                           </label>
                           <input
@@ -4428,7 +4428,7 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                             style={{
                               width: '100%',
                               padding: '8px 12px',
-                              borderRadius: '8px',
+                              borderRadius: 'var(--radius-md)',
                               border: '1px solid var(--bd-slate-300)',
                               fontSize: '0.875rem'
                             }}
@@ -4437,7 +4437,7 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
 
                         {/* Discussion Group URL */}
                         <div>
-                          <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: 'var(--fg-slate-600)', marginBottom: '4px' }}>
+                          <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: 'var(--fg-slate-600)', marginBottom: '4px' }}>
                             👥 Telegram Aspirants Discussion Group:
                           </label>
                           <input
@@ -4448,7 +4448,7 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                             style={{
                               width: '100%',
                               padding: '8px 12px',
-                              borderRadius: '8px',
+                              borderRadius: 'var(--radius-md)',
                               border: '1px solid var(--bd-slate-300)',
                               fontSize: '0.875rem'
                             }}
@@ -4457,7 +4457,7 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
 
                         {/* Support Username */}
                         <div>
-                          <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: 'var(--fg-slate-600)', marginBottom: '4px' }}>
+                          <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: 'var(--fg-slate-600)', marginBottom: '4px' }}>
                             💬 1-on-1 Direct Support Admin Telegram Username (without @):
                           </label>
                           <input
@@ -4468,7 +4468,7 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                             style={{
                               width: '100%',
                               padding: '8px 12px',
-                              borderRadius: '8px',
+                              borderRadius: 'var(--radius-md)',
                               border: '1px solid var(--bd-slate-300)',
                               fontSize: '0.875rem'
                             }}
@@ -4481,11 +4481,11 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                           type="submit"
                           style={{
                             padding: '9px 18px',
-                            background: 'linear-gradient(135deg, var(--tw-sky-600) 0%, var(--tw-sky-700) 100%)',
+                            background: 'var(--tw-sky-600)',
                             color: '#ffffff',
                             border: 'none',
-                            borderRadius: '8px',
-                            fontWeight: 700,
+                            borderRadius: 'var(--radius-md)',
+                            fontWeight: 600,
                             fontSize: '0.875rem',
                             cursor: 'pointer'
                           }}
@@ -4502,8 +4502,8 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                             background: 'var(--bg-green-50)',
                             color: 'var(--fg-green-800)',
                             border: '1.5px solid var(--bd-green-300)',
-                            borderRadius: '8px',
-                            fontWeight: 700,
+                            borderRadius: 'var(--radius-md)',
+                            fontWeight: 600,
                             fontSize: '0.875rem',
                             cursor: telegramStatus.loading ? 'not-allowed' : 'pointer',
                             display: 'flex',
@@ -4518,8 +4518,8 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                     </form>
 
                     {/* Step-by-Step Guide */}
-                    <div style={{ marginTop: '16px', background: 'var(--bg-slate-50)', border: '1px solid var(--bd-slate-200)', borderRadius: '8px', padding: '12px 16px' }}>
-                      <div style={{ fontWeight: 800, fontSize: '0.8rem', color: 'var(--fg-slate-900)', marginBottom: '6px' }}>
+                    <div style={{ marginTop: '16px', background: 'var(--bg-slate-50)', border: '1px solid var(--bd-slate-200)', borderRadius: 'var(--radius-md)', padding: '12px 16px' }}>
+                      <div style={{ fontWeight: 600, fontSize: '0.8rem', color: 'var(--fg-slate-900)', marginBottom: '6px' }}>
                         📋 1-Minute Setup Guide for Telegram Alerts:
                       </div>
                       <ol style={{ margin: 0, paddingLeft: '18px', fontSize: '0.8rem', color: 'var(--fg-slate-600)', lineHeight: 1.6 }}>
@@ -4553,14 +4553,14 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                   <div
                     style={{
                       background: 'var(--surface)',
-                      borderRadius: '16px',
+                      borderRadius: 'var(--radius-lg)',
                       maxWidth: '520px',
                       width: '100%',
                       maxHeight: '90vh',
                       display: 'flex',
                       flexDirection: 'column',
                       overflow: 'hidden',
-                      boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)'
+                      boxShadow: 'var(--shadow-lg)'
                     }}
                     onClick={(e) => e.stopPropagation()}
                   >
@@ -4574,7 +4574,7 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                         alignItems: 'center'
                       }}
                     >
-                      <div style={{ fontWeight: 800, fontSize: '0.95rem' }}>
+                      <div style={{ fontWeight: 600, fontSize: '0.95rem' }}>
                         🧾 Payment Receipt Proof
                       </div>
                       <button
@@ -4599,7 +4599,7 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                           maxWidth: '100%',
                           maxHeight: '65vh',
                           objectFit: 'contain',
-                          borderRadius: '8px',
+                          borderRadius: 'var(--radius-md)',
                           border: '1px solid var(--bd-slate-300)'
                         }}
                       />
@@ -4622,7 +4622,7 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                         style={{
                           fontSize: '0.8rem',
                           color: 'var(--fg-sky-600)',
-                          fontWeight: 700,
+                          fontWeight: 600,
                           textDecoration: 'none'
                         }}
                       >
@@ -4636,8 +4636,8 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                           background: 'var(--tw-slate-900)',
                           color: '#ffffff',
                           border: 'none',
-                          borderRadius: '8px',
-                          fontWeight: 700,
+                          borderRadius: 'var(--radius-md)',
+                          fontWeight: 600,
                           fontSize: '0.8rem',
                           cursor: 'pointer'
                         }}
@@ -4658,7 +4658,7 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                   <div
                     style={{
                       background: 'linear-gradient(135deg, var(--tw-slate-900) 0%, var(--tw-slate-800) 100%)',
-                      borderRadius: '16px',
+                      borderRadius: 'var(--radius-lg)',
                       padding: '24px',
                       color: '#ffffff',
                       display: 'flex',
@@ -4666,7 +4666,7 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                       alignItems: 'center',
                       flexWrap: 'wrap',
                       gap: '16px',
-                      boxShadow: '0 4px 20px rgba(15, 23, 42, 0.25)'
+                      boxShadow: 'var(--shadow-lg)'
                     }}
                   >
                     <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
@@ -4674,22 +4674,22 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                         style={{
                           width: '48px',
                           height: '48px',
-                          borderRadius: '12px',
-                          background: 'linear-gradient(135deg, var(--tw-amber-500) 0%, var(--tw-amber-600) 100%)',
+                          borderRadius: 'var(--radius-md)',
+                          background: 'var(--tw-amber-500)',
                           display: 'flex',
                           alignItems: 'center',
                           justifyContent: 'center',
                           fontSize: '1.6rem',
-                          boxShadow: '0 4px 12px rgba(245, 158, 11, 0.35)'
+                          boxShadow: 'var(--shadow-md)'
                         }}
                       >
                         🏷️
                       </div>
                       <div>
-                        <div style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--tw-sky-400)', letterSpacing: '1px', textTransform: 'uppercase' }}>
+                        <div style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--tw-sky-400)', letterSpacing: '1px', textTransform: 'uppercase' }}>
                           COMMERCIAL CONTROL CENTER
                         </div>
-                        <h2 style={{ margin: '2px 0 0 0', fontSize: '1.25rem', fontWeight: 900, color: '#ffffff' }}>
+                        <h2 style={{ margin: '2px 0 0 0', fontSize: '1.25rem', fontWeight: 700, color: '#ffffff' }}>
                           Pricing Plans & Promo Codes Studio
                         </h2>
                         <p style={{ margin: '4px 0 0 0', fontSize: '0.8rem', color: 'var(--tw-slate-400)' }}>
@@ -4706,9 +4706,9 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                           border: '1px solid rgba(255, 255, 255, 0.2)',
                           color: 'var(--tw-slate-200)',
                           padding: '9px 16px',
-                          borderRadius: '8px',
+                          borderRadius: 'var(--radius-md)',
                           fontSize: '0.8rem',
-                          fontWeight: 700,
+                          fontWeight: 600,
                           cursor: 'pointer'
                         }}
                       >
@@ -4717,15 +4717,15 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                       <button
                         onClick={handleSavePricingPlans}
                         style={{
-                          background: 'linear-gradient(135deg, var(--tw-emerald-500) 0%, var(--tw-emerald-600) 100%)',
+                          background: 'var(--tw-emerald-500)',
                           border: 'none',
                           color: '#ffffff',
                           padding: '9px 20px',
-                          borderRadius: '8px',
+                          borderRadius: 'var(--radius-md)',
                           fontSize: '0.875rem',
-                          fontWeight: 800,
+                          fontWeight: 600,
                           cursor: 'pointer',
-                          boxShadow: '0 2px 10px rgba(16, 185, 129, 0.35)'
+                          boxShadow: 'var(--shadow-md)'
                         }}
                       >
                         💾 Save All Pricing Changes
@@ -4739,10 +4739,10 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                       style={{
                         background: 'var(--bg-green-100)',
                         border: '1.5px solid var(--bd-green-300)',
-                        borderRadius: '10px',
+                        borderRadius: 'var(--radius-md)',
                         padding: '12px 18px',
                         color: 'var(--fg-green-700)',
-                        fontWeight: 700,
+                        fontWeight: 600,
                         fontSize: '0.875rem',
                         display: 'flex',
                         alignItems: 'center',
@@ -4758,7 +4758,7 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                   <div>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
                       <div>
-                        <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 800, color: 'var(--fg-slate-900)' }}>
+                        <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 700, color: 'var(--fg-slate-900)' }}>
                           🎯 5-Tier Subscription Ladder ({pricingPlansList.length} Active Plans)
                         </h3>
                         <div style={{ fontSize: '0.8rem', color: 'var(--fg-slate-500)' }}>
@@ -4790,7 +4790,7 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                                 : plan.isBestValue
                                 ? '2px solid var(--tw-violet-500)'
                                 : '1px solid var(--bd-slate-200)',
-                              borderRadius: '12px',
+                              borderRadius: 'var(--radius-md)',
                               padding: '16px',
                               display: 'flex',
                               flexDirection: 'column',
@@ -4809,25 +4809,25 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                                     color: 'var(--fg-slate-500)',
                                     background: 'var(--bg-slate-100)',
                                     padding: '2px 6px',
-                                    borderRadius: '4px',
-                                    fontWeight: 700
+                                    borderRadius: 'var(--radius-sm)',
+                                    fontWeight: 600
                                   }}
                                 >
                                   ID: {plan.id}
                                 </span>
                                 <div style={{ marginTop: '6px' }}>
-                                  <label style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--fg-slate-600)' }}>Plan Tier Name:</label>
+                                  <label style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--fg-slate-600)' }}>Plan Tier Name:</label>
                                   <input
                                     type="text"
                                     value={plan.name}
                                     onChange={(e) => handleUpdatePlan(idx, 'name', e.target.value)}
                                     style={{
                                       width: '100%',
-                                      fontWeight: 800,
+                                      fontWeight: 600,
                                       fontSize: '1rem',
                                       color: 'var(--fg-slate-900)',
                                       border: '1px solid var(--bd-slate-300)',
-                                      borderRadius: '6px',
+                                      borderRadius: 'var(--radius-sm)',
                                       padding: '4px 8px',
                                       marginTop: '2px'
                                     }}
@@ -4839,9 +4839,9 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                                 <span
                                   style={{
                                     fontSize: '0.75rem',
-                                    fontWeight: 800,
+                                    fontWeight: 600,
                                     padding: '3px 8px',
-                                    borderRadius: '12px',
+                                    borderRadius: 'var(--radius-md)',
                                     background: plan.type === 'all_exams_pass' ? 'var(--bg-blue-100)' : 'var(--bg-amber-100)',
                                     color: plan.type === 'all_exams_pass' ? 'var(--fg-blue-800)' : 'var(--fg-amber-800)',
                                     textTransform: 'uppercase'
@@ -4850,7 +4850,7 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                                   {plan.type === 'all_exams_pass' ? 'All 129 Exams' : 'Single Exam'}
                                 </span>
                                 {discountPct > 0 && (
-                                  <div style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--fg-green-600)', marginTop: '4px' }}>
+                                  <div style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--fg-green-600)', marginTop: '4px' }}>
                                     {discountPct}% OFF
                                   </div>
                                 )}
@@ -4859,7 +4859,7 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
 
                             {/* Badge Label Input */}
                             <div>
-                              <label style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--fg-slate-600)' }}>Badge Tagline:</label>
+                              <label style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--fg-slate-600)' }}>Badge Tagline:</label>
                               <input
                                 type="text"
                                 value={plan.badge || ''}
@@ -4869,7 +4869,7 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                                   width: '100%',
                                   fontSize: '0.8rem',
                                   border: '1px solid var(--bd-slate-300)',
-                                  borderRadius: '6px',
+                                  borderRadius: 'var(--radius-sm)',
                                   padding: '4px 8px',
                                   marginTop: '2px'
                                 }}
@@ -4878,8 +4878,8 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
 
                             {/* Price Row: Discounted (Payable) & Original */}
                             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
-                              <div style={{ background: 'var(--bg-green-50)', padding: '8px 10px', borderRadius: '8px', border: '1px solid var(--bd-green-200)' }}>
-                                <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 800, color: 'var(--fg-green-800)' }}>
+                              <div style={{ background: 'var(--bg-green-50)', padding: '8px 10px', borderRadius: 'var(--radius-md)', border: '1px solid var(--bd-green-200)' }}>
+                                <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: 'var(--fg-green-800)' }}>
                                   Payable Price (₹):
                                 </label>
                                 <input
@@ -4889,20 +4889,20 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                                   onChange={(e) => handleUpdatePlan(idx, 'discountedPrice', Number(e.target.value))}
                                   style={{
                                     width: '100%',
-                                    fontWeight: 900,
+                                    fontWeight: 700,
                                     fontSize: '1.1rem',
                                     color: 'var(--fg-green-700)',
                                     background: 'var(--surface)',
                                     border: '1px solid var(--bd-green-300)',
-                                    borderRadius: '6px',
+                                    borderRadius: 'var(--radius-sm)',
                                     padding: '4px 8px',
                                     marginTop: '2px'
                                   }}
                                 />
                               </div>
 
-                              <div style={{ background: 'var(--bg-slate-50)', padding: '8px 10px', borderRadius: '8px', border: '1px solid var(--bd-slate-200)' }}>
-                                <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: 'var(--fg-slate-500)' }}>
+                              <div style={{ background: 'var(--bg-slate-50)', padding: '8px 10px', borderRadius: 'var(--radius-md)', border: '1px solid var(--bd-slate-200)' }}>
+                                <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: 'var(--fg-slate-500)' }}>
                                   Original Price (₹):
                                 </label>
                                 <input
@@ -4912,12 +4912,12 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                                   onChange={(e) => handleUpdatePlan(idx, 'originalPrice', Number(e.target.value))}
                                   style={{
                                     width: '100%',
-                                    fontWeight: 700,
+                                    fontWeight: 600,
                                     fontSize: '1rem',
                                     color: 'var(--fg-slate-500)',
                                     background: 'var(--surface)',
                                     border: '1px solid var(--bd-slate-300)',
-                                    borderRadius: '6px',
+                                    borderRadius: 'var(--radius-sm)',
                                     padding: '4px 8px',
                                     marginTop: '2px'
                                   }}
@@ -4928,7 +4928,7 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                             {/* Validity & Exam Type Grid */}
                             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
                               <div>
-                                <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: 'var(--fg-slate-600)' }}>
+                                <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: 'var(--fg-slate-600)' }}>
                                   Validity (Days):
                                 </label>
                                 <input
@@ -4940,7 +4940,7 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                                     width: '100%',
                                     fontSize: '0.8rem',
                                     border: '1px solid var(--bd-slate-300)',
-                                    borderRadius: '6px',
+                                    borderRadius: 'var(--radius-sm)',
                                     padding: '4px 8px',
                                     marginTop: '2px'
                                   }}
@@ -4948,7 +4948,7 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                               </div>
 
                               <div>
-                                <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: 'var(--fg-slate-600)' }}>
+                                <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: 'var(--fg-slate-600)' }}>
                                   Access Scope:
                                 </label>
                                 <select
@@ -4958,7 +4958,7 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                                     width: '100%',
                                     fontSize: '0.8rem',
                                     border: '1px solid var(--bd-slate-300)',
-                                    borderRadius: '6px',
+                                    borderRadius: 'var(--radius-sm)',
                                     padding: '4px 6px',
                                     marginTop: '2px',
                                     background: 'var(--surface)'
@@ -4972,7 +4972,7 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
 
                             {/* Features List (Multiline) */}
                             <div>
-                              <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: 'var(--fg-slate-600)', marginBottom: '2px' }}>
+                              <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: 'var(--fg-slate-600)', marginBottom: '2px' }}>
                                 Features (1 per line):
                               </label>
                               <textarea
@@ -4983,7 +4983,7 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                                   width: '100%',
                                   fontSize: '0.75rem',
                                   border: '1px solid var(--bd-slate-300)',
-                                  borderRadius: '6px',
+                                  borderRadius: 'var(--radius-sm)',
                                   padding: '6px 8px',
                                   fontFamily: 'inherit',
                                   resize: 'vertical'
@@ -5005,10 +5005,10 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                     }}
                   >
                     {/* Active Promo Codes List */}
-                    <div style={{ background: 'var(--surface)', border: '1px solid var(--bd-slate-200)', borderRadius: '12px', padding: '20px' }}>
+                    <div style={{ background: 'var(--surface)', border: '1px solid var(--bd-slate-200)', borderRadius: 'var(--radius-md)', padding: '20px' }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
                         <div>
-                          <h3 style={{ margin: 0, fontSize: '1rem', fontWeight: 800, color: 'var(--fg-slate-900)' }}>
+                          <h3 style={{ margin: 0, fontSize: '1rem', fontWeight: 600, color: 'var(--fg-slate-900)' }}>
                             🎟️ Live Discount Promo Codes ({promoCodesList.length})
                           </h3>
                           <div style={{ fontSize: '0.75rem', color: 'var(--fg-slate-500)' }}>
@@ -5031,7 +5031,7 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                                 justifyContent: 'space-between',
                                 alignItems: 'center',
                                 padding: '10px 14px',
-                                borderRadius: '8px',
+                                borderRadius: 'var(--radius-md)',
                                 background: promo.isActive ? 'var(--bg-slate-50)' : 'var(--bg-slate-100)',
                                 border: '1px solid var(--bd-slate-200)',
                                 opacity: promo.isActive ? 1 : 0.65
@@ -5042,12 +5042,12 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                                   <span
                                     style={{
                                       fontFamily: 'monospace',
-                                      fontWeight: 800,
+                                      fontWeight: 600,
                                       fontSize: '0.875rem',
                                       color: 'var(--fg-indigo-700)',
                                       background: 'var(--bg-indigo-100)',
                                       padding: '2px 8px',
-                                      borderRadius: '4px'
+                                      borderRadius: 'var(--radius-sm)'
                                     }}
                                   >
                                     {promo.code}
@@ -5055,11 +5055,11 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                                   <span
                                     style={{
                                       fontSize: '0.75rem',
-                                      fontWeight: 700,
+                                      fontWeight: 600,
                                       color: promo.discountType === 'percentage' ? 'var(--fg-emerald-700)' : 'var(--fg-sky-700)',
                                       background: promo.discountType === 'percentage' ? 'var(--bg-emerald-100)' : 'var(--bg-sky-100)',
                                       padding: '2px 6px',
-                                      borderRadius: '4px'
+                                      borderRadius: 'var(--radius-sm)'
                                     }}
                                   >
                                     {promo.discountType === 'percentage' ? `${promo.discountValue}% OFF` : `₹${promo.discountValue} FLAT OFF`}
@@ -5076,10 +5076,10 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                                   onClick={() => handleTogglePromoStatus(promo.code)}
                                   style={{
                                     padding: '4px 8px',
-                                    borderRadius: '6px',
+                                    borderRadius: 'var(--radius-sm)',
                                     border: 'none',
                                     fontSize: '0.75rem',
-                                    fontWeight: 700,
+                                    fontWeight: 600,
                                     cursor: 'pointer',
                                     background: promo.isActive ? 'var(--bg-green-100)' : 'var(--bg-red-100)',
                                     color: promo.isActive ? 'var(--fg-green-700)' : 'var(--fg-red-800)'
@@ -5092,10 +5092,10 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                                   onClick={() => handleDeletePromoCode(promo.code)}
                                   style={{
                                     padding: '4px 8px',
-                                    borderRadius: '6px',
+                                    borderRadius: 'var(--radius-sm)',
                                     border: '1px solid var(--bd-red-200)',
                                     fontSize: '0.75rem',
-                                    fontWeight: 700,
+                                    fontWeight: 600,
                                     cursor: 'pointer',
                                     background: 'var(--surface)',
                                     color: 'var(--fg-red-600)'
@@ -5112,14 +5112,14 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                     </div>
 
                     {/* Create New Promo Code Form */}
-                    <div style={{ background: 'var(--surface)', border: '1px solid var(--bd-slate-200)', borderRadius: '12px', padding: '20px' }}>
-                      <h3 style={{ margin: '0 0 14px 0', fontSize: '1rem', fontWeight: 800, color: 'var(--fg-slate-900)' }}>
+                    <div style={{ background: 'var(--surface)', border: '1px solid var(--bd-slate-200)', borderRadius: 'var(--radius-md)', padding: '20px' }}>
+                      <h3 style={{ margin: '0 0 14px 0', fontSize: '1rem', fontWeight: 600, color: 'var(--fg-slate-900)' }}>
                         ➕ Create New Promo Code
                       </h3>
 
                       <form onSubmit={handleCreatePromoCode} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                         <div>
-                          <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: 'var(--fg-slate-600)', marginBottom: '4px' }}>
+                          <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: 'var(--fg-slate-600)', marginBottom: '4px' }}>
                             Promo Code Name (Uppercase):
                           </label>
                           <input
@@ -5131,18 +5131,18 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                             style={{
                               width: '100%',
                               padding: '8px 12px',
-                              borderRadius: '8px',
+                              borderRadius: 'var(--radius-md)',
                               border: '1px solid var(--bd-slate-300)',
                               fontSize: '0.875rem',
                               fontFamily: 'monospace',
-                              fontWeight: 700
+                              fontWeight: 600
                             }}
                           />
                         </div>
 
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
                           <div>
-                            <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: 'var(--fg-slate-600)', marginBottom: '4px' }}>
+                            <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: 'var(--fg-slate-600)', marginBottom: '4px' }}>
                               Discount Type:
                             </label>
                             <select
@@ -5151,7 +5151,7 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                               style={{
                                 width: '100%',
                                 padding: '8px 10px',
-                                borderRadius: '8px',
+                                borderRadius: 'var(--radius-md)',
                                 border: '1px solid var(--bd-slate-300)',
                                 fontSize: '0.875rem'
                               }}
@@ -5162,7 +5162,7 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                           </div>
 
                           <div>
-                            <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: 'var(--fg-slate-600)', marginBottom: '4px' }}>
+                            <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: 'var(--fg-slate-600)', marginBottom: '4px' }}>
                               Discount Value:
                             </label>
                             <input
@@ -5174,10 +5174,10 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                               style={{
                                 width: '100%',
                                 padding: '8px 10px',
-                                borderRadius: '8px',
+                                borderRadius: 'var(--radius-md)',
                                 border: '1px solid var(--bd-slate-300)',
                                 fontSize: '0.875rem',
-                                fontWeight: 700
+                                fontWeight: 600
                               }}
                             />
                           </div>
@@ -5185,7 +5185,7 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
 
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
                           <div>
-                            <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: 'var(--fg-slate-600)', marginBottom: '4px' }}>
+                            <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: 'var(--fg-slate-600)', marginBottom: '4px' }}>
                               Min Order Amount (₹):
                             </label>
                             <input
@@ -5196,7 +5196,7 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                               style={{
                                 width: '100%',
                                 padding: '8px 10px',
-                                borderRadius: '8px',
+                                borderRadius: 'var(--radius-md)',
                                 border: '1px solid var(--bd-slate-300)',
                                 fontSize: '0.875rem'
                               }}
@@ -5205,7 +5205,7 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
 
                           {newPromoType === 'percentage' && (
                             <div>
-                              <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: 'var(--fg-slate-600)', marginBottom: '4px' }}>
+                              <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: 'var(--fg-slate-600)', marginBottom: '4px' }}>
                                 Max Discount Cap (₹):
                               </label>
                               <input
@@ -5216,7 +5216,7 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                                 style={{
                                   width: '100%',
                                   padding: '8px 10px',
-                                  borderRadius: '8px',
+                                  borderRadius: 'var(--radius-md)',
                                   border: '1px solid var(--bd-slate-300)',
                                   fontSize: '0.875rem'
                                 }}
@@ -5226,7 +5226,7 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                         </div>
 
                         <div>
-                          <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: 'var(--fg-slate-600)', marginBottom: '4px' }}>
+                          <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: 'var(--fg-slate-600)', marginBottom: '4px' }}>
                             Description:
                           </label>
                           <input
@@ -5237,7 +5237,7 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                             style={{
                               width: '100%',
                               padding: '8px 12px',
-                              borderRadius: '8px',
+                              borderRadius: 'var(--radius-md)',
                               border: '1px solid var(--bd-slate-300)',
                               fontSize: '0.875rem'
                             }}
@@ -5248,11 +5248,11 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                           type="submit"
                           style={{
                             padding: '10px 16px',
-                            background: 'linear-gradient(135deg, var(--tw-sky-600) 0%, var(--tw-sky-700) 100%)',
+                            background: 'var(--tw-sky-600)',
                             color: '#ffffff',
                             border: 'none',
-                            borderRadius: '8px',
-                            fontWeight: 700,
+                            borderRadius: 'var(--radius-md)',
+                            fontWeight: 600,
                             fontSize: '0.875rem',
                             cursor: 'pointer',
                             marginTop: '6px'
@@ -5267,18 +5267,18 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                   {/* Section 3: Fintech UPI Receiver & Merchant Configuration */}
                   <div
                     style={{
-                      background: 'linear-gradient(135deg, var(--surface) 0%, var(--bg-slate-50) 100%)',
+                      background: 'var(--bg-slate-50)',
                       border: '1.5px solid var(--tw-sky-400)',
-                      borderRadius: '14px',
+                      borderRadius: 'var(--radius-lg)',
                       padding: '20px',
-                      boxShadow: '0 4px 14px rgba(56, 189, 248, 0.08)'
+                      boxShadow: 'var(--shadow-md)'
                     }}
                   >
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px', flexWrap: 'wrap', gap: '8px' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                         <span style={{ fontSize: '1.4rem' }}>🏦</span>
                         <div>
-                          <h3 style={{ margin: 0, fontSize: '1rem', fontWeight: 800, color: 'var(--fg-slate-900)' }}>
+                          <h3 style={{ margin: 0, fontSize: '1rem', fontWeight: 600, color: 'var(--fg-slate-900)' }}>
                             Fintech UPI Receiver & Merchant Configuration
                           </h3>
                           <div style={{ fontSize: '0.75rem', color: 'var(--fg-slate-500)' }}>
@@ -5286,14 +5286,14 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                           </div>
                         </div>
                       </div>
-                      <span style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--fg-sky-700)', background: 'var(--bg-sky-100)', padding: '3px 10px', borderRadius: '12px' }}>
+                      <span style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--fg-sky-700)', background: 'var(--bg-sky-100)', padding: '3px 10px', borderRadius: 'var(--radius-md)' }}>
                         ● ZERO GATEWAY FEE (0%)
                       </span>
                     </div>
 
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '16px' }}>
                       <div>
-                        <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: 'var(--fg-slate-600)', marginBottom: '4px' }}>
+                        <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: 'var(--fg-slate-600)', marginBottom: '4px' }}>
                           Merchant UPI ID (VPA):
                         </label>
                         <input
@@ -5304,11 +5304,11 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                           style={{
                             width: '100%',
                             padding: '8px 12px',
-                            borderRadius: '8px',
+                            borderRadius: 'var(--radius-md)',
                             border: '1.5px solid var(--bd-slate-300)',
                             fontSize: '0.875rem',
                             fontFamily: 'monospace',
-                            fontWeight: 800,
+                            fontWeight: 600,
                             color: 'var(--fg-slate-900)'
                           }}
                         />
@@ -5318,7 +5318,7 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                       </div>
 
                       <div>
-                        <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: 'var(--fg-slate-600)', marginBottom: '4px' }}>
+                        <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: 'var(--fg-slate-600)', marginBottom: '4px' }}>
                           Payee / Merchant Display Name:
                         </label>
                         <input
@@ -5329,10 +5329,10 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                           style={{
                             width: '100%',
                             padding: '8px 12px',
-                            borderRadius: '8px',
+                            borderRadius: 'var(--radius-md)',
                             border: '1.5px solid var(--bd-slate-300)',
                             fontSize: '0.875rem',
-                            fontWeight: 800,
+                            fontWeight: 600,
                             color: 'var(--fg-slate-900)'
                           }}
                         />
@@ -5351,57 +5351,57 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
               {activeTab === 'settings' && (
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '20px' }}>
                   {/* Passing Benchmark Rules */}
-                  <div style={{ background: 'var(--surface)', border: '1px solid var(--bd-slate-200)', borderRadius: '12px', padding: '20px' }}>
-                    <h3 style={{ margin: '0 0 14px 0', fontSize: '1rem', fontWeight: 800, color: 'var(--fg-slate-900)' }}>
+                  <div style={{ background: 'var(--surface)', border: '1px solid var(--bd-slate-200)', borderRadius: 'var(--radius-md)', padding: '20px' }}>
+                    <h3 style={{ margin: '0 0 14px 0', fontSize: '1rem', fontWeight: 600, color: 'var(--fg-slate-900)' }}>
                       📋 Official Exam Benchmarks
                     </h3>
 
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                       <div>
-                        <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 700, color: 'var(--fg-slate-600)', marginBottom: '4px' }}>
+                        <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: 'var(--fg-slate-600)', marginBottom: '4px' }}>
                           Hindi Passing Speed (Net WPM):
                         </label>
                         <input
                           type="number"
                           value={examConfig.hindiPassSpeed}
                           onChange={(e) => setExamConfig({ ...examConfig, hindiPassSpeed: Number(e.target.value) })}
-                          style={{ width: '100%', padding: '8px', borderRadius: '6px', border: '1px solid var(--bd-slate-300)', fontSize: '0.875rem' }}
+                          style={{ width: '100%', padding: '8px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--bd-slate-300)', fontSize: '0.875rem' }}
                         />
                       </div>
 
                       <div>
-                        <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 700, color: 'var(--fg-slate-600)', marginBottom: '4px' }}>
+                        <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: 'var(--fg-slate-600)', marginBottom: '4px' }}>
                           English Passing Speed (Net WPM):
                         </label>
                         <input
                           type="number"
                           value={examConfig.englishPassSpeed}
                           onChange={(e) => setExamConfig({ ...examConfig, englishPassSpeed: Number(e.target.value) })}
-                          style={{ width: '100%', padding: '8px', borderRadius: '6px', border: '1px solid var(--bd-slate-300)', fontSize: '0.875rem' }}
+                          style={{ width: '100%', padding: '8px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--bd-slate-300)', fontSize: '0.875rem' }}
                         />
                       </div>
 
                       <div>
-                        <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 700, color: 'var(--fg-slate-600)', marginBottom: '4px' }}>
+                        <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: 'var(--fg-slate-600)', marginBottom: '4px' }}>
                           Minimum Qualifying Accuracy (%):
                         </label>
                         <input
                           type="number"
                           value={examConfig.minAccuracy}
                           onChange={(e) => setExamConfig({ ...examConfig, minAccuracy: Number(e.target.value) })}
-                          style={{ width: '100%', padding: '8px', borderRadius: '6px', border: '1px solid var(--bd-slate-300)', fontSize: '0.875rem' }}
+                          style={{ width: '100%', padding: '8px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--bd-slate-300)', fontSize: '0.875rem' }}
                         />
                       </div>
 
                       {configSaveStatus && (
-                        <div style={{ padding: '8px', background: 'var(--bg-green-100)', color: 'var(--fg-green-700)', borderRadius: '6px', fontSize: '0.8rem', fontWeight: 700 }}>
+                        <div style={{ padding: '8px', background: 'var(--bg-green-100)', color: 'var(--fg-green-700)', borderRadius: 'var(--radius-sm)', fontSize: '0.8rem', fontWeight: 600 }}>
                           {configSaveStatus}
                         </div>
                       )}
 
                       <button
                         onClick={handleSaveExamConfig}
-                        style={{ padding: '10px', background: 'var(--tw-sky-600)', color: '#ffffff', border: 'none', borderRadius: '8px', fontWeight: 700, fontSize: '0.875rem', cursor: 'pointer', marginTop: '6px' }}
+                        style={{ padding: '10px', background: 'var(--tw-sky-600)', color: '#ffffff', border: 'none', borderRadius: 'var(--radius-md)', fontWeight: 600, fontSize: '0.875rem', cursor: 'pointer', marginTop: '6px' }}
                       >
                         💾 Update Examination Benchmarks
                       </button>
@@ -5409,8 +5409,8 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                   </div>
 
                   {/* Change Master PIN */}
-                  <div style={{ background: 'var(--surface)', border: '1px solid var(--bd-slate-200)', borderRadius: '12px', padding: '20px' }}>
-                    <h3 style={{ margin: '0 0 14px 0', fontSize: '1rem', fontWeight: 800, color: 'var(--fg-slate-900)' }}>
+                  <div style={{ background: 'var(--surface)', border: '1px solid var(--bd-slate-200)', borderRadius: 'var(--radius-md)', padding: '20px' }}>
+                    <h3 style={{ margin: '0 0 14px 0', fontSize: '1rem', fontWeight: 600, color: 'var(--fg-slate-900)' }}>
                       🔐 Security & Master PIN
                     </h3>
                     <p style={{ margin: '0 0 14px 0', fontSize: '0.8rem', color: 'var(--fg-slate-500)' }}>
@@ -5419,19 +5419,19 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
 
                     <form onSubmit={handleChangePin} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                       <div>
-                        <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 700, color: 'var(--fg-slate-600)', marginBottom: '4px' }}>
+                        <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: 'var(--fg-slate-600)', marginBottom: '4px' }}>
                           Current Active PIN:
                         </label>
                         <input
                           type="text"
                           disabled
                           value={getAdminPin()}
-                          style={{ width: '100%', padding: '8px', borderRadius: '6px', border: '1px solid var(--bd-slate-200)', background: 'var(--bg-slate-100)', fontSize: '0.875rem', color: 'var(--fg-slate-500)' }}
+                          style={{ width: '100%', padding: '8px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--bd-slate-200)', background: 'var(--bg-slate-100)', fontSize: '0.875rem', color: 'var(--fg-slate-500)' }}
                         />
                       </div>
 
                       <div>
-                        <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 700, color: 'var(--fg-slate-600)', marginBottom: '4px' }}>
+                        <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: 'var(--fg-slate-600)', marginBottom: '4px' }}>
                           New Master PIN / Passphrase:
                         </label>
                         <input
@@ -5439,7 +5439,7 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                           value={newPin}
                           onChange={(e) => setNewPin(e.target.value)}
                           placeholder="Enter at least 4 characters..."
-                          style={{ width: '100%', padding: '8px', borderRadius: '6px', border: '1px solid var(--bd-slate-300)', fontSize: '0.875rem' }}
+                          style={{ width: '100%', padding: '8px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--bd-slate-300)', fontSize: '0.875rem' }}
                         />
                       </div>
 
@@ -5449,9 +5449,9 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                             padding: '8px',
                             background: pinChangeStatus.includes('✅') ? 'var(--bg-green-100)' : 'var(--bg-red-100)',
                             color: pinChangeStatus.includes('✅') ? 'var(--fg-green-700)' : 'var(--fg-red-800)',
-                            borderRadius: '6px',
+                            borderRadius: 'var(--radius-sm)',
                             fontSize: '0.8rem',
-                            fontWeight: 700
+                            fontWeight: 600
                           }}
                         >
                           {pinChangeStatus}
@@ -5460,7 +5460,7 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
 
                       <button
                         type="submit"
-                        style={{ padding: '10px', background: 'var(--tw-slate-900)', color: '#ffffff', border: 'none', borderRadius: '8px', fontWeight: 700, fontSize: '0.875rem', cursor: 'pointer' }}
+                        style={{ padding: '10px', background: 'var(--tw-slate-900)', color: '#ffffff', border: 'none', borderRadius: 'var(--radius-md)', fontWeight: 600, fontSize: '0.875rem', cursor: 'pointer' }}
                       >
                         🔑 Update Master PIN
                       </button>
@@ -5491,13 +5491,13 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
             <div
               style={{
                 backgroundColor: 'var(--surface)',
-                borderRadius: '14px',
+                borderRadius: 'var(--radius-lg)',
                 maxWidth: '750px',
                 width: '100%',
                 maxHeight: '88vh',
                 display: 'flex',
                 flexDirection: 'column',
-                boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.35)',
+                boxShadow: 'var(--shadow-lg)',
                 overflow: 'hidden',
                 border: '1px solid var(--tw-slate-700)'
               }}
@@ -5514,7 +5514,7 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                 }}
               >
                 <div>
-                  <div style={{ fontSize: '1rem', fontWeight: 800 }}>{previewPassage.title}</div>
+                  <div style={{ fontSize: '1rem', fontWeight: 600 }}>{previewPassage.title}</div>
                   <div style={{ fontSize: '0.75rem', color: 'var(--tw-slate-400)', display: 'flex', gap: '8px', marginTop: '4px' }}>
                     <span>ID: {previewPassage.id}</span>
                     <span>•</span>
@@ -5585,8 +5585,8 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                     background: 'var(--tw-sky-600)',
                     color: '#ffffff',
                     border: 'none',
-                    borderRadius: '6px',
-                    fontWeight: 700,
+                    borderRadius: 'var(--radius-sm)',
+                    fontWeight: 600,
                     fontSize: '0.8rem',
                     cursor: 'pointer'
                   }}

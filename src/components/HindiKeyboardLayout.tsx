@@ -193,8 +193,8 @@ export const HindiKeyboardLayout: React.FC<HindiKeyboardLayoutProps> = ({
       style={{
         background: 'var(--surface)',
         border: '2px solid var(--tw-sky-600)',
-        borderRadius: '10px',
-        boxShadow: '0 8px 24px rgba(0,0,0,0.12)',
+        borderRadius: 'var(--radius-md)',
+        boxShadow: 'var(--shadow-lg)',
         padding: isCompact ? '8px 12px' : '14px 18px',
         width: '100%',
         maxWidth: '1020px',
@@ -219,7 +219,7 @@ export const HindiKeyboardLayout: React.FC<HindiKeyboardLayoutProps> = ({
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
           <span style={{ fontSize: '1.25rem' }}>⌨️</span>
           <div>
-            <h3 style={{ margin: 0, fontSize: isCompact ? '0.95rem' : '1.15rem', fontWeight: 800, color: 'var(--fg-slate-900)' }}>
+            <h3 style={{ margin: 0, fontSize: isCompact ? '0.95rem' : '1.15rem', fontWeight: 700, color: 'var(--fg-slate-900)' }}>
               {activeLayout === 'mangal' ? 'Mangal Font Inscript Keyboard Layout' : 'Kruti Dev 010 (Remington) Keyboard Layout'}
             </h3>
             <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.75rem', color: 'var(--fg-slate-500)' }}>
@@ -250,8 +250,8 @@ export const HindiKeyboardLayout: React.FC<HindiKeyboardLayoutProps> = ({
             style={{
               padding: '4px 10px',
               fontSize: '0.8rem',
-              fontWeight: 700,
-              borderRadius: '6px',
+              fontWeight: 600,
+              borderRadius: 'var(--radius-sm)',
               border: '1px solid',
               borderColor: isShiftActive ? 'var(--tw-blue-600)' : 'var(--bd-slate-300)',
               background: isShiftActive ? 'var(--bg-blue-100)' : 'var(--bg-slate-50)',
@@ -263,7 +263,7 @@ export const HindiKeyboardLayout: React.FC<HindiKeyboardLayoutProps> = ({
           </button>
 
           {/* Layout Switcher */}
-          <div style={{ display: 'flex', background: 'var(--bg-slate-100)', borderRadius: '6px', padding: '2px' }}>
+          <div style={{ display: 'flex', background: 'var(--bg-slate-100)', borderRadius: 'var(--radius-sm)', padding: '2px' }}>
             <button
               type="button"
               onClick={() => setActiveLayout('mangal')}
@@ -271,8 +271,8 @@ export const HindiKeyboardLayout: React.FC<HindiKeyboardLayoutProps> = ({
                 border: 'none',
                 padding: '4px 8px',
                 fontSize: '0.75rem',
-                fontWeight: 700,
-                borderRadius: '4px',
+                fontWeight: 600,
+                borderRadius: 'var(--radius-sm)',
                 cursor: 'pointer',
                 background: activeLayout === 'mangal' ? 'var(--tw-sky-600)' : 'transparent',
                 color: activeLayout === 'mangal' ? '#ffffff' : 'var(--fg-slate-600)'
@@ -287,8 +287,8 @@ export const HindiKeyboardLayout: React.FC<HindiKeyboardLayoutProps> = ({
                 border: 'none',
                 padding: '4px 8px',
                 fontSize: '0.75rem',
-                fontWeight: 700,
-                borderRadius: '4px',
+                fontWeight: 600,
+                borderRadius: 'var(--radius-sm)',
                 cursor: 'pointer',
                 background: activeLayout === 'kruti' ? 'var(--tw-sky-600)' : 'transparent',
                 color: activeLayout === 'kruti' ? '#ffffff' : 'var(--fg-slate-600)'
@@ -305,8 +305,8 @@ export const HindiKeyboardLayout: React.FC<HindiKeyboardLayoutProps> = ({
             style={{
               padding: '4px 10px',
               fontSize: '0.8rem',
-              fontWeight: 700,
-              borderRadius: '6px',
+              fontWeight: 600,
+              borderRadius: 'var(--radius-sm)',
               border: '1px solid var(--tw-amber-500)',
               background: showAltCodes ? 'var(--bg-amber-100)' : 'var(--bg-amber-50)',
               color: 'var(--fg-amber-700)',
@@ -328,7 +328,7 @@ export const HindiKeyboardLayout: React.FC<HindiKeyboardLayoutProps> = ({
                 height: '26px',
                 borderRadius: '50%',
                 cursor: 'pointer',
-                fontWeight: 800
+                fontWeight: 700
               }}
             >
               ✕
@@ -345,7 +345,7 @@ export const HindiKeyboardLayout: React.FC<HindiKeyboardLayoutProps> = ({
           gap: '5px',
           background: 'var(--tw-slate-900)',
           padding: '8px',
-          borderRadius: '8px',
+          borderRadius: 'var(--radius-md)',
           boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.4)',
           overflowX: 'auto'
         }}
@@ -381,7 +381,7 @@ export const HindiKeyboardLayout: React.FC<HindiKeyboardLayoutProps> = ({
                       height: isCompact ? '40px' : '48px',
                       background: isPressed || isSpecialShift ? 'var(--bg-blue-300)' : 'var(--bg-slate-200)',
                       border: isPressed || isSpecialShift ? '1.5px solid var(--tw-blue-600)' : '1px solid var(--bd-slate-400)',
-                      borderRadius: '6px',
+                      borderRadius: 'var(--radius-sm)',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
@@ -412,7 +412,7 @@ export const HindiKeyboardLayout: React.FC<HindiKeyboardLayoutProps> = ({
                       height: isCompact ? '40px' : '48px',
                       background: isPressed ? 'var(--bg-blue-200)' : 'var(--bg-slate-50)',
                       border: `1.5px solid ${isPressed ? 'var(--tw-blue-600)' : 'var(--bd-slate-300)'}`,
-                      borderRadius: '6px',
+                      borderRadius: 'var(--radius-sm)',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
@@ -445,7 +445,7 @@ export const HindiKeyboardLayout: React.FC<HindiKeyboardLayoutProps> = ({
                     height: isCompact ? '40px' : '48px',
                     background: isPressed ? 'var(--bg-blue-200)' : fingerColor.bg,
                     border: `1.5px solid ${isPressed ? 'var(--tw-blue-600)' : fingerColor.border}`,
-                    borderRadius: '6px',
+                    borderRadius: 'var(--radius-sm)',
                     display: 'flex',
                     flexDirection: 'column',
                     justifyContent: 'space-between',
@@ -481,10 +481,10 @@ export const HindiKeyboardLayout: React.FC<HindiKeyboardLayoutProps> = ({
                     <span
                       style={{
                         fontSize: isCompact ? '0.82rem' : '0.98rem',
-                        fontWeight: isShiftActive ? 800 : 700,
+                        fontWeight: isShiftActive ? 700 : 700,
                         color: isShiftActive ? 'var(--fg-red-600)' : 'var(--fg-sky-700)',
                         backgroundColor: isShiftActive ? 'var(--bg-yellow-200)' : 'transparent',
-                        borderRadius: '2px',
+                        borderRadius: 'var(--radius-sm)',
                         padding: '0 2px'
                       }}
                     >
@@ -515,7 +515,7 @@ export const HindiKeyboardLayout: React.FC<HindiKeyboardLayoutProps> = ({
                     <span
                       style={{
                         fontSize: isCompact ? '0.88rem' : '1.08rem',
-                        fontWeight: !isShiftActive ? 800 : 600,
+                        fontWeight: !isShiftActive ? 700 : 600,
                         color: !isShiftActive ? 'var(--fg-slate-900)' : 'var(--fg-slate-500)'
                       }}
                     >
@@ -546,19 +546,19 @@ export const HindiKeyboardLayout: React.FC<HindiKeyboardLayoutProps> = ({
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
           <span style={{ fontWeight: 700 }}>Finger Guide:</span>
           <span style={{ display: 'inline-flex', alignItems: 'center', gap: '3px' }}>
-            <span style={{ width: '12px', height: '12px', background: 'var(--bg-purple-100)', border: '1px solid var(--bd-purple-300)', borderRadius: '2px' }} />
+            <span style={{ width: '12px', height: '12px', background: 'var(--bg-purple-100)', border: '1px solid var(--bd-purple-300)', borderRadius: 'var(--radius-sm)' }} />
             Pinky (कनिष्ठिका)
           </span>
           <span style={{ display: 'inline-flex', alignItems: 'center', gap: '3px' }}>
-            <span style={{ width: '12px', height: '12px', background: 'var(--bg-sky-100)', border: '1px solid var(--bd-sky-300)', borderRadius: '2px' }} />
+            <span style={{ width: '12px', height: '12px', background: 'var(--bg-sky-100)', border: '1px solid var(--bd-sky-300)', borderRadius: 'var(--radius-sm)' }} />
             Ring (अनामिका)
           </span>
           <span style={{ display: 'inline-flex', alignItems: 'center', gap: '3px' }}>
-            <span style={{ width: '12px', height: '12px', background: 'var(--bg-yellow-100)', border: '1px solid var(--bd-yellow-300)', borderRadius: '2px' }} />
+            <span style={{ width: '12px', height: '12px', background: 'var(--bg-yellow-100)', border: '1px solid var(--bd-yellow-300)', borderRadius: 'var(--radius-sm)' }} />
             Middle (मध्यमा)
           </span>
           <span style={{ display: 'inline-flex', alignItems: 'center', gap: '3px' }}>
-            <span style={{ width: '12px', height: '12px', background: 'var(--bg-green-100)', border: '1px solid var(--bd-green-300)', borderRadius: '2px' }} />
+            <span style={{ width: '12px', height: '12px', background: 'var(--bg-green-100)', border: '1px solid var(--bd-green-300)', borderRadius: 'var(--radius-sm)' }} />
             Index (तर्जनी)
           </span>
         </div>
@@ -588,8 +588,8 @@ export const HindiKeyboardLayout: React.FC<HindiKeyboardLayoutProps> = ({
             }}
           >
             <div>
-              <h4 style={{ margin: 0, fontSize: '0.95rem', fontWeight: 800, color: 'var(--fg-amber-700)' }}>
-                Official Alt Codes Reference Table (Alt + Numpad)
+              <h4 style={{ margin: 0, fontSize: '0.95rem', fontWeight: 600, color: 'var(--fg-amber-700)' }}>
+                Alt Codes Reference Table (Alt + Numpad)
               </h4>
               <p style={{ margin: 0, fontSize: '0.8rem', color: 'var(--fg-slate-500)' }}>
                 Hold Left Alt and type numbers on Numpad, or click any card to copy/insert.
@@ -604,7 +604,7 @@ export const HindiKeyboardLayout: React.FC<HindiKeyboardLayoutProps> = ({
                 padding: '4px 8px',
                 fontSize: '0.8rem',
                 border: '1px solid var(--bd-slate-300)',
-                borderRadius: '4px',
+                borderRadius: 'var(--radius-sm)',
                 outline: 'none',
                 width: '240px'
               }}
@@ -634,7 +634,7 @@ export const HindiKeyboardLayout: React.FC<HindiKeyboardLayoutProps> = ({
                     padding: '6px 8px',
                     background: isCopied ? 'var(--bg-green-100)' : 'var(--bg-slate-50)',
                     border: `1px solid ${isCopied ? 'var(--tw-green-600)' : 'var(--bd-slate-200)'}`,
-                    borderRadius: '4px',
+                    borderRadius: 'var(--radius-sm)',
                     cursor: 'pointer',
                     fontSize: '0.8rem',
                     transition: 'all 0.1s ease'
@@ -645,11 +645,11 @@ export const HindiKeyboardLayout: React.FC<HindiKeyboardLayoutProps> = ({
                   <span
                     style={{
                       fontSize: '1rem',
-                      fontWeight: 800,
+                      fontWeight: 600,
                       color: isCopied ? 'var(--fg-green-700)' : 'var(--fg-sky-600)',
                       background: 'var(--surface)',
                       padding: '1px 6px',
-                      borderRadius: '3px',
+                      borderRadius: 'var(--radius-sm)',
                       border: '1px solid var(--bd-slate-300)'
                     }}
                   >

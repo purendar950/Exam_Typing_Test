@@ -83,9 +83,9 @@ export const RulesModal: React.FC<RulesModalProps> = ({
           display: 'flex',
           flexDirection: 'column',
           padding: '0',
-          borderRadius: '12px',
+          borderRadius: 'var(--radius-md)',
           overflow: 'hidden',
-          boxShadow: '0 20px 45px rgba(0,0,0,0.25)',
+          boxShadow: 'var(--shadow-lg)',
           background: 'var(--surface)'
         }}
       >
@@ -104,11 +104,11 @@ export const RulesModal: React.FC<RulesModalProps> = ({
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
             <span style={{ fontSize: '1.6rem' }}>📜</span>
             <div>
-              <h2 style={{ margin: 0, fontSize: '1.25rem', fontWeight: 800, color: 'var(--tw-slate-50)', letterSpacing: '-0.02em' }}>
-                Official Examination Typing Guidelines & Speed Verification
+              <h2 style={{ margin: 0, fontSize: '1.25rem', fontWeight: 700, color: 'var(--tw-slate-50)', letterSpacing: '-0.02em' }}>
+                Exam Typing Guidelines & Speed Verification
               </h2>
               <p style={{ margin: 0, fontSize: '0.8rem', color: 'var(--tw-slate-400)' }}>
-                Verified recruitment board standards, qualifying speeds, calculation models, and exam day instructions
+                Recruitment board standards, qualifying speeds, calculation models, and exam day instructions
               </p>
             </div>
           </div>
@@ -163,8 +163,8 @@ export const RulesModal: React.FC<RulesModalProps> = ({
                   style={{
                     padding: '6px 12px',
                     fontSize: '0.8rem',
-                    fontWeight: isActive ? 800 : 600,
-                    borderRadius: '20px',
+                    fontWeight: isActive ? 600 : 500,
+                    borderRadius: 'var(--radius-lg)',
                     border: '1px solid',
                     borderColor: isActive ? 'var(--tw-sky-600)' : 'var(--bd-slate-300)',
                     background: isActive ? 'var(--tw-sky-600)' : 'var(--surface)',
@@ -195,7 +195,7 @@ export const RulesModal: React.FC<RulesModalProps> = ({
                 width: '100%',
                 padding: '5px 10px 5px 28px',
                 fontSize: '0.8rem',
-                borderRadius: '16px',
+                borderRadius: 'var(--radius-lg)',
                 border: '1px solid var(--bd-slate-300)',
                 outline: 'none',
                 background: 'var(--surface)'
@@ -216,30 +216,30 @@ export const RulesModal: React.FC<RulesModalProps> = ({
             <div>
               <div style={{ marginBottom: '14px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <div>
-                  <h3 style={{ margin: 0, fontSize: '1rem', fontWeight: 800, color: 'var(--fg-slate-900)' }}>
-                    Pan-India Official Typing Exam Speed & Criteria Matrix
+                  <h3 style={{ margin: 0, fontSize: '1rem', fontWeight: 600, color: 'var(--fg-slate-900)' }}>
+                    Pan-India Typing Exam Speed & Criteria Matrix
                   </h3>
                   <p style={{ margin: 0, fontSize: '0.8rem', color: 'var(--fg-slate-500)' }}>
-                    Authentic benchmarks extracted from gazette recruitment notifications
+                    Based on published recruitment notifications
                   </p>
                 </div>
-                <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--fg-sky-600)', background: 'var(--bg-sky-100)', padding: '4px 8px', borderRadius: '4px' }}>
-                  Total Verified Categories: {OFFICIAL_EXAM_RULES.length}
+                <span style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--fg-sky-600)', background: 'var(--bg-sky-100)', padding: '4px 8px', borderRadius: 'var(--radius-sm)' }}>
+                  Total categories: {OFFICIAL_EXAM_RULES.length}
                 </span>
               </div>
 
-              <div style={{ overflowX: 'auto', border: '1px solid var(--bd-slate-300)', borderRadius: '8px' }}>
+              <div style={{ overflowX: 'auto', border: '1px solid var(--bd-slate-300)', borderRadius: 'var(--radius-md)' }}>
                 <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.8rem', textAlign: 'left' }}>
                   <thead>
                     <tr style={{ background: 'var(--bg-slate-100)', color: 'var(--fg-slate-800)', borderBottom: '2px solid var(--bd-slate-300)' }}>
-                      <th style={{ padding: '8px 10px', fontWeight: 800 }}>Examination & Post</th>
-                      <th style={{ padding: '8px 10px', fontWeight: 800 }}>Authority</th>
-                      <th style={{ padding: '8px 10px', fontWeight: 800 }}>Hindi Speed</th>
-                      <th style={{ padding: '8px 10px', fontWeight: 800 }}>English Speed</th>
-                      <th style={{ padding: '8px 10px', fontWeight: 800 }}>Duration</th>
-                      <th style={{ padding: '8px 10px', fontWeight: 800 }}>Allowed Font / Layout</th>
-                      <th style={{ padding: '8px 10px', fontWeight: 800 }}>Cutoff / Formula</th>
-                      <th style={{ padding: '8px 10px', fontWeight: 800 }}>Action</th>
+                      <th style={{ padding: '8px 10px', fontWeight: 700 }}>Exam & Post</th>
+                      <th style={{ padding: '8px 10px', fontWeight: 700 }}>Authority</th>
+                      <th style={{ padding: '8px 10px', fontWeight: 700 }}>Hindi Speed</th>
+                      <th style={{ padding: '8px 10px', fontWeight: 700 }}>English Speed</th>
+                      <th style={{ padding: '8px 10px', fontWeight: 700 }}>Duration</th>
+                      <th style={{ padding: '8px 10px', fontWeight: 700 }}>Allowed Font / Layout</th>
+                      <th style={{ padding: '8px 10px', fontWeight: 700 }}>Cutoff / Formula</th>
+                      <th style={{ padding: '8px 10px', fontWeight: 700 }}>Action</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -272,7 +272,7 @@ export const RulesModal: React.FC<RulesModalProps> = ({
                         <td style={{ padding: '8px 10px', fontSize: '0.75rem', color: 'var(--fg-slate-700)' }}>
                           {rule.hindiFont.split('(')[0]}
                         </td>
-                        <td style={{ padding: '8px 10px', fontSize: '0.75rem', color: 'var(--fg-teal-700)', fontWeight: 600 }}>
+                        <td style={{ padding: '8px 10px', fontSize: '0.75rem', color: 'var(--fg-teal-700)', fontWeight: 500 }}>
                           {rule.errorCutoff}
                         </td>
                         <td style={{ padding: '8px 10px' }}>
@@ -284,11 +284,11 @@ export const RulesModal: React.FC<RulesModalProps> = ({
                             style={{
                               padding: '3px 8px',
                               fontSize: '0.75rem',
-                              fontWeight: 700,
+                              fontWeight: 600,
                               background: 'var(--bg-sky-100)',
                               color: 'var(--fg-sky-700)',
                               border: '1px solid var(--bd-sky-200)',
-                              borderRadius: '4px',
+                              borderRadius: 'var(--radius-sm)',
                               cursor: 'pointer'
                             }}
                           >
@@ -316,12 +316,12 @@ export const RulesModal: React.FC<RulesModalProps> = ({
                       style={{
                         padding: '5px 10px',
                         fontSize: '0.8rem',
-                        fontWeight: selectedRuleId === r.id ? 800 : 600,
+                        fontWeight: selectedRuleId === r.id ? 600 : 500,
                         background: selectedRuleId === r.id ? 'var(--tw-slate-900)' : 'var(--bg-slate-100)',
                         color: selectedRuleId === r.id ? '#ffffff' : 'var(--fg-slate-700)',
                         border: '1px solid',
                         borderColor: selectedRuleId === r.id ? 'var(--tw-slate-900)' : 'var(--bd-slate-300)',
-                        borderRadius: '6px',
+                        borderRadius: 'var(--radius-sm)',
                         cursor: 'pointer'
                       }}
                     >
@@ -334,9 +334,9 @@ export const RulesModal: React.FC<RulesModalProps> = ({
               {/* Title & Notification Banner */}
               <div
                 style={{
-                  background: 'linear-gradient(135deg, var(--bg-sky-50) 0%, var(--bg-sky-100) 100%)',
+                  background: 'var(--bg-sky-50)',
                   border: '1.5px solid var(--bd-sky-300)',
-                  borderRadius: '10px',
+                  borderRadius: 'var(--radius-md)',
                   padding: '14px 16px',
                   marginBottom: '16px'
                 }}
@@ -345,20 +345,20 @@ export const RulesModal: React.FC<RulesModalProps> = ({
                   <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                     <ExamLogo identifier={activeRule.id} categoryGroup={activeRule.categoryGroup} size={48} />
                     <div>
-                      <span style={{ fontSize: '0.75rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--fg-sky-700)', background: 'var(--bg-sky-200)', padding: '2px 8px', borderRadius: '4px' }}>
+                      <span style={{ fontSize: '0.75rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--fg-sky-700)', background: 'var(--bg-sky-200)', padding: '2px 8px', borderRadius: 'var(--radius-sm)' }}>
                         {activeRule.organization}
                       </span>
-                      <h3 style={{ margin: '4px 0 2px 0', fontSize: '1.25rem', fontWeight: 800, color: 'var(--fg-sky-900)' }}>
+                      <h3 style={{ margin: '4px 0 2px 0', fontSize: '1.25rem', fontWeight: 700, color: 'var(--fg-sky-900)' }}>
                         {activeRule.postTitle}
                       </h3>
-                      <p style={{ margin: 0, fontSize: '0.8rem', color: 'var(--fg-sky-700)', fontWeight: 600 }}>
-                        📋 Official Reference: {activeRule.notificationRef}
+                      <p style={{ margin: 0, fontSize: '0.8rem', color: 'var(--fg-sky-700)', fontWeight: 500 }}>
+                        📋 Reference: {activeRule.notificationRef}
                       </p>
                     </div>
                   </div>
 
                   <div style={{ display: 'flex', gap: '8px' }}>
-                    <span style={{ background: 'var(--tw-sky-600)', color: '#ffffff', padding: '4px 10px', borderRadius: '6px', fontSize: '0.8rem', fontWeight: 800 }}>
+                    <span style={{ background: 'var(--tw-sky-600)', color: '#ffffff', padding: '4px 10px', borderRadius: 'var(--radius-sm)', fontSize: '0.8rem', fontWeight: 600 }}>
                       ⏱️ {activeRule.durationMinutes} Minutes
                     </span>
                   </div>
@@ -375,11 +375,11 @@ export const RulesModal: React.FC<RulesModalProps> = ({
                 }}
               >
                 {/* Hindi Speed */}
-                <div style={{ background: 'var(--surface)', border: '1px solid var(--bd-orange-200)', borderRadius: '8px', padding: '10px 12px' }}>
-                  <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--fg-orange-700)', textTransform: 'uppercase' }}>
+                <div style={{ background: 'var(--surface)', border: '1px solid var(--bd-orange-200)', borderRadius: 'var(--radius-md)', padding: '10px 12px' }}>
+                  <div style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--fg-orange-700)', textTransform: 'uppercase' }}>
                     🇮🇳 Hindi Qualifying Speed
                   </div>
-                  <div style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--fg-orange-800)', marginTop: '2px' }}>
+                  <div style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--fg-orange-800)', marginTop: '2px' }}>
                     {activeRule.hindiSpeed ? `${activeRule.hindiSpeed} WPM` : 'Optional / N/A'}
                   </div>
                   <div style={{ fontSize: '0.75rem', color: 'var(--fg-orange-900)', marginTop: '2px' }}>
@@ -388,11 +388,11 @@ export const RulesModal: React.FC<RulesModalProps> = ({
                 </div>
 
                 {/* English Speed */}
-                <div style={{ background: 'var(--surface)', border: '1px solid var(--bd-sky-200)', borderRadius: '8px', padding: '10px 12px' }}>
-                  <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--fg-sky-700)', textTransform: 'uppercase' }}>
+                <div style={{ background: 'var(--surface)', border: '1px solid var(--bd-sky-200)', borderRadius: 'var(--radius-md)', padding: '10px 12px' }}>
+                  <div style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--fg-sky-700)', textTransform: 'uppercase' }}>
                     🇬🇧 English Qualifying Speed
                   </div>
-                  <div style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--fg-sky-800)', marginTop: '2px' }}>
+                  <div style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--fg-sky-800)', marginTop: '2px' }}>
                     {activeRule.englishSpeed ? `${activeRule.englishSpeed} WPM` : 'Optional / N/A'}
                   </div>
                   <div style={{ fontSize: '0.75rem', color: 'var(--fg-sky-900)', marginTop: '2px' }}>
@@ -401,11 +401,11 @@ export const RulesModal: React.FC<RulesModalProps> = ({
                 </div>
 
                 {/* Accuracy / Error Cutoff */}
-                <div style={{ background: 'var(--surface)', border: '1px solid var(--bd-green-200)', borderRadius: '8px', padding: '10px 12px' }}>
-                  <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--fg-green-700)', textTransform: 'uppercase' }}>
-                    🎯 Official Error Cutoff
+                <div style={{ background: 'var(--surface)', border: '1px solid var(--bd-green-200)', borderRadius: 'var(--radius-md)', padding: '10px 12px' }}>
+                  <div style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--fg-green-700)', textTransform: 'uppercase' }}>
+                    🎯 Error Cutoff
                   </div>
-                  <div style={{ fontSize: '1rem', fontWeight: 800, color: 'var(--fg-green-800)', marginTop: '2px' }}>
+                  <div style={{ fontSize: '1rem', fontWeight: 600, color: 'var(--fg-green-800)', marginTop: '2px' }}>
                     {activeRule.errorCutoff}
                   </div>
                   <div style={{ fontSize: '0.75rem', color: 'var(--fg-green-900)', marginTop: '2px' }}>
@@ -414,11 +414,11 @@ export const RulesModal: React.FC<RulesModalProps> = ({
                 </div>
 
                 {/* Scoring Model */}
-                <div style={{ background: 'var(--surface)', border: '1px solid var(--bd-slate-200)', borderRadius: '8px', padding: '10px 12px' }}>
-                  <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--fg-slate-600)', textTransform: 'uppercase' }}>
+                <div style={{ background: 'var(--surface)', border: '1px solid var(--bd-slate-200)', borderRadius: 'var(--radius-md)', padding: '10px 12px' }}>
+                  <div style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--fg-slate-600)', textTransform: 'uppercase' }}>
                     🧮 Calculation Model
                   </div>
-                  <div style={{ fontSize: '1rem', fontWeight: 800, color: 'var(--fg-slate-800)', marginTop: '2px' }}>
+                  <div style={{ fontSize: '1rem', fontWeight: 600, color: 'var(--fg-slate-800)', marginTop: '2px' }}>
                     {activeRule.calculationModel.toUpperCase()}
                   </div>
                   <div style={{ fontSize: '0.75rem', color: 'var(--fg-slate-500)', marginTop: '2px' }}>
@@ -432,14 +432,14 @@ export const RulesModal: React.FC<RulesModalProps> = ({
                 style={{
                   background: 'var(--surface)',
                   border: '1px solid var(--bd-slate-300)',
-                  borderRadius: '10px',
+                  borderRadius: 'var(--radius-md)',
                   padding: '14px 16px',
                   marginBottom: '14px'
                 }}
               >
-                <h4 style={{ margin: '0 0 8px 0', fontSize: '0.95rem', fontWeight: 800, color: 'var(--fg-slate-900)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <h4 style={{ margin: '0 0 8px 0', fontSize: '0.95rem', fontWeight: 600, color: 'var(--fg-slate-900)', display: 'flex', alignItems: 'center', gap: '6px' }}>
                   <span>🧮</span>
-                  <span>Official Calculation Formula & Deduction Rules</span>
+                  <span>Calculation Formula & Deduction Rules</span>
                 </h4>
                 <div
                   style={{
@@ -449,7 +449,7 @@ export const RulesModal: React.FC<RulesModalProps> = ({
                     fontSize: '0.8rem',
                     fontFamily: 'monospace',
                     color: 'var(--fg-slate-900)',
-                    borderRadius: '4px',
+                    borderRadius: 'var(--radius-sm)',
                     marginBottom: '10px'
                   }}
                 >
@@ -458,8 +458,8 @@ export const RulesModal: React.FC<RulesModalProps> = ({
 
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
                   {/* Full Mistakes */}
-                  <div style={{ background: 'var(--bg-red-50)', border: '1px solid var(--bd-red-200)', borderRadius: '6px', padding: '10px 12px' }}>
-                    <div style={{ fontSize: '0.8rem', fontWeight: 800, color: 'var(--fg-red-700)', marginBottom: '6px' }}>
+                  <div style={{ background: 'var(--bg-red-50)', border: '1px solid var(--bd-red-200)', borderRadius: 'var(--radius-sm)', padding: '10px 12px' }}>
+                    <div style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--fg-red-700)', marginBottom: '6px' }}>
                       ❌ Full Mistake (1 Full Penalty Word):
                     </div>
                     <ul style={{ margin: 0, paddingLeft: '18px', fontSize: '0.75rem', color: 'var(--fg-red-900)', lineHeight: 1.5 }}>
@@ -470,8 +470,8 @@ export const RulesModal: React.FC<RulesModalProps> = ({
                   </div>
 
                   {/* Half Mistakes */}
-                  <div style={{ background: 'var(--bg-amber-50)', border: '1px solid var(--bd-amber-200)', borderRadius: '6px', padding: '10px 12px' }}>
-                    <div style={{ fontSize: '0.8rem', fontWeight: 800, color: 'var(--fg-amber-700)', marginBottom: '6px' }}>
+                  <div style={{ background: 'var(--bg-amber-50)', border: '1px solid var(--bd-amber-200)', borderRadius: 'var(--radius-sm)', padding: '10px 12px' }}>
+                    <div style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--fg-amber-700)', marginBottom: '6px' }}>
                       ⚠️ Half Mistake (0.5 Penalty Word):
                     </div>
                     <ul style={{ margin: 0, paddingLeft: '18px', fontSize: '0.75rem', color: 'var(--fg-amber-900)', lineHeight: 1.5 }}>
@@ -488,12 +488,12 @@ export const RulesModal: React.FC<RulesModalProps> = ({
                 style={{
                   background: 'var(--surface)',
                   border: '1px solid var(--bd-slate-300)',
-                  borderRadius: '10px',
+                  borderRadius: 'var(--radius-md)',
                   padding: '14px 16px',
                   marginBottom: '14px'
                 }}
               >
-                <h4 style={{ margin: '0 0 8px 0', fontSize: '0.95rem', fontWeight: 800, color: 'var(--fg-slate-900)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <h4 style={{ margin: '0 0 8px 0', fontSize: '0.95rem', fontWeight: 600, color: 'var(--fg-slate-900)', display: 'flex', alignItems: 'center', gap: '6px' }}>
                   <span>⌨️</span>
                   <span>Mandatory Keyboard Layout & Font Requirements</span>
                 </h4>
@@ -504,7 +504,7 @@ export const RulesModal: React.FC<RulesModalProps> = ({
                   <p style={{ margin: '0 0 6px 0' }}>
                     <strong>English Layout:</strong> {activeRule.englishFont}
                   </p>
-                  <p style={{ margin: 0, fontSize: '0.75rem', color: 'var(--fg-sky-700)', background: 'var(--bg-sky-50)', padding: '6px 10px', borderRadius: '4px' }}>
+                  <p style={{ margin: 0, fontSize: '0.75rem', color: 'var(--fg-sky-700)', background: 'var(--bg-sky-50)', padding: '6px 10px', borderRadius: 'var(--radius-sm)' }}>
                     💡 Pro Tip: On our platform, switch seamlessly between <strong>Mangal Inscript</strong> and <strong>Kruti Dev 010</strong> anytime using the layout switcher!
                   </p>
                 </div>
@@ -515,14 +515,14 @@ export const RulesModal: React.FC<RulesModalProps> = ({
                 style={{
                   background: 'var(--surface)',
                   border: '1px solid var(--bd-slate-300)',
-                  borderRadius: '10px',
+                  borderRadius: 'var(--radius-md)',
                   padding: '14px 16px',
                   marginBottom: '14px'
                 }}
               >
-                <h4 style={{ margin: '0 0 8px 0', fontSize: '0.95rem', fontWeight: 800, color: 'var(--fg-slate-900)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <h4 style={{ margin: '0 0 8px 0', fontSize: '0.95rem', fontWeight: 600, color: 'var(--fg-slate-900)', display: 'flex', alignItems: 'center', gap: '6px' }}>
                   <span>🖥️</span>
-                  <span>Official Exam Interface & Software Controls</span>
+                  <span>Exam Interface & Software Controls</span>
                 </h4>
                 <div style={{ fontSize: '0.8rem', color: 'var(--fg-slate-700)', display: 'flex', flexDirection: 'column', gap: '8px' }}>
                   <div style={{ display: 'flex', gap: '8px' }}>
@@ -543,13 +543,13 @@ export const RulesModal: React.FC<RulesModalProps> = ({
                 style={{
                   background: 'var(--bg-slate-50)',
                   border: '1.5px dashed var(--bd-slate-400)',
-                  borderRadius: '10px',
+                  borderRadius: 'var(--radius-md)',
                   padding: '14px 16px'
                 }}
               >
-                <h4 style={{ margin: '0 0 8px 0', fontSize: '0.95rem', fontWeight: 800, color: 'var(--fg-slate-900)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <h4 style={{ margin: '0 0 8px 0', fontSize: '0.95rem', fontWeight: 600, color: 'var(--fg-slate-900)', display: 'flex', alignItems: 'center', gap: '6px' }}>
                   <span>✅</span>
-                  <span>Official Examination Day Dos & Don'ts Checklist</span>
+                  <span>Exam Day Dos & Don'ts Checklist</span>
                 </h4>
                 <ul style={{ margin: 0, paddingLeft: '18px', fontSize: '0.8rem', color: 'var(--fg-slate-600)', lineHeight: 1.6 }}>
                   {activeRule.examChecklist.map((item, idx) => (
@@ -558,7 +558,7 @@ export const RulesModal: React.FC<RulesModalProps> = ({
                     </li>
                   ))}
                   <li>
-                    Practice under exact timer pressure (10 or 15 mins) daily on our official passages to ensure finger stamina.
+                    Practice under exact timer pressure (10 or 15 mins) daily on our practice passages to ensure finger stamina.
                   </li>
                 </ul>
               </div>
@@ -580,12 +580,12 @@ export const RulesModal: React.FC<RulesModalProps> = ({
           }}
         >
           <span>
-            Verified against authentic recruitment notifications (UPPRPB, RRB Eduquity, SSC DEST, High Courts, MP CPCT).
+            Based on published recruitment notifications (UPPRPB, RRB Eduquity, SSC DEST, High Courts, MP CPCT).
           </span>
           <button
             onClick={onClose}
             className="btn btn-primary"
-            style={{ padding: '6px 18px', fontSize: '0.8rem', fontWeight: 700 }}
+            style={{ padding: '6px 18px', fontSize: '0.8rem', fontWeight: 600 }}
           >
             Got It, Close
           </button>

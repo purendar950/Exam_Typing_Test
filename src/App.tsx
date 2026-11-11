@@ -3,6 +3,7 @@ import { Passage, TestSettings, EvaluationResult, ExamProfile } from './types';
 import { PASSAGES } from './data/passages';
 import { ALL_EXAMS } from './data/allExams';
 import { Header } from './components/Header';
+import { BottomNav } from './components/BottomNav';
 import { ChooseTest } from './components/ChooseTest';
 import { StartTest } from './components/StartTest';
 import { HindiHelperModal } from './components/HindiHelperModal';
@@ -234,16 +235,7 @@ export const App: React.FC = () => {
     }
   });
 
-  // Automatically open login modal if user is not logged in on site visit
-  const [isAuthOpen, setIsAuthOpen] = useState<boolean>(() => {
-    try {
-      const savedUser = localStorage.getItem('up_typing_active_user');
-      const dismissed = sessionStorage.getItem('up_auth_dismissed') === 'true';
-      return !savedUser && !dismissed;
-    } catch {
-      return false;
-    }
-  });
+  const [isAuthOpen, setIsAuthOpen] = useState<boolean>(false);
   const [isDashboardOpen, setIsDashboardOpen] = useState<boolean>(false);
   const [dashboardInitialTab, setDashboardInitialTab] = useState<'overview' | 'history' | 'heatmap' | 'courses' | 'admitCard'>('overview');
   const [isLeaderboardOpen, setIsLeaderboardOpen] = useState<boolean>(false);
@@ -432,12 +424,6 @@ export const App: React.FC = () => {
           .catch((err) => {
             console.warn('Error fetching cloud test attempts:', err);
           });
-      } else {
-        // If not logged in and not dismissed in this session, auto-open login modal
-        const dismissed = sessionStorage.getItem('up_auth_dismissed') === 'true';
-        if (!dismissed) {
-          setIsAuthOpen(true);
-        }
       }
     });
     return () => {
@@ -692,23 +678,25 @@ export const App: React.FC = () => {
     }
   };
 
+  const selectTab = (tab: 'tests' | 'learn' | 'book') => {
+    setActiveTab(tab);
+    if (tab === 'learn') {
+      window.location.hash = '#/learn';
+      setCurrentView('learn');
+    } else if (tab === 'book') {
+      window.location.hash = '#/book';
+      setCurrentView('book');
+    } else {
+      returnToExamOrHome();
+    }
+  };
+
   return (
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
       {currentView !== 'test' && (
         <Header
           currentTab={activeTab}
-          onSelectTab={(tab) => {
-            setActiveTab(tab);
-            if (tab === 'learn') {
-              window.location.hash = '#/learn';
-              setCurrentView('learn');
-            } else if (tab === 'book') {
-              window.location.hash = '#/book';
-              setCurrentView('book');
-            } else {
-              returnToExamOrHome();
-            }
-          }}
+          onSelectTab={selectTab}
           onOpenRules={() => openRulesModal()}
           onOpenHistory={() => setIsHistoryOpen(true)}
           onOpenHindiHelper={() => setIsHindiHelperOpen(true)}
@@ -729,6 +717,28 @@ export const App: React.FC = () => {
           onToggleDarkMode={toggleDarkMode}
         />
 
+      )}
+
+      {currentView !== 'test' && (
+        <BottomNav
+          currentTab={activeTab}
+          isLoggedIn={!!currentUser}
+          onSelectTab={selectTab}
+          onOpenMyCourses={() => setIsMyCoursesOpen(true)}
+          onOpenAccount={() => {
+            if (!currentUser) {
+              setIsAuthOpen(true);
+              return;
+            }
+            setDashboardInitialTab('overview');
+            setIsDashboardOpen(true);
+          }}
+          onOpenPayment={() => handleOpenPayment()}
+          onOpenHindiHelper={() => setIsHindiHelperOpen(true)}
+          onOpenRules={() => openRulesModal()}
+          onOpenHistory={() => setIsHistoryOpen(true)}
+          onOpenLeaderboard={() => setIsLeaderboardOpen(true)}
+        />
       )}
 
       {/* ⚡ EXCLUSIVE ₹12 FOR 15 DAYS WELCOME OFFER BANNER (Shown when user logs in) */}
@@ -814,207 +824,50 @@ export const App: React.FC = () => {
       </main>
 
       {currentView !== 'book' && currentView !== 'test' && (
-        <footer
-          style={{
-            background: 'linear-gradient(180deg, var(--surface) 0%, var(--bg-slate-50) 100%)',
-            borderTop: '1px solid var(--bd-slate-200)',
-            padding: '40px 0 24px 0',
-            color: 'var(--fg-slate-600)',
-            fontSize: '0.875rem',
-            marginTop: 'auto'
-          }}
-        >
-          <div className="container" style={{ margin: '0 auto', padding: '0 20px' }}>
-            {/* Top Multi-Column Grid */}
-            <div
-              style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
-                gap: '32px',
-                marginBottom: '32px'
-              }}
-            >
-              {/* Col 1: Brand & Gov Standard */}
-              <div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '12px' }}>
+        <footer className="site-footer">
+          <div className="container site-footer-inner">
+            <div className="site-footer-grid">
+              <div className="site-footer-brand">
+                <div className="site-footer-logo">
                   <img
                     src={appLogo}
-                    alt="Exam Typing Mentor"
-                    style={{ height: '36px', width: 'auto', borderRadius: '6px' }}
+                    alt=""
+                    width={32}
+                    height={32}
                     onError={(e) => { (e.currentTarget as HTMLElement).style.display = 'none'; }}
                   />
-                  <div>
-                    <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 800, color: 'var(--fg-slate-900)' }}>
-                      Exam Typing Mentor
-                    </h3>
-                    <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--fg-sky-600)' }}>
-                      Official Exam Speed & Accuracy Simulator
-                    </span>
-                  </div>
+                  <span>Exam Typing</span>
                 </div>
-                <p style={{ fontSize: '0.8rem', color: 'var(--fg-slate-500)', lineHeight: 1.6, margin: '0 0 12px 0' }}>
-                  Crafted strictly per official recruitment benchmarks: <strong>UP Police Computer Operator</strong> (Hindi 25 WPM, English 30 WPM, 85% Accuracy), <strong>UP Police ASI</strong>, <strong>UPSSSC Junior Assistant</strong>, <strong>Allahabad High Court</strong>, and <strong>SSC CGL/CHSL</strong>.
+                <p>
+                  Typing practice for government exams: UP Police Computer Operator and ASI, UPSSSC, Allahabad High Court, SSC CGL/CHSL and more.
                 </p>
-                <div style={{ fontSize: '0.75rem', color: 'var(--tw-slate-400)', lineHeight: 1.45, background: 'var(--bg-slate-100)', padding: '8px 12px', borderRadius: '6px', borderLeft: '3px solid var(--bd-slate-300)' }}>
-                  <strong>Disclaimer:</strong> Independent educational preparation tool. Not affiliated with UPPRPB, UPSSSC, SSC, or any government recruiting board.
-                </div>
+                <p className="site-footer-note">
+                  An independent practice tool. Not affiliated with UPPRPB, UPSSSC, SSC or any recruitment board.
+                </p>
               </div>
 
-              {/* Col 2: Legal, Trust & Policies */}
-              <div>
-                <h4 style={{ fontSize: '0.95rem', fontWeight: 800, color: 'var(--fg-slate-900)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '14px' }}>
-                  ⚖️ Trust & Policies
-                </h4>
-                <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                  <li>
-                    <button
-                      onClick={() => openLegalModal('terms')}
-                      style={{ background: 'none', border: 'none', padding: 0, color: 'var(--fg-slate-700)', cursor: 'pointer', fontSize: '0.875rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '6px' }}
-                    >
-                      <span>📜</span>
-                      <span style={{ textDecoration: 'underline' }}>Terms & Conditions</span>
-                    </button>
-                  </li>
-                  <li>
-                    <button
-                      onClick={() => openLegalModal('privacy')}
-                      style={{ background: 'none', border: 'none', padding: 0, color: 'var(--fg-slate-700)', cursor: 'pointer', fontSize: '0.875rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '6px' }}
-                    >
-                      <span>🔒</span>
-                      <span style={{ textDecoration: 'underline' }}>Privacy Policy</span>
-                    </button>
-                  </li>
-                  <li>
-                    <button
-                      onClick={() => openLegalModal('refund')}
-                      style={{ background: 'none', border: 'none', padding: 0, color: 'var(--fg-slate-700)', cursor: 'pointer', fontSize: '0.875rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '6px' }}
-                    >
-                      <span>🚫</span>
-                      <span style={{ textDecoration: 'underline' }}>Strict No-Refund Policy</span>
-                    </button>
-                  </li>
-                  <li>
-                    <button
-                      onClick={() => openLegalModal('copyright')}
-                      style={{ background: 'none', border: 'none', padding: 0, color: 'var(--fg-slate-700)', cursor: 'pointer', fontSize: '0.875rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '6px' }}
-                    >
-                      <span>©️</span>
-                      <span style={{ textDecoration: 'underline' }}>Copyright & IP Notice</span>
-                    </button>
-                  </li>
-                  <li>
-                    <button
-                      onClick={() => openLegalModal('disclaimer')}
-                      style={{ background: 'none', border: 'none', padding: 0, color: 'var(--fg-slate-700)', cursor: 'pointer', fontSize: '0.875rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '6px' }}
-                    >
-                      <span>🛡️</span>
-                      <span style={{ textDecoration: 'underline' }}>Non-Affiliation Disclaimer</span>
-                    </button>
-                  </li>
-                </ul>
-              </div>
+              <nav aria-label="Support" className="site-footer-col">
+                <h4>Support</h4>
+                <a href="https://t.me/Exam_Typing_Mentor" target="_blank" rel="noopener noreferrer">Telegram channel</a>
+                <a href="https://t.me/+Lw-tPbRqOOc2ZTA1" target="_blank" rel="noopener noreferrer">Student group</a>
+                <a href="https://t.me/purendare" target="_blank" rel="noopener noreferrer">Message us on Telegram</a>
+                <button type="button" onClick={() => openLegalModal('contact')}>Contact</button>
+                {currentUser && isUserAdmin(currentUser) && (
+                  <button type="button" onClick={() => setIsAdminOpen(true)}>Admin panel</button>
+                )}
+              </nav>
 
-              {/* Col 3: Community & Support */}
-              <div>
-                <h4 style={{ fontSize: '0.95rem', fontWeight: 800, color: 'var(--fg-slate-900)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '14px' }}>
-                  💬 Community & Support
-                </h4>
-                <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                  <li>
-                    <a
-                      href="https://t.me/Exam_Typing_Mentor"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      style={{ color: 'var(--fg-sky-600)', textDecoration: 'none', fontSize: '0.875rem', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '6px' }}
-                    >
-                      <span>📢</span>
-                      <span>Official Telegram Channel ↗</span>
-                    </a>
-                  </li>
-                  <li>
-                    <a
-                      href="https://t.me/+Lw-tPbRqOOc2ZTA1"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      style={{ color: 'var(--fg-sky-600)', textDecoration: 'none', fontSize: '0.875rem', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '6px' }}
-                    >
-                      <span>👥</span>
-                      <span>Aspirants Discussion Group ↗</span>
-                    </a>
-                  </li>
-                  <li>
-                    <a
-                      href="https://t.me/purendare"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      style={{ color: 'var(--fg-sky-600)', textDecoration: 'none', fontSize: '0.875rem', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '6px' }}
-                    >
-                      <span>💬</span>
-                      <span>1-on-1 Admin Support (@purendare) ↗</span>
-                    </a>
-                  </li>
-                  <li>
-                    <button
-                      onClick={() => openLegalModal('contact')}
-                      style={{ background: 'none', border: 'none', padding: 0, color: 'var(--fg-slate-700)', cursor: 'pointer', fontSize: '0.875rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '6px' }}
-                    >
-                      <span>📞</span>
-                      <span style={{ textDecoration: 'underline' }}>Contact & Grievance Redressal</span>
-                    </button>
-                  </li>
-                  {currentUser && isUserAdmin(currentUser) && (
-                    <li style={{ marginTop: '4px' }}>
-                      <button
-                        onClick={() => setIsAdminOpen(true)}
-                        style={{
-                          background: 'var(--tw-sky-600)',
-                          color: '#ffffff',
-                          border: 'none',
-                          padding: '6px 12px',
-                          borderRadius: '6px',
-                          fontSize: '0.8rem',
-                          fontWeight: 700,
-                          cursor: 'pointer',
-                          display: 'inline-flex',
-                          alignItems: 'center',
-                          gap: '6px'
-                        }}
-                      >
-                        <span>🛡️</span>
-                        <span>Examination Authority Admin Portal</span>
-                      </button>
-                    </li>
-                  )}
-                </ul>
-              </div>
+              <nav aria-label="Legal" className="site-footer-col">
+                <h4>Legal</h4>
+                <button type="button" onClick={() => openLegalModal('terms')}>Terms of use</button>
+                <button type="button" onClick={() => openLegalModal('privacy')}>Privacy policy</button>
+                <button type="button" onClick={() => openLegalModal('refund')}>Refund policy</button>
+                <button type="button" onClick={() => openLegalModal('copyright')}>Copyright</button>
+                <button type="button" onClick={() => openLegalModal('disclaimer')}>Disclaimer</button>
+              </nav>
             </div>
 
-            {/* Bottom Row: Copyright Bar */}
-            <div
-              style={{
-                borderTop: '1px solid var(--bd-slate-200)',
-                paddingTop: '18px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                flexWrap: 'wrap',
-                gap: '12px',
-                fontSize: '0.8rem',
-                color: 'var(--tw-slate-400)'
-              }}
-            >
-              <div>
-                &copy; 2026 <strong>Exam Typing Mentor</strong>. All Rights Reserved.
-              </div>
-              <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
-                <span onClick={() => openLegalModal('terms')} style={{ cursor: 'pointer', textDecoration: 'underline' }}>Terms</span>
-                <span onClick={() => openLegalModal('privacy')} style={{ cursor: 'pointer', textDecoration: 'underline' }}>Privacy</span>
-                <span onClick={() => openLegalModal('refund')} style={{ cursor: 'pointer', textDecoration: 'underline' }}>No Refunds</span>
-                <span onClick={() => openLegalModal('copyright')} style={{ cursor: 'pointer', textDecoration: 'underline' }}>Copyright</span>
-                <span onClick={() => openLegalModal('disclaimer')} style={{ cursor: 'pointer', textDecoration: 'underline' }}>Disclaimer</span>
-                <span onClick={() => openLegalModal('contact')} style={{ cursor: 'pointer', textDecoration: 'underline' }}>Contact</span>
-              </div>
-            </div>
+            <div className="site-footer-bottom">&copy; {new Date().getFullYear()} Exam Typing</div>
           </div>
         </footer>
       )}
@@ -1205,13 +1058,13 @@ export const App: React.FC = () => {
             background: telegramToast.success ? 'var(--tw-slate-900)' : 'var(--tw-red-800)',
             color: '#ffffff',
             padding: '12px 22px',
-            borderRadius: '12px',
-            boxShadow: '0 10px 30px rgba(0,0,0,0.35)',
+            borderRadius: 'var(--radius-md)',
+            boxShadow: 'var(--shadow-lg)',
             display: 'flex',
             alignItems: 'center',
             gap: '12px',
             fontSize: '0.875rem',
-            fontWeight: 700,
+            fontWeight: 600,
             border: telegramToast.success ? '1.5px solid var(--tw-sky-400)' : '1.5px solid var(--tw-red-400)'
           }}
         >

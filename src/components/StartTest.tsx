@@ -396,11 +396,11 @@ export const StartTest: React.FC<StartTestProps> = ({
               background: settings.autoScroll ? 'var(--tw-green-600)' : 'rgba(255, 255, 255, 0.15)',
               border: '1px solid rgba(255, 255, 255, 0.3)',
               color: '#ffffff',
-              borderRadius: '4px',
+              borderRadius: 'var(--radius-sm)',
               padding: '4px 10px',
               cursor: 'pointer',
               fontSize: '0.8rem',
-              fontWeight: 700,
+              fontWeight: 600,
               display: 'inline-flex',
               alignItems: 'center',
               gap: '6px'
@@ -421,11 +421,11 @@ export const StartTest: React.FC<StartTestProps> = ({
               background: showVirtualKeyboard ? 'var(--tw-amber-500)' : 'rgba(255, 255, 255, 0.15)',
               border: '1px solid rgba(255, 255, 255, 0.3)',
               color: '#ffffff',
-              borderRadius: '4px',
+              borderRadius: 'var(--radius-sm)',
               padding: '4px 10px',
               cursor: 'pointer',
               fontSize: '0.8rem',
-              fontWeight: 700,
+              fontWeight: 600,
               display: 'inline-flex',
               alignItems: 'center',
               gap: '6px'
@@ -444,11 +444,11 @@ export const StartTest: React.FC<StartTestProps> = ({
               background: isFullscreen ? 'var(--tw-sky-600)' : 'rgba(255, 255, 255, 0.15)',
               border: '1px solid rgba(255, 255, 255, 0.3)',
               color: '#ffffff',
-              borderRadius: '4px',
+              borderRadius: 'var(--radius-sm)',
               padding: '4px 12px',
               cursor: 'pointer',
               fontSize: '0.8rem',
-              fontWeight: 700,
+              fontWeight: 600,
               display: 'inline-flex',
               alignItems: 'center',
               gap: '6px'
@@ -476,16 +476,16 @@ export const StartTest: React.FC<StartTestProps> = ({
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
           <ExamLogo identifier={activeExamProfile?.id || passage.category || ''} categoryGroup={activeExamProfile?.categoryGroup} size={26} />
-          <span style={{ fontWeight: 800, color: 'var(--fg-slate-800)' }}>
+          <span style={{ fontWeight: 700, color: 'var(--fg-slate-800)' }}>
             {activeExamProfile?.title || passage.title}
           </span>
-          <span style={{ background: 'var(--bg-sky-100)', color: 'var(--fg-sky-700)', padding: '1px 8px', borderRadius: '4px', fontWeight: 700 }}>
+          <span style={{ background: 'var(--bg-sky-100)', color: 'var(--fg-sky-700)', padding: '1px 8px', borderRadius: 'var(--radius-sm)', fontWeight: 700 }}>
             🎯 Target: {activeExamProfile?.targetSpeed || (passage.language.startsWith('hindi') ? 25 : 30)} WPM
           </span>
-          <span style={{ background: 'var(--bg-amber-100)', color: 'var(--fg-amber-800)', padding: '1px 8px', borderRadius: '4px', fontWeight: 700 }}>
+          <span style={{ background: 'var(--bg-amber-100)', color: 'var(--fg-amber-800)', padding: '1px 8px', borderRadius: 'var(--radius-sm)', fontWeight: 700 }}>
             📏 Limit: {isCharBased ? `${targetLimit} Keystrokes` : `${targetLimit} Words`}
           </span>
-          <span style={{ background: 'var(--bg-slate-100)', color: 'var(--fg-slate-600)', padding: '1px 8px', borderRadius: '4px', fontWeight: 600 }}>
+          <span style={{ background: 'var(--bg-slate-100)', color: 'var(--fg-slate-600)', padding: '1px 8px', borderRadius: 'var(--radius-sm)', fontWeight: 600 }}>
             ⏱️ {durationMinutes} Mins
           </span>
           {(() => {
@@ -498,8 +498,8 @@ export const StartTest: React.FC<StartTestProps> = ({
                   color: bsRule.badgeText,
                   border: `1px solid ${bsRule.badgeBorder}`,
                   padding: '1px 8px',
-                  borderRadius: '4px',
-                  fontWeight: 700,
+                  borderRadius: 'var(--radius-sm)',
+                  fontWeight: 600,
                   fontSize: '0.8rem',
                   display: 'inline-flex',
                   alignItems: 'center',
@@ -514,15 +514,15 @@ export const StartTest: React.FC<StartTestProps> = ({
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-          <span style={{ color: 'var(--fg-slate-500)', fontWeight: 600 }}>Official Cutoff Rule:</span>
-          <span style={{ color: 'var(--fg-teal-700)', fontWeight: 700, background: 'var(--bg-teal-100)', padding: '1px 8px', borderRadius: '4px' }}>
+          <span style={{ color: 'var(--fg-slate-500)', fontWeight: 600 }}>Cutoff Rule:</span>
+          <span style={{ color: 'var(--fg-teal-700)', fontWeight: 700, background: 'var(--bg-teal-100)', padding: '1px 8px', borderRadius: 'var(--radius-sm)' }}>
             {activeExamProfile?.calculationModel === 'upprpb' ? '85.0% Passage Accuracy Benchmark' :
              activeExamProfile?.calculationModel === 'rrb_eduquity' ? '5% Error Margin (10 Words/Mistake Cut)' :
              activeExamProfile?.calculationModel === 'ssc_dest' ? `Max ${activeExamProfile?.limitErrorPercentage || 7}% Errors Allowed` :
              activeExamProfile?.calculationModel === 'court_delhi' ? 'Max 3.0% Errors Allowed' :
              activeExamProfile?.calculationModel === 'court_ahc' ? '50 Marks (0.1 Mark Deducted/Error)' :
              activeExamProfile?.calculationModel === 'mp_cpct' ? 'Net Speed (Correct Words / Time)' :
-             'Official Board Standard'}
+             'Board Standard'}
           </span>
           {onOpenRules && (
             <button
@@ -532,17 +532,17 @@ export const StartTest: React.FC<StartTestProps> = ({
                 marginLeft: '4px',
                 padding: '2px 8px',
                 fontSize: '0.75rem',
-                fontWeight: 700,
+                fontWeight: 600,
                 background: 'var(--tw-sky-600)',
                 color: '#ffffff',
                 border: 'none',
-                borderRadius: '4px',
+                borderRadius: 'var(--radius-sm)',
                 cursor: 'pointer',
                 display: 'inline-flex',
                 alignItems: 'center',
                 gap: '3px'
               }}
-              title="View full official exam guidelines, speed rules, and formula"
+              title="View full exam guidelines, speed rules, and formula"
             >
               <span>📋</span>
               <span>Instructions</span>
@@ -567,7 +567,7 @@ export const StartTest: React.FC<StartTestProps> = ({
         >
           {/* Left: Quick status & live progress tracker */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', minWidth: '180px' }}>
-            <div style={{ fontSize: '0.875rem', color: 'var(--fg-slate-800)', fontWeight: 700 }}>
+            <div style={{ fontSize: '0.875rem', color: 'var(--fg-slate-800)', fontWeight: 600 }}>
               {isCharBased ? (
                 <span>Keystrokes: <strong style={{ color: 'var(--fg-sky-600)' }}>{typedText.length}</strong> / {targetLimit} ({progressPercent}%)</span>
               ) : (
@@ -576,7 +576,7 @@ export const StartTest: React.FC<StartTestProps> = ({
             </div>
 
             {/* Visual Progress Bar */}
-            <div style={{ width: '100%', maxWidth: '200px', height: '6px', background: 'var(--bg-slate-200)', borderRadius: '3px', overflow: 'hidden' }}>
+            <div style={{ width: '100%', maxWidth: '200px', height: '6px', background: 'var(--bg-slate-200)', borderRadius: 'var(--radius-sm)', overflow: 'hidden' }}>
               <div
                 style={{
                   width: `${progressPercent}%`,
@@ -589,7 +589,7 @@ export const StartTest: React.FC<StartTestProps> = ({
 
             {/* 85% UPPRPB Cutoff Goal Hint */}
             {(!activeExamProfile || activeExamProfile.calculationModel === 'upprpb') && !isCharBased && (
-              <span style={{ fontSize: '0.75rem', color: typedWords.length >= requiredPassageWords85 ? 'var(--fg-green-700)' : 'var(--fg-amber-700)', fontWeight: 600 }}>
+              <span style={{ fontSize: '0.75rem', color: typedWords.length >= requiredPassageWords85 ? 'var(--fg-green-700)' : 'var(--fg-amber-700)', fontWeight: 500 }}>
                 {typedWords.length >= requiredPassageWords85
                   ? '✅ 85% passage benchmark achieved!'
                   : `Need ${requiredPassageWords85} words for 85% cutoff`}
@@ -612,9 +612,9 @@ export const StartTest: React.FC<StartTestProps> = ({
                 alignItems: 'center',
                 background: 'var(--surface)',
                 border: '1.5px solid var(--bd-slate-300)',
-                borderRadius: '8px',
+                borderRadius: 'var(--radius-md)',
                 padding: '3px 10px',
-                boxShadow: '0 2px 4px rgba(0,0,0,0.05)'
+                boxShadow: 'var(--shadow-sm)'
               }}
             >
               {/* Silhouette Avatar */}
@@ -622,8 +622,8 @@ export const StartTest: React.FC<StartTestProps> = ({
                 style={{
                   width: '40px',
                   height: '40px',
-                  borderRadius: '6px',
-                  background: 'linear-gradient(135deg, var(--tw-slate-700) 0%, var(--tw-slate-900) 100%)',
+                  borderRadius: 'var(--radius-sm)',
+                  background: 'var(--tw-slate-700)',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
@@ -642,7 +642,7 @@ export const StartTest: React.FC<StartTestProps> = ({
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
               {/* Highlight Toggle Switch */}
               <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }} title="Toggle Word Highlights (Disabled by default)">
-                <span style={{ fontSize: '0.75rem', color: 'var(--fg-slate-500)', fontWeight: 600 }}>Highlight:</span>
+                <span style={{ fontSize: '0.75rem', color: 'var(--fg-slate-500)', fontWeight: 500 }}>Highlight:</span>
                 <label className="ar-toggle-switch">
                   <input
                     type="checkbox"
@@ -655,7 +655,7 @@ export const StartTest: React.FC<StartTestProps> = ({
 
               {/* Auto Scroll Toggle Switch (Default OFF) */}
               <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }} title="Toggle Auto Scroll (Default: OFF)">
-                <span style={{ fontSize: '0.75rem', color: settings.autoScroll ? 'var(--fg-green-600)' : 'var(--fg-slate-500)', fontWeight: 700 }}>
+                <span style={{ fontSize: '0.75rem', color: settings.autoScroll ? 'var(--fg-green-600)' : 'var(--fg-slate-500)', fontWeight: 600 }}>
                   Auto Scroll:
                 </span>
                 <label className="ar-toggle-switch">
@@ -666,7 +666,7 @@ export const StartTest: React.FC<StartTestProps> = ({
                   />
                   <span className="ar-toggle-slider" />
                 </label>
-                <span style={{ fontSize: '0.75rem', fontWeight: 800, color: settings.autoScroll ? 'var(--fg-green-600)' : 'var(--tw-slate-400)' }}>
+                <span style={{ fontSize: '0.75rem', fontWeight: 600, color: settings.autoScroll ? 'var(--fg-green-600)' : 'var(--tw-slate-400)' }}>
                   {settings.autoScroll ? 'ON' : 'OFF'}
                 </span>
               </div>
@@ -677,7 +677,7 @@ export const StartTest: React.FC<StartTestProps> = ({
                   style={{ display: 'flex', alignItems: 'center', gap: '4px' }}
                   title="Toggle QWERTY-to-Inscript Key Mapping. Keep ON if typing on standard English keyboard. Turn OFF if using Windows Indic IME or Google Input Tools."
                 >
-                  <span style={{ fontSize: '0.75rem', color: inscriptMappingEnabled ? 'var(--fg-sky-600)' : 'var(--fg-slate-500)', fontWeight: 700 }}>
+                  <span style={{ fontSize: '0.75rem', color: inscriptMappingEnabled ? 'var(--fg-sky-600)' : 'var(--fg-slate-500)', fontWeight: 600 }}>
                     Inscript:
                   </span>
                   <label className="ar-toggle-switch">
@@ -688,7 +688,7 @@ export const StartTest: React.FC<StartTestProps> = ({
                     />
                     <span className="ar-toggle-slider" />
                   </label>
-                  <span style={{ fontSize: '0.75rem', fontWeight: 800, color: inscriptMappingEnabled ? 'var(--fg-sky-600)' : 'var(--tw-slate-400)' }}>
+                  <span style={{ fontSize: '0.75rem', fontWeight: 600, color: inscriptMappingEnabled ? 'var(--fg-sky-600)' : 'var(--tw-slate-400)' }}>
                     {inscriptMappingEnabled ? 'ON' : 'OFF'}
                   </span>
                 </div>
@@ -754,7 +754,7 @@ export const StartTest: React.FC<StartTestProps> = ({
             style={{
               background: 'var(--bg-green-50)',
               border: '1.5px solid var(--bd-green-300)',
-              borderRadius: '8px',
+              borderRadius: 'var(--radius-md)',
               padding: '6px 14px',
               marginBottom: '10px',
               fontSize: '0.875rem',
@@ -762,10 +762,10 @@ export const StartTest: React.FC<StartTestProps> = ({
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'space-between',
-              fontWeight: 600
+              fontWeight: 500
             }}
           >
-            <span>✅ Official passage limit reached ({targetLimit} {isCharBased ? 'keystrokes' : 'words'})! Review your text or click Submit.</span>
+            <span>✅ Passage limit reached ({targetLimit} {isCharBased ? 'keystrokes' : 'words'})! Review your text or click Submit.</span>
             <button
               type="button"
               onClick={() => setShowSubmitModal(true)}
@@ -882,7 +882,7 @@ export const StartTest: React.FC<StartTestProps> = ({
         <div className="modal-overlay" onClick={() => setShowSettingsModal(false)}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '520px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '18px' }}>
-              <h3 style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--fg-slate-900)' }}>
+              <h3 style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--fg-slate-900)' }}>
                 Test Preferences & Settings
               </h3>
               <button
@@ -896,8 +896,8 @@ export const StartTest: React.FC<StartTestProps> = ({
             <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
               {/* Candidate Name Input */}
               <div>
-                <label style={{ fontSize: '0.875rem', fontWeight: 700, color: 'var(--fg-slate-700)', display: 'block', marginBottom: '6px' }}>
-                  Candidate Name (Appears on Screen):
+                <label style={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--fg-slate-700)', display: 'block', marginBottom: '6px' }}>
+                  Name (Appears on Screen):
                 </label>
                 <input
                   type="text"
@@ -910,7 +910,7 @@ export const StartTest: React.FC<StartTestProps> = ({
                   style={{
                     width: '100%',
                     padding: '8px 12px',
-                    borderRadius: '6px',
+                    borderRadius: 'var(--radius-sm)',
                     border: '1px solid var(--bd-slate-300)',
                     fontWeight: 700,
                     textTransform: 'uppercase'
@@ -982,8 +982,8 @@ export const StartTest: React.FC<StartTestProps> = ({
       {showSubmitModal && (
         <div className="modal-overlay" onClick={() => setShowSubmitModal(false)}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '440px', textAlign: 'center' }}>
-            <h3 style={{ fontSize: '1.25rem', fontWeight: 800, marginBottom: '12px', color: 'var(--fg-slate-900)' }}>
-              Submit Official Test?
+            <h3 style={{ fontSize: '1.25rem', fontWeight: 700, marginBottom: '12px', color: 'var(--fg-slate-900)' }}>
+              Submit test?
             </h3>
             <p style={{ color: 'var(--fg-slate-500)', fontSize: '0.95rem', marginBottom: '20px', lineHeight: 1.5 }}>
               Are you sure you want to end your test now? Your Net WPM, accuracy, and mistake breakdown will be calculated according to official UPPRPB guidelines.

@@ -56,14 +56,14 @@ export class ErrorBoundary extends Component<Props, State> {
               width: '100%',
               background: 'var(--surface)',
               border: '1.5px solid var(--bd-red-100)',
-              borderRadius: '16px',
+              borderRadius: 'var(--radius-lg)',
               padding: '32px 24px',
-              boxShadow: '0 10px 25px -5px rgba(220, 38, 38, 0.12)',
+              boxShadow: 'var(--shadow-lg)',
               textAlign: 'center'
             }}
           >
             <div style={{ fontSize: '3rem', marginBottom: '12px' }}>⚠️</div>
-            <h2 style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--fg-red-800)', marginBottom: '8px' }}>
+            <h2 style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--fg-red-800)', marginBottom: '8px' }}>
               {this.props.fallbackTitle || 'Something went wrong (तकनीकी समस्या हुई)'}
             </h2>
             <p style={{ fontSize: '0.875rem', color: 'var(--fg-slate-500)', lineHeight: 1.6, marginBottom: '20px' }}>
@@ -75,7 +75,7 @@ export class ErrorBoundary extends Component<Props, State> {
                 style={{
                   background: 'var(--bg-red-50)',
                   border: '1px solid var(--bd-red-200)',
-                  borderRadius: '8px',
+                  borderRadius: 'var(--radius-md)',
                   padding: '10px 14px',
                   fontSize: '0.8rem',
                   fontFamily: 'monospace',
@@ -94,12 +94,12 @@ export class ErrorBoundary extends Component<Props, State> {
               <button
                 onClick={this.handleReload}
                 style={{
-                  background: 'linear-gradient(135deg, var(--tw-sky-600) 0%, var(--tw-sky-700) 100%)',
+                  background: 'var(--tw-sky-600)',
                   color: '#ffffff',
                   border: 'none',
                   padding: '10px 20px',
-                  borderRadius: '8px',
-                  fontWeight: 700,
+                  borderRadius: 'var(--radius-md)',
+                  fontWeight: 600,
                   fontSize: '0.875rem',
                   cursor: 'pointer',
                   display: 'inline-flex',
@@ -118,8 +118,8 @@ export class ErrorBoundary extends Component<Props, State> {
                   color: 'var(--fg-slate-700)',
                   border: '1px solid var(--bd-slate-300)',
                   padding: '10px 18px',
-                  borderRadius: '8px',
-                  fontWeight: 700,
+                  borderRadius: 'var(--radius-md)',
+                  fontWeight: 600,
                   fontSize: '0.875rem',
                   cursor: 'pointer',
                   display: 'inline-flex',

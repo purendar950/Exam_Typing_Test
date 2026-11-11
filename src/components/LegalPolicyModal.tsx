@@ -45,13 +45,13 @@ export const LegalPolicyModal: React.FC<LegalPolicyModalProps> = ({
       <div
         style={{
           backgroundColor: 'var(--surface)',
-          borderRadius: '16px',
+          borderRadius: 'var(--radius-lg)',
           width: '100%',
           maxWidth: '900px',
           maxHeight: '90vh',
           display: 'flex',
           flexDirection: 'column',
-          boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+          boxShadow: 'var(--shadow-lg)',
           overflow: 'hidden',
           animation: 'fadeIn 0.2s ease-out'
         }}
@@ -72,7 +72,7 @@ export const LegalPolicyModal: React.FC<LegalPolicyModalProps> = ({
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
             <span style={{ fontSize: '1.4rem' }}>⚖️</span>
             <div>
-              <h2 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 800 }}>
+              <h2 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 700 }}>
                 Legal Policies & Trust Center
               </h2>
               <p style={{ margin: 0, fontSize: '0.8rem', color: 'var(--tw-slate-400)' }}>
@@ -86,11 +86,11 @@ export const LegalPolicyModal: React.FC<LegalPolicyModalProps> = ({
               background: 'rgba(255, 255, 255, 0.1)',
               border: 'none',
               color: '#ffffff',
-              borderRadius: '8px',
+              borderRadius: 'var(--radius-md)',
               padding: '6px 12px',
               cursor: 'pointer',
               fontSize: '1rem',
-              fontWeight: 700
+              fontWeight: 600
             }}
             title="Close"
           >
@@ -124,11 +124,11 @@ export const LegalPolicyModal: React.FC<LegalPolicyModalProps> = ({
                 onClick={() => setActiveTab(tab.id as LegalTab)}
                 style={{
                   padding: '10px 14px',
-                  borderRadius: '8px',
+                  borderRadius: 'var(--radius-md)',
                   border: 'none',
                   background: isActive ? 'var(--tw-sky-600)' : 'transparent',
                   color: isActive ? '#ffffff' : 'var(--fg-slate-500)',
-                  fontWeight: isActive ? 700 : 600,
+                  fontWeight: isActive ? 600 : 500,
                   fontSize: '0.8rem',
                   cursor: 'pointer',
                   whiteSpace: 'nowrap',
@@ -155,14 +155,14 @@ export const LegalPolicyModal: React.FC<LegalPolicyModalProps> = ({
           {/* 1. TERMS OF SERVICE */}
           {activeTab === 'terms' && (
             <div>
-              <h3 style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--fg-slate-900)', marginBottom: '8px' }}>
+              <h3 style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--fg-slate-900)', marginBottom: '8px' }}>
                 Terms and Conditions of Service
               </h3>
               <p style={{ fontSize: '0.8rem', color: 'var(--fg-slate-500)', marginBottom: '16px' }}>
                 Last Updated: November 2026 &bull; Effective Date: Immediate
               </p>
 
-              <div style={{ background: 'var(--bg-sky-50)', borderLeft: '4px solid var(--tw-sky-600)', padding: '12px 16px', borderRadius: '4px', marginBottom: '18px' }}>
+              <div style={{ background: 'var(--bg-sky-50)', borderLeft: '4px solid var(--tw-sky-600)', padding: '12px 16px', borderRadius: 'var(--radius-sm)', marginBottom: '18px' }}>
                 <p style={{ margin: 0, fontSize: '0.875rem', color: 'var(--fg-sky-700)' }}>
                   Please read these Terms and Conditions carefully before using the <strong>Exam Typing Mentor</strong> online portal. By registering, accessing, or practicing on this website, you agree to be legally bound by these terms.
                 </p>
@@ -213,14 +213,14 @@ export const LegalPolicyModal: React.FC<LegalPolicyModalProps> = ({
           {/* 2. PRIVACY POLICY */}
           {activeTab === 'privacy' && (
             <div>
-              <h3 style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--fg-slate-900)', marginBottom: '8px' }}>
+              <h3 style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--fg-slate-900)', marginBottom: '8px' }}>
                 Privacy Policy
               </h3>
               <p style={{ fontSize: '0.8rem', color: 'var(--fg-slate-500)', marginBottom: '16px' }}>
                 Your Privacy Matters &bull; Strict Non-Commercial Data Protection
               </p>
 
-              <div style={{ background: 'var(--bg-emerald-50)', borderLeft: '4px solid var(--tw-emerald-500)', padding: '12px 16px', borderRadius: '4px', marginBottom: '18px' }}>
+              <div style={{ background: 'var(--bg-emerald-50)', borderLeft: '4px solid var(--tw-emerald-500)', padding: '12px 16px', borderRadius: 'var(--radius-sm)', marginBottom: '18px' }}>
                 <p style={{ margin: 0, fontSize: '0.875rem', color: 'var(--fg-emerald-700)' }}>
                   <strong>Our Privacy Guarantee:</strong> We never sell, rent, or trade your personal information, phone number, or test performance history to third-party telemarketers or advertisers.
                 </p>
@@ -263,15 +263,15 @@ export const LegalPolicyModal: React.FC<LegalPolicyModalProps> = ({
           {/* 3. STRICT NO-REFUND POLICY */}
           {activeTab === 'refund' && (
             <div>
-              <h3 style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--fg-red-800)', marginBottom: '8px' }}>
+              <h3 style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--fg-red-800)', marginBottom: '8px' }}>
                 Strict No-Refund & Cancellation Policy
               </h3>
               <p style={{ fontSize: '0.8rem', color: 'var(--fg-slate-500)', marginBottom: '16px' }}>
                 Effective Date: Immediate &bull; Mandatory Terms for All Candidates
               </p>
 
-              <div style={{ background: 'var(--bg-red-50)', borderLeft: '4px solid var(--tw-red-600)', padding: '14px 18px', borderRadius: '6px', marginBottom: '18px' }}>
-                <p style={{ margin: 0, fontSize: '0.95rem', color: 'var(--fg-red-800)', fontWeight: 800 }}>
+              <div style={{ background: 'var(--bg-red-50)', borderLeft: '4px solid var(--tw-red-600)', padding: '14px 18px', borderRadius: 'var(--radius-sm)', marginBottom: '18px' }}>
+                <p style={{ margin: 0, fontSize: '0.95rem', color: 'var(--fg-red-800)', fontWeight: 600 }}>
                   🚨 MANDATORY NOTICE: PAYMENTS ARE STRICTLY NON-REFUNDABLE UNDER ANY CIRCUMSTANCES
                 </p>
                 <p style={{ margin: '6px 0 0', fontSize: '0.875rem', color: 'var(--fg-red-700)', lineHeight: 1.5 }}>
@@ -316,7 +316,7 @@ export const LegalPolicyModal: React.FC<LegalPolicyModalProps> = ({
           {/* 4. COPYRIGHT & INTELLECTUAL PROPERTY */}
           {activeTab === 'copyright' && (
             <div>
-              <h3 style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--fg-slate-900)', marginBottom: '8px' }}>
+              <h3 style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--fg-slate-900)', marginBottom: '8px' }}>
                 Copyright & Intellectual Property Notice
               </h3>
               <p style={{ fontSize: '0.8rem', color: 'var(--fg-slate-500)', marginBottom: '16px' }}>
@@ -349,15 +349,15 @@ export const LegalPolicyModal: React.FC<LegalPolicyModalProps> = ({
           {/* 5. DISCLAIMER */}
           {activeTab === 'disclaimer' && (
             <div>
-              <h3 style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--fg-slate-900)', marginBottom: '8px' }}>
+              <h3 style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--fg-slate-900)', marginBottom: '8px' }}>
                 Non-Affiliation & Educational Disclaimer
               </h3>
               <p style={{ fontSize: '0.8rem', color: 'var(--fg-slate-500)', marginBottom: '16px' }}>
                 Important Notice for All Candidates
               </p>
 
-              <div style={{ background: 'var(--bg-red-50)', borderLeft: '4px solid var(--tw-red-500)', padding: '14px 18px', borderRadius: '4px', marginBottom: '18px' }}>
-                <p style={{ margin: 0, fontSize: '0.875rem', color: 'var(--fg-red-800)', fontWeight: 700 }}>
+              <div style={{ background: 'var(--bg-red-50)', borderLeft: '4px solid var(--tw-red-500)', padding: '14px 18px', borderRadius: 'var(--radius-sm)', marginBottom: '18px' }}>
+                <p style={{ margin: 0, fontSize: '0.875rem', color: 'var(--fg-red-800)', fontWeight: 600 }}>
                   NON-GOVERNMENT AFFILIATION DISCLAIMER:
                 </p>
                 <p style={{ margin: '6px 0 0', fontSize: '0.875rem', color: 'var(--fg-red-700)' }}>
@@ -386,7 +386,7 @@ export const LegalPolicyModal: React.FC<LegalPolicyModalProps> = ({
           {/* 6. CONTACT & SUPPORT */}
           {activeTab === 'contact' && (
             <div>
-              <h3 style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--fg-slate-900)', marginBottom: '8px' }}>
+              <h3 style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--fg-slate-900)', marginBottom: '8px' }}>
                 Contact & Grievance Redressal
               </h3>
               <p style={{ fontSize: '0.8rem', color: 'var(--fg-slate-500)', marginBottom: '16px' }}>
@@ -398,7 +398,7 @@ export const LegalPolicyModal: React.FC<LegalPolicyModalProps> = ({
               </p>
 
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '14px', marginTop: '16px' }}>
-                <div style={{ background: 'var(--bg-slate-50)', border: '1px solid var(--bd-slate-200)', borderRadius: '10px', padding: '16px' }}>
+                <div style={{ background: 'var(--bg-slate-50)', border: '1px solid var(--bd-slate-200)', borderRadius: 'var(--radius-md)', padding: '16px' }}>
                   <div style={{ fontSize: '1.4rem', marginBottom: '6px' }}>💬</div>
                   <strong style={{ display: 'block', color: 'var(--fg-slate-900)', marginBottom: '4px' }}>Direct 1-on-1 Admin Helpdesk</strong>
                   <span style={{ fontSize: '0.8rem', color: 'var(--fg-slate-500)' }}>Fastest response for payment activations & login help:</span>
@@ -414,7 +414,7 @@ export const LegalPolicyModal: React.FC<LegalPolicyModalProps> = ({
                   </div>
                 </div>
 
-                <div style={{ background: 'var(--bg-slate-50)', border: '1px solid var(--bd-slate-200)', borderRadius: '10px', padding: '16px' }}>
+                <div style={{ background: 'var(--bg-slate-50)', border: '1px solid var(--bd-slate-200)', borderRadius: 'var(--radius-md)', padding: '16px' }}>
                   <div style={{ fontSize: '1.4rem', marginBottom: '6px' }}>📢</div>
                   <strong style={{ display: 'block', color: 'var(--fg-slate-900)', marginBottom: '4px' }}>Official Broadcast Channel</strong>
                   <span style={{ fontSize: '0.8rem', color: 'var(--fg-slate-500)' }}>For exam dates, cutoff alerts, and daily tests:</span>
@@ -430,7 +430,7 @@ export const LegalPolicyModal: React.FC<LegalPolicyModalProps> = ({
                   </div>
                 </div>
 
-                <div style={{ background: 'var(--bg-slate-50)', border: '1px solid var(--bd-slate-200)', borderRadius: '10px', padding: '16px' }}>
+                <div style={{ background: 'var(--bg-slate-50)', border: '1px solid var(--bd-slate-200)', borderRadius: 'var(--radius-md)', padding: '16px' }}>
                   <div style={{ fontSize: '1.4rem', marginBottom: '6px' }}>👥</div>
                   <strong style={{ display: 'block', color: 'var(--fg-slate-900)', marginBottom: '4px' }}>Aspirants Community</strong>
                   <span style={{ fontSize: '0.8rem', color: 'var(--fg-slate-500)' }}>Chat with thousands of fellow aspirants & share tips:</span>
@@ -446,11 +446,11 @@ export const LegalPolicyModal: React.FC<LegalPolicyModalProps> = ({
                   </div>
                 </div>
 
-                <div style={{ background: 'var(--bg-slate-50)', border: '1px solid var(--bd-slate-200)', borderRadius: '10px', padding: '16px' }}>
+                <div style={{ background: 'var(--bg-slate-50)', border: '1px solid var(--bd-slate-200)', borderRadius: 'var(--radius-md)', padding: '16px' }}>
                   <div style={{ fontSize: '1.4rem', marginBottom: '6px' }}>🛡️</div>
                   <strong style={{ display: 'block', color: 'var(--fg-slate-900)', marginBottom: '4px' }}>Admin & Grievance Officer</strong>
                   <span style={{ fontSize: '0.8rem', color: 'var(--fg-slate-500)' }}>Direct escalation for account or payment disputes:</span>
-                  <div style={{ marginTop: '8px', fontSize: '0.875rem', fontWeight: 700, color: 'var(--fg-slate-700)' }}>
+                  <div style={{ marginTop: '8px', fontSize: '0.875rem', fontWeight: 600, color: 'var(--fg-slate-700)' }}>
                     Purendar Chauhan (@purendare)
                   </div>
                 </div>
@@ -478,7 +478,7 @@ export const LegalPolicyModal: React.FC<LegalPolicyModalProps> = ({
           <button
             onClick={onClose}
             className="btn btn-primary btn-sm"
-            style={{ fontWeight: 700, padding: '8px 20px', borderRadius: '8px' }}
+            style={{ fontWeight: 700, padding: '8px 20px', borderRadius: 'var(--radius-md)' }}
           >
             I Understand & Agree
           </button>

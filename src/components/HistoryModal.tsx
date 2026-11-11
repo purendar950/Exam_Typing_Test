@@ -20,7 +20,7 @@ export const HistoryModal: React.FC<HistoryModalProps> = ({
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal-content" onClick={(e) => e.stopPropagation()}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-          <h2 style={{ fontSize: '1.4rem', fontWeight: 800, color: 'var(--primary-dark)' }}>
+          <h2 style={{ fontSize: '1.4rem', fontWeight: 700, color: 'var(--primary-dark)' }}>
             Your Test History & Performance Record
           </h2>
           <button

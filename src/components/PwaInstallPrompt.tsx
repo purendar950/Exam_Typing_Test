@@ -64,7 +64,7 @@ export const PwaInstallPrompt: React.FC = () => {
     <div
       style={{
         position: 'fixed',
-        bottom: '16px',
+        bottom: 'calc(16px + var(--bottom-nav-h, 0px))',
         right: '16px',
         zIndex: 9998,
         maxWidth: '380px',
@@ -72,8 +72,8 @@ export const PwaInstallPrompt: React.FC = () => {
         background: isOffline ? 'var(--tw-emerald-900)' : 'var(--tw-slate-900)',
         color: '#ffffff',
         padding: '12px 16px',
-        borderRadius: '12px',
-        boxShadow: '0 8px 30px rgba(0,0,0,0.3)',
+        borderRadius: 'var(--radius-md)',
+        boxShadow: 'var(--shadow-lg)',
         border: `1.5px solid ${isOffline ? 'var(--tw-emerald-500)' : 'var(--tw-sky-600)'}`,
         display: 'flex',
         alignItems: 'center',
@@ -85,7 +85,7 @@ export const PwaInstallPrompt: React.FC = () => {
       <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
         <span style={{ fontSize: '1.4rem' }}>{isOffline ? '⚡' : '📲'}</span>
         <div>
-          <div style={{ fontWeight: 800, fontSize: '0.875rem' }}>
+          <div style={{ fontWeight: 600, fontSize: '0.875rem' }}>
             {isOffline ? 'Offline Mode Active' : 'Install UP Typing App'}
           </div>
           <div style={{ fontSize: '0.75rem', opacity: 0.85 }}>
@@ -105,9 +105,9 @@ export const PwaInstallPrompt: React.FC = () => {
               color: '#ffffff',
               border: 'none',
               padding: '6px 12px',
-              borderRadius: '6px',
+              borderRadius: 'var(--radius-sm)',
               fontSize: '0.8rem',
-              fontWeight: 700,
+              fontWeight: 600,
               cursor: 'pointer',
               whiteSpace: 'nowrap'
             }}

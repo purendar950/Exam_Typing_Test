@@ -81,11 +81,11 @@ export const LeaderboardModal: React.FC<LeaderboardModalProps> = ({
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
             <span style={{ fontSize: '1.8rem' }}>🏅</span>
             <div>
-              <h2 style={{ margin: 0, fontSize: '1.25rem', fontWeight: 900, color: 'var(--fg-slate-900)' }}>
-                Official Typing Skill Hall of Fame
+              <h2 style={{ margin: 0, fontSize: '1.25rem', fontWeight: 700, color: 'var(--fg-slate-900)' }}>
+                Leaderboard
               </h2>
               <div style={{ fontSize: '0.75rem', color: 'var(--fg-slate-500)' }}>
-                Verified Qualified Candidates Ranked by Net Speed (WPM)
+                Top scores ranked by net speed (WPM)
               </div>
             </div>
           </div>
@@ -124,12 +124,12 @@ export const LeaderboardModal: React.FC<LeaderboardModalProps> = ({
                 onClick={() => setCategory(cat)}
                 style={{
                   padding: '6px 14px',
-                  borderRadius: '20px',
+                  borderRadius: 'var(--radius-lg)',
                   border: isActive ? '1.5px solid var(--tw-sky-600)' : '1px solid var(--bd-slate-300)',
                   background: isActive ? 'var(--tw-sky-600)' : 'var(--surface)',
                   color: isActive ? '#ffffff' : 'var(--fg-slate-600)',
                   fontSize: '0.8rem',
-                  fontWeight: 700,
+                  fontWeight: 600,
                   cursor: 'pointer',
                   transition: 'all 0.15s ease'
                 }}
@@ -145,7 +145,7 @@ export const LeaderboardModal: React.FC<LeaderboardModalProps> = ({
           {loading ? (
             <div style={{ textAlign: 'center', padding: '40px 0', color: 'var(--fg-slate-500)' }}>
               <div className="spinner" style={{ margin: '0 auto 12px' }} />
-              <div>Fetching live examination scores...</div>
+              <div>Fetching live exam scores...</div>
             </div>
           ) : entries.length === 0 ? (
             <div
@@ -154,12 +154,12 @@ export const LeaderboardModal: React.FC<LeaderboardModalProps> = ({
                 padding: '48px 16px',
                 color: 'var(--fg-slate-500)',
                 background: 'var(--bg-slate-50)',
-                borderRadius: '8px',
+                borderRadius: 'var(--radius-md)',
                 border: '1px dashed var(--bd-slate-300)'
               }}
             >
               <div style={{ fontSize: '2.5rem', marginBottom: '8px' }}>🎯</div>
-              <div style={{ fontWeight: 800, fontSize: '1rem', color: 'var(--fg-slate-900)', marginBottom: '4px' }}>
+              <div style={{ fontWeight: 600, fontSize: '1rem', color: 'var(--fg-slate-900)', marginBottom: '4px' }}>
                 No qualified scores yet!
               </div>
               <div style={{ fontSize: '0.8rem' }}>
@@ -180,7 +180,7 @@ export const LeaderboardModal: React.FC<LeaderboardModalProps> = ({
                       alignItems: 'center',
                       gap: '12px',
                       padding: '12px 14px',
-                      borderRadius: '8px',
+                      borderRadius: 'var(--radius-md)',
                       background: isUser
                         ? 'var(--bg-blue-50)'
                         : isTop3
@@ -200,7 +200,7 @@ export const LeaderboardModal: React.FC<LeaderboardModalProps> = ({
                         width: '36px',
                         textAlign: 'center',
                         fontSize: isTop3 ? '1.4rem' : '0.9rem',
-                        fontWeight: 900,
+                        fontWeight: 700,
                         color: isTop3 ? 'var(--fg-yellow-600)' : 'var(--fg-slate-500)',
                         flexShrink: 0
                       }}
@@ -211,7 +211,7 @@ export const LeaderboardModal: React.FC<LeaderboardModalProps> = ({
                     {/* Candidate Details */}
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
-                        <span style={{ fontWeight: 800, fontSize: '0.95rem', color: 'var(--fg-slate-900)' }}>
+                        <span style={{ fontWeight: 600, fontSize: '0.95rem', color: 'var(--fg-slate-900)' }}>
                           {item.displayName}
                         </span>
                         {isUser && (
@@ -220,9 +220,9 @@ export const LeaderboardModal: React.FC<LeaderboardModalProps> = ({
                               background: 'var(--tw-blue-500)',
                               color: '#fff',
                               fontSize: '0.75rem',
-                              fontWeight: 900,
+                              fontWeight: 600,
                               padding: '1px 6px',
-                              borderRadius: '4px',
+                              borderRadius: 'var(--radius-sm)',
                               letterSpacing: '0.5px'
                             }}
                           >
@@ -239,13 +239,13 @@ export const LeaderboardModal: React.FC<LeaderboardModalProps> = ({
 
                     {/* Speed & Accuracy */}
                     <div style={{ textAlign: 'right', flexShrink: 0 }}>
-                      <div style={{ fontSize: '1.1rem', fontWeight: 900, color: 'var(--fg-sky-600)' }}>
+                      <div style={{ fontSize: '1.1rem', fontWeight: 700, color: 'var(--fg-sky-600)' }}>
                         {item.netWpm}{' '}
-                        <span style={{ fontSize: '0.75rem', color: 'var(--fg-slate-500)', fontWeight: 700 }}>
+                        <span style={{ fontSize: '0.75rem', color: 'var(--fg-slate-500)', fontWeight: 600 }}>
                           WPM
                         </span>
                       </div>
-                      <div style={{ fontSize: '0.75rem', color: 'var(--fg-green-600)', fontWeight: 700 }}>
+                      <div style={{ fontSize: '0.75rem', color: 'var(--fg-green-600)', fontWeight: 600 }}>
                         {item.accuracy}% acc &bull; QUALIFIED
                       </div>
                     </div>
@@ -262,8 +262,8 @@ export const LeaderboardModal: React.FC<LeaderboardModalProps> = ({
             style={{
               marginTop: '16px',
               padding: '12px 16px',
-              borderRadius: '8px',
-              background: 'linear-gradient(135deg, var(--bg-green-50) 0%, var(--bg-green-100) 100%)',
+              borderRadius: 'var(--radius-md)',
+              background: 'var(--bg-green-50)',
               border: '1px solid var(--bd-green-300)',
               display: 'flex',
               alignItems: 'center',
@@ -273,7 +273,7 @@ export const LeaderboardModal: React.FC<LeaderboardModalProps> = ({
             }}
           >
             <div>
-              <div style={{ fontWeight: 800, fontSize: '0.875rem', color: 'var(--fg-green-700)' }}>
+              <div style={{ fontWeight: 600, fontSize: '0.875rem', color: 'var(--fg-green-700)' }}>
                 🔒 Showing Top 3 Free Rankers
               </div>
               <div style={{ fontSize: '0.75rem', color: 'var(--fg-green-800)' }}>
@@ -289,13 +289,13 @@ export const LeaderboardModal: React.FC<LeaderboardModalProps> = ({
                   onOpenPayment();
                 }}
                 style={{
-                  background: 'linear-gradient(135deg, var(--tw-green-600) 0%, var(--tw-green-700) 100%)',
+                  background: 'var(--tw-green-600)',
                   color: '#ffffff',
                   border: 'none',
-                  borderRadius: '6px',
+                  borderRadius: 'var(--radius-sm)',
                   padding: '6px 14px',
                   fontSize: '0.8rem',
-                  fontWeight: 800,
+                  fontWeight: 600,
                   cursor: 'pointer'
                 }}
               >

@@ -2,7 +2,8 @@ import React from 'react';
 import {
   BookOpen, Building2, CalendarDays, Check, Circle, CircleDot, ClipboardList, Crown, FileText, Files, Flame,
   Gem, Gift, GraduationCap, House, KeyRound, Landmark, Languages, LayoutGrid, Library, ListOrdered, Lock, Medal,
-  Menu, Pin, Ruler, Scale, Search, Shield, ShieldCheck, Sparkles, Target, TrainFront, Trophy, User, X, Zap,
+  Menu, Moon, Pin, Ruler, Scale, Search, Shield, ShieldCheck, Sparkles, Sun, Target, TrainFront, Trophy, User, Volume2, VolumeX, X, Zap,
+  Award, ChevronRight, CircleCheck, Clock, Ellipsis, History, Info, Keyboard, LogIn, PenLine,
   type LucideIcon
 } from 'lucide-react';
 
@@ -12,7 +13,9 @@ const ICONS = {
   home: House, key: KeyRound, landmark: Landmark, languages: Languages, grid: LayoutGrid, library: Library,
   numbered: ListOrdered, live: CircleDot, lock: Lock, medal: Medal, menu: Menu, pin: Pin, ruler: Ruler,
   scale: Scale, search: Search, shield: Shield, 'shield-check': ShieldCheck, sparkles: Sparkles, target: Target,
-  train: TrainFront, trophy: Trophy, user: User, x: X, zap: Zap
+  train: TrainFront, trophy: Trophy, user: User, x: X, zap: Zap, sun: Sun, moon: Moon, volume: Volume2,
+  mute: VolumeX, award: Award, chevron: ChevronRight, 'check-circle': CircleCheck, clock: Clock, more: Ellipsis,
+  history: History, info: Info, keyboard: Keyboard, login: LogIn, pen: PenLine
 } satisfies Record<string, LucideIcon>;
 
 export type IcoName = keyof typeof ICONS | 'dot-green' | 'dot-yellow' | 'dot-red';
