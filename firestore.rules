@@ -13,6 +13,13 @@ service cloud.firestore {
         exists(/databases/$(database)/documents/admins/$(request.auth.uid));
     }
 
+    // Dedicated machine account (notifier@upp-typing.web.app) used by the GitHub
+    // Actions payment-alert job. It can ONLY list pending payment submissions,
+    // stamp them as alerted, and read the Telegram bot settings. No admin rights.
+    function isPaymentNotifier() {
+      return signedIn() && request.auth.uid == 'ywDOc6gPKAOzxPE4dsLgABLngpH3';
+    }
+
     // Fields a candidate must never set on their own profile.
     function protectedKeys() {
       return ['isAdmin', 'role', 'is_subscribed', 'subscriptionPlan', 'subscriptionPlanName',
@@ -107,8 +114,10 @@ service cloud.firestore {
     // ── App settings ─────────────────────────────────────────
     // telegram_config (bot token) and ai_config (API key) are admin-only.
     // pricing_config (plans, promo codes, UPI ID) is shown on the checkout page, so it is public.
+    // The payment notifier may read the Telegram settings because it sends the alerts.
     match /system_settings/{docId} {
-      allow read: if docId == 'exam_config' || docId == 'pricing_config' || isAdmin();
+      allow read: if docId == 'exam_config' || docId == 'pricing_config' || isAdmin()
+        || (isPaymentNotifier() && docId == 'telegram_config');
       allow write: if isAdmin();
     }
 
@@ -117,10 +126,17 @@ service cloud.firestore {
       allow create: if signedIn()
         && request.resource.data.userId == request.auth.uid
         && request.resource.data.status == 'pending';
-      allow get: if isAdmin() || (signedIn() && resource.data.userId == request.auth.uid);
-      allow list: if isAdmin()
+      allow get: if isAdmin() || isPaymentNotifier()
         || (signedIn() && resource.data.userId == request.auth.uid);
-      allow update, delete: if isAdmin();
+      allow list: if isAdmin()
+        || (isPaymentNotifier() && resource.data.status == 'pending')
+        || (signedIn() && resource.data.userId == request.auth.uid);
+      // The notifier may only stamp 'alertedAt' so the alert job knows a
+      // submission has already been sent to Telegram.
+      allow update: if isAdmin()
+        || (isPaymentNotifier()
+            && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['alertedAt']));
+      allow delete: if isAdmin();
     }
 
     // ── Live support chat (candidate <-> admin) ─────────────

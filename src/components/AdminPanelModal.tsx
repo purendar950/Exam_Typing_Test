@@ -1385,7 +1385,7 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                     type="email"
                     value={fbEmail}
                     onChange={(e) => setFbEmail(e.target.value)}
-                    placeholder="admin@upprpb.gov.in"
+                    placeholder="youradmin@gmail.com"
                     required
                     style={{
                       width: '100%',

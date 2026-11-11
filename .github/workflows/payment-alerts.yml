@@ -1,0 +1,32 @@
+name: Payment Telegram Alerts
+
+on:
+  schedule:
+    # Every 15 minutes (GitHub may start runs a few minutes late under load)
+    - cron: '*/15 * * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: 'payment-alerts'
+  cancel-in-progress: false
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Send pending payment alerts to Telegram
+        env:
+          NOTIFIER_EMAIL: ${{ secrets.NOTIFIER_EMAIL }}
+          NOTIFIER_PASSWORD: ${{ secrets.NOTIFIER_PASSWORD }}
+        run: node scripts/notify_payments.mjs

@@ -23,6 +23,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onLoginSu
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [displayName, setDisplayName] = useState('');
+  const [email, setEmail] = useState('');
   const [rollNumber, setRollNumber] = useState(`UP-${Math.floor(100000 + Math.random() * 900000)}`);
   const [category, setCategory] = useState<'up_police_co' | 'up_police_asi'>('up_police_co');
   const [loading, setLoading] = useState(false);
@@ -74,7 +75,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onLoginSu
       let msg = err instanceof Error ? err.message : 'Login failed. Please check credentials.';
       msg = msg.replace('Firebase:', '').trim();
       if (msg.includes('auth/invalid-credential')) {
-        setErrorMsg('Invalid password or credentials. If you haven\'t set your password in Firebase yet, click "Forgot / Set Password" below to receive a setup link in your Gmail.');
+        setErrorMsg('Wrong password or roll number. New users: log in with the email you registered with. Old roll-number accounts: use the same password you chose at registration.');
       } else {
         setErrorMsg(msg);
       }
@@ -93,7 +94,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onLoginSu
     setSuccessMsg('');
     try {
       await resetUserPassword(identifier.trim());
-      setSuccessMsg(`✅ Password reset/setup link sent to ${identifier.trim()}! Please check your Gmail inbox (and Spam folder) to set your password.`);
+      setSuccessMsg(`✅ Password reset link sent to ${identifier.trim()}! Please check your email inbox (and Spam folder) to set your password.`);
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Failed to send password reset email.';
       setErrorMsg(msg.replace('Firebase:', '').trim());
@@ -108,10 +109,18 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onLoginSu
       setErrorMsg('Please enter full name.');
       return;
     }
+    if (!email.trim() || !email.trim().includes('@')) {
+      setErrorMsg('Please enter a valid email address. You will use it to log in.');
+      return;
+    }
+    if (!password || password.length < 8) {
+      setErrorMsg('Please choose a password with at least 8 characters.');
+      return;
+    }
     setLoading(true);
     setErrorMsg('');
     try {
-      const user = await registerCandidate(displayName.trim(), rollNumber.trim(), category, password);
+      const user = await registerCandidate(displayName.trim(), email.trim(), password, rollNumber.trim(), category);
       onLoginSuccess(user);
       onClose();
     } catch (err: unknown) {
@@ -499,13 +508,13 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onLoginSu
 
               <div>
                 <label style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--fg-slate-800)', display: 'block', marginBottom: '4px' }}>
-                  Roll Number / Reg No *
+                  Email *
                 </label>
                 <input
-                  type="text"
-                  placeholder="e.g. UP-202601"
-                  value={rollNumber}
-                  onChange={(e) => setRollNumber(e.target.value)}
+                  type="email"
+                  placeholder="e.g. name@gmail.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                   style={{
                     width: '100%',
                     padding: '10px 14px',
@@ -544,7 +553,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onLoginSu
 
               <div>
                 <label style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--fg-slate-800)', display: 'block', marginBottom: '4px' }}>
-                  Password (min 6 characters) *
+                  Password (min 8 characters) *
                 </label>
                 <div style={{ position: 'relative' }}>
                   <input

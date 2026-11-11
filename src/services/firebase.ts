@@ -153,7 +153,13 @@ export async function signUpWithEmail(
   rollNumber: string,
   category: 'up_police_co' | 'up_police_asi'
 ): Promise<UserProfile> {
-  const cleanEmail = email.includes('@') ? email.trim() : `${email.trim().toLowerCase()}@upprpb.gov.in`;
+  const cleanEmail = email.trim().toLowerCase();
+  if (!cleanEmail || !cleanEmail.includes('@') || /\.\./.test(cleanEmail)) {
+    throw new Error('Please enter a valid email address. It is used to log in and to reset your password.');
+  }
+  if (!pass || pass.length < 8) {
+    throw new Error('Please choose a password with at least 8 characters.');
+  }
   const cleanRoll = rollNumber.trim().toUpperCase() || `UP-${Math.floor(100000 + Math.random() * 900000)}`;
   const cleanName = displayName.trim().toUpperCase() || 'UP CANDIDATE';
 
@@ -697,23 +703,28 @@ export async function fetchLeaderboard(
 }
 
 // Backwards compatibility aliases
+// New registrations always use the student's own email and a password they chose.
 export const registerCandidate = async (
   displayName: string,
+  email: string,
+  password: string,
   rollNumber: string,
-  category: 'up_police_co' | 'up_police_asi',
-  password?: string
+  category: 'up_police_co' | 'up_police_asi'
 ) => {
   return signUpWithEmail(
-    `${rollNumber.toLowerCase()}@upprpb.gov.in`,
-    password || 'pass1234',
+    email,
+    password,
     displayName,
     rollNumber,
     category
   );
 };
 
-export const loginCandidate = async (identifier: string, pass?: string) => {
-  return signInWithEmail(identifier, pass || 'pass1234');
+export const loginCandidate = async (identifier: string, pass: string) => {
+  if (!pass) {
+    throw new Error('Please enter your password.');
+  }
+  return signInWithEmail(identifier, pass);
 };
 
 // -------------------------------------------------------------
@@ -819,8 +830,12 @@ export async function resetUserPassword(emailOrRoll: string): Promise<void> {
   if (!cleanInput) {
     throw new Error('Please enter your email address to reset password.');
   }
-  const cleanEmail = cleanInput.includes('@') ? cleanInput : `${cleanInput}@upprpb.gov.in`;
-  await sendPasswordResetEmail(auth, cleanEmail);
+  if (!cleanInput.includes('@')) {
+    throw new Error(
+      'Password reset needs the email you registered with. If you registered with just a roll number, log in with it or contact support on Telegram (@purendare).'
+    );
+  }
+  await sendPasswordResetEmail(auth, cleanInput);
 }
 
 // Send Admin Password Reset / Setup Email

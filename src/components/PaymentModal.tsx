@@ -8,7 +8,6 @@ import {
   getUpiMerchantConfig,
   syncPricingConfigFromCloud
 } from '../services/paymentService';
-import { sendTelegramPaymentNotification } from '../services/telegramService';
 import { UserProfile } from '../services/firebase';
 import { ALL_EXAMS } from '../data/allExams';
 import phonePeQrImg from '../assets/phonepe-qr.png';
@@ -220,6 +219,10 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
     e.preventDefault();
     setErrorMessage('');
 
+    if (!currentUser || !currentUser.uid || currentUser.isAnonymous || String(currentUser.uid).startsWith('guest')) {
+      setErrorMessage('Please log in with your account first (use the Login button), then submit your payment. This attaches the payment to your account so we can activate it.');
+      return;
+    }
     if (!candidateName.trim()) {
       setErrorMessage('Please enter your full name.');
       return;
@@ -241,9 +244,9 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
     setIsSubmitting(true);
     try {
       const submission = await submitPaymentRequest({
-        userId: currentUser?.uid || `guest_${Date.now()}`,
+        userId: currentUser.uid,
         userName: candidateName.trim(),
-        userEmail: candidateEmail.trim() || currentUser?.email || 'unregistered@candidate.com',
+        userEmail: candidateEmail.trim() || currentUser.email || '',
         userPhone: candidatePhone.trim() || undefined,
         planId: selectedPlan.id,
         planName: selectedPlan.name,
@@ -258,10 +261,13 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
         screenshotUrl: screenshotPreview
       });
 
-      // Forward screenshot and UTR alert to Admin Telegram Bot
-      sendTelegramPaymentNotification(submission).catch((tErr) => {
-        console.warn('Telegram forward notice:', tErr);
-      });
+      // The alert to the admin is sent by the GitHub Actions job (payment-alerts.yml);
+      // the browser cannot send it because the bot token is admin-only in Firestore.
+      if (!submission.firestoreSynced) {
+        setIsSubmitting(false);
+        setErrorMessage('Your payment request could not reach the server. Please check your internet connection and submit again — do not pay twice; your UTR was not saved.');
+        return;
+      }
 
       setIsSubmitting(false);
       setSubmitSuccess(true);

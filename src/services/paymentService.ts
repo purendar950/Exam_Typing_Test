@@ -62,6 +62,7 @@ export interface PaymentSubmission {
   utrNumber: string;
   screenshotUrl: string; // Base64 data URL or storage URL
   status: 'pending' | 'approved' | 'rejected';
+  firestoreSynced?: boolean; // true when the request reached the server
   rejectionReason?: string;
   submittedAt: string; // ISO date
   reviewedAt?: string; // ISO date
@@ -381,15 +382,18 @@ export async function submitPaymentRequest(
   };
 
   // 1. Save locally
+  let localSaved = false;
   try {
     const existing = getAllLocalSubmissions();
     existing.unshift(newSubmission);
     localStorage.setItem(STORAGE_KEY_SUBMISSIONS, JSON.stringify(existing));
+    localSaved = true;
   } catch {
     // Ignore
   }
 
   // 2. Sync to Firebase Firestore (compressed screenshot fits easily in Firestore <100KB)
+  let synced = false;
   try {
     const docRef = doc(db, 'payment_submissions', newSubmission.id);
     const includeScreenshot = compressedScreenshot && compressedScreenshot.length < 350000;
@@ -401,11 +405,16 @@ export async function submitPaymentRequest(
           return { ...rest, hasScreenshot: Boolean(compressedScreenshot) };
         })();
     await setDoc(docRef, firestorePayload);
+    synced = true;
   } catch (err) {
-    console.warn('Could not sync payment submission to Firestore (saved locally):', err);
+    console.warn('Could not sync payment submission to Firestore:', err);
   }
 
-  return newSubmission;
+  return {
+    ...newSubmission,
+    // Lets the UI tell the student clearly whether the request reached the server.
+    firestoreSynced: synced
+  };
 }
 
 
