@@ -44,8 +44,8 @@ export const ResultScreen: React.FC<ResultScreenProps> = ({
       <div
         className="card"
         style={{
-          backgroundColor: result.isQualified ? '#f0fdf4' : '#fef2f2',
-          borderColor: result.isQualified ? '#86efac' : '#fca5a5',
+          backgroundColor: result.isQualified ? 'var(--bg-green-50)' : 'var(--bg-red-50)',
+          borderColor: result.isQualified ? 'var(--bd-green-300)' : 'var(--bd-red-300)',
           textAlign: 'center',
           padding: '32px 20px',
           marginBottom: '28px'
@@ -57,9 +57,9 @@ export const ResultScreen: React.FC<ResultScreenProps> = ({
 
         <h1
           style={{
-            fontSize: '2rem',
+            fontSize: '2.1rem',
             fontWeight: 800,
-            color: result.isQualified ? '#15803d' : '#b91c1c',
+            color: result.isQualified ? 'var(--fg-green-700)' : 'var(--fg-red-700)',
             marginBottom: '8px'
           }}
         >
@@ -70,8 +70,8 @@ export const ResultScreen: React.FC<ResultScreenProps> = ({
 
         <p
           style={{
-            fontSize: '1.05rem',
-            color: result.isQualified ? '#166534' : '#991b1b',
+            fontSize: '1rem',
+            color: result.isQualified ? 'var(--fg-green-800)' : 'var(--fg-red-800)',
             maxWidth: '650px',
             margin: '0 auto 16px'
           }}
@@ -107,8 +107,8 @@ export const ResultScreen: React.FC<ResultScreenProps> = ({
       {(!result.calculationModel || result.calculationModel === 'upprpb') && result.completionRate < 85 && (
         <div
           style={{
-            background: '#fff1f2',
-            border: '1.5px solid #fecdd3',
+            background: 'var(--bg-rose-50)',
+            border: '1.5px solid var(--bd-rose-200)',
             borderRadius: '12px',
             padding: '16px 20px',
             marginBottom: '24px',
@@ -119,10 +119,10 @@ export const ResultScreen: React.FC<ResultScreenProps> = ({
         >
           <span style={{ fontSize: '1.6rem', flexShrink: 0 }}>⚠️</span>
           <div>
-            <strong style={{ color: '#9f1239', fontSize: '1rem', display: 'block', marginBottom: '4px' }}>
+            <strong style={{ color: 'var(--fg-rose-800)', fontSize: '1rem', display: 'block', marginBottom: '4px' }}>
               Official UPPRPB / Recruitment Board 85% Passage Accuracy Rule
             </strong>
-            <p style={{ margin: 0, fontSize: '0.88rem', color: '#881337', lineHeight: 1.55 }}>
+            <p style={{ margin: 0, fontSize: '0.875rem', color: 'var(--fg-rose-900)', lineHeight: 1.55 }}>
               In official UP Police Computer Operator and SI/ASI exams, <strong>85% accuracy is strictly measured against the total words in the official passage ({result.totalOriginalWords} words)</strong>, not merely against the words you typed. You completed <strong>{result.completionRate}%</strong> ({result.totalTypedWords} words). To qualify, candidates must complete at least 85% of the passage correctly.
             </p>
           </div>
@@ -133,8 +133,8 @@ export const ResultScreen: React.FC<ResultScreenProps> = ({
       {result.calculationModel === 'ssc_dest' && result.sscErrorPercentage !== undefined && result.sscErrorPercentage > (result.qualificationCriteria.examTitle?.includes('CHSL') ? 7 : 20) && (
         <div
           style={{
-            background: '#fff1f2',
-            border: '1.5px solid #fecdd3',
+            background: 'var(--bg-rose-50)',
+            border: '1.5px solid var(--bd-rose-200)',
             borderRadius: '12px',
             padding: '16px 20px',
             marginBottom: '24px',
@@ -145,10 +145,10 @@ export const ResultScreen: React.FC<ResultScreenProps> = ({
         >
           <span style={{ fontSize: '1.6rem', flexShrink: 0 }}>⚠️</span>
           <div>
-            <strong style={{ color: '#9f1239', fontSize: '1rem', display: 'block', marginBottom: '4px' }}>
+            <strong style={{ color: 'var(--fg-rose-800)', fontSize: '1rem', display: 'block', marginBottom: '4px' }}>
               Official SSC DEST Error Percentage Limit Exceeded
             </strong>
-            <p style={{ margin: 0, fontSize: '0.88rem', color: '#881337', lineHeight: 1.55 }}>
+            <p style={{ margin: 0, fontSize: '0.875rem', color: 'var(--fg-rose-900)', lineHeight: 1.55 }}>
               In Staff Selection Commission DEST examinations, candidates are disqualified if total errors exceed the prescribed category cutoff ({result.qualificationCriteria.examTitle?.includes('CHSL') ? '7% for UR' : '20% for UR'}). Your recorded error rate was <strong>{result.sscErrorPercentage}%</strong> ({result.equivalentErrors} mistakes).
             </p>
           </div>
@@ -159,8 +159,8 @@ export const ResultScreen: React.FC<ResultScreenProps> = ({
       {result.calculationModel === 'court_delhi' && (result.equivalentErrors / Math.max(1, result.totalTypedWords)) * 100 > 3.0 && (
         <div
           style={{
-            background: '#fff1f2',
-            border: '1.5px solid #fecdd3',
+            background: 'var(--bg-rose-50)',
+            border: '1.5px solid var(--bd-rose-200)',
             borderRadius: '12px',
             padding: '16px 20px',
             marginBottom: '24px',
@@ -171,10 +171,10 @@ export const ResultScreen: React.FC<ResultScreenProps> = ({
         >
           <span style={{ fontSize: '1.6rem', flexShrink: 0 }}>⚠️</span>
           <div>
-            <strong style={{ color: '#9f1239', fontSize: '1rem', display: 'block', marginBottom: '4px' }}>
+            <strong style={{ color: 'var(--fg-rose-800)', fontSize: '1rem', display: 'block', marginBottom: '4px' }}>
               Official High Court / Supreme Court 3.0% Error Limit Exceeded
             </strong>
-            <p style={{ margin: 0, fontSize: '0.88rem', color: '#881337', lineHeight: 1.55 }}>
+            <p style={{ margin: 0, fontSize: '0.875rem', color: 'var(--fg-rose-900)', lineHeight: 1.55 }}>
               In High Court and Supreme Court typing tests, candidates are permitted a maximum of <strong>3.0% errors of typed words</strong>. Your error rate was <strong>{Math.round(((result.equivalentErrors / Math.max(1, result.totalTypedWords)) * 100) * 10) / 10}%</strong> ({result.equivalentErrors} mistakes in {result.totalTypedWords} words).
             </p>
           </div>
@@ -184,7 +184,7 @@ export const ResultScreen: React.FC<ResultScreenProps> = ({
       {/* Official Cutoff Verification Table */}
       <div className="card" style={{ marginBottom: '28px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', flexWrap: 'wrap', gap: '8px' }}>
-          <h2 style={{ fontSize: '1.15rem', fontWeight: 800, margin: 0, color: '#0f172a' }}>
+          <h2 style={{ fontSize: '1.1rem', fontWeight: 800, margin: 0, color: 'var(--fg-slate-900)' }}>
             Official {result.qualificationCriteria.examTitle || 'Recruitment'} Benchmark Verification
           </h2>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -197,9 +197,9 @@ export const ResultScreen: React.FC<ResultScreenProps> = ({
                   fontSize: '0.75rem',
                   fontWeight: 700,
                   borderRadius: '12px',
-                  background: '#e0f2fe',
-                  color: '#0369a1',
-                  border: '1px solid #bae6fd',
+                  background: 'var(--bg-sky-100)',
+                  color: 'var(--fg-sky-700)',
+                  border: '1px solid var(--bd-sky-200)',
                   cursor: 'pointer',
                   display: 'inline-flex',
                   alignItems: 'center',
@@ -211,7 +211,7 @@ export const ResultScreen: React.FC<ResultScreenProps> = ({
                 <span>Official Instructions & Formula</span>
               </button>
             )}
-            <span style={{ fontSize: '0.75rem', fontWeight: 700, padding: '3px 10px', borderRadius: '12px', background: '#f1f5f9', color: '#475569', border: '1px solid #e2e8f0' }}>
+            <span style={{ fontSize: '0.75rem', fontWeight: 700, padding: '3px 10px', borderRadius: '12px', background: 'var(--bg-slate-100)', color: 'var(--fg-slate-600)', border: '1px solid var(--bd-slate-200)' }}>
               {result.calculationModel === 'rrb_eduquity' ? 'RRB CBTST Standards' :
                result.calculationModel === 'ssc_dest' ? 'SSC DEST Guidelines' :
                result.calculationModel === 'court_delhi' || result.calculationModel === 'court_ahc' || result.calculationModel === 'court_phhc' ? 'Court & Judicial Rules' :
@@ -222,9 +222,9 @@ export const ResultScreen: React.FC<ResultScreenProps> = ({
         </div>
 
         <div style={{ overflowX: 'auto' }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.92rem' }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.95rem' }}>
             <thead>
-              <tr style={{ background: '#f8fafc', borderBottom: '2px solid var(--border-color)' }}>
+              <tr style={{ background: 'var(--bg-slate-50)', borderBottom: '2px solid var(--border-color)' }}>
                 <th style={{ padding: '12px 16px' }}>Parameter</th>
                 <th style={{ padding: '12px 16px' }}>Official Benchmark</th>
                 <th style={{ padding: '12px 16px' }}>Achieved Score</th>
@@ -235,17 +235,17 @@ export const ResultScreen: React.FC<ResultScreenProps> = ({
               {/* Row 1: Primary Speed Parameter */}
               <tr style={{ borderBottom: '1px solid var(--border-color)' }}>
                 <td style={{ padding: '12px 16px' }}>
-                  <div style={{ fontWeight: 700, color: '#0f172a' }}>
+                  <div style={{ fontWeight: 700, color: 'var(--fg-slate-900)' }}>
                     {result.calculationModel === 'rrb_eduquity' ? 'RRB Net CBTST Speed' : 'Net Typing Speed'}
                   </div>
-                  <div style={{ fontSize: '0.75rem', color: '#64748b' }}>
+                  <div style={{ fontSize: '0.75rem', color: 'var(--fg-slate-500)' }}>
                     {result.calculationModel === 'rrb_eduquity' ? '(Typed Words - Penalty Words) / Time' :
                      result.calculationModel === 'mp_cpct' ? 'Correct Words / Minutes' :
                      'Board Formula: Gross WPM - (Errors / Time)'}
                   </div>
                 </td>
                 <td style={{ padding: '12px 16px' }}>&ge; {result.qualificationCriteria.requiredSpeed} WPM</td>
-                <td style={{ padding: '12px 16px', fontWeight: 800, color: (result.rrbNetWpm || result.netWpm) >= result.qualificationCriteria.requiredSpeed ? '#16a34a' : '#dc2626' }}>
+                <td style={{ padding: '12px 16px', fontWeight: 800, color: (result.rrbNetWpm || result.netWpm) >= result.qualificationCriteria.requiredSpeed ? 'var(--fg-green-600)' : 'var(--fg-red-600)' }}>
                   {result.calculationModel === 'rrb_eduquity' ? `${result.rrbNetWpm} WPM` : `${result.netWpm} WPM`}
                 </td>
                 <td style={{ padding: '12px 16px' }}>
@@ -260,14 +260,14 @@ export const ResultScreen: React.FC<ResultScreenProps> = ({
               {/* Row 2: Accuracy or Error Metric */}
               <tr style={{ borderBottom: '1px solid var(--border-color)' }}>
                 <td style={{ padding: '12px 16px' }}>
-                  <div style={{ fontWeight: 700, color: '#0f172a' }}>
+                  <div style={{ fontWeight: 700, color: 'var(--fg-slate-900)' }}>
                     {result.calculationModel === 'ssc_dest' ? 'DEST Error Percentage' :
                      result.calculationModel === 'court_delhi' ? 'Court Error Percentage' :
                      result.calculationModel === 'court_ahc' ? 'Allahabad HC Total Marks' :
                      result.calculationModel === 'rrb_eduquity' ? '5% Free Error Allowance' :
                      'Official Passage Accuracy'}
                   </div>
-                  <div style={{ fontSize: '0.75rem', color: '#64748b' }}>
+                  <div style={{ fontSize: '0.75rem', color: 'var(--fg-slate-500)' }}>
                     {result.calculationModel === 'ssc_dest' ? `Total mistakes / Master words (${result.totalOriginalWords})` :
                      result.calculationModel === 'court_delhi' ? `Total mistakes / Attempted words (${result.totalTypedWords})` :
                      result.calculationModel === 'court_ahc' ? '50 Marks scale (0.1 mark deducted per mistake)' :
@@ -282,7 +282,7 @@ export const ResultScreen: React.FC<ResultScreenProps> = ({
                    result.calculationModel === 'rrb_eduquity' ? `${result.allowedErrors} Mistakes Allowed` :
                    `≥ ${result.qualificationCriteria.requiredAccuracy}%`}
                 </td>
-                <td style={{ padding: '12px 16px', fontWeight: 800, color: result.isQualified ? '#16a34a' : '#dc2626' }}>
+                <td style={{ padding: '12px 16px', fontWeight: 800, color: result.isQualified ? 'var(--fg-green-600)' : 'var(--fg-red-600)' }}>
                   {result.calculationModel === 'ssc_dest' ? `${result.sscErrorPercentage}%` :
                    result.calculationModel === 'court_delhi' ? `${Math.round(((result.equivalentErrors / Math.max(1, result.totalTypedWords)) * 100) * 10) / 10}%` :
                    result.calculationModel === 'court_ahc' ? `${result.courtMarks} / 50.0` :
@@ -301,18 +301,18 @@ export const ResultScreen: React.FC<ResultScreenProps> = ({
               {/* Row 3: Diagnostic Precision & Keystrokes */}
               <tr style={{ borderBottom: '1px solid var(--border-color)' }}>
                 <td style={{ padding: '12px 16px' }}>
-                  <div style={{ fontWeight: 700, color: '#0f172a' }}>
+                  <div style={{ fontWeight: 700, color: 'var(--fg-slate-900)' }}>
                     {result.calculationModel === 'ssc_dest' ? 'Total Keystrokes Depressed' : 'Raw Typing Precision'}
                   </div>
-                  <div style={{ fontSize: '0.75rem', color: '#64748b' }}>
+                  <div style={{ fontSize: '0.75rem', color: 'var(--fg-slate-500)' }}>
                     {result.calculationModel === 'ssc_dest' ? `Standard 5 keystrokes = 1 word (${result.totalTypedWords} standard words)` :
                      `Precision on attempted words (${result.totalTypedWords} words)`}
                   </div>
                 </td>
-                <td style={{ padding: '12px 16px', color: '#64748b' }}>
+                <td style={{ padding: '12px 16px', color: 'var(--fg-slate-500)' }}>
                   {result.calculationModel === 'ssc_dest' ? '2,000 / 1,750 Target' : 'Diagnostic Metric'}
                 </td>
-                <td style={{ padding: '12px 16px', fontWeight: 700, color: '#0284c7' }}>
+                <td style={{ padding: '12px 16px', fontWeight: 700, color: 'var(--fg-sky-600)' }}>
                   {result.calculationModel === 'ssc_dest' ? `${result.totalKeystrokes} Keys` : `${result.typedAccuracy}%`}
                 </td>
                 <td style={{ padding: '12px 16px' }}>
@@ -325,10 +325,10 @@ export const ResultScreen: React.FC<ResultScreenProps> = ({
               {/* Row 4: Completion or CPCT Tier */}
               <tr style={{ borderBottom: '1px solid var(--border-color)' }}>
                 <td style={{ padding: '12px 16px' }}>
-                  <div style={{ fontWeight: 700, color: '#0f172a' }}>
+                  <div style={{ fontWeight: 700, color: 'var(--fg-slate-900)' }}>
                     {result.calculationModel === 'mp_cpct' ? 'CPCT Proficiency Grade' : 'Passage Completion Rate'}
                   </div>
-                  <div style={{ fontSize: '0.75rem', color: '#64748b' }}>
+                  <div style={{ fontSize: '0.75rem', color: 'var(--fg-slate-500)' }}>
                     {result.calculationModel === 'mp_cpct' ? 'Official MPSEDC Certification Tier' :
                      `${result.totalTypedWords} typed / ${result.totalOriginalWords} in passage`}
                   </div>
@@ -336,7 +336,7 @@ export const ResultScreen: React.FC<ResultScreenProps> = ({
                 <td style={{ padding: '12px 16px' }}>
                   {result.calculationModel === 'mp_cpct' ? 'Level 1-4' : '≥ 85.0% Recommended'}
                 </td>
-                <td style={{ padding: '12px 16px', fontWeight: 700, color: result.completionRate >= 85 || result.cpctBand?.includes('Level') ? '#16a34a' : '#d97706' }}>
+                <td style={{ padding: '12px 16px', fontWeight: 700, color: result.completionRate >= 85 || result.cpctBand?.includes('Level') ? 'var(--fg-green-600)' : 'var(--fg-amber-600)' }}>
                   {result.calculationModel === 'mp_cpct' ? (result.cpctBand || 'Level 4') : `${result.completionRate}%`}
                 </td>
                 <td style={{ padding: '12px 16px' }}>
@@ -349,8 +349,8 @@ export const ResultScreen: React.FC<ResultScreenProps> = ({
               {/* Row 5: Duration */}
               <tr>
                 <td style={{ padding: '12px 16px' }}>
-                  <div style={{ fontWeight: 700, color: '#0f172a' }}>Duration & Exam Font</div>
-                  <div style={{ fontSize: '0.75rem', color: '#64748b' }}>Official countdown & keyboard layout</div>
+                  <div style={{ fontWeight: 700, color: 'var(--fg-slate-900)' }}>Duration & Exam Font</div>
+                  <div style={{ fontSize: '0.75rem', color: 'var(--fg-slate-500)' }}>Official countdown & keyboard layout</div>
                 </td>
                 <td style={{ padding: '12px 16px' }}>{result.timeAllowedMinutes} Mins</td>
                 <td style={{ padding: '12px 16px' }}>
@@ -366,9 +366,9 @@ export const ResultScreen: React.FC<ResultScreenProps> = ({
       </div>
 
       {/* Official Exam Pattern Breakdown Simulator Card */}
-      <div className="card" style={{ marginBottom: '28px', background: '#f8fafc', border: '1.5px solid #e2e8f0' }}>
+      <div className="card" style={{ marginBottom: '28px', background: 'var(--bg-slate-50)', border: '1.5px solid var(--bd-slate-200)' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', flexWrap: 'wrap', gap: '8px' }}>
-          <h3 style={{ fontSize: '1.05rem', fontWeight: 800, color: '#0f172a', margin: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <h3 style={{ fontSize: '1rem', fontWeight: 800, color: 'var(--fg-slate-900)', margin: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
             <span>🧮</span>
             <span>
               {result.calculationModel === 'rrb_eduquity' ? 'RRB NTPC CBTST & CAPF Error Allowance Model (5% Free Margin)' :
@@ -379,68 +379,68 @@ export const ResultScreen: React.FC<ResultScreenProps> = ({
                'Eduquity & UPPRPB Error Deduction Engine (5% Free Margin Model)'}
             </span>
           </h3>
-          <span style={{ fontSize: '0.73rem', fontWeight: 700, padding: '3px 10px', borderRadius: '12px', background: '#e0f2fe', color: '#0369a1', border: '1px solid #bae6fd' }}>
+          <span style={{ fontSize: '0.75rem', fontWeight: 700, padding: '3px 10px', borderRadius: '12px', background: 'var(--bg-sky-100)', color: 'var(--fg-sky-700)', border: '1px solid var(--bd-sky-200)' }}>
             Official Exam Pattern Standard
           </span>
         </div>
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '12px', marginBottom: '14px' }}>
-          <div style={{ background: '#ffffff', padding: '12px 14px', borderRadius: '10px', border: '1px solid #e2e8f0' }}>
-            <div style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 600 }}>Total Equivalent Mistakes</div>
-            <div style={{ fontSize: '1.3rem', fontWeight: 800, color: '#dc2626', marginTop: '2px' }}>
+          <div style={{ background: 'var(--surface)', padding: '12px 14px', borderRadius: '10px', border: '1px solid var(--bd-slate-200)' }}>
+            <div style={{ fontSize: '0.75rem', color: 'var(--fg-slate-500)', fontWeight: 600 }}>Total Equivalent Mistakes</div>
+            <div style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--fg-red-600)', marginTop: '2px' }}>
               {result.equivalentErrors} Errors
             </div>
-            <div style={{ fontSize: '0.72rem', color: '#94a3b8' }}>{result.fullMistakes} Full + {result.halfMistakes} Half (0.5×)</div>
+            <div style={{ fontSize: '0.75rem', color: 'var(--tw-slate-400)' }}>{result.fullMistakes} Full + {result.halfMistakes} Half (0.5×)</div>
           </div>
 
-          <div style={{ background: '#ffffff', padding: '12px 14px', borderRadius: '10px', border: '1px solid #bbf7d0' }}>
-            <div style={{ fontSize: '0.75rem', color: '#166534', fontWeight: 600 }}>
+          <div style={{ background: 'var(--surface)', padding: '12px 14px', borderRadius: '10px', border: '1px solid var(--bd-green-200)' }}>
+            <div style={{ fontSize: '0.75rem', color: 'var(--fg-green-800)', fontWeight: 600 }}>
               {result.calculationModel === 'court_ahc' ? 'Mark Deduction' :
                result.calculationModel === 'ssc_dest' ? 'Permissible Error Cutoff' :
                '5% Free Error Allowance'}
             </div>
-            <div style={{ fontSize: '1.3rem', fontWeight: 800, color: '#15803d', marginTop: '2px' }}>
+            <div style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--fg-green-700)', marginTop: '2px' }}>
               {result.calculationModel === 'court_ahc' ? `-${Math.round(result.equivalentErrors * 0.1 * 10) / 10} M` :
                result.calculationModel === 'ssc_dest' ? `${result.qualificationCriteria.examTitle?.includes('CHSL') ? 7 : 20}%` :
                `${result.allowedErrors} Exempt`}
             </div>
-            <div style={{ fontSize: '0.72rem', color: '#16a34a' }}>
+            <div style={{ fontSize: '0.75rem', color: 'var(--fg-green-600)' }}>
               {result.calculationModel === 'court_ahc' ? '0.1 mark per mistake' :
                result.calculationModel === 'ssc_dest' ? 'Maximum allowed error %' :
                '5% permissible margin on typed words'}
             </div>
           </div>
 
-          <div style={{ background: '#ffffff', padding: '12px 14px', borderRadius: '10px', border: '1px solid #fed7aa' }}>
-            <div style={{ fontSize: '0.75rem', color: '#9a3412', fontWeight: 600 }}>
+          <div style={{ background: 'var(--surface)', padding: '12px 14px', borderRadius: '10px', border: '1px solid var(--bd-orange-200)' }}>
+            <div style={{ fontSize: '0.75rem', color: 'var(--fg-orange-800)', fontWeight: 600 }}>
               {result.calculationModel === 'ssc_dest' ? 'Your DEST Error Rate' : 'Excess Mistakes (Penalized)'}
             </div>
-            <div style={{ fontSize: '1.3rem', fontWeight: 800, color: result.excessMistakes > 0 || (result.sscErrorPercentage && result.sscErrorPercentage > 7) ? '#ea580c' : '#16a34a', marginTop: '2px' }}>
+            <div style={{ fontSize: '1.25rem', fontWeight: 800, color: result.excessMistakes > 0 || (result.sscErrorPercentage && result.sscErrorPercentage > 7) ? 'var(--fg-orange-600)' : 'var(--fg-green-600)', marginTop: '2px' }}>
               {result.calculationModel === 'ssc_dest' ? `${result.sscErrorPercentage}%` : `${result.excessMistakes} Mistakes`}
             </div>
-            <div style={{ fontSize: '0.72rem', color: '#c2410c' }}>
+            <div style={{ fontSize: '0.75rem', color: 'var(--fg-orange-700)' }}>
               {result.calculationModel === 'ssc_dest' ? 'Mistakes / Total Words * 100' : 'Max(0, Total Mistakes - 5% Margin)'}
             </div>
           </div>
 
-          <div style={{ background: '#ffffff', padding: '12px 14px', borderRadius: '10px', border: '1px solid #fecaca' }}>
-            <div style={{ fontSize: '0.75rem', color: '#991b1b', fontWeight: 600 }}>
+          <div style={{ background: 'var(--surface)', padding: '12px 14px', borderRadius: '10px', border: '1px solid var(--bd-red-200)' }}>
+            <div style={{ fontSize: '0.75rem', color: 'var(--fg-red-800)', fontWeight: 600 }}>
               {result.calculationModel === 'court_ahc' ? 'Final Score Obtained' : 'Penalty Words Deducted'}
             </div>
-            <div style={{ fontSize: '1.3rem', fontWeight: 800, color: result.penaltyWords > 0 ? '#b91c1c' : '#16a34a', marginTop: '2px' }}>
+            <div style={{ fontSize: '1.25rem', fontWeight: 800, color: result.penaltyWords > 0 ? 'var(--fg-red-700)' : 'var(--fg-green-600)', marginTop: '2px' }}>
               {result.calculationModel === 'court_ahc' ? `${result.courtMarks} / 50` : `-${result.penaltyWords} Words`}
             </div>
-            <div style={{ fontSize: '0.72rem', color: '#dc2626' }}>
+            <div style={{ fontSize: '0.75rem', color: 'var(--fg-red-600)' }}>
               {result.calculationModel === 'court_ahc' ? 'Passing marks: 25.0 / 50' : 'Excess Mistakes × 10 Words'}
             </div>
           </div>
         </div>
 
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#ffffff', padding: '12px 16px', borderRadius: '10px', border: '1px solid #cbd5e1', flexWrap: 'wrap', gap: '8px' }}>
-          <div style={{ fontSize: '0.86rem', color: '#334155' }}>
-            <strong>Board Net Speed:</strong> <span style={{ color: '#0284c7', fontWeight: 800 }}>{result.netWpm} WPM</span> &bull; <strong>Eduquity/RRB Net Speed:</strong> <span style={{ color: '#7c3aed', fontWeight: 800 }}>{result.eduquityNetWpm} WPM</span>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--surface)', padding: '12px 16px', borderRadius: '10px', border: '1px solid var(--bd-slate-300)', flexWrap: 'wrap', gap: '8px' }}>
+          <div style={{ fontSize: '0.875rem', color: 'var(--fg-slate-700)' }}>
+            <strong>Board Net Speed:</strong> <span style={{ color: 'var(--fg-sky-600)', fontWeight: 800 }}>{result.netWpm} WPM</span> &bull; <strong>Eduquity/RRB Net Speed:</strong> <span style={{ color: 'var(--fg-violet-600)', fontWeight: 800 }}>{result.eduquityNetWpm} WPM</span>
           </div>
-          <div style={{ fontSize: '0.75rem', color: '#64748b' }}>
+          <div style={{ fontSize: '0.75rem', color: 'var(--fg-slate-500)' }}>
             Verified against official recruitment board algorithms
           </div>
         </div>
@@ -456,73 +456,73 @@ export const ResultScreen: React.FC<ResultScreenProps> = ({
         }}
       >
         <div className="card" style={{ textAlign: 'center', padding: '16px' }}>
-          <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 700 }}>
+          <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 700 }}>
             Net Speed (WPM)
           </span>
           <div style={{ fontSize: '2.1rem', fontWeight: 800, color: 'var(--primary)' }}>
             {result.netWpm}
           </div>
-          <span style={{ fontSize: '0.74rem', color: 'var(--text-muted)' }}>Cutoff: &ge; {result.qualificationCriteria.requiredSpeed} WPM</span>
+          <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Cutoff: &ge; {result.qualificationCriteria.requiredSpeed} WPM</span>
         </div>
 
         <div className="card" style={{ textAlign: 'center', padding: '16px' }}>
-          <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 700 }}>
+          <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 700 }}>
             Gross Speed
           </span>
-          <div style={{ fontSize: '2.1rem', fontWeight: 800, color: '#0f172a' }}>
+          <div style={{ fontSize: '2.1rem', fontWeight: 800, color: 'var(--fg-slate-900)' }}>
             {result.grossWpm}
           </div>
-          <span style={{ fontSize: '0.74rem', color: 'var(--text-muted)' }}>Strokes / 5 / Min</span>
+          <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Strokes / 5 / Min</span>
         </div>
 
         <div className="card" style={{ textAlign: 'center', padding: '16px' }}>
-          <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 700 }}>
+          <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 700 }}>
             Official Accuracy
           </span>
-          <div style={{ fontSize: '2.1rem', fontWeight: 800, color: result.accuracy >= 85 ? '#16a34a' : '#dc2626' }}>
+          <div style={{ fontSize: '2.1rem', fontWeight: 800, color: result.accuracy >= 85 ? 'var(--fg-green-600)' : 'var(--fg-red-600)' }}>
             {result.accuracy}%
           </div>
-          <span style={{ fontSize: '0.74rem', color: 'var(--text-muted)' }}>Passage Cutoff: &ge; 85.0%</span>
+          <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Passage Cutoff: &ge; 85.0%</span>
         </div>
 
         <div className="card" style={{ textAlign: 'center', padding: '16px' }}>
-          <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 700 }}>
+          <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 700 }}>
             Passage Completed
           </span>
-          <div style={{ fontSize: '2.1rem', fontWeight: 800, color: result.completionRate >= 85 ? '#0284c7' : '#ea580c' }}>
+          <div style={{ fontSize: '2.1rem', fontWeight: 800, color: result.completionRate >= 85 ? 'var(--fg-sky-600)' : 'var(--fg-orange-600)' }}>
             {result.completionRate}%
           </div>
-          <span style={{ fontSize: '0.74rem', color: 'var(--text-muted)' }}>{result.totalTypedWords} / {result.totalOriginalWords} words</span>
+          <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{result.totalTypedWords} / {result.totalOriginalWords} words</span>
         </div>
 
         <div className="card" style={{ textAlign: 'center', padding: '16px' }}>
-          <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 700 }}>
+          <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 700 }}>
             Total Keystrokes
           </span>
-          <div style={{ fontSize: '2.1rem', fontWeight: 800, color: '#334155' }}>
+          <div style={{ fontSize: '2.1rem', fontWeight: 800, color: 'var(--fg-slate-700)' }}>
             {result.totalKeystrokes}
           </div>
-          <span style={{ fontSize: '0.74rem', color: 'var(--text-muted)' }}>Backspaces: {result.backspaceCount}</span>
+          <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Backspaces: {result.backspaceCount}</span>
         </div>
 
         <div className="card" style={{ textAlign: 'center', padding: '16px' }}>
-          <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 700 }}>
+          <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 700 }}>
             Full Mistakes
           </span>
-          <div style={{ fontSize: '2.1rem', fontWeight: 800, color: '#dc2626' }}>
+          <div style={{ fontSize: '2.1rem', fontWeight: 800, color: 'var(--fg-red-600)' }}>
             {result.fullMistakes}
           </div>
-          <span style={{ fontSize: '0.74rem', color: 'var(--text-muted)' }}>1 Error Point Each</span>
+          <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>1 Error Point Each</span>
         </div>
 
         <div className="card" style={{ textAlign: 'center', padding: '16px' }}>
-          <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 700 }}>
+          <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 700 }}>
             Half Mistakes
           </span>
-          <div style={{ fontSize: '2.1rem', fontWeight: 800, color: '#d97706' }}>
+          <div style={{ fontSize: '2.1rem', fontWeight: 800, color: 'var(--fg-amber-600)' }}>
             {result.halfMistakes}
           </div>
-          <span style={{ fontSize: '0.74rem', color: 'var(--text-muted)' }}>0.5 Error Point Each</span>
+          <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>0.5 Error Point Each</span>
         </div>
       </div>
 
@@ -532,21 +532,21 @@ export const ResultScreen: React.FC<ResultScreenProps> = ({
           className="card"
           style={{
             marginBottom: '28px',
-            background: 'linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%)',
-            borderColor: '#fde68a',
+            background: 'linear-gradient(135deg, var(--bg-amber-50) 0%, var(--bg-amber-100) 100%)',
+            borderColor: 'var(--bd-amber-200)',
             borderWidth: '2px'
           }}
         >
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px', marginBottom: '14px' }}>
             <div>
-              <h3 style={{ fontSize: '1.2rem', fontWeight: 800, color: '#92400e', margin: 0 }}>
+              <h3 style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--fg-amber-800)', margin: 0 }}>
                 🔍 Weak Keys & Error Heatmap (कमजोर बटन विश्लेषण)
               </h3>
-              <p style={{ margin: '4px 0 0', fontSize: '0.85rem', color: '#b45309' }}>
+              <p style={{ margin: '4px 0 0', fontSize: '0.875rem', color: 'var(--fg-amber-700)' }}>
                 You made the most errors on these specific characters. Review their finger placements and key combinations:
               </p>
             </div>
-            <span style={{ background: '#f59e0b', color: '#ffffff', padding: '4px 10px', borderRadius: '12px', fontSize: '0.78rem', fontWeight: 700 }}>
+            <span style={{ background: 'var(--tw-amber-500)', color: '#ffffff', padding: '4px 10px', borderRadius: '12px', fontSize: '0.8rem', fontWeight: 700 }}>
               {result.weakKeys.length} Weak Keys Identified
             </span>
           </div>
@@ -564,8 +564,8 @@ export const ResultScreen: React.FC<ResultScreenProps> = ({
               <div
                 key={idx}
                 style={{
-                  background: '#ffffff',
-                  border: '1.5px solid #fcd34d',
+                  background: 'var(--surface)',
+                  border: '1.5px solid var(--bd-amber-300)',
                   borderRadius: '8px',
                   padding: '10px 12px',
                   boxShadow: '0 2px 4px rgba(0,0,0,0.04)',
@@ -577,14 +577,14 @@ export const ResultScreen: React.FC<ResultScreenProps> = ({
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <span
                     className={result.language === 'hindi_kruti' ? 'font-kruti' : ''}
-                    style={{ fontSize: '1.5rem', fontWeight: 800, color: '#b45309' }}
+                    style={{ fontSize: '1.4rem', fontWeight: 800, color: 'var(--fg-amber-700)' }}
                   >
                     {item.character}
                   </span>
                   <span
                     style={{
-                      background: '#fee2e2',
-                      color: '#dc2626',
+                      background: 'var(--bg-red-100)',
+                      color: 'var(--fg-red-600)',
                       padding: '2px 8px',
                       borderRadius: '10px',
                       fontSize: '0.75rem',
@@ -595,12 +595,12 @@ export const ResultScreen: React.FC<ResultScreenProps> = ({
                   </span>
                 </div>
                 {item.keyCombo && (
-                  <div style={{ fontSize: '0.8rem', fontWeight: 700, color: '#0369a1' }}>
+                  <div style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--fg-sky-700)' }}>
                     Keys: <code>{item.keyCombo}</code>
                   </div>
                 )}
                 {item.fingerHint && (
-                  <div style={{ fontSize: '0.75rem', color: '#64748b' }}>
+                  <div style={{ fontSize: '0.75rem', color: 'var(--fg-slate-500)' }}>
                     Finger: <strong>{item.fingerHint}</strong>
                   </div>
                 )}
@@ -611,10 +611,10 @@ export const ResultScreen: React.FC<ResultScreenProps> = ({
           {/* Launch 2-Minute Booster Drill */}
           <div
             style={{
-              background: '#ffffff',
+              background: 'var(--surface)',
               borderRadius: '8px',
               padding: '14px 18px',
-              border: '1px solid #fef08a',
+              border: '1px solid var(--bd-yellow-200)',
               display: 'flex',
               justifyContent: 'space-between',
               alignItems: 'center',
@@ -624,15 +624,15 @@ export const ResultScreen: React.FC<ResultScreenProps> = ({
           >
             <div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <span style={{ fontSize: '1.2rem' }}>⚡</span>
-                <strong style={{ fontSize: '0.98rem', color: '#1e3a8a' }}>
+                <span style={{ fontSize: '1.25rem' }}>⚡</span>
+                <strong style={{ fontSize: '1rem', color: 'var(--fg-blue-900)' }}>
                   Re-Test My Mistakes (2-Minute Booster Drill)
                 </strong>
-                <span style={{ background: '#dbeafe', color: '#1e40af', padding: '2px 8px', borderRadius: '4px', fontSize: '0.75rem', fontWeight: 700 }}>
+                <span style={{ background: 'var(--bg-blue-100)', color: 'var(--fg-blue-800)', padding: '2px 8px', borderRadius: '4px', fontSize: '0.75rem', fontWeight: 700 }}>
                   ⏱️ 2 Mins
                 </span>
               </div>
-              <p style={{ margin: '4px 0 0', fontSize: '0.82rem', color: '#64748b' }}>
+              <p style={{ margin: '4px 0 0', fontSize: '0.8rem', color: 'var(--fg-slate-500)' }}>
                 Practice only your {result.wrongWordsList.length} mistyped words and weak characters to rapidly achieve 85%+ accuracy.
               </p>
             </div>
@@ -641,7 +641,7 @@ export const ResultScreen: React.FC<ResultScreenProps> = ({
               onClick={() => onPracticeWrongWords(result.wrongWordsList)}
               className="btn btn-primary"
               style={{
-                background: 'linear-gradient(135deg, #0284c7 0%, #0369a1 100%)',
+                background: 'linear-gradient(135deg, var(--tw-sky-600) 0%, var(--tw-sky-700) 100%)',
                 fontWeight: 800,
                 padding: '10px 22px',
                 fontSize: '0.95rem',
@@ -657,19 +657,19 @@ export const ResultScreen: React.FC<ResultScreenProps> = ({
       {/* Detailed Side-by-Side Word Evaluation Diff */}
       <div className="card">
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px', flexWrap: 'wrap', gap: '8px' }}>
-          <h2 style={{ fontSize: '1.2rem', fontWeight: 700 }}>Diagnostic Word-by-Word Analysis</h2>
-          <div style={{ display: 'flex', gap: '16px', fontSize: '0.85rem', fontWeight: 600 }}>
+          <h2 style={{ fontSize: '1.25rem', fontWeight: 700 }}>Diagnostic Word-by-Word Analysis</h2>
+          <div style={{ display: 'flex', gap: '16px', fontSize: '0.875rem', fontWeight: 600 }}>
             <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <span style={{ width: 12, height: 12, borderRadius: 2, background: '#16a34a' }}></span> Correct
+              <span style={{ width: 12, height: 12, borderRadius: 2, background: 'var(--tw-green-600)' }}></span> Correct
             </span>
             <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <span style={{ width: 12, height: 12, borderRadius: 2, background: '#dc2626' }}></span> Full Mistake
+              <span style={{ width: 12, height: 12, borderRadius: 2, background: 'var(--tw-red-600)' }}></span> Full Mistake
             </span>
             <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <span style={{ width: 12, height: 12, borderRadius: 2, background: '#ea580c' }}></span> Half Mistake
+              <span style={{ width: 12, height: 12, borderRadius: 2, background: 'var(--tw-orange-600)' }}></span> Half Mistake
             </span>
             <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <span style={{ width: 12, height: 12, borderRadius: 2, background: '#94a3b8' }}></span> Skipped
+              <span style={{ width: 12, height: 12, borderRadius: 2, background: 'var(--tw-slate-400)' }}></span> Skipped
             </span>
           </div>
         </div>

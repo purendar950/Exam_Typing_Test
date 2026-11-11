@@ -57,7 +57,7 @@ export const Header: React.FC<HeaderProps> = ({
                 borderRadius: '50%',
                 objectFit: 'cover',
                 boxShadow: '0 2px 6px rgba(2, 132, 199, 0.35)',
-                border: '1.5px solid #38bdf8',
+                border: '1.5px solid var(--tw-sky-400)',
                 flexShrink: 0
               }}
             />
@@ -124,8 +124,8 @@ export const Header: React.FC<HeaderProps> = ({
                 onClick={onOpenPayment}
                 style={{
                   background: currentUser?.is_subscribed
-                    ? 'linear-gradient(135deg, #10b981 0%, #059669 100%)'
-                    : 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
+                    ? 'linear-gradient(135deg, var(--tw-emerald-500) 0%, var(--tw-emerald-600) 100%)'
+                    : 'linear-gradient(135deg, var(--tw-amber-500) 0%, var(--tw-amber-600) 100%)',
                   color: '#ffffff',
                   border: 'none',
                   fontWeight: 700,
@@ -152,7 +152,7 @@ export const Header: React.FC<HeaderProps> = ({
                 className="nav-btn header-courses-btn"
                 onClick={onOpenMyCourses}
                 style={{
-                  background: 'linear-gradient(135deg, #7c3aed 0%, #4f46e5 100%)',
+                  background: 'linear-gradient(135deg, var(--tw-violet-600) 0%, var(--tw-indigo-600) 100%)',
                   color: '#ffffff',
                   border: 'none',
                   fontWeight: 700,
@@ -246,7 +246,7 @@ export const Header: React.FC<HeaderProps> = ({
             className="nav-btn"
             onClick={onOpenHindiHelper}
             title="Hindi Character & Conjuncts Helper (संयुक्ताक्षर गाइड)"
-            style={{ color: '#d97706', fontWeight: 600 }}
+            style={{ color: 'var(--fg-amber-600)', fontWeight: 600 }}
           >
             <span style={{ fontSize: '0.95rem', marginRight: '4px' }}>⌨️</span>
             Hindi Keys
@@ -271,7 +271,7 @@ export const Header: React.FC<HeaderProps> = ({
               className="nav-btn"
               onClick={onOpenLeaderboard}
               title="Official Examination Hall of Fame (लीडरबोर्ड)"
-              style={{ color: '#0284c7', fontWeight: 700 }}
+              style={{ color: 'var(--fg-sky-600)', fontWeight: 700 }}
             >
               <span style={{ fontSize: '0.95rem', marginRight: '4px' }}>🏅</span>
               Leaderboard

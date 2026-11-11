@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { EmojiIco } from './Ico';
 import { UserProfile } from '../services/firebase';
 import { PaymentSubmission, fetchUserPaymentSubmissions } from '../services/paymentService';
 import { resolveCourseDestination, openPurchasedCourse } from '../utils/courseNavigation';
@@ -151,13 +152,13 @@ export const MyCoursesModal: React.FC<MyCoursesModalProps> = ({
           borderRadius: '16px',
           overflow: 'hidden',
           boxShadow: '0 25px 50px -12px rgba(15, 23, 42, 0.45)',
-          background: '#ffffff'
+          background: 'var(--surface)'
         }}
       >
         {/* 1. Header Banner */}
         <div
           style={{
-            background: 'linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #312e81 100%)',
+            background: 'linear-gradient(135deg, var(--tw-slate-900) 0%, var(--tw-indigo-950) 50%, var(--tw-indigo-900) 100%)',
             color: '#ffffff',
             padding: '20px 24px',
             position: 'relative'
@@ -167,11 +168,11 @@ export const MyCoursesModal: React.FC<MyCoursesModalProps> = ({
             <div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '4px' }}>
                 <span style={{ fontSize: '1.6rem' }}>🎓</span>
-                <h2 style={{ margin: 0, fontSize: '1.35rem', fontWeight: 900, letterSpacing: '-0.3px' }}>
+                <h2 style={{ margin: 0, fontSize: '1.4rem', fontWeight: 900, letterSpacing: '-0.3px' }}>
                   My Enrolled Courses & Test Series
                 </h2>
               </div>
-              <p style={{ margin: 0, fontSize: '0.84rem', color: '#c7d2fe', lineHeight: 1.4 }}>
+              <p style={{ margin: 0, fontSize: '0.875rem', color: 'var(--tw-indigo-200)', lineHeight: 1.4 }}>
                 {currentUser
                   ? `Candidate: ${currentUser.displayName} (${currentUser.rollNumber}) • Access your purchased exam passes & mock tests`
                   : 'Sign in to access your purchased typing courses & test series'}
@@ -186,7 +187,7 @@ export const MyCoursesModal: React.FC<MyCoursesModalProps> = ({
                     onOpenPayment();
                   }}
                   style={{
-                    background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
+                    background: 'linear-gradient(135deg, var(--tw-amber-500) 0%, var(--tw-amber-600) 100%)',
                     color: '#ffffff',
                     border: 'none',
                     borderRadius: '20px',
@@ -217,7 +218,7 @@ export const MyCoursesModal: React.FC<MyCoursesModalProps> = ({
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  fontSize: '1.2rem',
+                  fontSize: '1.25rem',
                   cursor: 'pointer'
                 }}
               >
@@ -241,20 +242,20 @@ export const MyCoursesModal: React.FC<MyCoursesModalProps> = ({
               }}
             >
               <div style={{ textAlign: 'center' }}>
-                <div style={{ fontSize: '1.25rem', fontWeight: 900, color: '#38bdf8' }}>{courses.length}</div>
-                <div style={{ fontSize: '0.72rem', color: '#94a3b8', textTransform: 'uppercase', fontWeight: 700 }}>
+                <div style={{ fontSize: '1.25rem', fontWeight: 900, color: 'var(--tw-sky-400)' }}>{courses.length}</div>
+                <div style={{ fontSize: '0.75rem', color: 'var(--tw-slate-400)', textTransform: 'uppercase', fontWeight: 700 }}>
                   Total Orders
                 </div>
               </div>
               <div style={{ textAlign: 'center', borderLeft: '1px solid rgba(255,255,255,0.1)', borderRight: '1px solid rgba(255,255,255,0.1)' }}>
-                <div style={{ fontSize: '1.25rem', fontWeight: 900, color: '#4ade80' }}>{activeCount}</div>
-                <div style={{ fontSize: '0.72rem', color: '#94a3b8', textTransform: 'uppercase', fontWeight: 700 }}>
+                <div style={{ fontSize: '1.25rem', fontWeight: 900, color: 'var(--tw-green-400)' }}>{activeCount}</div>
+                <div style={{ fontSize: '0.75rem', color: 'var(--tw-slate-400)', textTransform: 'uppercase', fontWeight: 700 }}>
                   Active Passes
                 </div>
               </div>
               <div style={{ textAlign: 'center' }}>
-                <div style={{ fontSize: '1.25rem', fontWeight: 900, color: '#facc15' }}>{pendingCount}</div>
-                <div style={{ fontSize: '0.72rem', color: '#94a3b8', textTransform: 'uppercase', fontWeight: 700 }}>
+                <div style={{ fontSize: '1.25rem', fontWeight: 900, color: 'var(--tw-yellow-400)' }}>{pendingCount}</div>
+                <div style={{ fontSize: '0.75rem', color: 'var(--tw-slate-400)', textTransform: 'uppercase', fontWeight: 700 }}>
                   Pending Verification
                 </div>
               </div>
@@ -269,8 +270,8 @@ export const MyCoursesModal: React.FC<MyCoursesModalProps> = ({
               display: 'flex',
               gap: '8px',
               padding: '12px 24px',
-              background: '#f8fafc',
-              borderBottom: '1px solid #e2e8f0',
+              background: 'var(--bg-slate-50)',
+              borderBottom: '1px solid var(--bd-slate-200)',
               overflowX: 'auto'
             }}
           >
@@ -280,9 +281,9 @@ export const MyCoursesModal: React.FC<MyCoursesModalProps> = ({
                 padding: '6px 14px',
                 borderRadius: '20px',
                 border: '1px solid',
-                borderColor: filterTab === 'all' ? '#4f46e5' : '#cbd5e1',
-                background: filterTab === 'all' ? '#e0e7ff' : '#ffffff',
-                color: filterTab === 'all' ? '#3730a3' : '#475569',
+                borderColor: filterTab === 'all' ? 'var(--tw-indigo-600)' : 'var(--bd-slate-300)',
+                background: filterTab === 'all' ? 'var(--bg-indigo-100)' : 'var(--surface)',
+                color: filterTab === 'all' ? 'var(--fg-indigo-800)' : 'var(--fg-slate-600)',
                 fontSize: '0.8rem',
                 fontWeight: 700,
                 cursor: 'pointer'
@@ -296,9 +297,9 @@ export const MyCoursesModal: React.FC<MyCoursesModalProps> = ({
                 padding: '6px 14px',
                 borderRadius: '20px',
                 border: '1px solid',
-                borderColor: filterTab === 'active' ? '#16a34a' : '#cbd5e1',
-                background: filterTab === 'active' ? '#dcfce7' : '#ffffff',
-                color: filterTab === 'active' ? '#166534' : '#475569',
+                borderColor: filterTab === 'active' ? 'var(--tw-green-600)' : 'var(--bd-slate-300)',
+                background: filterTab === 'active' ? 'var(--bg-green-100)' : 'var(--surface)',
+                color: filterTab === 'active' ? 'var(--fg-green-800)' : 'var(--fg-slate-600)',
                 fontSize: '0.8rem',
                 fontWeight: 700,
                 cursor: 'pointer'
@@ -312,9 +313,9 @@ export const MyCoursesModal: React.FC<MyCoursesModalProps> = ({
                 padding: '6px 14px',
                 borderRadius: '20px',
                 border: '1px solid',
-                borderColor: filterTab === 'pending' ? '#d97706' : '#cbd5e1',
-                background: filterTab === 'pending' ? '#fef3c7' : '#ffffff',
-                color: filterTab === 'pending' ? '#92400e' : '#475569',
+                borderColor: filterTab === 'pending' ? 'var(--tw-amber-600)' : 'var(--bd-slate-300)',
+                background: filterTab === 'pending' ? 'var(--bg-amber-100)' : 'var(--surface)',
+                color: filterTab === 'pending' ? 'var(--fg-amber-800)' : 'var(--fg-slate-600)',
                 fontSize: '0.8rem',
                 fontWeight: 700,
                 cursor: 'pointer'
@@ -329,9 +330,9 @@ export const MyCoursesModal: React.FC<MyCoursesModalProps> = ({
                   padding: '6px 14px',
                   borderRadius: '20px',
                   border: '1px solid',
-                  borderColor: filterTab === 'expired' ? '#dc2626' : '#cbd5e1',
-                  background: filterTab === 'expired' ? '#fee2e2' : '#ffffff',
-                  color: filterTab === 'expired' ? '#991b1b' : '#475569',
+                  borderColor: filterTab === 'expired' ? 'var(--tw-red-600)' : 'var(--bd-slate-300)',
+                  background: filterTab === 'expired' ? 'var(--bg-red-100)' : 'var(--surface)',
+                  color: filterTab === 'expired' ? 'var(--fg-red-800)' : 'var(--fg-slate-600)',
                   fontSize: '0.8rem',
                   fontWeight: 700,
                   cursor: 'pointer'
@@ -344,23 +345,23 @@ export const MyCoursesModal: React.FC<MyCoursesModalProps> = ({
         )}
 
         {/* 3. Modal Body */}
-        <div style={{ flex: 1, overflowY: 'auto', padding: '20px 24px', background: '#f8fafc' }}>
+        <div style={{ flex: 1, overflowY: 'auto', padding: '20px 24px', background: 'var(--bg-slate-50)' }}>
           {/* Guest State */}
           {!currentUser ? (
             <div
               style={{
                 textAlign: 'center',
                 padding: '48px 24px',
-                background: '#ffffff',
-                border: '1.5px dashed #cbd5e1',
+                background: 'var(--surface)',
+                border: '1.5px dashed var(--bd-slate-300)',
                 borderRadius: '12px'
               }}
             >
               <div style={{ fontSize: '3rem', marginBottom: '12px' }}>🔒</div>
-              <h3 style={{ margin: '0 0 6px', fontSize: '1.2rem', fontWeight: 800, color: '#0f172a' }}>
+              <h3 style={{ margin: '0 0 6px', fontSize: '1.25rem', fontWeight: 800, color: 'var(--fg-slate-900)' }}>
                 Please Sign In to View Your Courses
               </h3>
-              <p style={{ margin: '0 0 20px', fontSize: '0.88rem', color: '#64748b', maxWidth: '420px', marginLeft: 'auto', marginRight: 'auto' }}>
+              <p style={{ margin: '0 0 20px', fontSize: '0.875rem', color: 'var(--fg-slate-500)', maxWidth: '420px', marginLeft: 'auto', marginRight: 'auto' }}>
                 Your purchases, mock test series passes, and payment verification records are linked to your candidate account.
               </p>
               <button
@@ -369,12 +370,12 @@ export const MyCoursesModal: React.FC<MyCoursesModalProps> = ({
                   onOpenAuth();
                 }}
                 style={{
-                  background: 'linear-gradient(135deg, #0284c7 0%, #0369a1 100%)',
+                  background: 'linear-gradient(135deg, var(--tw-sky-600) 0%, var(--tw-sky-700) 100%)',
                   color: '#ffffff',
                   border: 'none',
                   borderRadius: '8px',
                   padding: '10px 24px',
-                  fontSize: '0.9rem',
+                  fontSize: '0.875rem',
                   fontWeight: 800,
                   cursor: 'pointer',
                   boxShadow: '0 2px 8px rgba(2, 132, 199, 0.35)'
@@ -384,8 +385,8 @@ export const MyCoursesModal: React.FC<MyCoursesModalProps> = ({
               </button>
             </div>
           ) : loading ? (
-            <div style={{ textAlign: 'center', padding: '50px 20px', color: '#64748b' }}>
-              <div style={{ fontSize: '2rem', marginBottom: '10px', animation: 'spin 1.5s linear infinite' }}>⏳</div>
+            <div style={{ textAlign: 'center', padding: '50px 20px', color: 'var(--fg-slate-500)' }}>
+              <div style={{ fontSize: '2.1rem', marginBottom: '10px', animation: 'spin 1.5s linear infinite' }}>⏳</div>
               <div style={{ fontWeight: 700, fontSize: '0.95rem' }}>Loading your courses and passes...</div>
             </div>
           ) : courses.length === 0 ? (
@@ -394,17 +395,17 @@ export const MyCoursesModal: React.FC<MyCoursesModalProps> = ({
               style={{
                 textAlign: 'center',
                 padding: '44px 20px',
-                background: '#ffffff',
-                border: '1.5px dashed #cbd5e1',
+                background: 'var(--surface)',
+                border: '1.5px dashed var(--bd-slate-300)',
                 borderRadius: '14px',
                 boxShadow: '0 2px 8px rgba(0,0,0,0.03)'
               }}
             >
-              <div style={{ fontSize: '3.2rem', marginBottom: '12px' }}>🎯</div>
-              <h3 style={{ margin: '0 0 6px', fontSize: '1.2rem', fontWeight: 900, color: '#0f172a' }}>
+              <div style={{ fontSize: '3rem', marginBottom: '12px' }}>🎯</div>
+              <h3 style={{ margin: '0 0 6px', fontSize: '1.25rem', fontWeight: 900, color: 'var(--fg-slate-900)' }}>
                 No Enrolled Courses Found
               </h3>
-              <p style={{ margin: '0 0 20px', fontSize: '0.88rem', color: '#64748b', maxWidth: '460px', marginLeft: 'auto', marginRight: 'auto', lineHeight: 1.5 }}>
+              <p style={{ margin: '0 0 20px', fontSize: '0.875rem', color: 'var(--fg-slate-500)', maxWidth: '460px', marginLeft: 'auto', marginRight: 'auto', lineHeight: 1.5 }}>
                 You have not purchased any examination passes yet. Unlock official mock test series, bilingual typing simulators, and benchmark accuracy grading.
               </p>
               <button
@@ -413,7 +414,7 @@ export const MyCoursesModal: React.FC<MyCoursesModalProps> = ({
                   onOpenPayment();
                 }}
                 style={{
-                  background: 'linear-gradient(135deg, #7c3aed 0%, #4f46e5 100%)',
+                  background: 'linear-gradient(135deg, var(--tw-violet-600) 0%, var(--tw-indigo-600) 100%)',
                   color: '#ffffff',
                   border: 'none',
                   borderRadius: '10px',
@@ -432,7 +433,7 @@ export const MyCoursesModal: React.FC<MyCoursesModalProps> = ({
               </button>
             </div>
           ) : filteredList.length === 0 ? (
-            <div style={{ textAlign: 'center', padding: '40px', color: '#64748b' }}>
+            <div style={{ textAlign: 'center', padding: '40px', color: 'var(--fg-slate-500)' }}>
               No passes found under the <strong>{filterTab}</strong> filter.
             </div>
           ) : (
@@ -443,33 +444,33 @@ export const MyCoursesModal: React.FC<MyCoursesModalProps> = ({
 
                 // Status styling
                 let statusBadge = {
-                  bg: '#fef3c7',
-                  border: '#fde68a',
-                  text: '#92400e',
+                  bg: 'var(--bg-amber-100)',
+                  border: 'var(--bd-amber-200)',
+                  text: 'var(--fg-amber-800)',
                   label: '⏳ VERIFICATION PENDING'
                 };
 
                 if (c.isApproved) {
                   if (c.isExpired) {
                     statusBadge = {
-                      bg: '#fee2e2',
-                      border: '#fca5a5',
-                      text: '#991b1b',
+                      bg: 'var(--bg-red-100)',
+                      border: 'var(--bd-red-300)',
+                      text: 'var(--fg-red-800)',
                       label: '⌛ EXPIRED'
                     };
                   } else {
                     statusBadge = {
-                      bg: '#dcfce7',
-                      border: '#86efac',
-                      text: '#15803d',
+                      bg: 'var(--bg-green-100)',
+                      border: 'var(--bd-green-300)',
+                      text: 'var(--fg-green-700)',
                       label: '✅ ACTIVE & UNLOCKED'
                     };
                   }
                 } else if (c.isRejected) {
                   statusBadge = {
-                    bg: '#fee2e2',
-                    border: '#fca5a5',
-                    text: '#991b1b',
+                    bg: 'var(--bg-red-100)',
+                    border: 'var(--bd-red-300)',
+                    text: 'var(--fg-red-800)',
                     label: '❌ REJECTED'
                   };
                 }
@@ -492,8 +493,8 @@ export const MyCoursesModal: React.FC<MyCoursesModalProps> = ({
                   <div
                     key={c.id}
                     style={{
-                      background: '#ffffff',
-                      border: c.isApproved && !c.isExpired ? '2px solid #86efac' : '1px solid #e2e8f0',
+                      background: 'var(--surface)',
+                      border: c.isApproved && !c.isExpired ? '2px solid var(--bd-green-300)' : '1px solid var(--bd-slate-200)',
                       borderRadius: '14px',
                       padding: '18px 20px',
                       boxShadow: c.isApproved && !c.isExpired
@@ -513,8 +514,8 @@ export const MyCoursesModal: React.FC<MyCoursesModalProps> = ({
                             width: '46px',
                             height: '46px',
                             borderRadius: '12px',
-                            background: c.isApproved && !c.isExpired ? '#f0fdf4' : '#f8fafc',
-                            border: `1.5px solid ${c.isApproved && !c.isExpired ? '#86efac' : '#cbd5e1'}`,
+                            background: c.isApproved && !c.isExpired ? 'var(--bg-green-50)' : 'var(--bg-slate-50)',
+                            border: `1.5px solid ${c.isApproved && !c.isExpired ? 'var(--bd-green-300)' : 'var(--bd-slate-300)'}`,
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
@@ -522,19 +523,19 @@ export const MyCoursesModal: React.FC<MyCoursesModalProps> = ({
                             flexShrink: 0
                           }}
                         >
-                          {dest.emblemEmoji}
+                          <EmojiIco e={dest.emblemEmoji} />
                         </div>
                         <div>
                           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-                            <h3 style={{ margin: 0, fontSize: '1.05rem', fontWeight: 900, color: '#0f172a' }}>
+                            <h3 style={{ margin: 0, fontSize: '1rem', fontWeight: 900, color: 'var(--fg-slate-900)' }}>
                               {dest.examTitle || c.planName}
                             </h3>
                             {dest.badge && (
                               <span
                                 style={{
-                                  background: '#e0f2fe',
-                                  color: '#0284c7',
-                                  fontSize: '0.7rem',
+                                  background: 'var(--bg-sky-100)',
+                                  color: 'var(--fg-sky-600)',
+                                  fontSize: '0.75rem',
                                   fontWeight: 800,
                                   padding: '2px 8px',
                                   borderRadius: '6px'
@@ -544,7 +545,7 @@ export const MyCoursesModal: React.FC<MyCoursesModalProps> = ({
                               </span>
                             )}
                           </div>
-                          <div style={{ fontSize: '0.82rem', color: '#64748b', marginTop: '2px' }}>
+                          <div style={{ fontSize: '0.8rem', color: 'var(--fg-slate-500)', marginTop: '2px' }}>
                             Plan: <strong>{c.planName}</strong>
                             {dest.postTitle && dest.postTitle !== dest.examTitle && (
                               <span> &bull; Post: <strong>{dest.postTitle}</strong></span>
@@ -562,7 +563,7 @@ export const MyCoursesModal: React.FC<MyCoursesModalProps> = ({
                             color: statusBadge.text,
                             padding: '4px 12px',
                             borderRadius: '20px',
-                            fontSize: '0.74rem',
+                            fontSize: '0.75rem',
                             fontWeight: 900,
                             letterSpacing: '0.5px'
                           }}
@@ -570,12 +571,12 @@ export const MyCoursesModal: React.FC<MyCoursesModalProps> = ({
                           {statusBadge.label}
                         </span>
                         {c.isApproved && !c.isExpired && c.daysRemaining !== null && (
-                          <span style={{ fontSize: '0.74rem', color: '#16a34a', fontWeight: 700 }}>
+                          <span style={{ fontSize: '0.75rem', color: 'var(--fg-green-600)', fontWeight: 700 }}>
                             ⏳ {c.daysRemaining} days left {expiryFormatted ? `(till ${expiryFormatted})` : ''}
                           </span>
                         )}
                         {c.isExpired && expiryFormatted && (
-                          <span style={{ fontSize: '0.72rem', color: '#dc2626', fontWeight: 700 }}>
+                          <span style={{ fontSize: '0.75rem', color: 'var(--fg-red-600)', fontWeight: 700 }}>
                             Expired on {expiryFormatted}
                           </span>
                         )}
@@ -588,24 +589,24 @@ export const MyCoursesModal: React.FC<MyCoursesModalProps> = ({
                         display: 'flex',
                         flexWrap: 'wrap',
                         gap: '8px 16px',
-                        background: '#f8fafc',
+                        background: 'var(--bg-slate-50)',
                         padding: '10px 14px',
                         borderRadius: '8px',
-                        fontSize: '0.78rem',
-                        color: '#475569'
+                        fontSize: '0.8rem',
+                        color: 'var(--fg-slate-600)'
                       }}
                     >
                       <span style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-                        <span style={{ color: '#16a34a', fontWeight: 900 }}>✓</span> Full Mock Test Series
+                        <span style={{ color: 'var(--fg-green-600)', fontWeight: 900 }}>✓</span> Full Mock Test Series
                       </span>
                       <span style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-                        <span style={{ color: '#16a34a', fontWeight: 900 }}>✓</span> Official Accuracy & Net WPM Grading
+                        <span style={{ color: 'var(--fg-green-600)', fontWeight: 900 }}>✓</span> Official Accuracy & Net WPM Grading
                       </span>
                       <span style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-                        <span style={{ color: '#16a34a', fontWeight: 900 }}>✓</span> AI-Calibrated Passages
+                        <span style={{ color: 'var(--fg-green-600)', fontWeight: 900 }}>✓</span> AI-Calibrated Passages
                       </span>
                       <span style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-                        <span style={{ color: '#16a34a', fontWeight: 900 }}>✓</span> Instant Scorecard & Keystroke Audit
+                        <span style={{ color: 'var(--fg-green-600)', fontWeight: 900 }}>✓</span> Instant Scorecard & Keystroke Audit
                       </span>
                     </div>
 
@@ -615,34 +616,34 @@ export const MyCoursesModal: React.FC<MyCoursesModalProps> = ({
                         display: 'grid',
                         gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))',
                         gap: '8px',
-                        fontSize: '0.78rem',
-                        borderTop: '1px solid #f1f5f9',
+                        fontSize: '0.8rem',
+                        borderTop: '1px solid var(--bd-slate-100)',
                         paddingTop: '8px'
                       }}
                     >
                       <div>
-                        <span style={{ color: '#94a3b8' }}>Amount Paid:</span>{' '}
-                        <strong style={{ color: '#0f172a' }}>
+                        <span style={{ color: 'var(--tw-slate-400)' }}>Amount Paid:</span>{' '}
+                        <strong style={{ color: 'var(--fg-slate-900)' }}>
                           ₹{c.finalAmount || c.finalAmountPaid || c.originalAmount}
                         </strong>
                         {c.promoCodeUsed || c.promoCodeApplied ? (
-                          <span style={{ color: '#16a34a', fontSize: '0.7rem', marginLeft: '4px' }}>
+                          <span style={{ color: 'var(--fg-green-600)', fontSize: '0.75rem', marginLeft: '4px' }}>
                             ({c.promoCodeUsed || c.promoCodeApplied})
                           </span>
                         ) : null}
                       </div>
 
                       <div>
-                        <span style={{ color: '#94a3b8' }}>UTR No:</span>{' '}
-                        <strong style={{ color: '#0f172a', fontFamily: 'monospace' }}>{c.utrNumber}</strong>
+                        <span style={{ color: 'var(--tw-slate-400)' }}>UTR No:</span>{' '}
+                        <strong style={{ color: 'var(--fg-slate-900)', fontFamily: 'monospace' }}>{c.utrNumber}</strong>
                         <button
                           onClick={() => handleCopyUtr(c.utrNumber)}
                           style={{
                             background: 'none',
                             border: 'none',
                             cursor: 'pointer',
-                            fontSize: '0.72rem',
-                            color: copiedUtr === c.utrNumber ? '#16a34a' : '#0284c7',
+                            fontSize: '0.75rem',
+                            color: copiedUtr === c.utrNumber ? 'var(--fg-green-600)' : 'var(--fg-sky-600)',
                             marginLeft: '4px'
                           }}
                           title="Copy UTR number"
@@ -652,8 +653,8 @@ export const MyCoursesModal: React.FC<MyCoursesModalProps> = ({
                       </div>
 
                       <div>
-                        <span style={{ color: '#94a3b8' }}>Order Date:</span>{' '}
-                        <strong style={{ color: '#0f172a' }}>{submittedDate}</strong>
+                        <span style={{ color: 'var(--tw-slate-400)' }}>Order Date:</span>{' '}
+                        <strong style={{ color: 'var(--fg-slate-900)' }}>{submittedDate}</strong>
                       </div>
                     </div>
 
@@ -661,12 +662,12 @@ export const MyCoursesModal: React.FC<MyCoursesModalProps> = ({
                     {c.isRejected && c.rejectionReason && (
                       <div
                         style={{
-                          background: '#fef2f2',
-                          border: '1px solid #fca5a5',
+                          background: 'var(--bg-red-50)',
+                          border: '1px solid var(--bd-red-300)',
                           borderRadius: '8px',
                           padding: '10px 14px',
                           fontSize: '0.8rem',
-                          color: '#b91c1c'
+                          color: 'var(--fg-red-700)'
                         }}
                       >
                         <strong>Rejection Reason:</strong> {c.rejectionReason}
@@ -677,12 +678,12 @@ export const MyCoursesModal: React.FC<MyCoursesModalProps> = ({
                     {c.isPending && (
                       <div
                         style={{
-                          background: '#fffbeb',
-                          border: '1px solid #fde68a',
+                          background: 'var(--bg-amber-50)',
+                          border: '1px solid var(--bd-amber-200)',
                           borderRadius: '8px',
                           padding: '10px 14px',
                           fontSize: '0.8rem',
-                          color: '#92400e',
+                          color: 'var(--fg-amber-800)',
                           display: 'flex',
                           justifyContent: 'space-between',
                           alignItems: 'center',
@@ -699,12 +700,12 @@ export const MyCoursesModal: React.FC<MyCoursesModalProps> = ({
                             target="_blank"
                             rel="noopener noreferrer"
                             style={{
-                              background: '#2563eb',
+                              background: 'var(--tw-blue-600)',
                               color: '#ffffff',
                               padding: '5px 12px',
                               borderRadius: '6px',
                               textDecoration: 'none',
-                              fontSize: '0.76rem',
+                              fontSize: '0.75rem',
                               fontWeight: 800,
                               display: 'inline-flex',
                               alignItems: 'center',
@@ -724,12 +725,12 @@ export const MyCoursesModal: React.FC<MyCoursesModalProps> = ({
                           <button
                             onClick={() => handleDirectOpenCourse(c)}
                             style={{
-                              background: 'linear-gradient(135deg, #16a34a 0%, #15803d 100%)',
+                              background: 'linear-gradient(135deg, var(--tw-green-600) 0%, var(--tw-green-700) 100%)',
                               color: '#ffffff',
                               border: 'none',
                               borderRadius: '10px',
                               padding: '11px 22px',
-                              fontSize: '0.92rem',
+                              fontSize: '0.95rem',
                               fontWeight: 900,
                               cursor: 'pointer',
                               display: 'inline-flex',
@@ -747,12 +748,12 @@ export const MyCoursesModal: React.FC<MyCoursesModalProps> = ({
                           <button
                             onClick={() => handleDirectOpenCourse(c)}
                             style={{
-                              background: '#ffffff',
-                              border: '1.5px solid #0284c7',
-                              color: '#0284c7',
+                              background: 'var(--surface)',
+                              border: '1.5px solid var(--tw-sky-600)',
+                              color: 'var(--fg-sky-600)',
                               borderRadius: '10px',
                               padding: '11px 18px',
-                              fontSize: '0.88rem',
+                              fontSize: '0.875rem',
                               fontWeight: 800,
                               cursor: 'pointer',
                               display: 'inline-flex',
@@ -772,12 +773,12 @@ export const MyCoursesModal: React.FC<MyCoursesModalProps> = ({
                             onOpenPayment(c.selectedExamId);
                           }}
                           style={{
-                            background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
+                            background: 'linear-gradient(135deg, var(--tw-amber-500) 0%, var(--tw-amber-600) 100%)',
                             color: '#ffffff',
                             border: 'none',
                             borderRadius: '10px',
                             padding: '10px 20px',
-                            fontSize: '0.88rem',
+                            fontSize: '0.875rem',
                             fontWeight: 800,
                             cursor: 'pointer',
                             display: 'inline-flex',
@@ -795,12 +796,12 @@ export const MyCoursesModal: React.FC<MyCoursesModalProps> = ({
                             onOpenPayment(c.selectedExamId);
                           }}
                           style={{
-                            background: '#dc2626',
+                            background: 'var(--tw-red-600)',
                             color: '#ffffff',
                             border: 'none',
                             borderRadius: '10px',
                             padding: '10px 20px',
-                            fontSize: '0.88rem',
+                            fontSize: '0.875rem',
                             fontWeight: 800,
                             cursor: 'pointer',
                             display: 'inline-flex',
@@ -812,7 +813,7 @@ export const MyCoursesModal: React.FC<MyCoursesModalProps> = ({
                           <span>Re-submit Payment Proof</span>
                         </button>
                       ) : (
-                        <div style={{ fontSize: '0.78rem', color: '#64748b', fontStyle: 'italic' }}>
+                        <div style={{ fontSize: '0.8rem', color: 'var(--fg-slate-500)', fontStyle: 'italic' }}>
                           Course access unlocks automatically as soon as admin approves the UTR.
                         </div>
                       )}
@@ -828,8 +829,8 @@ export const MyCoursesModal: React.FC<MyCoursesModalProps> = ({
         <div
           style={{
             padding: '14px 24px',
-            background: '#ffffff',
-            borderTop: '1px solid #e2e8f0',
+            background: 'var(--surface)',
+            borderTop: '1px solid var(--bd-slate-200)',
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'center',
@@ -837,19 +838,19 @@ export const MyCoursesModal: React.FC<MyCoursesModalProps> = ({
             gap: '12px'
           }}
         >
-          <div style={{ fontSize: '0.8rem', color: '#64748b' }}>
+          <div style={{ fontSize: '0.8rem', color: 'var(--fg-slate-500)' }}>
             🔒 All purchases include dedicated exam scoring benchmarks & AI drills.
           </div>
           <div style={{ display: 'flex', gap: '8px' }}>
             <button
               onClick={onClose}
               style={{
-                background: '#f1f5f9',
-                border: '1px solid #cbd5e1',
-                color: '#334155',
+                background: 'var(--bg-slate-100)',
+                border: '1px solid var(--bd-slate-300)',
+                color: 'var(--fg-slate-700)',
                 padding: '8px 18px',
                 borderRadius: '8px',
-                fontSize: '0.85rem',
+                fontSize: '0.875rem',
                 fontWeight: 700,
                 cursor: 'pointer'
               }}

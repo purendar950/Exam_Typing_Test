@@ -69,12 +69,12 @@ export const PwaInstallPrompt: React.FC = () => {
         zIndex: 9998,
         maxWidth: '380px',
         width: 'calc(100% - 32px)',
-        background: isOffline ? '#064e3b' : '#0f172a',
+        background: isOffline ? 'var(--tw-emerald-900)' : 'var(--tw-slate-900)',
         color: '#ffffff',
         padding: '12px 16px',
         borderRadius: '12px',
         boxShadow: '0 8px 30px rgba(0,0,0,0.3)',
-        border: `1.5px solid ${isOffline ? '#10b981' : '#0284c7'}`,
+        border: `1.5px solid ${isOffline ? 'var(--tw-emerald-500)' : 'var(--tw-sky-600)'}`,
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
@@ -85,7 +85,7 @@ export const PwaInstallPrompt: React.FC = () => {
       <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
         <span style={{ fontSize: '1.4rem' }}>{isOffline ? '⚡' : '📲'}</span>
         <div>
-          <div style={{ fontWeight: 800, fontSize: '0.88rem' }}>
+          <div style={{ fontWeight: 800, fontSize: '0.875rem' }}>
             {isOffline ? 'Offline Mode Active' : 'Install UP Typing App'}
           </div>
           <div style={{ fontSize: '0.75rem', opacity: 0.85 }}>
@@ -101,12 +101,12 @@ export const PwaInstallPrompt: React.FC = () => {
           <button
             onClick={handleInstallClick}
             style={{
-              background: '#0284c7',
+              background: 'var(--tw-sky-600)',
               color: '#ffffff',
               border: 'none',
               padding: '6px 12px',
               borderRadius: '6px',
-              fontSize: '0.78rem',
+              fontSize: '0.8rem',
               fontWeight: 700,
               cursor: 'pointer',
               whiteSpace: 'nowrap'
@@ -120,7 +120,7 @@ export const PwaInstallPrompt: React.FC = () => {
           style={{
             background: 'transparent',
             border: 'none',
-            color: '#94a3b8',
+            color: 'var(--tw-slate-400)',
             fontSize: '1rem',
             cursor: 'pointer',
             padding: '2px 6px'

@@ -197,9 +197,9 @@ export const ExamLogo: React.FC<ExamLogoProps> = ({
         height: dimension,
         borderRadius: '50%',
         objectFit: 'contain',
-        background: '#ffffff',
+        background: 'var(--surface)',
         padding: '2px',
-        border: '1.5px solid #e2e8f0',
+        border: '1.5px solid var(--bd-slate-200)',
         boxShadow: '0 2px 5px rgba(0,0,0,0.06)',
         flexShrink: 0,
         ...style
@@ -224,46 +224,46 @@ const mk = (from: string, to: string, border: string): ExamCardTheme => ({
 
 // Keyed by logo file name (prefix match), so every commission that shares a logo shares a colour.
 const LOGO_THEMES: Array<[string, ExamCardTheme]> = [
-  ['up-police', mk('#eff6ff', '#dbeafe', '#93c5fd')], // UP Police - blue
-  ['uppsc', mk('#eef2ff', '#e0e7ff', '#a5b4fc')], // UPPSC - indigo
-  ['upsssc', mk('#f0fdfa', '#ccfbf1', '#5eead4')], // UPSSSC - teal
-  ['ssc', mk('#fff7ed', '#ffedd5', '#fdba74')], // SSC - orange
-  ['railways', mk('#fef2f2', '#fee2e2', '#fca5a5')], // Railways - red
-  ['allahabad-hc', mk('#fffbeb', '#fef3c7', '#fcd34d')], // Allahabad HC - amber
-  ['delhi-high-court', mk('#faf5ff', '#f3e8ff', '#d8b4fe')], // Delhi HC - purple
-  ['delhi-hc', mk('#faf5ff', '#f3e8ff', '#d8b4fe')],
-  ['supreme-court', mk('#fefce8', '#fef9c3', '#fde047')], // Supreme Court - yellow
-  ['phhc', mk('#f7fee7', '#ecfccb', '#bef264')], // Punjab & Haryana HC - lime
-  ['aphc', mk('#ecfdf5', '#d1fae5', '#6ee7b7')], // Andhra HC - emerald
-  ['judiciary-seal', mk('#fafaf9', '#f5f5f4', '#d6d3d1')], // Generic judiciary - stone
-  ['delhi-police', mk('#f0f9ff', '#e0f2fe', '#7dd3fc')], // Delhi Police - sky
-  ['dsssb', mk('#ecfeff', '#cffafe', '#67e8f9')], // DSSSB - cyan
-  ['dda', mk('#f0fdfa', '#e6fffa', '#99f6e4')], // DDA
-  ['capf-bsf', mk('#f0fdf4', '#dcfce7', '#86efac')], // Defence / BSF - green
-  ['bihar-govt', mk('#fff1f2', '#ffe4e6', '#fda4af')], // Bihar - rose
-  ['cbse', mk('#f5f3ff', '#ede9fe', '#c4b5fd')], // CBSE / NTA - violet
-  ['ncert', mk('#fdf4ff', '#fae8ff', '#f0abfc')], // NCERT - fuchsia
-  ['kvs', mk('#fff7ed', '#fef3c7', '#fdba74')], // KVS/NVS
-  ['csir', mk('#f8fafc', '#e2e8f0', '#94a3b8')], // CSIR - slate
-  ['aiims', mk('#fef2f2', '#ffe4e6', '#fda4af')], // AIIMS
-  ['bhu', mk('#fffbeb', '#fef3c7', '#fcd34d')], // BHU
-  ['emrs', mk('#f0fdf4', '#d1fae5', '#6ee7b7')], // EMRS
-  ['mp-cpct', mk('#fdf2f8', '#fce7f3', '#f9a8d4')], // MP CPCT - pink
-  ['rssb', mk('#fdf2f8', '#fbcfe8', '#f472b6')], // Rajasthan RSSB
-  ['skau', mk('#f7fee7', '#d9f99d', '#a3e635')], // SKAU
-  ['wbpsc', mk('#eff6ff', '#bfdbfe', '#60a5fa')] // West Bengal
+  ['up-police', mk('var(--bg-blue-50)', 'var(--bg-blue-100)', 'var(--bd-blue-300)')], // UP Police - blue
+  ['uppsc', mk('var(--bg-indigo-50)', 'var(--bg-indigo-100)', 'var(--bd-indigo-300)')], // UPPSC - indigo
+  ['upsssc', mk('var(--bg-teal-50)', 'var(--bg-teal-100)', 'var(--bd-teal-300)')], // UPSSSC - teal
+  ['ssc', mk('var(--bg-orange-50)', 'var(--bg-orange-100)', 'var(--bd-orange-300)')], // SSC - orange
+  ['railways', mk('var(--bg-red-50)', 'var(--bg-red-100)', 'var(--bd-red-300)')], // Railways - red
+  ['allahabad-hc', mk('var(--bg-amber-50)', 'var(--bg-amber-100)', 'var(--bd-amber-300)')], // Allahabad HC - amber
+  ['delhi-high-court', mk('var(--bg-purple-50)', 'var(--bg-purple-100)', 'var(--bd-purple-300)')], // Delhi HC - purple
+  ['delhi-hc', mk('var(--bg-purple-50)', 'var(--bg-purple-100)', 'var(--bd-purple-300)')],
+  ['supreme-court', mk('var(--bg-yellow-50)', 'var(--bg-yellow-100)', 'var(--bd-yellow-300)')], // Supreme Court - yellow
+  ['phhc', mk('var(--bg-lime-50)', 'var(--bg-lime-100)', 'var(--bd-lime-300)')], // Punjab & Haryana HC - lime
+  ['aphc', mk('var(--bg-emerald-50)', 'var(--bg-emerald-100)', 'var(--bd-emerald-300)')], // Andhra HC - emerald
+  ['judiciary-seal', mk('var(--bg-stone-50)', 'var(--bg-stone-100)', 'var(--bd-stone-300)')], // Generic judiciary - stone
+  ['delhi-police', mk('var(--bg-sky-50)', 'var(--bg-sky-100)', 'var(--bd-sky-300)')], // Delhi Police - sky
+  ['dsssb', mk('var(--bg-cyan-50)', 'var(--bg-cyan-100)', 'var(--bd-cyan-300)')], // DSSSB - cyan
+  ['dda', mk('var(--bg-teal-50)', 'var(--bg-cyan-50)', 'var(--bd-teal-200)')], // DDA
+  ['capf-bsf', mk('var(--bg-green-50)', 'var(--bg-green-100)', 'var(--bd-green-300)')], // Defence / BSF - green
+  ['bihar-govt', mk('var(--bg-rose-50)', 'var(--bg-rose-100)', 'var(--bd-rose-300)')], // Bihar - rose
+  ['cbse', mk('var(--bg-violet-50)', 'var(--bg-violet-100)', 'var(--bd-violet-300)')], // CBSE / NTA - violet
+  ['ncert', mk('var(--bg-fuchsia-50)', 'var(--bg-fuchsia-100)', 'var(--bd-fuchsia-300)')], // NCERT - fuchsia
+  ['kvs', mk('var(--bg-orange-50)', 'var(--bg-amber-100)', 'var(--bd-orange-300)')], // KVS/NVS
+  ['csir', mk('var(--bg-slate-50)', 'var(--bg-slate-200)', 'var(--bd-slate-400)')], // CSIR - slate
+  ['aiims', mk('var(--bg-red-50)', 'var(--bg-rose-100)', 'var(--bd-rose-300)')], // AIIMS
+  ['bhu', mk('var(--bg-amber-50)', 'var(--bg-amber-100)', 'var(--bd-amber-300)')], // BHU
+  ['emrs', mk('var(--bg-green-50)', 'var(--bg-emerald-100)', 'var(--bd-emerald-300)')], // EMRS
+  ['mp-cpct', mk('var(--bg-pink-50)', 'var(--bg-pink-100)', 'var(--bd-pink-300)')], // MP CPCT - pink
+  ['rssb', mk('var(--bg-pink-50)', 'var(--bg-pink-200)', 'var(--tw-pink-400)')], // Rajasthan RSSB
+  ['skau', mk('var(--bg-lime-50)', 'var(--bg-lime-200)', 'var(--tw-lime-400)')], // SKAU
+  ['wbpsc', mk('var(--bg-blue-50)', 'var(--bg-blue-200)', 'var(--tw-blue-400)')] // West Bengal
 ];
 
 const GROUP_THEMES: Record<string, ExamCardTheme> = {
-  up_govt: mk('#eff6ff', '#dbeafe', '#93c5fd'),
-  judiciary: mk('#fffbeb', '#fef3c7', '#fcd34d'),
-  ssc: mk('#fff7ed', '#ffedd5', '#fdba74'),
-  delhi_govt: mk('#ecfeff', '#cffafe', '#67e8f9'),
-  defense: mk('#f0fdf4', '#dcfce7', '#86efac'),
-  bihar: mk('#fff1f2', '#ffe4e6', '#fda4af'),
-  central_nta: mk('#f5f3ff', '#ede9fe', '#c4b5fd'),
-  railways: mk('#fef2f2', '#fee2e2', '#fca5a5'),
-  state_exams: mk('#fdf2f8', '#fce7f3', '#f9a8d4')
+  up_govt: mk('var(--bg-blue-50)', 'var(--bg-blue-100)', 'var(--bd-blue-300)'),
+  judiciary: mk('var(--bg-amber-50)', 'var(--bg-amber-100)', 'var(--bd-amber-300)'),
+  ssc: mk('var(--bg-orange-50)', 'var(--bg-orange-100)', 'var(--bd-orange-300)'),
+  delhi_govt: mk('var(--bg-cyan-50)', 'var(--bg-cyan-100)', 'var(--bd-cyan-300)'),
+  defense: mk('var(--bg-green-50)', 'var(--bg-green-100)', 'var(--bd-green-300)'),
+  bihar: mk('var(--bg-rose-50)', 'var(--bg-rose-100)', 'var(--bd-rose-300)'),
+  central_nta: mk('var(--bg-violet-50)', 'var(--bg-violet-100)', 'var(--bd-violet-300)'),
+  railways: mk('var(--bg-red-50)', 'var(--bg-red-100)', 'var(--bd-red-300)'),
+  state_exams: mk('var(--bg-pink-50)', 'var(--bg-pink-100)', 'var(--bd-pink-300)')
 };
 
 export function getExamTheme(identifier: string, categoryGroup?: string): ExamCardTheme {
@@ -272,7 +272,7 @@ export function getExamTheme(identifier: string, categoryGroup?: string): ExamCa
   for (const [key, theme] of LOGO_THEMES) {
     if (stem.startsWith(key)) return theme;
   }
-  return GROUP_THEMES[categoryGroup || ''] || mk('#f8fafc', '#f1f5f9', '#cbd5e1');
+  return GROUP_THEMES[categoryGroup || ''] || mk('var(--bg-slate-50)', 'var(--bg-slate-100)', 'var(--bd-slate-300)');
 }
 
 // Faint, see-through commission logo in the corner of a card.

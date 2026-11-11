@@ -44,7 +44,7 @@ export const LegalPolicyModal: React.FC<LegalPolicyModalProps> = ({
     >
       <div
         style={{
-          backgroundColor: '#ffffff',
+          backgroundColor: 'var(--surface)',
           borderRadius: '16px',
           width: '100%',
           maxWidth: '900px',
@@ -61,21 +61,21 @@ export const LegalPolicyModal: React.FC<LegalPolicyModalProps> = ({
         <div
           style={{
             padding: '16px 24px',
-            borderBottom: '1px solid #e2e8f0',
+            borderBottom: '1px solid var(--bd-slate-200)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
-            background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)',
+            background: 'linear-gradient(135deg, var(--tw-slate-900) 0%, var(--tw-slate-800) 100%)',
             color: '#ffffff'
           }}
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
             <span style={{ fontSize: '1.4rem' }}>⚖️</span>
             <div>
-              <h2 style={{ margin: 0, fontSize: '1.15rem', fontWeight: 800 }}>
+              <h2 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 800 }}>
                 Legal Policies & Trust Center
               </h2>
-              <p style={{ margin: 0, fontSize: '0.78rem', color: '#94a3b8' }}>
+              <p style={{ margin: 0, fontSize: '0.8rem', color: 'var(--tw-slate-400)' }}>
                 Exam Typing Mentor &bull; Transparency, Privacy & Terms of Service
               </p>
             </div>
@@ -102,8 +102,8 @@ export const LegalPolicyModal: React.FC<LegalPolicyModalProps> = ({
         <div
           style={{
             display: 'flex',
-            background: '#f8fafc',
-            borderBottom: '1px solid #e2e8f0',
+            background: 'var(--bg-slate-50)',
+            borderBottom: '1px solid var(--bd-slate-200)',
             overflowX: 'auto',
             padding: '4px 12px',
             gap: '6px'
@@ -126,10 +126,10 @@ export const LegalPolicyModal: React.FC<LegalPolicyModalProps> = ({
                   padding: '10px 14px',
                   borderRadius: '8px',
                   border: 'none',
-                  background: isActive ? '#0284c7' : 'transparent',
-                  color: isActive ? '#ffffff' : '#64748b',
+                  background: isActive ? 'var(--tw-sky-600)' : 'transparent',
+                  color: isActive ? '#ffffff' : 'var(--fg-slate-500)',
                   fontWeight: isActive ? 700 : 600,
-                  fontSize: '0.82rem',
+                  fontSize: '0.8rem',
                   cursor: 'pointer',
                   whiteSpace: 'nowrap',
                   transition: 'all 0.15s ease'
@@ -147,63 +147,63 @@ export const LegalPolicyModal: React.FC<LegalPolicyModalProps> = ({
             padding: '24px 28px',
             overflowY: 'auto',
             flex: 1,
-            color: '#334155',
-            fontSize: '0.9rem',
+            color: 'var(--fg-slate-700)',
+            fontSize: '0.875rem',
             lineHeight: 1.7
           }}
         >
           {/* 1. TERMS OF SERVICE */}
           {activeTab === 'terms' && (
             <div>
-              <h3 style={{ fontSize: '1.25rem', fontWeight: 800, color: '#0f172a', marginBottom: '8px' }}>
+              <h3 style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--fg-slate-900)', marginBottom: '8px' }}>
                 Terms and Conditions of Service
               </h3>
-              <p style={{ fontSize: '0.78rem', color: '#64748b', marginBottom: '16px' }}>
+              <p style={{ fontSize: '0.8rem', color: 'var(--fg-slate-500)', marginBottom: '16px' }}>
                 Last Updated: November 2026 &bull; Effective Date: Immediate
               </p>
 
-              <div style={{ background: '#f0f9ff', borderLeft: '4px solid #0284c7', padding: '12px 16px', borderRadius: '4px', marginBottom: '18px' }}>
-                <p style={{ margin: 0, fontSize: '0.85rem', color: '#0369a1' }}>
+              <div style={{ background: 'var(--bg-sky-50)', borderLeft: '4px solid var(--tw-sky-600)', padding: '12px 16px', borderRadius: '4px', marginBottom: '18px' }}>
+                <p style={{ margin: 0, fontSize: '0.875rem', color: 'var(--fg-sky-700)' }}>
                   Please read these Terms and Conditions carefully before using the <strong>Exam Typing Mentor</strong> online portal. By registering, accessing, or practicing on this website, you agree to be legally bound by these terms.
                 </p>
               </div>
 
-              <h4 style={{ color: '#0f172a', marginTop: '16px', marginBottom: '6px' }}>1. Platform Purpose & Scope</h4>
+              <h4 style={{ color: 'var(--fg-slate-900)', marginTop: '16px', marginBottom: '6px' }}>1. Platform Purpose & Scope</h4>
               <p>
                 Exam Typing Mentor is an educational web simulator designed to assist aspirants in preparing for competitive government typing examinations, including but not limited to <strong>UP Police Computer Operator</strong>, <strong>UP Police ASI (Clerk/Accounts)</strong>, <strong>UPSSSC Junior Assistant</strong>, <strong>Allahabad High Court</strong>, and <strong>SSC CGL / CHSL</strong>.
               </p>
 
-              <h4 style={{ color: '#0f172a', marginTop: '16px', marginBottom: '6px' }}>2. User Account & Security</h4>
+              <h4 style={{ color: 'var(--fg-slate-900)', marginTop: '16px', marginBottom: '6px' }}>2. User Account & Security</h4>
               <ul>
                 <li>Each student is granted an individual, non-transferable account. Sharing account credentials, passwords, or active sessions is strictly prohibited.</li>
                 <li>Users are responsible for maintaining the confidentiality of their login credentials and are responsible for all test attempts under their account.</li>
                 <li>Accounts detected engaging in automated bot typing, script injection, or unauthorized credential sharing may be suspended without refund.</li>
               </ul>
 
-              <h4 style={{ color: '#0f172a', marginTop: '16px', marginBottom: '6px' }}>3. Typing Evaluation Algorithm</h4>
+              <h4 style={{ color: 'var(--fg-slate-900)', marginTop: '16px', marginBottom: '6px' }}>3. Typing Evaluation Algorithm</h4>
               <p>
                 Our typing test evaluation engine closely simulates the official government exam formulas (such as UPPRPB formula: Gross WPM, Net WPM, 85% Accuracy benchmark, and Backspace rules). While we strive for 100% fidelity to official exam standards, Exam Typing Mentor operates as a practice tool and does not issue official government certifications or guarantee selection in government recruitment.
               </p>
 
-              <h4 style={{ color: '#0f172a', marginTop: '16px', marginBottom: '6px' }}>4. Free Demo Tests & Pro Subscriptions</h4>
+              <h4 style={{ color: 'var(--fg-slate-900)', marginTop: '16px', marginBottom: '6px' }}>4. Free Demo Tests & Pro Subscriptions</h4>
               <ul>
                 <li><strong>7 Free Demo Tests:</strong> Every candidate is entitled to take the first 7 mock tests of every exam category completely free of charge to evaluate our system, software interface, keyboard responsiveness, and timer accuracy.</li>
                 <li><strong>Pro Subscription:</strong> Access to Test #08 and beyond requires an active Pro subscription (Single Exam Pass, Category Combo Pass, or All Exams Mega Pass). Subscriptions are valid for the designated validity period (1 Month, 3 Months, 6 Months, or 12 Months) from the approval date.</li>
                 <li><strong>Strict No-Refund Clause:</strong> Once an order is placed and subscription is activated, payments are <strong>strictly non-refundable under any circumstances whatsoever</strong>. All purchases are final.</li>
               </ul>
 
-              <h4 style={{ color: '#0f172a', marginTop: '16px', marginBottom: '6px' }}>5. User Conduct & Prohibited Activities</h4>
+              <h4 style={{ color: 'var(--fg-slate-900)', marginTop: '16px', marginBottom: '6px' }}>5. User Conduct & Prohibited Activities</h4>
               <ul>
                 <li>You agree not to copy, reverse-engineer, decompile, scrape, or mass-download passage banks or exam software assets.</li>
                 <li>You agree not to post vulgar, abusive, or fraudulent content or spam within our Telegram community channels or discussion forums.</li>
               </ul>
 
-              <h4 style={{ color: '#0f172a', marginTop: '16px', marginBottom: '6px' }}>6. Modifications to Service</h4>
+              <h4 style={{ color: 'var(--fg-slate-900)', marginTop: '16px', marginBottom: '6px' }}>6. Modifications to Service</h4>
               <p>
                 We reserve the right to update typing passages, improve UI algorithms, adjust subscription pricing, or introduce new exams at any time to reflect the latest government exam patterns.
               </p>
 
-              <h4 style={{ color: '#0f172a', marginTop: '16px', marginBottom: '6px' }}>7. Governing Law</h4>
+              <h4 style={{ color: 'var(--fg-slate-900)', marginTop: '16px', marginBottom: '6px' }}>7. Governing Law</h4>
               <p>
                 These Terms shall be governed by and construed in accordance with the laws of the Republic of India. Any disputes arising out of the use of this website shall be subject to the exclusive jurisdiction of the competent courts in Uttar Pradesh, India.
               </p>
@@ -213,20 +213,20 @@ export const LegalPolicyModal: React.FC<LegalPolicyModalProps> = ({
           {/* 2. PRIVACY POLICY */}
           {activeTab === 'privacy' && (
             <div>
-              <h3 style={{ fontSize: '1.25rem', fontWeight: 800, color: '#0f172a', marginBottom: '8px' }}>
+              <h3 style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--fg-slate-900)', marginBottom: '8px' }}>
                 Privacy Policy
               </h3>
-              <p style={{ fontSize: '0.78rem', color: '#64748b', marginBottom: '16px' }}>
+              <p style={{ fontSize: '0.8rem', color: 'var(--fg-slate-500)', marginBottom: '16px' }}>
                 Your Privacy Matters &bull; Strict Non-Commercial Data Protection
               </p>
 
-              <div style={{ background: '#ecfdf5', borderLeft: '4px solid #10b981', padding: '12px 16px', borderRadius: '4px', marginBottom: '18px' }}>
-                <p style={{ margin: 0, fontSize: '0.85rem', color: '#047857' }}>
+              <div style={{ background: 'var(--bg-emerald-50)', borderLeft: '4px solid var(--tw-emerald-500)', padding: '12px 16px', borderRadius: '4px', marginBottom: '18px' }}>
+                <p style={{ margin: 0, fontSize: '0.875rem', color: 'var(--fg-emerald-700)' }}>
                   <strong>Our Privacy Guarantee:</strong> We never sell, rent, or trade your personal information, phone number, or test performance history to third-party telemarketers or advertisers.
                 </p>
               </div>
 
-              <h4 style={{ color: '#0f172a', marginTop: '16px', marginBottom: '6px' }}>1. Information We Collect</h4>
+              <h4 style={{ color: 'var(--fg-slate-900)', marginTop: '16px', marginBottom: '6px' }}>1. Information We Collect</h4>
               <p>To provide personalized typing training and maintain candidate progress, we collect:</p>
               <ul>
                 <li><strong>Account Data:</strong> Name, Email Address, and encrypted authentication tokens via Google Firebase.</li>
@@ -235,7 +235,7 @@ export const LegalPolicyModal: React.FC<LegalPolicyModalProps> = ({
                 <li><strong>Local Device Preferences:</strong> Sound effects state (ON/OFF), font size, auto-scroll choice, and dark/light mode saved locally on your device via browser LocalStorage.</li>
               </ul>
 
-              <h4 style={{ color: '#0f172a', marginTop: '16px', marginBottom: '6px' }}>2. How We Use Your Information</h4>
+              <h4 style={{ color: 'var(--fg-slate-900)', marginTop: '16px', marginBottom: '6px' }}>2. How We Use Your Information</h4>
               <ul>
                 <li>To calculate your typing speed, accuracy percentage, and exam qualification status.</li>
                 <li>To generate detailed Weak Keys & Mistakes drills tailored to your typing habits.</li>
@@ -243,17 +243,17 @@ export const LegalPolicyModal: React.FC<LegalPolicyModalProps> = ({
                 <li>To send important exam updates, admit card alerts, or score reports to your registered email or Telegram account.</li>
               </ul>
 
-              <h4 style={{ color: '#0f172a', marginTop: '16px', marginBottom: '6px' }}>3. Data Storage & Security</h4>
+              <h4 style={{ color: 'var(--fg-slate-900)', marginTop: '16px', marginBottom: '6px' }}>3. Data Storage & Security</h4>
               <p>
                 All sensitive candidate credentials and test histories are stored on Google Cloud Firebase infrastructure with enterprise-grade SSL/TLS 256-bit encryption. Payment verification screenshots are only accessible to authorized platform administrators for subscription activation.
               </p>
 
-              <h4 style={{ color: '#0f172a', marginTop: '16px', marginBottom: '6px' }}>4. Cookies & Local Storage</h4>
+              <h4 style={{ color: 'var(--fg-slate-900)', marginTop: '16px', marginBottom: '6px' }}>4. Cookies & Local Storage</h4>
               <p>
                 We use browser <code>localStorage</code> and <code>sessionStorage</code> exclusively to save your active test progress, display settings, and login session so your experience remains seamless across page refreshes. We do not use intrusive third-party cross-site tracking cookies.
               </p>
 
-              <h4 style={{ color: '#0f172a', marginTop: '16px', marginBottom: '6px' }}>5. User Rights & Data Deletion</h4>
+              <h4 style={{ color: 'var(--fg-slate-900)', marginTop: '16px', marginBottom: '6px' }}>5. User Rights & Data Deletion</h4>
               <p>
                 Candidates may request complete deletion of their account and test attempt history at any time by contacting our administrator via Telegram (<code>@purendare</code>).
               </p>
@@ -263,23 +263,23 @@ export const LegalPolicyModal: React.FC<LegalPolicyModalProps> = ({
           {/* 3. STRICT NO-REFUND POLICY */}
           {activeTab === 'refund' && (
             <div>
-              <h3 style={{ fontSize: '1.25rem', fontWeight: 800, color: '#991b1b', marginBottom: '8px' }}>
+              <h3 style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--fg-red-800)', marginBottom: '8px' }}>
                 Strict No-Refund & Cancellation Policy
               </h3>
-              <p style={{ fontSize: '0.78rem', color: '#64748b', marginBottom: '16px' }}>
+              <p style={{ fontSize: '0.8rem', color: 'var(--fg-slate-500)', marginBottom: '16px' }}>
                 Effective Date: Immediate &bull; Mandatory Terms for All Candidates
               </p>
 
-              <div style={{ background: '#fef2f2', borderLeft: '4px solid #dc2626', padding: '14px 18px', borderRadius: '6px', marginBottom: '18px' }}>
-                <p style={{ margin: 0, fontSize: '0.92rem', color: '#991b1b', fontWeight: 800 }}>
+              <div style={{ background: 'var(--bg-red-50)', borderLeft: '4px solid var(--tw-red-600)', padding: '14px 18px', borderRadius: '6px', marginBottom: '18px' }}>
+                <p style={{ margin: 0, fontSize: '0.95rem', color: 'var(--fg-red-800)', fontWeight: 800 }}>
                   🚨 MANDATORY NOTICE: PAYMENTS ARE STRICTLY NON-REFUNDABLE UNDER ANY CIRCUMSTANCES
                 </p>
-                <p style={{ margin: '6px 0 0', fontSize: '0.85rem', color: '#b91c1c', lineHeight: 1.5 }}>
+                <p style={{ margin: '6px 0 0', fontSize: '0.875rem', color: 'var(--fg-red-700)', lineHeight: 1.5 }}>
                   Once a candidate completes payment and access to the Pro exam test series is granted, <strong>no refunds, cancellations, chargebacks, or reversals will be provided under any circumstances whatsoever</strong>. All sales and subscription fees are final and non-negotiable.
                 </p>
               </div>
 
-              <h4 style={{ color: '#0f172a', marginTop: '16px', marginBottom: '6px' }}>1. Try Before You Buy: 7 Free Demo Tests Guarantee</h4>
+              <h4 style={{ color: 'var(--fg-slate-900)', marginTop: '16px', marginBottom: '6px' }}>1. Try Before You Buy: 7 Free Demo Tests Guarantee</h4>
               <p>
                 To ensure 100% transparency, fairness, and student confidence, <strong>Exam Typing Mentor provides the first 7 full-length typing tests of every single exam completely free of charge</strong>.
               </p>
@@ -288,7 +288,7 @@ export const LegalPolicyModal: React.FC<LegalPolicyModalProps> = ({
                 <li>By initiating payment or submitting a transaction UTR, the candidate explicitly certifies that they have attempted the 7 free demo tests, evaluated the platform thoroughly, and found the software completely satisfactory.</li>
               </ul>
 
-              <h4 style={{ color: '#0f172a', marginTop: '16px', marginBottom: '6px' }}>2. Absolute No-Refund Scenarios</h4>
+              <h4 style={{ color: 'var(--fg-slate-900)', marginTop: '16px', marginBottom: '6px' }}>2. Absolute No-Refund Scenarios</h4>
               <p>
                 Refund requests will <strong>NOT</strong> be entertained or granted under any of the following circumstances:
               </p>
@@ -301,12 +301,12 @@ export const LegalPolicyModal: React.FC<LegalPolicyModalProps> = ({
                 <li><strong>Account Sharing Violations:</strong> Account suspension or termination resulting from sharing credentials, multiple concurrent IP logins, or scraping.</li>
               </ul>
 
-              <h4 style={{ color: '#0f172a', marginTop: '16px', marginBottom: '6px' }}>3. Digital Goods & Instant Delivery</h4>
+              <h4 style={{ color: 'var(--fg-slate-900)', marginTop: '16px', marginBottom: '6px' }}>3. Digital Goods & Instant Delivery</h4>
               <p>
                 The subscription provides immediate, intangible digital access to our proprietary question banks, passage archives, and AI performance reports. In accordance with digital commerce standards, digital goods cannot be returned or revoked once delivered.
               </p>
 
-              <h4 style={{ color: '#0f172a', marginTop: '16px', marginBottom: '6px' }}>4. Accidental Duplicate Payment Exception</h4>
+              <h4 style={{ color: 'var(--fg-slate-900)', marginTop: '16px', marginBottom: '6px' }}>4. Accidental Duplicate Payment Exception</h4>
               <p>
                 The sole technical exception is an <strong>accidental duplicate deduction</strong> where a candidate's bank debits twice for the exact same transaction within a few minutes due to a UPI network glitch. In such cases, upon verification of the identical duplicate UTR with our bank, the extra amount will be refunded within 3 to 5 business days. This does not apply to active, intended subscriptions.
               </p>
@@ -316,30 +316,30 @@ export const LegalPolicyModal: React.FC<LegalPolicyModalProps> = ({
           {/* 4. COPYRIGHT & INTELLECTUAL PROPERTY */}
           {activeTab === 'copyright' && (
             <div>
-              <h3 style={{ fontSize: '1.25rem', fontWeight: 800, color: '#0f172a', marginBottom: '8px' }}>
+              <h3 style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--fg-slate-900)', marginBottom: '8px' }}>
                 Copyright & Intellectual Property Notice
               </h3>
-              <p style={{ fontSize: '0.78rem', color: '#64748b', marginBottom: '16px' }}>
+              <p style={{ fontSize: '0.8rem', color: 'var(--fg-slate-500)', marginBottom: '16px' }}>
                 &copy; 2026 Exam Typing Mentor. All Rights Reserved.
               </p>
 
-              <h4 style={{ color: '#0f172a', marginTop: '16px', marginBottom: '6px' }}>1. Proprietary Software & Design</h4>
+              <h4 style={{ color: 'var(--fg-slate-900)', marginTop: '16px', marginBottom: '6px' }}>1. Proprietary Software & Design</h4>
               <p>
                 All software code, visual layouts, styling, custom typewriter sound synthesizer, real-time diff evaluation algorithms, and proprietary passage arrangements available on <strong>Exam Typing Mentor</strong> are protected under the Indian Copyright Act, 1957, and international intellectual property laws.
               </p>
 
-              <h4 style={{ color: '#0f172a', marginTop: '16px', marginBottom: '6px' }}>2. Permitted Use</h4>
+              <h4 style={{ color: 'var(--fg-slate-900)', marginTop: '16px', marginBottom: '6px' }}>2. Permitted Use</h4>
               <p>
                 Subscribers and candidates are granted a limited, personal, non-exclusive, revocable license to practice and test their typing skills on this website for their individual exam preparation.
               </p>
 
-              <h4 style={{ color: '#0f172a', marginTop: '16px', marginBottom: '6px' }}>3. Prohibited Exploitation</h4>
+              <h4 style={{ color: 'var(--fg-slate-900)', marginTop: '16px', marginBottom: '6px' }}>3. Prohibited Exploitation</h4>
               <ul>
                 <li>You may not reproduce, copy, duplicate, sell, scrape, mirror, or republish our typing passages, test series, or software interfaces onto any other portal, mobile application, or offline institute material without written consent.</li>
                 <li>Unauthorized distribution of our premium passage banks via Telegram channels, WhatsApp groups, or YouTube links will result in account termination and legal action under copyright infringement provisions.</li>
               </ul>
 
-              <h4 style={{ color: '#0f172a', marginTop: '16px', marginBottom: '6px' }}>4. Fonts & Third-Party Trademarks</h4>
+              <h4 style={{ color: 'var(--fg-slate-900)', marginTop: '16px', marginBottom: '6px' }}>4. Fonts & Third-Party Trademarks</h4>
               <p>
                 <strong>KrutiDev 010</strong>, <strong>Mangal (Inscript / Remington GAIL)</strong>, and government exam acronyms (UPPRPB, UPSSSC, SSC, HSSC, BSSC) are acknowledged as the property and trademarks of their respective creators and government commissions. They are referenced strictly for educational compatibility and candidate guidance.
               </p>
@@ -349,23 +349,23 @@ export const LegalPolicyModal: React.FC<LegalPolicyModalProps> = ({
           {/* 5. DISCLAIMER */}
           {activeTab === 'disclaimer' && (
             <div>
-              <h3 style={{ fontSize: '1.25rem', fontWeight: 800, color: '#0f172a', marginBottom: '8px' }}>
+              <h3 style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--fg-slate-900)', marginBottom: '8px' }}>
                 Non-Affiliation & Educational Disclaimer
               </h3>
-              <p style={{ fontSize: '0.78rem', color: '#64748b', marginBottom: '16px' }}>
+              <p style={{ fontSize: '0.8rem', color: 'var(--fg-slate-500)', marginBottom: '16px' }}>
                 Important Notice for All Candidates
               </p>
 
-              <div style={{ background: '#fef2f2', borderLeft: '4px solid #ef4444', padding: '14px 18px', borderRadius: '4px', marginBottom: '18px' }}>
-                <p style={{ margin: 0, fontSize: '0.9rem', color: '#991b1b', fontWeight: 700 }}>
+              <div style={{ background: 'var(--bg-red-50)', borderLeft: '4px solid var(--tw-red-500)', padding: '14px 18px', borderRadius: '4px', marginBottom: '18px' }}>
+                <p style={{ margin: 0, fontSize: '0.875rem', color: 'var(--fg-red-800)', fontWeight: 700 }}>
                   NON-GOVERNMENT AFFILIATION DISCLAIMER:
                 </p>
-                <p style={{ margin: '6px 0 0', fontSize: '0.85rem', color: '#b91c1c' }}>
+                <p style={{ margin: '6px 0 0', fontSize: '0.875rem', color: 'var(--fg-red-700)' }}>
                   Exam Typing Mentor is an independent educational training platform. We are <strong>NOT affiliated, associated, authorized, endorsed by, or in any way officially connected</strong> with the Uttar Pradesh Police Recruitment and Promotion Board (UPPRPB), UPSSSC, Staff Selection Commission (SSC), Allahabad High Court, or any Central or State Government department.
                 </p>
               </div>
 
-              <h4 style={{ color: '#0f172a', marginTop: '16px', marginBottom: '6px' }}>1. Information Accuracy</h4>
+              <h4 style={{ color: 'var(--fg-slate-900)', marginTop: '16px', marginBottom: '6px' }}>1. Information Accuracy</h4>
               <p>
                 Exam benchmarks, speeds (e.g. 25 WPM Hindi, 30 WPM English), accuracy criteria, and test durations mentioned on this portal are compiled from publicly available recruitment notifications and previous years' exam patterns for student guidance. Candidates are strongly advised to verify official guidelines, dates, and admit cards directly from official government recruiting websites:
               </p>
@@ -376,7 +376,7 @@ export const LegalPolicyModal: React.FC<LegalPolicyModalProps> = ({
                 <li>Allahabad High Court: <code>allahabadhighcourt.in</code></li>
               </ul>
 
-              <h4 style={{ color: '#0f172a', marginTop: '16px', marginBottom: '6px' }}>2. No Guarantee of Selection</h4>
+              <h4 style={{ color: 'var(--fg-slate-900)', marginTop: '16px', marginBottom: '6px' }}>2. No Guarantee of Selection</h4>
               <p>
                 While regular practice on our simulator will dramatically improve your speed, key accuracy, and exam temperament, achieving qualifying marks on our platform does not guarantee selection in official government recruitment exams, as official evaluations are conducted under distinct physical conditions and administrative supervision.
               </p>
@@ -386,10 +386,10 @@ export const LegalPolicyModal: React.FC<LegalPolicyModalProps> = ({
           {/* 6. CONTACT & SUPPORT */}
           {activeTab === 'contact' && (
             <div>
-              <h3 style={{ fontSize: '1.25rem', fontWeight: 800, color: '#0f172a', marginBottom: '8px' }}>
+              <h3 style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--fg-slate-900)', marginBottom: '8px' }}>
                 Contact & Grievance Redressal
               </h3>
-              <p style={{ fontSize: '0.78rem', color: '#64748b', marginBottom: '16px' }}>
+              <p style={{ fontSize: '0.8rem', color: 'var(--fg-slate-500)', marginBottom: '16px' }}>
                 We are Here to Help You 24x7
               </p>
 
@@ -398,59 +398,59 @@ export const LegalPolicyModal: React.FC<LegalPolicyModalProps> = ({
               </p>
 
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '14px', marginTop: '16px' }}>
-                <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '10px', padding: '16px' }}>
+                <div style={{ background: 'var(--bg-slate-50)', border: '1px solid var(--bd-slate-200)', borderRadius: '10px', padding: '16px' }}>
                   <div style={{ fontSize: '1.4rem', marginBottom: '6px' }}>💬</div>
-                  <strong style={{ display: 'block', color: '#0f172a', marginBottom: '4px' }}>Direct 1-on-1 Admin Helpdesk</strong>
-                  <span style={{ fontSize: '0.82rem', color: '#64748b' }}>Fastest response for payment activations & login help:</span>
+                  <strong style={{ display: 'block', color: 'var(--fg-slate-900)', marginBottom: '4px' }}>Direct 1-on-1 Admin Helpdesk</strong>
+                  <span style={{ fontSize: '0.8rem', color: 'var(--fg-slate-500)' }}>Fastest response for payment activations & login help:</span>
                   <div style={{ marginTop: '8px' }}>
                     <a
                       href="https://t.me/purendare"
                       target="_blank"
                       rel="noopener noreferrer"
-                      style={{ color: '#0284c7', fontWeight: 700, textDecoration: 'none' }}
+                      style={{ color: 'var(--fg-sky-600)', fontWeight: 700, textDecoration: 'none' }}
                     >
                       @purendare ↗
                     </a>
                   </div>
                 </div>
 
-                <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '10px', padding: '16px' }}>
+                <div style={{ background: 'var(--bg-slate-50)', border: '1px solid var(--bd-slate-200)', borderRadius: '10px', padding: '16px' }}>
                   <div style={{ fontSize: '1.4rem', marginBottom: '6px' }}>📢</div>
-                  <strong style={{ display: 'block', color: '#0f172a', marginBottom: '4px' }}>Official Broadcast Channel</strong>
-                  <span style={{ fontSize: '0.82rem', color: '#64748b' }}>For exam dates, cutoff alerts, and daily tests:</span>
+                  <strong style={{ display: 'block', color: 'var(--fg-slate-900)', marginBottom: '4px' }}>Official Broadcast Channel</strong>
+                  <span style={{ fontSize: '0.8rem', color: 'var(--fg-slate-500)' }}>For exam dates, cutoff alerts, and daily tests:</span>
                   <div style={{ marginTop: '8px' }}>
                     <a
                       href="https://t.me/Exam_Typing_Mentor"
                       target="_blank"
                       rel="noopener noreferrer"
-                      style={{ color: '#0284c7', fontWeight: 700, textDecoration: 'none' }}
+                      style={{ color: 'var(--fg-sky-600)', fontWeight: 700, textDecoration: 'none' }}
                     >
                       t.me/Exam_Typing_Mentor ↗
                     </a>
                   </div>
                 </div>
 
-                <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '10px', padding: '16px' }}>
+                <div style={{ background: 'var(--bg-slate-50)', border: '1px solid var(--bd-slate-200)', borderRadius: '10px', padding: '16px' }}>
                   <div style={{ fontSize: '1.4rem', marginBottom: '6px' }}>👥</div>
-                  <strong style={{ display: 'block', color: '#0f172a', marginBottom: '4px' }}>Aspirants Community</strong>
-                  <span style={{ fontSize: '0.82rem', color: '#64748b' }}>Chat with thousands of fellow aspirants & share tips:</span>
+                  <strong style={{ display: 'block', color: 'var(--fg-slate-900)', marginBottom: '4px' }}>Aspirants Community</strong>
+                  <span style={{ fontSize: '0.8rem', color: 'var(--fg-slate-500)' }}>Chat with thousands of fellow aspirants & share tips:</span>
                   <div style={{ marginTop: '8px' }}>
                     <a
                       href="https://t.me/+Lw-tPbRqOOc2ZTA1"
                       target="_blank"
                       rel="noopener noreferrer"
-                      style={{ color: '#0284c7', fontWeight: 700, textDecoration: 'none' }}
+                      style={{ color: 'var(--fg-sky-600)', fontWeight: 700, textDecoration: 'none' }}
                     >
                       Join Discussion Group ↗
                     </a>
                   </div>
                 </div>
 
-                <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '10px', padding: '16px' }}>
+                <div style={{ background: 'var(--bg-slate-50)', border: '1px solid var(--bd-slate-200)', borderRadius: '10px', padding: '16px' }}>
                   <div style={{ fontSize: '1.4rem', marginBottom: '6px' }}>🛡️</div>
-                  <strong style={{ display: 'block', color: '#0f172a', marginBottom: '4px' }}>Admin & Grievance Officer</strong>
-                  <span style={{ fontSize: '0.82rem', color: '#64748b' }}>Direct escalation for account or payment disputes:</span>
-                  <div style={{ marginTop: '8px', fontSize: '0.85rem', fontWeight: 700, color: '#334155' }}>
+                  <strong style={{ display: 'block', color: 'var(--fg-slate-900)', marginBottom: '4px' }}>Admin & Grievance Officer</strong>
+                  <span style={{ fontSize: '0.8rem', color: 'var(--fg-slate-500)' }}>Direct escalation for account or payment disputes:</span>
+                  <div style={{ marginTop: '8px', fontSize: '0.875rem', fontWeight: 700, color: 'var(--fg-slate-700)' }}>
                     Purendar Chauhan (@purendare)
                   </div>
                 </div>
@@ -463,8 +463,8 @@ export const LegalPolicyModal: React.FC<LegalPolicyModalProps> = ({
         <div
           style={{
             padding: '12px 24px',
-            borderTop: '1px solid #e2e8f0',
-            background: '#f8fafc',
+            borderTop: '1px solid var(--bd-slate-200)',
+            background: 'var(--bg-slate-50)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
@@ -472,7 +472,7 @@ export const LegalPolicyModal: React.FC<LegalPolicyModalProps> = ({
             gap: '10px'
           }}
         >
-          <span style={{ fontSize: '0.78rem', color: '#94a3b8' }}>
+          <span style={{ fontSize: '0.8rem', color: 'var(--tw-slate-400)' }}>
             &copy; 2026 Exam Typing Mentor. All rights reserved.
           </span>
           <button

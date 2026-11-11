@@ -12,7 +12,7 @@ export const WpmProgressChart: React.FC<WpmProgressChartProps> = ({
 }) => {
   if (!attempts || attempts.length < 2) {
     return (
-      <div style={{ textAlign: 'center', padding: '24px 12px', color: '#64748b', fontSize: '0.85rem' }}>
+      <div style={{ textAlign: 'center', padding: '24px 12px', color: 'var(--fg-slate-500)', fontSize: '0.875rem' }}>
         <span>📈 Take at least <strong>2 tests</strong> to visualize your speed progress trajectory chart.</span>
       </div>
     );
@@ -26,7 +26,7 @@ export const WpmProgressChart: React.FC<WpmProgressChartProps> = ({
 
   if (data.length < 2) {
     return (
-      <div style={{ textAlign: 'center', padding: '24px 12px', color: '#64748b', fontSize: '0.85rem' }}>
+      <div style={{ textAlign: 'center', padding: '24px 12px', color: 'var(--fg-slate-500)', fontSize: '0.875rem' }}>
         <span>📈 Take at least <strong>2 tests</strong> to visualize your speed progress trajectory chart.</span>
       </div>
     );
@@ -86,12 +86,12 @@ export const WpmProgressChart: React.FC<WpmProgressChartProps> = ({
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <span style={{ fontSize: '1.2rem' }}>📊</span>
+          <span style={{ fontSize: '1.25rem' }}>📊</span>
           <div>
-            <h4 style={{ margin: 0, fontSize: '0.95rem', fontWeight: 800, color: '#0f172a' }}>
+            <h4 style={{ margin: 0, fontSize: '0.95rem', fontWeight: 800, color: 'var(--fg-slate-900)' }}>
               Speed Trajectory (Last {data.length} Tests)
             </h4>
-            <div style={{ fontSize: '0.74rem', color: '#64748b' }}>
+            <div style={{ fontSize: '0.75rem', color: 'var(--fg-slate-500)' }}>
               Net WPM over time &bull; Target: {targetWpm} WPM
             </div>
           </div>
@@ -99,12 +99,12 @@ export const WpmProgressChart: React.FC<WpmProgressChartProps> = ({
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '14px', fontSize: '0.8rem' }}>
           <div>
-            <span style={{ color: '#64748b' }}>Average: </span>
-            <strong style={{ color: '#0284c7', fontWeight: 800 }}>{avgWpm} WPM</strong>
+            <span style={{ color: 'var(--fg-slate-500)' }}>Average: </span>
+            <strong style={{ color: 'var(--fg-sky-600)', fontWeight: 800 }}>{avgWpm} WPM</strong>
           </div>
           <div>
-            <span style={{ color: '#64748b' }}>Peak: </span>
-            <strong style={{ color: '#16a34a', fontWeight: 800 }}>{highestWpm} WPM</strong>
+            <span style={{ color: 'var(--fg-slate-500)' }}>Peak: </span>
+            <strong style={{ color: 'var(--fg-green-600)', fontWeight: 800 }}>{highestWpm} WPM</strong>
           </div>
           <div
             style={{
@@ -112,8 +112,8 @@ export const WpmProgressChart: React.FC<WpmProgressChartProps> = ({
               borderRadius: '12px',
               fontWeight: 800,
               fontSize: '0.75rem',
-              background: delta >= 0 ? '#dcfce7' : '#fee2e2',
-              color: delta >= 0 ? '#15803d' : '#b91c1c'
+              background: delta >= 0 ? 'var(--bg-green-100)' : 'var(--bg-red-100)',
+              color: delta >= 0 ? 'var(--fg-green-700)' : 'var(--fg-red-700)'
             }}
           >
             {delta >= 0 ? `▲ +${delta}` : `▼ ${delta}`} WPM
@@ -264,20 +264,20 @@ export const WpmProgressChart: React.FC<WpmProgressChartProps> = ({
           justifyContent: 'center',
           gap: '16px',
           marginTop: '6px',
-          fontSize: '0.72rem',
-          color: '#64748b'
+          fontSize: '0.75rem',
+          color: 'var(--fg-slate-500)'
         }}
       >
         <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-          <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#16a34a' }} />
+          <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--tw-green-600)' }} />
           Qualified (Cutoff met)
         </span>
         <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-          <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#0284c7' }} />
+          <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--tw-sky-600)' }} />
           Attempt
         </span>
         <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-          <span style={{ width: '14px', height: '2px', background: '#f97316' }} />
+          <span style={{ width: '14px', height: '2px', background: 'var(--tw-orange-500)' }} />
           {targetWpm} WPM Cutoff
         </span>
       </div>

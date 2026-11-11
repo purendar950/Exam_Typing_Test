@@ -148,7 +148,7 @@ export const TelegramSupportWidget: React.FC<TelegramSupportWidgetProps> = ({
               maxWidth: 'calc(100vw - 32px)',
               height: '560px',
               maxHeight: 'calc(100vh - 100px)',
-              background: '#ffffff',
+              background: 'var(--surface)',
               borderRadius: '20px',
               boxShadow: '0 24px 60px rgba(15, 23, 42, 0.32), 0 0 0 1px rgba(226, 232, 240, 0.9)',
               overflow: 'hidden',
@@ -160,7 +160,7 @@ export const TelegramSupportWidget: React.FC<TelegramSupportWidgetProps> = ({
             {/* Fintech Header */}
             <div
               style={{
-                background: 'linear-gradient(135deg, #090d16 0%, #0f172a 60%, #1e293b 100%)',
+                background: 'linear-gradient(135deg, var(--tw-gray-950) 0%, var(--tw-slate-900) 60%, var(--tw-slate-800) 100%)',
                 padding: '16px 18px',
                 color: '#ffffff',
                 borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
@@ -176,11 +176,11 @@ export const TelegramSupportWidget: React.FC<TelegramSupportWidgetProps> = ({
                     width: '42px',
                     height: '42px',
                     borderRadius: '12px',
-                    background: 'linear-gradient(135deg, #0284c7 0%, #0369a1 100%)',
+                    background: 'linear-gradient(135deg, var(--tw-sky-600) 0%, var(--tw-sky-700) 100%)',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    fontSize: '1.3rem',
+                    fontSize: '1.25rem',
                     boxShadow: '0 4px 14px rgba(2, 132, 199, 0.45)',
                     border: '1.5px solid rgba(255, 255, 255, 0.2)',
                     flexShrink: 0
@@ -190,16 +190,16 @@ export const TelegramSupportWidget: React.FC<TelegramSupportWidgetProps> = ({
                 </div>
                 <div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                    <h4 style={{ margin: 0, fontSize: '0.98rem', fontWeight: 800, letterSpacing: '-0.01em', color: '#ffffff' }}>
+                    <h4 style={{ margin: 0, fontSize: '1rem', fontWeight: 800, letterSpacing: '-0.01em', color: '#ffffff' }}>
                       Exam Typing Desk
                     </h4>
                     <span
                       style={{
                         background: 'rgba(56, 189, 248, 0.18)',
-                        color: '#38bdf8',
+                        color: 'var(--tw-sky-400)',
                         padding: '1px 6px',
                         borderRadius: '6px',
-                        fontSize: '0.62rem',
+                        fontSize: '0.75rem',
                         fontWeight: 800,
                         letterSpacing: '0.04em'
                       }}
@@ -209,8 +209,8 @@ export const TelegramSupportWidget: React.FC<TelegramSupportWidgetProps> = ({
                   </div>
                   <div
                     style={{
-                      fontSize: '0.72rem',
-                      color: '#94a3b8',
+                      fontSize: '0.75rem',
+                      color: 'var(--tw-slate-400)',
                       display: 'flex',
                       alignItems: 'center',
                       gap: '6px',
@@ -222,7 +222,7 @@ export const TelegramSupportWidget: React.FC<TelegramSupportWidgetProps> = ({
                         width: '7px',
                         height: '7px',
                         borderRadius: '50%',
-                        background: '#22c55e',
+                        background: 'var(--tw-green-500)',
                         boxShadow: '0 0 8px #22c55e',
                         display: 'inline-block'
                       }}
@@ -238,7 +238,7 @@ export const TelegramSupportWidget: React.FC<TelegramSupportWidgetProps> = ({
                 style={{
                   background: 'rgba(255, 255, 255, 0.1)',
                   border: 'none',
-                  color: '#94a3b8',
+                  color: 'var(--tw-slate-400)',
                   width: '30px',
                   height: '30px',
                   borderRadius: '50%',
@@ -246,11 +246,11 @@ export const TelegramSupportWidget: React.FC<TelegramSupportWidgetProps> = ({
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  fontSize: '0.9rem',
+                  fontSize: '0.875rem',
                   transition: 'background 0.15s ease'
                 }}
                 onMouseEnter={(e) => (e.currentTarget.style.color = '#ffffff')}
-                onMouseLeave={(e) => (e.currentTarget.style.color = '#94a3b8')}
+                onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--tw-slate-400)')}
               >
                 ✕
               </button>
@@ -260,8 +260,8 @@ export const TelegramSupportWidget: React.FC<TelegramSupportWidgetProps> = ({
             <div
               style={{
                 display: 'flex',
-                background: '#f8fafc',
-                borderBottom: '1px solid #e2e8f0',
+                background: 'var(--bg-slate-50)',
+                borderBottom: '1px solid var(--bd-slate-200)',
                 padding: '0 10px'
               }}
             >
@@ -273,11 +273,11 @@ export const TelegramSupportWidget: React.FC<TelegramSupportWidgetProps> = ({
                   padding: '10px 14px',
                   border: 'none',
                   background: 'transparent',
-                  color: activeTab === 'chat' ? '#0284c7' : '#64748b',
+                  color: activeTab === 'chat' ? 'var(--fg-sky-600)' : 'var(--fg-slate-500)',
                   fontWeight: activeTab === 'chat' ? 800 : 600,
-                  fontSize: '0.82rem',
+                  fontSize: '0.8rem',
                   cursor: 'pointer',
-                  borderBottom: activeTab === 'chat' ? '2.5px solid #0284c7' : '2.5px solid transparent',
+                  borderBottom: activeTab === 'chat' ? '2.5px solid var(--tw-sky-600)' : '2.5px solid transparent',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
@@ -292,7 +292,7 @@ export const TelegramSupportWidget: React.FC<TelegramSupportWidgetProps> = ({
                       width: '8px',
                       height: '8px',
                       borderRadius: '50%',
-                      background: '#ef4444'
+                      background: 'var(--tw-red-500)'
                     }}
                   />
                 )}
@@ -306,11 +306,11 @@ export const TelegramSupportWidget: React.FC<TelegramSupportWidgetProps> = ({
                   padding: '10px 14px',
                   border: 'none',
                   background: 'transparent',
-                  color: activeTab === 'channels' ? '#0284c7' : '#64748b',
+                  color: activeTab === 'channels' ? 'var(--fg-sky-600)' : 'var(--fg-slate-500)',
                   fontWeight: activeTab === 'channels' ? 800 : 600,
-                  fontSize: '0.82rem',
+                  fontSize: '0.8rem',
                   cursor: 'pointer',
-                  borderBottom: activeTab === 'channels' ? '2.5px solid #0284c7' : '2.5px solid transparent',
+                  borderBottom: activeTab === 'channels' ? '2.5px solid var(--tw-sky-600)' : '2.5px solid transparent',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
@@ -330,21 +330,21 @@ export const TelegramSupportWidget: React.FC<TelegramSupportWidgetProps> = ({
                   display: 'flex',
                   flexDirection: 'column',
                   overflow: 'hidden',
-                  background: '#f8fafc'
+                  background: 'var(--bg-slate-50)'
                 }}
               >
                 {!canUseLiveChat && (
                   <div
                     style={{
-                      background: '#f0f9ff',
+                      background: 'var(--bg-sky-50)',
                       padding: '8px 14px',
-                      borderBottom: '1px solid #bae6fd',
+                      borderBottom: '1px solid var(--bd-sky-200)',
                       display: 'flex',
                       alignItems: 'center',
                       gap: '8px'
                     }}
                   >
-                    <span style={{ fontSize: '0.74rem', color: '#0369a1', fontWeight: 700, whiteSpace: 'nowrap' }}>
+                    <span style={{ fontSize: '0.75rem', color: 'var(--fg-sky-700)', fontWeight: 700, whiteSpace: 'nowrap' }}>
                       🔐 Sign in to use secure live support.
                     </span>
                   </div>
@@ -365,11 +365,11 @@ export const TelegramSupportWidget: React.FC<TelegramSupportWidgetProps> = ({
                   <div style={{ textAlign: 'center', margin: '4px 0 8px 0' }}>
                     <span
                       style={{
-                        background: '#e2e8f0',
-                        color: '#475569',
+                        background: 'var(--bg-slate-200)',
+                        color: 'var(--fg-slate-600)',
                         padding: '3px 10px',
                         borderRadius: '12px',
-                        fontSize: '0.66rem',
+                        fontSize: '0.75rem',
                         fontWeight: 700,
                         letterSpacing: '0.02em',
                         display: 'inline-flex',
@@ -395,9 +395,9 @@ export const TelegramSupportWidget: React.FC<TelegramSupportWidgetProps> = ({
                       >
                         <div
                           style={{
-                            fontSize: '0.66rem',
+                            fontSize: '0.75rem',
                             fontWeight: 700,
-                            color: '#64748b',
+                            color: 'var(--fg-slate-500)',
                             marginBottom: '3px',
                             display: 'flex',
                             alignItems: 'center',
@@ -407,11 +407,11 @@ export const TelegramSupportWidget: React.FC<TelegramSupportWidgetProps> = ({
                           {!isUser ? (
                             <span
                               style={{
-                                background: '#0284c7',
+                                background: 'var(--tw-sky-600)',
                                 color: '#ffffff',
                                 padding: '1px 5px',
                                 borderRadius: '4px',
-                                fontSize: '0.60rem',
+                                fontSize: '0.75rem',
                                 fontWeight: 800,
                                 letterSpacing: '0.04em'
                               }}
@@ -419,7 +419,7 @@ export const TelegramSupportWidget: React.FC<TelegramSupportWidgetProps> = ({
                               SUPPORT DESK
                             </span>
                           ) : (
-                            <span style={{ color: '#0284c7', fontWeight: 800 }}>YOU</span>
+                            <span style={{ color: 'var(--fg-sky-600)', fontWeight: 800 }}>YOU</span>
                           )}
                           <span>•</span>
                           <span>
@@ -435,20 +435,20 @@ export const TelegramSupportWidget: React.FC<TelegramSupportWidgetProps> = ({
                             maxWidth: '85%',
                             padding: '10px 14px',
                             borderRadius: isUser ? '16px 16px 4px 16px' : '16px 16px 16px 4px',
-                            background: isUser ? 'linear-gradient(135deg, #0284c7 0%, #0369a1 100%)' : '#ffffff',
-                            color: isUser ? '#ffffff' : '#0f172a',
-                            fontSize: '0.85rem',
+                            background: isUser ? 'linear-gradient(135deg, var(--tw-sky-600) 0%, var(--tw-sky-700) 100%)' : 'var(--surface)',
+                            color: isUser ? '#ffffff' : 'var(--fg-slate-900)',
+                            fontSize: '0.875rem',
                             lineHeight: 1.45,
                             boxShadow: isUser
                               ? '0 3px 10px rgba(2, 132, 199, 0.28)'
                               : '0 2px 8px rgba(15, 23, 42, 0.06)',
-                            border: isUser ? 'none' : '1px solid #e2e8f0',
+                            border: isUser ? 'none' : '1px solid var(--bd-slate-200)',
                             wordBreak: 'break-word'
                           }}
                         >
                           {msg.text}
                           {isUser && (
-                            <div style={{ textAlign: 'right', marginTop: '3px', fontSize: '0.62rem', opacity: 0.85 }}>
+                            <div style={{ textAlign: 'right', marginTop: '3px', fontSize: '0.75rem', opacity: 0.85 }}>
                               Delivered ✓✓
                             </div>
                           )}
@@ -462,9 +462,9 @@ export const TelegramSupportWidget: React.FC<TelegramSupportWidgetProps> = ({
                 {/* Quick Suggestion Chips */}
                 <div
                   style={{
-                    background: '#ffffff',
+                    background: 'var(--surface)',
                     padding: '8px 12px',
-                    borderTop: '1px solid #e2e8f0',
+                    borderTop: '1px solid var(--bd-slate-200)',
                     display: 'flex',
                     gap: '6px',
                     overflowX: 'auto',
@@ -478,27 +478,27 @@ export const TelegramSupportWidget: React.FC<TelegramSupportWidgetProps> = ({
                       onClick={() => handleSendMessage(p.text)}
                       disabled={!canUseLiveChat}
                       style={{
-                        background: '#f1f5f9',
-                        border: '1px solid #cbd5e1',
+                        background: 'var(--bg-slate-100)',
+                        border: '1px solid var(--bd-slate-300)',
                         borderRadius: '14px',
                         padding: '4px 10px',
-                        fontSize: '0.72rem',
+                        fontSize: '0.75rem',
                         fontWeight: 700,
-                        color: '#334155',
+                        color: 'var(--fg-slate-700)',
                         cursor: canUseLiveChat ? 'pointer' : 'not-allowed',
                         opacity: canUseLiveChat ? 1 : 0.55,
                         whiteSpace: 'nowrap',
                         transition: 'all 0.15s ease'
                       }}
                       onMouseEnter={(e) => {
-                        e.currentTarget.style.background = '#e0f2fe';
-                        e.currentTarget.style.borderColor = '#38bdf8';
-                        e.currentTarget.style.color = '#0284c7';
+                        e.currentTarget.style.background = 'var(--bg-sky-100)';
+                        e.currentTarget.style.borderColor = 'var(--tw-sky-400)';
+                        e.currentTarget.style.color = 'var(--fg-sky-600)';
                       }}
                       onMouseLeave={(e) => {
-                        e.currentTarget.style.background = '#f1f5f9';
-                        e.currentTarget.style.borderColor = '#cbd5e1';
-                        e.currentTarget.style.color = '#334155';
+                        e.currentTarget.style.background = 'var(--bg-slate-100)';
+                        e.currentTarget.style.borderColor = 'var(--bd-slate-300)';
+                        e.currentTarget.style.color = 'var(--fg-slate-700)';
                       }}
                     >
                       {p.label}
@@ -513,9 +513,9 @@ export const TelegramSupportWidget: React.FC<TelegramSupportWidgetProps> = ({
                     handleSendMessage();
                   }}
                   style={{
-                    background: '#ffffff',
+                    background: 'var(--surface)',
                     padding: '10px 14px',
-                    borderTop: '1px solid #f1f5f9',
+                    borderTop: '1px solid var(--bd-slate-100)',
                     display: 'flex',
                     alignItems: 'center',
                     gap: '8px'
@@ -531,26 +531,26 @@ export const TelegramSupportWidget: React.FC<TelegramSupportWidgetProps> = ({
                       flex: 1,
                       padding: '10px 14px',
                       borderRadius: '24px',
-                      border: '1.5px solid #cbd5e1',
-                      fontSize: '0.85rem',
+                      border: '1.5px solid var(--bd-slate-300)',
+                      fontSize: '0.875rem',
                       outline: 'none',
                       transition: 'border-color 0.15s ease',
-                      background: '#f8fafc'
+                      background: 'var(--bg-slate-50)'
                     }}
                     onFocus={(e) => {
-                      e.target.style.borderColor = '#0284c7';
-                      e.target.style.background = '#ffffff';
+                      e.target.style.borderColor = 'var(--tw-sky-600)';
+                      e.target.style.background = 'var(--surface)';
                     }}
                     onBlur={(e) => {
-                      e.target.style.borderColor = '#cbd5e1';
-                      e.target.style.background = '#f8fafc';
+                      e.target.style.borderColor = 'var(--bd-slate-300)';
+                      e.target.style.background = 'var(--bg-slate-50)';
                     }}
                   />
                   <button
                     type="submit"
                     disabled={!inputText.trim() || isSending || !canUseLiveChat}
                     style={{
-                      background: inputText.trim() && !isSending && canUseLiveChat ? 'linear-gradient(135deg, #0284c7 0%, #0369a1 100%)' : '#cbd5e1',
+                      background: inputText.trim() && !isSending && canUseLiveChat ? 'linear-gradient(135deg, var(--tw-sky-600) 0%, var(--tw-sky-700) 100%)' : 'var(--bg-slate-300)',
                       color: '#ffffff',
                       border: 'none',
                       borderRadius: '50%',
@@ -576,12 +576,12 @@ export const TelegramSupportWidget: React.FC<TelegramSupportWidgetProps> = ({
                 {/* Footer status text */}
                 <div
                   style={{
-                    background: '#f8fafc',
+                    background: 'var(--bg-slate-50)',
                     padding: '6px 14px',
-                    fontSize: '0.68rem',
-                    color: '#64748b',
+                    fontSize: '0.75rem',
+                    color: 'var(--fg-slate-500)',
                     textAlign: 'center',
-                    borderTop: '1px solid #f1f5f9',
+                    borderTop: '1px solid var(--bd-slate-100)',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
@@ -617,10 +617,10 @@ export const TelegramSupportWidget: React.FC<TelegramSupportWidgetProps> = ({
                     gap: '12px',
                     padding: '12px 14px',
                     borderRadius: '12px',
-                    background: '#f0f9ff',
-                    border: '1px solid #bae6fd',
+                    background: 'var(--bg-sky-50)',
+                    border: '1px solid var(--bd-sky-200)',
                     textDecoration: 'none',
-                    color: '#0f172a'
+                    color: 'var(--fg-slate-900)'
                   }}
                 >
                   <div
@@ -628,26 +628,26 @@ export const TelegramSupportWidget: React.FC<TelegramSupportWidgetProps> = ({
                       width: '38px',
                       height: '38px',
                       borderRadius: '10px',
-                      background: '#0284c7',
+                      background: 'var(--tw-sky-600)',
                       color: '#ffffff',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
-                      fontSize: '1.2rem',
+                      fontSize: '1.25rem',
                       flexShrink: 0
                     }}
                   >
                     📢
                   </div>
                   <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ fontWeight: 800, fontSize: '0.86rem', color: '#0369a1' }}>
+                    <div style={{ fontWeight: 800, fontSize: '0.875rem', color: 'var(--fg-sky-700)' }}>
                       Official Broadcast Channel
                     </div>
-                    <div style={{ fontSize: '0.72rem', color: '#64748b', lineHeight: 1.25 }}>
+                    <div style={{ fontSize: '0.75rem', color: 'var(--fg-slate-500)', lineHeight: 1.25 }}>
                       Daily mock alerts, exam cutoffs & special discounts
                     </div>
                   </div>
-                  <span style={{ fontSize: '0.82rem', color: '#0284c7', fontWeight: 800 }}>Join →</span>
+                  <span style={{ fontSize: '0.8rem', color: 'var(--fg-sky-600)', fontWeight: 800 }}>Join →</span>
                 </a>
 
                 {/* Option 2: Discussion Group */}
@@ -661,10 +661,10 @@ export const TelegramSupportWidget: React.FC<TelegramSupportWidgetProps> = ({
                     gap: '12px',
                     padding: '12px 14px',
                     borderRadius: '12px',
-                    background: '#f8fafc',
-                    border: '1px solid #e2e8f0',
+                    background: 'var(--bg-slate-50)',
+                    border: '1px solid var(--bd-slate-200)',
                     textDecoration: 'none',
-                    color: '#0f172a'
+                    color: 'var(--fg-slate-900)'
                   }}
                 >
                   <div
@@ -672,26 +672,26 @@ export const TelegramSupportWidget: React.FC<TelegramSupportWidgetProps> = ({
                       width: '38px',
                       height: '38px',
                       borderRadius: '10px',
-                      background: '#10b981',
+                      background: 'var(--tw-emerald-500)',
                       color: '#ffffff',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
-                      fontSize: '1.2rem',
+                      fontSize: '1.25rem',
                       flexShrink: 0
                     }}
                   >
                     👥
                   </div>
                   <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ fontWeight: 800, fontSize: '0.86rem', color: '#047857' }}>
+                    <div style={{ fontWeight: 800, fontSize: '0.875rem', color: 'var(--fg-emerald-700)' }}>
                       Aspirants Community Forum
                     </div>
-                    <div style={{ fontSize: '0.72rem', color: '#64748b', lineHeight: 1.25 }}>
+                    <div style={{ fontSize: '0.75rem', color: 'var(--fg-slate-500)', lineHeight: 1.25 }}>
                       Ask typing doubts, compare scores & practice together
                     </div>
                   </div>
-                  <span style={{ fontSize: '0.82rem', color: '#10b981', fontWeight: 800 }}>Chat →</span>
+                  <span style={{ fontSize: '0.8rem', color: 'var(--fg-emerald-500)', fontWeight: 800 }}>Chat →</span>
                 </a>
 
                 {/* Option 3: Direct 1-on-1 Admin Chat */}
@@ -705,10 +705,10 @@ export const TelegramSupportWidget: React.FC<TelegramSupportWidgetProps> = ({
                     gap: '12px',
                     padding: '12px 14px',
                     borderRadius: '12px',
-                    background: '#faf5ff',
-                    border: '1px solid #e9d5ff',
+                    background: 'var(--bg-purple-50)',
+                    border: '1px solid var(--bd-purple-200)',
                     textDecoration: 'none',
-                    color: '#0f172a'
+                    color: 'var(--fg-slate-900)'
                   }}
                 >
                   <div
@@ -716,34 +716,34 @@ export const TelegramSupportWidget: React.FC<TelegramSupportWidgetProps> = ({
                       width: '38px',
                       height: '38px',
                       borderRadius: '10px',
-                      background: '#8b5cf6',
+                      background: 'var(--tw-violet-500)',
                       color: '#ffffff',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
-                      fontSize: '1.2rem',
+                      fontSize: '1.25rem',
                       flexShrink: 0
                     }}
                   >
                     💬
                   </div>
                   <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ fontWeight: 800, fontSize: '0.86rem', color: '#6d28d9' }}>
+                    <div style={{ fontWeight: 800, fontSize: '0.875rem', color: 'var(--fg-violet-700)' }}>
                       Direct Admin Telegram Chat
                     </div>
-                    <div style={{ fontSize: '0.72rem', color: '#64748b', lineHeight: 1.25 }}>
+                    <div style={{ fontSize: '0.75rem', color: 'var(--fg-slate-500)', lineHeight: 1.25 }}>
                       Message Admin Purendar (@purendare) directly in Telegram
                     </div>
                   </div>
-                  <span style={{ fontSize: '0.82rem', color: '#8b5cf6', fontWeight: 800 }}>Open →</span>
+                  <span style={{ fontSize: '0.8rem', color: 'var(--fg-violet-500)', fontWeight: 800 }}>Open →</span>
                 </a>
 
                 {/* Pro Plan callout */}
                 {onOpenPayment && (
                   <div
                     style={{
-                      background: 'linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%)',
-                      border: '1px solid #fde68a',
+                      background: 'linear-gradient(135deg, var(--bg-amber-50) 0%, var(--bg-amber-100) 100%)',
+                      border: '1px solid var(--bd-amber-200)',
                       borderRadius: '14px',
                       padding: '12px 14px',
                       display: 'flex',
@@ -753,8 +753,8 @@ export const TelegramSupportWidget: React.FC<TelegramSupportWidgetProps> = ({
                       marginTop: 'auto'
                     }}
                   >
-                    <div style={{ fontSize: '0.76rem', color: '#92400e', lineHeight: 1.35 }}>
-                      <strong style={{ display: 'block', color: '#78350f' }}>👑 Pro Membership Activation</strong>
+                    <div style={{ fontSize: '0.75rem', color: 'var(--fg-amber-800)', lineHeight: 1.35 }}>
+                      <strong style={{ display: 'block', color: 'var(--fg-amber-900)' }}>👑 Pro Membership Activation</strong>
                       Pay via PhonePe QR & submit your UTR for instant unlock.
                     </div>
                     <button
@@ -764,12 +764,12 @@ export const TelegramSupportWidget: React.FC<TelegramSupportWidgetProps> = ({
                         onOpenPayment();
                       }}
                       style={{
-                        background: '#d97706',
+                        background: 'var(--tw-amber-600)',
                         color: '#ffffff',
                         border: 'none',
                         borderRadius: '8px',
                         padding: '6px 12px',
-                        fontSize: '0.76rem',
+                        fontSize: '0.75rem',
                         fontWeight: 800,
                         cursor: 'pointer',
                         whiteSpace: 'nowrap'
@@ -785,21 +785,21 @@ export const TelegramSupportWidget: React.FC<TelegramSupportWidgetProps> = ({
             {/* Fintech Footer */}
             <div
               style={{
-                background: '#090d16',
+                background: 'var(--tw-gray-950)',
                 padding: '10px 18px',
                 borderTop: '1px solid rgba(255, 255, 255, 0.08)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'space-between',
-                fontSize: '0.70rem',
-                color: '#94a3b8'
+                fontSize: '0.75rem',
+                color: 'var(--tw-slate-400)'
               }}
             >
               <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
                 <span>🔒</span>
                 <span>End-to-End Logged</span>
               </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '5px', color: '#38bdf8', fontWeight: 700 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '5px', color: 'var(--tw-sky-400)', fontWeight: 700 }}>
                 <span>Telegram Bot v2.4</span>
                 <span>•</span>
                 <span>Verified Desk</span>
@@ -813,7 +813,7 @@ export const TelegramSupportWidget: React.FC<TelegramSupportWidgetProps> = ({
           type="button"
           onClick={() => setIsOpen(!isOpen)}
           style={{
-            background: 'linear-gradient(135deg, #090d16 0%, #0f172a 60%, #0284c7 100%)',
+            background: 'linear-gradient(135deg, var(--tw-gray-950) 0%, var(--tw-slate-900) 60%, var(--tw-sky-600) 100%)',
             color: '#ffffff',
             border: '1.5px solid rgba(56, 189, 248, 0.4)',
             borderRadius: '28px',
@@ -823,7 +823,7 @@ export const TelegramSupportWidget: React.FC<TelegramSupportWidgetProps> = ({
             display: 'flex',
             alignItems: 'center',
             gap: '9px',
-            fontSize: '0.88rem',
+            fontSize: '0.875rem',
             fontWeight: 800,
             transition: 'transform 0.15s ease, box-shadow 0.15s ease',
             position: 'relative'
@@ -839,7 +839,7 @@ export const TelegramSupportWidget: React.FC<TelegramSupportWidgetProps> = ({
               width: '8px',
               height: '8px',
               borderRadius: '50%',
-              background: '#22c55e',
+              background: 'var(--tw-green-500)',
               boxShadow: '0 0 0 2px rgba(34, 197, 94, 0.4)'
             }}
           />
@@ -849,9 +849,9 @@ export const TelegramSupportWidget: React.FC<TelegramSupportWidgetProps> = ({
                 position: 'absolute',
                 top: '-4px',
                 right: '-4px',
-                background: '#ef4444',
+                background: 'var(--tw-red-500)',
                 color: '#ffffff',
-                fontSize: '0.68rem',
+                fontSize: '0.75rem',
                 fontWeight: 900,
                 width: '18px',
                 height: '18px',

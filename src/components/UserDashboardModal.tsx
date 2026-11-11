@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { EmojiIco } from './Ico';
 import {
   UserProfile,
   UserStats,
@@ -114,7 +115,7 @@ export const UserDashboardModal: React.FC<UserDashboardModalProps> = ({
         {/* 1. Header Banner */}
         <div
           style={{
-            background: 'linear-gradient(135deg, #0f172a 0%, #1e3a8a 100%)',
+            background: 'linear-gradient(135deg, var(--tw-slate-900) 0%, var(--tw-blue-900) 100%)',
             color: '#ffffff',
             padding: '18px 24px',
             display: 'flex',
@@ -133,7 +134,7 @@ export const UserDashboardModal: React.FC<UserDashboardModalProps> = ({
                   width: '48px',
                   height: '48px',
                   borderRadius: '50%',
-                  border: '2px solid #38bdf8',
+                  border: '2px solid var(--tw-sky-400)',
                   boxShadow: '0 2px 6px rgba(0,0,0,0.3)',
                   objectFit: 'cover'
                 }}
@@ -144,7 +145,7 @@ export const UserDashboardModal: React.FC<UserDashboardModalProps> = ({
                   width: '48px',
                   height: '48px',
                   borderRadius: '50%',
-                  background: '#0284c7',
+                  background: 'var(--tw-sky-600)',
                   color: '#ffffff',
                   display: 'flex',
                   alignItems: 'center',
@@ -164,11 +165,11 @@ export const UserDashboardModal: React.FC<UserDashboardModalProps> = ({
                 </h2>
                 <span
                   style={{
-                    background: '#dcfce7',
-                    color: '#15803d',
+                    background: 'var(--bg-green-100)',
+                    color: 'var(--fg-green-700)',
                     padding: '2px 8px',
                     borderRadius: '10px',
-                    fontSize: '0.72rem',
+                    fontSize: '0.75rem',
                     fontWeight: 700
                   }}
                 >
@@ -177,14 +178,14 @@ export const UserDashboardModal: React.FC<UserDashboardModalProps> = ({
                 <span
                   style={{
                     background: user.isAdmin
-                      ? 'linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%)'
+                      ? 'linear-gradient(135deg, var(--tw-violet-600) 0%, var(--tw-violet-700) 100%)'
                       : user.is_subscribed
-                      ? 'linear-gradient(135deg, #059669 0%, #047857 100%)'
-                      : '#f1f5f9',
-                    color: user.isAdmin || user.is_subscribed ? '#ffffff' : '#64748b',
+                      ? 'linear-gradient(135deg, var(--tw-emerald-600) 0%, var(--tw-emerald-700) 100%)'
+                      : 'var(--bg-slate-100)',
+                    color: user.isAdmin || user.is_subscribed ? '#ffffff' : 'var(--fg-slate-500)',
                     padding: '2px 9px',
                     borderRadius: '10px',
-                    fontSize: '0.72rem',
+                    fontSize: '0.75rem',
                     fontWeight: 800
                   }}
                 >
@@ -218,13 +219,13 @@ export const UserDashboardModal: React.FC<UserDashboardModalProps> = ({
                 onClose();
               }}
               className="btn btn-sm"
-              style={{ background: 'rgba(239,68,68,0.2)', color: '#fca5a5', border: '1px solid rgba(239,68,68,0.4)', padding: '6px 12px', fontSize: '0.8rem' }}
+              style={{ background: 'rgba(239,68,68,0.2)', color: 'var(--tw-red-300)', border: '1px solid rgba(239,68,68,0.4)', padding: '6px 12px', fontSize: '0.8rem' }}
             >
               Log Out
             </button>
             <button
               onClick={onClose}
-              style={{ background: 'none', border: 'none', color: '#cbd5e1', fontSize: '1.4rem', cursor: 'pointer', marginLeft: '4px' }}
+              style={{ background: 'none', border: 'none', color: 'var(--tw-slate-300)', fontSize: '1.4rem', cursor: 'pointer', marginLeft: '4px' }}
             >
               &times;
             </button>
@@ -232,7 +233,7 @@ export const UserDashboardModal: React.FC<UserDashboardModalProps> = ({
         </div>
 
         {/* 2. Navigation Tabs */}
-        <div style={{ display: 'flex', background: '#f8fafc', borderBottom: '1px solid #e2e8f0', padding: '0 20px' }}>
+        <div style={{ display: 'flex', background: 'var(--bg-slate-50)', borderBottom: '1px solid var(--bd-slate-200)', padding: '0 20px' }}>
           <button
             onClick={() => setActiveTab('overview')}
             style={{
@@ -240,10 +241,10 @@ export const UserDashboardModal: React.FC<UserDashboardModalProps> = ({
               border: 'none',
               background: 'transparent',
               fontWeight: 700,
-              fontSize: '0.88rem',
+              fontSize: '0.875rem',
               cursor: 'pointer',
-              color: activeTab === 'overview' ? '#0284c7' : '#64748b',
-              borderBottom: activeTab === 'overview' ? '2.5px solid #0284c7' : '2.5px solid transparent'
+              color: activeTab === 'overview' ? 'var(--fg-sky-600)' : 'var(--fg-slate-500)',
+              borderBottom: activeTab === 'overview' ? '2.5px solid var(--tw-sky-600)' : '2.5px solid transparent'
             }}
           >
             📊 Performance Overview
@@ -255,10 +256,10 @@ export const UserDashboardModal: React.FC<UserDashboardModalProps> = ({
               border: 'none',
               background: 'transparent',
               fontWeight: 700,
-              fontSize: '0.88rem',
+              fontSize: '0.875rem',
               cursor: 'pointer',
-              color: activeTab === 'history' ? '#0284c7' : '#64748b',
-              borderBottom: activeTab === 'history' ? '2.5px solid #0284c7' : '2.5px solid transparent'
+              color: activeTab === 'history' ? 'var(--fg-sky-600)' : 'var(--fg-slate-500)',
+              borderBottom: activeTab === 'history' ? '2.5px solid var(--tw-sky-600)' : '2.5px solid transparent'
             }}
           >
             📜 Test Attempt History ({attempts.length})
@@ -270,10 +271,10 @@ export const UserDashboardModal: React.FC<UserDashboardModalProps> = ({
               border: 'none',
               background: 'transparent',
               fontWeight: 700,
-              fontSize: '0.88rem',
+              fontSize: '0.875rem',
               cursor: 'pointer',
-              color: activeTab === 'heatmap' ? '#0284c7' : '#64748b',
-              borderBottom: activeTab === 'heatmap' ? '2.5px solid #0284c7' : '2.5px solid transparent'
+              color: activeTab === 'heatmap' ? 'var(--fg-sky-600)' : 'var(--fg-slate-500)',
+              borderBottom: activeTab === 'heatmap' ? '2.5px solid var(--tw-sky-600)' : '2.5px solid transparent'
             }}
           >
             ⌨️ Key Heatmap
@@ -285,10 +286,10 @@ export const UserDashboardModal: React.FC<UserDashboardModalProps> = ({
               border: 'none',
               background: 'transparent',
               fontWeight: 700,
-              fontSize: '0.88rem',
+              fontSize: '0.875rem',
               cursor: 'pointer',
-              color: activeTab === 'courses' ? '#7c3aed' : '#64748b',
-              borderBottom: activeTab === 'courses' ? '2.5px solid #7c3aed' : '2.5px solid transparent',
+              color: activeTab === 'courses' ? 'var(--fg-violet-600)' : 'var(--fg-slate-500)',
+              borderBottom: activeTab === 'courses' ? '2.5px solid var(--tw-violet-600)' : '2.5px solid transparent',
               position: 'relative'
             }}
           >
@@ -297,7 +298,7 @@ export const UserDashboardModal: React.FC<UserDashboardModalProps> = ({
               <span style={{
                 position: 'absolute', top: '8px', right: '6px',
                 width: '8px', height: '8px', borderRadius: '50%',
-                background: '#f59e0b', display: 'inline-block'
+                background: 'var(--tw-amber-500)', display: 'inline-block'
               }} />
             )}
           </button>
@@ -308,10 +309,10 @@ export const UserDashboardModal: React.FC<UserDashboardModalProps> = ({
               border: 'none',
               background: 'transparent',
               fontWeight: 700,
-              fontSize: '0.88rem',
+              fontSize: '0.875rem',
               cursor: 'pointer',
-              color: activeTab === 'admitCard' ? '#0284c7' : '#64748b',
-              borderBottom: activeTab === 'admitCard' ? '2.5px solid #0284c7' : '2.5px solid transparent'
+              color: activeTab === 'admitCard' ? 'var(--fg-sky-600)' : 'var(--fg-slate-500)',
+              borderBottom: activeTab === 'admitCard' ? '2.5px solid var(--tw-sky-600)' : '2.5px solid transparent'
             }}
           >
             🎫 Simulated Admit Card
@@ -322,7 +323,7 @@ export const UserDashboardModal: React.FC<UserDashboardModalProps> = ({
         {/* 3. Tab Contents */}
         <div style={{ padding: '20px', overflowY: 'auto', flex: 1 }}>
           {loading ? (
-            <div style={{ textAlign: 'center', padding: '40px', color: '#64748b' }}>
+            <div style={{ textAlign: 'center', padding: '40px', color: 'var(--fg-slate-500)' }}>
               Loading candidate records...
             </div>
           ) : (
@@ -335,10 +336,10 @@ export const UserDashboardModal: React.FC<UserDashboardModalProps> = ({
                     <div
                       style={{
                         background: streak.currentStreak >= 7
-                          ? 'linear-gradient(135deg, #ea580c 0%, #dc2626 100%)'
+                          ? 'linear-gradient(135deg, var(--tw-orange-600) 0%, var(--tw-red-600) 100%)'
                           : streak.currentStreak >= 3
-                          ? 'linear-gradient(135deg, #f59e0b 0%, #ea580c 100%)'
-                          : 'linear-gradient(135deg, #0284c7 0%, #0369a1 100%)',
+                          ? 'linear-gradient(135deg, var(--tw-amber-500) 0%, var(--tw-orange-600) 100%)'
+                          : 'linear-gradient(135deg, var(--tw-sky-600) 0%, var(--tw-sky-700) 100%)',
                         borderRadius: '10px',
                         padding: '14px 18px',
                         marginBottom: '16px',
@@ -350,14 +351,14 @@ export const UserDashboardModal: React.FC<UserDashboardModalProps> = ({
                       }}
                     >
                       <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                        <span style={{ fontSize: '2rem' }}>
+                        <span style={{ fontSize: '2.1rem' }}>
                           {streak.currentStreak >= 30 ? '🏆' : streak.currentStreak >= 7 ? '🔥' : '⚡'}
                         </span>
                         <div>
-                          <div style={{ fontWeight: 900, fontSize: '1.05rem', letterSpacing: '0.3px' }}>
+                          <div style={{ fontWeight: 900, fontSize: '1rem', letterSpacing: '0.3px' }}>
                             {streak.currentStreak} Day Practice Streak! {streak.currentStreak >= 7 ? '🔥' : ''}
                           </div>
-                          <div style={{ fontSize: '0.78rem', opacity: 0.95 }}>
+                          <div style={{ fontSize: '0.8rem', opacity: 0.95 }}>
                             {streak.todayCompleted
                               ? '✓ Today\'s practice target complete! Consistency builds qualifying speed.'
                               : 'Keep the chain going! Complete a mock test today.'}
@@ -365,8 +366,8 @@ export const UserDashboardModal: React.FC<UserDashboardModalProps> = ({
                         </div>
                       </div>
                       <div style={{ textAlign: 'right' }}>
-                        <div style={{ fontSize: '1.5rem', fontWeight: 900 }}>{streak.currentStreak}</div>
-                        <div style={{ fontSize: '0.7rem', opacity: 0.85 }}>Best: {streak.longestStreak} days</div>
+                        <div style={{ fontSize: '1.4rem', fontWeight: 900 }}>{streak.currentStreak}</div>
+                        <div style={{ fontSize: '0.75rem', opacity: 0.85 }}>Best: {streak.longestStreak} days</div>
                       </div>
                     </div>
                   )}
@@ -380,50 +381,50 @@ export const UserDashboardModal: React.FC<UserDashboardModalProps> = ({
                       marginBottom: '20px'
                     }}
                   >
-                    <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '14px', textAlign: 'center' }}>
-                      <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase' }}>
+                    <div style={{ background: 'var(--bg-slate-50)', border: '1px solid var(--bd-slate-200)', borderRadius: '8px', padding: '14px', textAlign: 'center' }}>
+                      <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--fg-slate-500)', textTransform: 'uppercase' }}>
                         Total Tests
                       </span>
-                      <div style={{ fontSize: '1.8rem', fontWeight: 800, color: '#0f172a' }}>
+                      <div style={{ fontSize: '1.8rem', fontWeight: 800, color: 'var(--fg-slate-900)' }}>
                         {stats.totalTests}
                       </div>
-                      <span style={{ fontSize: '0.72rem', color: '#0284c7' }}>
+                      <span style={{ fontSize: '0.75rem', color: 'var(--fg-sky-600)' }}>
                         {stats.hindiTestsCount} Hindi &bull; {stats.englishTestsCount} English
                       </span>
                     </div>
 
-                    <div style={{ background: stats.passRate >= 80 ? '#f0fdf4' : '#fffbeb', border: `1px solid ${stats.passRate >= 80 ? '#86efac' : '#fde68a'}`, borderRadius: '8px', padding: '14px', textAlign: 'center' }}>
-                      <span style={{ fontSize: '0.75rem', fontWeight: 700, color: stats.passRate >= 80 ? '#166534' : '#92400e', textTransform: 'uppercase' }}>
+                    <div style={{ background: stats.passRate >= 80 ? 'var(--bg-green-50)' : 'var(--bg-amber-50)', border: `1px solid ${stats.passRate >= 80 ? 'var(--bd-green-300)' : 'var(--bd-amber-200)'}`, borderRadius: '8px', padding: '14px', textAlign: 'center' }}>
+                      <span style={{ fontSize: '0.75rem', fontWeight: 700, color: stats.passRate >= 80 ? 'var(--fg-green-800)' : 'var(--fg-amber-800)', textTransform: 'uppercase' }}>
                         Qualification Rate
                       </span>
-                      <div style={{ fontSize: '1.8rem', fontWeight: 800, color: stats.passRate >= 80 ? '#15803d' : '#b45309' }}>
+                      <div style={{ fontSize: '1.8rem', fontWeight: 800, color: stats.passRate >= 80 ? 'var(--fg-green-700)' : 'var(--fg-amber-700)' }}>
                         {stats.passRate}%
                       </div>
-                      <span style={{ fontSize: '0.72rem', color: '#64748b' }}>
+                      <span style={{ fontSize: '0.75rem', color: 'var(--fg-slate-500)' }}>
                         {stats.qualifiedTests} / {stats.totalTests} Met Cutoffs
                       </span>
                     </div>
 
-                    <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '14px', textAlign: 'center' }}>
-                      <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase' }}>
+                    <div style={{ background: 'var(--bg-slate-50)', border: '1px solid var(--bd-slate-200)', borderRadius: '8px', padding: '14px', textAlign: 'center' }}>
+                      <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--fg-slate-500)', textTransform: 'uppercase' }}>
                         Avg Net Speed
                       </span>
-                      <div style={{ fontSize: '1.8rem', fontWeight: 800, color: '#0284c7' }}>
-                        {stats.avgNetWpm} <span style={{ fontSize: '0.9rem', fontWeight: 600 }}>WPM</span>
+                      <div style={{ fontSize: '1.8rem', fontWeight: 800, color: 'var(--fg-sky-600)' }}>
+                        {stats.avgNetWpm} <span style={{ fontSize: '0.875rem', fontWeight: 600 }}>WPM</span>
                       </div>
-                      <span style={{ fontSize: '0.72rem', color: '#64748b' }}>
+                      <span style={{ fontSize: '0.75rem', color: 'var(--fg-slate-500)' }}>
                         Best: {stats.bestNetWpm} WPM
                       </span>
                     </div>
 
-                    <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '14px', textAlign: 'center' }}>
-                      <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase' }}>
+                    <div style={{ background: 'var(--bg-slate-50)', border: '1px solid var(--bd-slate-200)', borderRadius: '8px', padding: '14px', textAlign: 'center' }}>
+                      <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--fg-slate-500)', textTransform: 'uppercase' }}>
                         Avg Accuracy
                       </span>
-                      <div style={{ fontSize: '1.8rem', fontWeight: 800, color: stats.avgAccuracy >= 85 ? '#15803d' : '#dc2626' }}>
+                      <div style={{ fontSize: '1.8rem', fontWeight: 800, color: stats.avgAccuracy >= 85 ? 'var(--fg-green-700)' : 'var(--fg-red-600)' }}>
                         {stats.avgAccuracy}%
                       </div>
-                      <span style={{ fontSize: '0.72rem', color: '#64748b' }}>
+                      <span style={{ fontSize: '0.75rem', color: 'var(--fg-slate-500)' }}>
                         Cutoff Threshold: 85%
                       </span>
                     </div>
@@ -433,8 +434,8 @@ export const UserDashboardModal: React.FC<UserDashboardModalProps> = ({
                   {attempts.length >= 2 && (
                     <div
                       style={{
-                        background: '#ffffff',
-                        border: '1px solid #e2e8f0',
+                        background: 'var(--surface)',
+                        border: '1px solid var(--bd-slate-200)',
                         borderRadius: '8px',
                         padding: '16px',
                         marginBottom: '20px'
@@ -448,31 +449,31 @@ export const UserDashboardModal: React.FC<UserDashboardModalProps> = ({
                   )}
 
                   {/* Cutoff Standards Checklist */}
-                  <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '16px', marginBottom: '20px' }}>
-                    <h3 style={{ margin: '0 0 10px', fontSize: '0.95rem', fontWeight: 800, color: '#0f172a' }}>
+                  <div style={{ background: 'var(--surface)', border: '1px solid var(--bd-slate-200)', borderRadius: '8px', padding: '16px', marginBottom: '20px' }}>
+                    <h3 style={{ margin: '0 0 10px', fontSize: '0.95rem', fontWeight: 800, color: 'var(--fg-slate-900)' }}>
                       Official UPPRPB Cutoff Readiness Tracker
                     </h3>
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '12px' }}>
-                      <div style={{ background: '#f8fafc', padding: '12px', borderRadius: '6px', border: '1px solid #cbd5e1' }}>
+                      <div style={{ background: 'var(--bg-slate-50)', padding: '12px', borderRadius: '6px', border: '1px solid var(--bd-slate-300)' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                          <span style={{ fontWeight: 700, fontSize: '0.85rem' }}>Hindi Typing (Mangal/Kruti)</span>
-                          <span style={{ fontWeight: 800, color: stats.avgNetWpm >= 25 ? '#16a34a' : '#dc2626', fontSize: '0.82rem' }}>
+                          <span style={{ fontWeight: 700, fontSize: '0.875rem' }}>Hindi Typing (Mangal/Kruti)</span>
+                          <span style={{ fontWeight: 800, color: stats.avgNetWpm >= 25 ? 'var(--fg-green-600)' : 'var(--fg-red-600)', fontSize: '0.8rem' }}>
                             {stats.avgNetWpm >= 25 ? '✓ Ready (25+ WPM)' : 'Needs Practice (< 25 WPM)'}
                           </span>
                         </div>
-                        <div style={{ fontSize: '0.75rem', color: '#64748b', marginTop: '4px' }}>
+                        <div style={{ fontSize: '0.75rem', color: 'var(--fg-slate-500)', marginTop: '4px' }}>
                           Required: 25 WPM (15 mins, 400 words, 85% accuracy)
                         </div>
                       </div>
 
-                      <div style={{ background: '#f8fafc', padding: '12px', borderRadius: '6px', border: '1px solid #cbd5e1' }}>
+                      <div style={{ background: 'var(--bg-slate-50)', padding: '12px', borderRadius: '6px', border: '1px solid var(--bd-slate-300)' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                          <span style={{ fontWeight: 700, fontSize: '0.85rem' }}>English Typing</span>
-                          <span style={{ fontWeight: 800, color: stats.avgNetWpm >= 30 ? '#16a34a' : '#dc2626', fontSize: '0.82rem' }}>
+                          <span style={{ fontWeight: 700, fontSize: '0.875rem' }}>English Typing</span>
+                          <span style={{ fontWeight: 800, color: stats.avgNetWpm >= 30 ? 'var(--fg-green-600)' : 'var(--fg-red-600)', fontSize: '0.8rem' }}>
                             {stats.avgNetWpm >= 30 ? '✓ Ready (30+ WPM)' : 'Needs Practice (< 30 WPM)'}
                           </span>
                         </div>
-                        <div style={{ fontSize: '0.75rem', color: '#64748b', marginTop: '4px' }}>
+                        <div style={{ fontSize: '0.75rem', color: 'var(--fg-slate-500)', marginTop: '4px' }}>
                           Required: 30 WPM (15 mins, 500 words, 85% accuracy)
                         </div>
                       </div>
@@ -481,11 +482,11 @@ export const UserDashboardModal: React.FC<UserDashboardModalProps> = ({
 
                   {/* Recent 3 Attempts */}
                   <div>
-                    <h3 style={{ margin: '0 0 10px', fontSize: '0.95rem', fontWeight: 800, color: '#0f172a' }}>
+                    <h3 style={{ margin: '0 0 10px', fontSize: '0.95rem', fontWeight: 800, color: 'var(--fg-slate-900)' }}>
                       Recent Test Attempts
                     </h3>
                     {attempts.length === 0 ? (
-                      <p style={{ color: '#64748b', fontSize: '0.85rem' }}>
+                      <p style={{ color: 'var(--fg-slate-500)', fontSize: '0.875rem' }}>
                         No test attempts recorded yet. Take your first test to start building your record!
                       </p>
                     ) : (
@@ -498,29 +499,29 @@ export const UserDashboardModal: React.FC<UserDashboardModalProps> = ({
                               alignItems: 'center',
                               justifyContent: 'space-between',
                               padding: '10px 14px',
-                              background: '#f8fafc',
-                              border: '1px solid #e2e8f0',
+                              background: 'var(--bg-slate-50)',
+                              border: '1px solid var(--bd-slate-200)',
                               borderRadius: '6px',
-                              fontSize: '0.85rem'
+                              fontSize: '0.875rem'
                             }}
                           >
                             <div>
-                              <strong style={{ color: '#0f172a' }}>{a.testTitle}</strong>
-                              <div style={{ fontSize: '0.75rem', color: '#64748b' }}>
+                              <strong style={{ color: 'var(--fg-slate-900)' }}>{a.testTitle}</strong>
+                              <div style={{ fontSize: '0.75rem', color: 'var(--fg-slate-500)' }}>
                                 {new Date(a.timestamp).toLocaleDateString()} &bull; {a.language.replace('_', ' ').toUpperCase()}
                               </div>
                             </div>
 
                             <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                              <span style={{ fontWeight: 700, color: '#0284c7' }}>{a.netWpm} WPM</span>
-                              <span style={{ fontWeight: 700, color: a.accuracy >= 85 ? '#16a34a' : '#dc2626' }}>{a.accuracy}%</span>
+                              <span style={{ fontWeight: 700, color: 'var(--fg-sky-600)' }}>{a.netWpm} WPM</span>
+                              <span style={{ fontWeight: 700, color: a.accuracy >= 85 ? 'var(--fg-green-600)' : 'var(--fg-red-600)' }}>{a.accuracy}%</span>
                               <span
                                 style={{
-                                  background: a.isQualified ? '#dcfce7' : '#fee2e2',
-                                  color: a.isQualified ? '#15803d' : '#dc2626',
+                                  background: a.isQualified ? 'var(--bg-green-100)' : 'var(--bg-red-100)',
+                                  color: a.isQualified ? 'var(--fg-green-700)' : 'var(--fg-red-600)',
                                   padding: '2px 8px',
                                   borderRadius: '4px',
-                                  fontSize: '0.72rem',
+                                  fontSize: '0.75rem',
                                   fontWeight: 800
                                 }}
                               >
@@ -539,14 +540,14 @@ export const UserDashboardModal: React.FC<UserDashboardModalProps> = ({
               {activeTab === 'history' && (
                 <div>
                   {attempts.length === 0 ? (
-                    <div style={{ textAlign: 'center', padding: '40px', color: '#64748b' }}>
+                    <div style={{ textAlign: 'center', padding: '40px', color: 'var(--fg-slate-500)' }}>
                       No test attempts found. Complete mock tests to see full records here.
                     </div>
                   ) : (
                     <div style={{ overflowX: 'auto' }}>
-                      <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.85rem', textAlign: 'left' }}>
+                      <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.875rem', textAlign: 'left' }}>
                         <thead>
-                          <tr style={{ background: '#f1f5f9', borderBottom: '2px solid #cbd5e1' }}>
+                          <tr style={{ background: 'var(--bg-slate-100)', borderBottom: '2px solid var(--bd-slate-300)' }}>
                             <th style={{ padding: '8px 12px' }}>Date</th>
                             <th style={{ padding: '8px 12px' }}>Test Passage</th>
                             <th style={{ padding: '8px 12px' }}>Language</th>
@@ -558,32 +559,32 @@ export const UserDashboardModal: React.FC<UserDashboardModalProps> = ({
                         </thead>
                         <tbody>
                           {attempts.map((a, idx) => (
-                            <tr key={idx} style={{ borderBottom: '1px solid #e2e8f0' }}>
-                              <td style={{ padding: '8px 12px', whiteSpace: 'nowrap', color: '#64748b' }}>
+                            <tr key={idx} style={{ borderBottom: '1px solid var(--bd-slate-200)' }}>
+                              <td style={{ padding: '8px 12px', whiteSpace: 'nowrap', color: 'var(--fg-slate-500)' }}>
                                 {new Date(a.timestamp).toLocaleDateString()}
                               </td>
-                              <td style={{ padding: '8px 12px', fontWeight: 600, color: '#0f172a' }}>
+                              <td style={{ padding: '8px 12px', fontWeight: 600, color: 'var(--fg-slate-900)' }}>
                                 {a.testTitle}
                               </td>
                               <td style={{ padding: '8px 12px' }}>
-                                <span style={{ background: '#e0f2fe', color: '#0369a1', padding: '2px 6px', borderRadius: '4px', fontSize: '0.72rem', fontWeight: 700 }}>
+                                <span style={{ background: 'var(--bg-sky-100)', color: 'var(--fg-sky-700)', padding: '2px 6px', borderRadius: '4px', fontSize: '0.75rem', fontWeight: 700 }}>
                                   {a.language.startsWith('hindi') ? 'Hindi' : 'English'}
                                 </span>
                               </td>
-                              <td style={{ padding: '8px 12px', fontWeight: 800, color: '#0284c7' }}>
+                              <td style={{ padding: '8px 12px', fontWeight: 800, color: 'var(--fg-sky-600)' }}>
                                 {a.netWpm}
                               </td>
-                              <td style={{ padding: '8px 12px', fontWeight: 700, color: a.accuracy >= 85 ? '#16a34a' : '#dc2626' }}>
+                              <td style={{ padding: '8px 12px', fontWeight: 700, color: a.accuracy >= 85 ? 'var(--fg-green-600)' : 'var(--fg-red-600)' }}>
                                 {a.accuracy}%
                               </td>
                               <td style={{ padding: '8px 12px' }}>
                                 <span
                                   style={{
-                                    background: a.isQualified ? '#dcfce7' : '#fee2e2',
-                                    color: a.isQualified ? '#15803d' : '#dc2626',
+                                    background: a.isQualified ? 'var(--bg-green-100)' : 'var(--bg-red-100)',
+                                    color: a.isQualified ? 'var(--fg-green-700)' : 'var(--fg-red-600)',
                                     padding: '2px 8px',
                                     borderRadius: '4px',
-                                    fontSize: '0.72rem',
+                                    fontSize: '0.75rem',
                                     fontWeight: 800
                                   }}
                                 >
@@ -599,7 +600,7 @@ export const UserDashboardModal: React.FC<UserDashboardModalProps> = ({
                                         onClose();
                                       }}
                                       className="btn btn-sm"
-                                      style={{ padding: '3px 8px', fontSize: '0.75rem', background: '#e2e8f0', color: '#334155' }}
+                                      style={{ padding: '3px 8px', fontSize: '0.75rem', background: 'var(--bg-slate-200)', color: 'var(--fg-slate-700)' }}
                                     >
                                       Scorecard
                                     </button>
@@ -647,8 +648,8 @@ export const UserDashboardModal: React.FC<UserDashboardModalProps> = ({
                 <div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', flexWrap: 'wrap', gap: '8px' }}>
                     <div>
-                      <h3 style={{ margin: 0, fontSize: '1.05rem', fontWeight: 800, color: '#0f172a' }}>🎓 My Purchased Courses</h3>
-                      <p style={{ margin: '2px 0 0', fontSize: '0.8rem', color: '#64748b' }}>
+                      <h3 style={{ margin: 0, fontSize: '1rem', fontWeight: 800, color: 'var(--fg-slate-900)' }}>🎓 My Purchased Courses</h3>
+                      <p style={{ margin: '2px 0 0', fontSize: '0.8rem', color: 'var(--fg-slate-500)' }}>
                         All exam plans you have submitted for activation
                       </p>
                     </div>
@@ -656,13 +657,13 @@ export const UserDashboardModal: React.FC<UserDashboardModalProps> = ({
                       <button
                         onClick={() => { onOpenPayment(); onClose(); }}
                         style={{
-                          background: 'linear-gradient(135deg, #7c3aed, #4f46e5)',
+                          background: 'linear-gradient(135deg, var(--tw-violet-600), var(--tw-indigo-600))',
                           color: '#ffffff',
                           border: 'none',
                           borderRadius: '8px',
                           padding: '8px 16px',
                           fontWeight: 700,
-                          fontSize: '0.85rem',
+                          fontSize: '0.875rem',
                           cursor: 'pointer'
                         }}
                       >
@@ -672,33 +673,33 @@ export const UserDashboardModal: React.FC<UserDashboardModalProps> = ({
                   </div>
 
                   {coursesLoading ? (
-                    <div style={{ textAlign: 'center', padding: '40px', color: '#64748b' }}>Loading your courses...</div>
+                    <div style={{ textAlign: 'center', padding: '40px', color: 'var(--fg-slate-500)' }}>Loading your courses...</div>
                   ) : courses.length === 0 ? (
                     <div style={{
                       textAlign: 'center',
                       padding: '48px 24px',
-                      background: '#f8fafc',
-                      border: '2px dashed #e2e8f0',
+                      background: 'var(--bg-slate-50)',
+                      border: '2px dashed var(--bd-slate-200)',
                       borderRadius: '12px'
                     }}>
                       <div style={{ fontSize: '3rem', marginBottom: '12px' }}>🎓</div>
-                      <div style={{ fontWeight: 800, fontSize: '1.05rem', color: '#0f172a', marginBottom: '6px' }}>
+                      <div style={{ fontWeight: 800, fontSize: '1rem', color: 'var(--fg-slate-900)', marginBottom: '6px' }}>
                         No Courses Purchased Yet
                       </div>
-                      <div style={{ color: '#64748b', fontSize: '0.88rem', marginBottom: '20px' }}>
+                      <div style={{ color: 'var(--fg-slate-500)', fontSize: '0.875rem', marginBottom: '20px' }}>
                         Purchase an exam plan to unlock full typing test access, mock tests, and AI-generated passages.
                       </div>
                       {onOpenPayment && (
                         <button
                           onClick={() => { onOpenPayment(); onClose(); }}
                           style={{
-                            background: 'linear-gradient(135deg, #7c3aed, #4f46e5)',
+                            background: 'linear-gradient(135deg, var(--tw-violet-600), var(--tw-indigo-600))',
                             color: '#ffffff',
                             border: 'none',
                             borderRadius: '8px',
                             padding: '10px 24px',
                             fontWeight: 700,
-                            fontSize: '0.9rem',
+                            fontSize: '0.875rem',
                             cursor: 'pointer'
                           }}
                         >
@@ -732,11 +733,11 @@ export const UserDashboardModal: React.FC<UserDashboardModalProps> = ({
 
                         const statusColor = isApproved
                           ? isExpired
-                            ? { bg: '#fee2e2', border: '#fca5a5', text: '#991b1b', label: '⌛ EXPIRED' }
-                            : { bg: '#f0fdf4', border: '#86efac', text: '#15803d', label: '✅ ACTIVE & UNLOCKED' }
+                            ? { bg: 'var(--bg-red-100)', border: 'var(--bd-red-300)', text: 'var(--fg-red-800)', label: '⌛ EXPIRED' }
+                            : { bg: 'var(--bg-green-50)', border: 'var(--bd-green-300)', text: 'var(--fg-green-700)', label: '✅ ACTIVE & UNLOCKED' }
                           : isRejected
-                          ? { bg: '#fef2f2', border: '#fca5a5', text: '#dc2626', label: '❌ REJECTED' }
-                          : { bg: '#fffbeb', border: '#fde68a', text: '#92400e', label: '⏳ PENDING APPROVAL' };
+                          ? { bg: 'var(--bg-red-50)', border: 'var(--bd-red-300)', text: 'var(--fg-red-600)', label: '❌ REJECTED' }
+                          : { bg: 'var(--bg-amber-50)', border: 'var(--bd-amber-200)', text: 'var(--fg-amber-800)', label: '⏳ PENDING APPROVAL' };
 
                         const submittedDate = new Date(course.submittedAt).toLocaleDateString('en-IN', {
                           day: '2-digit', month: 'short', year: 'numeric'
@@ -774,12 +775,12 @@ export const UserDashboardModal: React.FC<UserDashboardModalProps> = ({
                             {/* Top row: Emblem + Titles + Status Badge */}
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '10px', flexWrap: 'wrap' }}>
                               <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                                <span style={{ fontSize: '1.6rem' }}>{dest.emblemEmoji}</span>
+                                <span style={{ fontSize: '1.6rem' }}><EmojiIco e={dest.emblemEmoji} /></span>
                                 <div>
-                                  <div style={{ fontWeight: 800, fontSize: '1.02rem', color: '#0f172a' }}>
+                                  <div style={{ fontWeight: 800, fontSize: '1rem', color: 'var(--fg-slate-900)' }}>
                                     {dest.examTitle || course.planName}
                                   </div>
-                                  <div style={{ fontSize: '0.8rem', color: '#64748b', marginTop: '2px' }}>
+                                  <div style={{ fontSize: '0.8rem', color: 'var(--fg-slate-500)', marginTop: '2px' }}>
                                     Plan: <strong>{course.planName}</strong>
                                     {dest.postTitle && dest.postTitle !== dest.examTitle && (
                                       <span> &bull; Post: <strong>{dest.postTitle}</strong></span>
@@ -795,7 +796,7 @@ export const UserDashboardModal: React.FC<UserDashboardModalProps> = ({
                                     color: statusColor.text,
                                     padding: '3px 10px',
                                     borderRadius: '20px',
-                                    fontSize: '0.72rem',
+                                    fontSize: '0.75rem',
                                     fontWeight: 800,
                                     letterSpacing: '0.5px'
                                   }}
@@ -803,7 +804,7 @@ export const UserDashboardModal: React.FC<UserDashboardModalProps> = ({
                                   {statusColor.label}
                                 </span>
                                 {isApproved && !isExpired && daysRemaining !== null && (
-                                  <span style={{ fontSize: '0.72rem', color: '#16a34a', fontWeight: 700 }}>
+                                  <span style={{ fontSize: '0.75rem', color: 'var(--fg-green-600)', fontWeight: 700 }}>
                                     ⏳ {daysRemaining} days left {expiryDateFormatted ? `(till ${expiryDateFormatted})` : ''}
                                   </span>
                                 )}
@@ -813,24 +814,24 @@ export const UserDashboardModal: React.FC<UserDashboardModalProps> = ({
                             {/* Info Grid */}
                             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '8px', fontSize: '0.8rem' }}>
                               <div>
-                                <span style={{ color: '#64748b' }}>Amount Paid:</span>{' '}
-                                <strong style={{ color: '#0f172a' }}>₹{course.finalAmount || course.finalAmountPaid || course.originalAmount}</strong>
+                                <span style={{ color: 'var(--fg-slate-500)' }}>Amount Paid:</span>{' '}
+                                <strong style={{ color: 'var(--fg-slate-900)' }}>₹{course.finalAmount || course.finalAmountPaid || course.originalAmount}</strong>
                                 {course.promoCodeUsed || course.promoCodeApplied
-                                  ? <span style={{ color: '#16a34a', fontSize: '0.72rem', marginLeft: '4px' }}>({course.promoCodeUsed || course.promoCodeApplied})</span>
+                                  ? <span style={{ color: 'var(--fg-green-600)', fontSize: '0.75rem', marginLeft: '4px' }}>({course.promoCodeUsed || course.promoCodeApplied})</span>
                                   : null}
                               </div>
                               <div>
-                                <span style={{ color: '#64748b' }}>UTR Number:</span>{' '}
-                                <strong style={{ color: '#0f172a', fontFamily: 'monospace' }}>{course.utrNumber}</strong>
+                                <span style={{ color: 'var(--fg-slate-500)' }}>UTR Number:</span>{' '}
+                                <strong style={{ color: 'var(--fg-slate-900)', fontFamily: 'monospace' }}>{course.utrNumber}</strong>
                               </div>
                               <div>
-                                <span style={{ color: '#64748b' }}>Submitted:</span>{' '}
-                                <strong style={{ color: '#0f172a' }}>{submittedDate}</strong>
+                                <span style={{ color: 'var(--fg-slate-500)' }}>Submitted:</span>{' '}
+                                <strong style={{ color: 'var(--fg-slate-900)' }}>{submittedDate}</strong>
                               </div>
                               {reviewedDate && (
                                 <div>
-                                  <span style={{ color: '#64748b' }}>Reviewed:</span>{' '}
-                                  <strong style={{ color: '#0f172a' }}>{reviewedDate}</strong>
+                                  <span style={{ color: 'var(--fg-slate-500)' }}>Reviewed:</span>{' '}
+                                  <strong style={{ color: 'var(--fg-slate-900)' }}>{reviewedDate}</strong>
                                 </div>
                               )}
                             </div>
@@ -838,12 +839,12 @@ export const UserDashboardModal: React.FC<UserDashboardModalProps> = ({
                             {/* Rejection reason */}
                             {isRejected && course.rejectionReason && (
                               <div style={{
-                                background: '#fef2f2',
-                                border: '1px solid #fca5a5',
+                                background: 'var(--bg-red-50)',
+                                border: '1px solid var(--bd-red-300)',
                                 borderRadius: '6px',
                                 padding: '8px 12px',
                                 fontSize: '0.8rem',
-                                color: '#dc2626'
+                                color: 'var(--fg-red-600)'
                               }}>
                                 <strong>Rejection Reason:</strong> {course.rejectionReason}
                               </div>
@@ -851,7 +852,7 @@ export const UserDashboardModal: React.FC<UserDashboardModalProps> = ({
 
                             {/* Pending message */}
                             {isPending && (
-                              <div style={{ fontSize: '0.78rem', color: '#92400e' }}>
+                              <div style={{ fontSize: '0.8rem', color: 'var(--fg-amber-800)' }}>
                                 ⏱️ Admin typically approves within <strong>15–30 minutes</strong> during business hours. You will receive access immediately after approval.
                               </div>
                             )}
@@ -863,12 +864,12 @@ export const UserDashboardModal: React.FC<UserDashboardModalProps> = ({
                                   <button
                                     onClick={handleDirectOpen}
                                     style={{
-                                      background: 'linear-gradient(135deg, #16a34a 0%, #15803d 100%)',
+                                      background: 'linear-gradient(135deg, var(--tw-green-600) 0%, var(--tw-green-700) 100%)',
                                       color: '#ffffff',
                                       border: 'none',
                                       borderRadius: '8px',
                                       padding: '9px 18px',
-                                      fontSize: '0.86rem',
+                                      fontSize: '0.875rem',
                                       fontWeight: 800,
                                       cursor: 'pointer',
                                       display: 'inline-flex',
@@ -883,12 +884,12 @@ export const UserDashboardModal: React.FC<UserDashboardModalProps> = ({
                                   <button
                                     onClick={handleDirectOpen}
                                     style={{
-                                      background: '#ffffff',
-                                      border: '1.5px solid #0284c7',
-                                      color: '#0284c7',
+                                      background: 'var(--surface)',
+                                      border: '1.5px solid var(--tw-sky-600)',
+                                      color: 'var(--fg-sky-600)',
                                       borderRadius: '8px',
                                       padding: '9px 14px',
-                                      fontSize: '0.82rem',
+                                      fontSize: '0.8rem',
                                       fontWeight: 700,
                                       cursor: 'pointer'
                                     }}
@@ -905,12 +906,12 @@ export const UserDashboardModal: React.FC<UserDashboardModalProps> = ({
                                       onClose();
                                     }}
                                     style={{
-                                      background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
+                                      background: 'linear-gradient(135deg, var(--tw-amber-500) 0%, var(--tw-amber-600) 100%)',
                                       color: '#ffffff',
                                       border: 'none',
                                       borderRadius: '8px',
                                       padding: '8px 16px',
-                                      fontSize: '0.82rem',
+                                      fontSize: '0.8rem',
                                       fontWeight: 700,
                                       cursor: 'pointer'
                                     }}
@@ -927,7 +928,7 @@ export const UserDashboardModal: React.FC<UserDashboardModalProps> = ({
                                       onClose();
                                     }}
                                     style={{
-                                      background: '#dc2626',
+                                      background: 'var(--tw-red-600)',
                                       color: '#fff',
                                       border: 'none',
                                       borderRadius: '6px',
@@ -953,21 +954,21 @@ export const UserDashboardModal: React.FC<UserDashboardModalProps> = ({
 
               {/* TAB 4: ADMIT CARD VIEW */}
               {activeTab === 'admitCard' && (
-                <div style={{ maxWidth: '650px', margin: '0 auto', border: '2px solid #0f172a', borderRadius: '8px', padding: '20px', background: '#ffffff' }}>
-                  <div style={{ textAlign: 'center', borderBottom: '2px solid #0f172a', paddingBottom: '12px', marginBottom: '16px' }}>
-                    <div style={{ fontSize: '0.85rem', fontWeight: 800, letterSpacing: '1px', color: '#64748b' }}>
+                <div style={{ maxWidth: '650px', margin: '0 auto', border: '2px solid var(--tw-slate-900)', borderRadius: '8px', padding: '20px', background: 'var(--surface)' }}>
+                  <div style={{ textAlign: 'center', borderBottom: '2px solid var(--tw-slate-900)', paddingBottom: '12px', marginBottom: '16px' }}>
+                    <div style={{ fontSize: '0.875rem', fontWeight: 800, letterSpacing: '1px', color: 'var(--fg-slate-500)' }}>
                       UTTAR PRADESH POLICE RECRUITMENT & PROMOTION BOARD
                     </div>
-                    <h2 style={{ margin: '4px 0', fontSize: '1.25rem', fontWeight: 900, color: '#0f172a' }}>
+                    <h2 style={{ margin: '4px 0', fontSize: '1.25rem', fontWeight: 900, color: 'var(--fg-slate-900)' }}>
                       CANDIDATE TYPING SKILL TEST RECORD DOSSIER
                     </h2>
-                    <div style={{ fontSize: '0.8rem', color: '#0284c7', fontWeight: 700 }}>
+                    <div style={{ fontSize: '0.8rem', color: 'var(--fg-sky-600)', fontWeight: 700 }}>
                       Computer Operator (Grade-A) / ASI (Clerk/Accounts) Exam 2024-2025
                     </div>
                   </div>
 
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 120px', gap: '16px', marginBottom: '16px' }}>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '0.85rem' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '0.875rem' }}>
                       <div>Candidate Name: <strong>{user.displayName}</strong></div>
                       <div>Roll Number: <strong>{user.rollNumber}</strong></div>
                       <div>Post Applied: <strong>{user.category === 'up_police_asi' ? 'Assistant Sub-Inspector (Clerk/Accounts)' : 'Computer Operator Grade-A'}</strong></div>
@@ -975,13 +976,13 @@ export const UserDashboardModal: React.FC<UserDashboardModalProps> = ({
                       <div>Profile Status: <strong>{isLocalOnly ? 'Local Offline Mode' : 'Cloud Registered'}</strong></div>
                     </div>
 
-                    <div style={{ width: '110px', height: '120px', border: '1.5px solid #cbd5e1', borderRadius: '6px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: '#f8fafc' }}>
+                    <div style={{ width: '110px', height: '120px', border: '1.5px solid var(--bd-slate-300)', borderRadius: '6px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: 'var(--bg-slate-50)' }}>
                       <span style={{ fontSize: '2.5rem' }}>👤</span>
-                      <span style={{ fontSize: '0.65rem', color: '#64748b' }}>PHOTO</span>
+                      <span style={{ fontSize: '0.75rem', color: 'var(--fg-slate-500)' }}>PHOTO</span>
                     </div>
                   </div>
 
-                  <div style={{ background: '#f8fafc', border: '1px solid #cbd5e1', borderRadius: '6px', padding: '12px', fontSize: '0.8rem', lineHeight: 1.6 }}>
+                  <div style={{ background: 'var(--bg-slate-50)', border: '1px solid var(--bd-slate-300)', borderRadius: '6px', padding: '12px', fontSize: '0.8rem', lineHeight: 1.6 }}>
                     <strong>Verified Performance Summary:</strong>
                     <div>Total Practice Tests Completed: <strong>{attempts.length}</strong></div>
                     <div>Overall Qualification Rate: <strong>{stats?.passRate || 0}%</strong></div>

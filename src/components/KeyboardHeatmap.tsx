@@ -119,19 +119,19 @@ export const KeyboardHeatmap: React.FC<KeyboardHeatmapProps> = ({
 
   const getKeyBgColor = (key: string): string => {
     const info = keyMap.get(key);
-    if (!info || info.count === 0) return '#ffffff';
+    if (!info || info.count === 0) return 'var(--surface)';
     const ratio = info.count / maxMistakes;
-    if (ratio > 0.75) return '#ef4444'; // Red (hot)
-    if (ratio > 0.45) return '#f97316'; // Orange
-    if (ratio > 0.2) return '#fbbf24';  // Yellow-amber
-    return '#fef08a';                   // Light yellow
+    if (ratio > 0.75) return 'var(--tw-red-500)'; // Red (hot)
+    if (ratio > 0.45) return 'var(--tw-orange-500)'; // Orange
+    if (ratio > 0.2) return 'var(--tw-amber-400)';  // Yellow-amber
+    return 'var(--bg-yellow-200)';                   // Light yellow
   };
 
   const getKeyTextColor = (key: string): string => {
     const info = keyMap.get(key);
-    if (!info || info.count === 0) return '#334155';
+    if (!info || info.count === 0) return 'var(--fg-slate-700)';
     const ratio = info.count / maxMistakes;
-    return ratio > 0.45 ? '#ffffff' : '#0f172a';
+    return ratio > 0.45 ? '#ffffff' : 'var(--fg-slate-900)';
   };
 
   const renderKey = (k: string, width = '38px') => {
@@ -149,11 +149,11 @@ export const KeyboardHeatmap: React.FC<KeyboardHeatmapProps> = ({
           width,
           height: '38px',
           borderRadius: '6px',
-          border: isSelected ? '2px solid #0284c7' : '1px solid #cbd5e1',
+          border: isSelected ? '2px solid var(--tw-sky-600)' : '1px solid var(--bd-slate-300)',
           background: getKeyBgColor(k),
           color: getKeyTextColor(k),
           fontWeight: 800,
-          fontSize: '0.82rem',
+          fontSize: '0.8rem',
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
@@ -166,7 +166,7 @@ export const KeyboardHeatmap: React.FC<KeyboardHeatmapProps> = ({
       >
         <span>{k.toUpperCase()}</span>
         {count > 0 && (
-          <span style={{ fontSize: '0.62rem', opacity: 0.9, lineHeight: 1 }}>
+          <span style={{ fontSize: '0.75rem', opacity: 0.9, lineHeight: 1 }}>
             {count}
           </span>
         )}
@@ -196,22 +196,22 @@ export const KeyboardHeatmap: React.FC<KeyboardHeatmapProps> = ({
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
           <span style={{ fontSize: '1.25rem' }}>⌨️</span>
           <div>
-            <h4 style={{ margin: 0, fontSize: '0.95rem', fontWeight: 800, color: '#0f172a' }}>
+            <h4 style={{ margin: 0, fontSize: '0.95rem', fontWeight: 800, color: 'var(--fg-slate-900)' }}>
               Keyboard Error Heatmap (गलतियों का नक्शा)
             </h4>
-            <div style={{ fontSize: '0.74rem', color: '#64748b' }}>
+            <div style={{ fontSize: '0.75rem', color: 'var(--fg-slate-500)' }}>
               Red keys indicate high error frequency across your tests
             </div>
           </div>
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.75rem', color: '#64748b' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.75rem', color: 'var(--fg-slate-500)' }}>
           <span>Low</span>
-          <span style={{ width: '12px', height: '12px', borderRadius: '3px', background: '#ffffff', border: '1px solid #cbd5e1' }} />
-          <span style={{ width: '12px', height: '12px', borderRadius: '3px', background: '#fef08a' }} />
-          <span style={{ width: '12px', height: '12px', borderRadius: '3px', background: '#fbbf24' }} />
-          <span style={{ width: '12px', height: '12px', borderRadius: '3px', background: '#f97316' }} />
-          <span style={{ width: '12px', height: '12px', borderRadius: '3px', background: '#ef4444' }} />
+          <span style={{ width: '12px', height: '12px', borderRadius: '3px', background: 'var(--surface)', border: '1px solid var(--bd-slate-300)' }} />
+          <span style={{ width: '12px', height: '12px', borderRadius: '3px', background: 'var(--bg-yellow-200)' }} />
+          <span style={{ width: '12px', height: '12px', borderRadius: '3px', background: 'var(--tw-amber-400)' }} />
+          <span style={{ width: '12px', height: '12px', borderRadius: '3px', background: 'var(--tw-orange-500)' }} />
+          <span style={{ width: '12px', height: '12px', borderRadius: '3px', background: 'var(--tw-red-500)' }} />
           <span>High Mistakes</span>
         </div>
       </div>
@@ -219,10 +219,10 @@ export const KeyboardHeatmap: React.FC<KeyboardHeatmapProps> = ({
       {/* Visual QWERTY Layout */}
       <div
         style={{
-          background: '#f1f5f9',
+          background: 'var(--bg-slate-100)',
           padding: '16px 12px',
           borderRadius: '10px',
-          border: '1px solid #e2e8f0',
+          border: '1px solid var(--bd-slate-200)',
           overflowX: 'auto',
           marginBottom: '16px'
         }}
@@ -255,13 +255,13 @@ export const KeyboardHeatmap: React.FC<KeyboardHeatmapProps> = ({
                 width: '180px',
                 height: '28px',
                 borderRadius: '6px',
-                border: '1px solid #cbd5e1',
-                background: '#ffffff',
+                border: '1px solid var(--bd-slate-300)',
+                background: 'var(--surface)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                fontSize: '0.7rem',
-                color: '#94a3b8',
+                fontSize: '0.75rem',
+                color: 'var(--tw-slate-400)',
                 fontWeight: 700
               }}
             >
@@ -275,8 +275,8 @@ export const KeyboardHeatmap: React.FC<KeyboardHeatmapProps> = ({
       {selectedKey && (
         <div
           style={{
-            background: '#f8fafc',
-            border: '1.5px solid #0284c7',
+            background: 'var(--bg-slate-50)',
+            border: '1.5px solid var(--tw-sky-600)',
             borderRadius: '8px',
             padding: '10px 14px',
             marginBottom: '14px',
@@ -293,7 +293,7 @@ export const KeyboardHeatmap: React.FC<KeyboardHeatmapProps> = ({
                 width: '36px',
                 height: '36px',
                 borderRadius: '6px',
-                background: '#0284c7',
+                background: 'var(--tw-sky-600)',
                 color: '#fff',
                 display: 'flex',
                 alignItems: 'center',
@@ -305,10 +305,10 @@ export const KeyboardHeatmap: React.FC<KeyboardHeatmapProps> = ({
               {selectedKey.key.toUpperCase()}
             </span>
             <div>
-              <div style={{ fontWeight: 800, fontSize: '0.88rem', color: '#0f172a' }}>
+              <div style={{ fontWeight: 800, fontSize: '0.875rem', color: 'var(--fg-slate-900)' }}>
                 Key <strong>{selectedKey.key.toUpperCase()}</strong>: {selectedKey.count} Recorded Mistake{selectedKey.count === 1 ? '' : 's'}
               </div>
-              <div style={{ fontSize: '0.75rem', color: '#64748b' }}>
+              <div style={{ fontSize: '0.75rem', color: 'var(--fg-slate-500)' }}>
                 {selectedKey.finger && <span>Finger: <strong>{selectedKey.finger}</strong> &bull; </span>}
                 {selectedKey.keyCombo && <span>Combo: <code>{selectedKey.keyCombo}</code> &bull; </span>}
                 {selectedKey.hindiChars && selectedKey.hindiChars.length > 0 && (
@@ -324,9 +324,9 @@ export const KeyboardHeatmap: React.FC<KeyboardHeatmapProps> = ({
             style={{
               background: 'none',
               border: 'none',
-              color: '#64748b',
+              color: 'var(--fg-slate-500)',
               cursor: 'pointer',
-              fontSize: '1.2rem',
+              fontSize: '1.25rem',
               padding: '2px 6px'
             }}
           >
@@ -338,7 +338,7 @@ export const KeyboardHeatmap: React.FC<KeyboardHeatmapProps> = ({
       {/* Weakest Characters Ranking */}
       <div>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
-          <h5 style={{ margin: 0, fontSize: '0.86rem', fontWeight: 800, color: '#0f172a' }}>
+          <h5 style={{ margin: 0, fontSize: '0.875rem', fontWeight: 800, color: 'var(--fg-slate-900)' }}>
             🎯 Top Focus Characters ({weakCharsList.length})
           </h5>
           {onPracticeWords && weakCharsList.length > 0 && (
@@ -346,12 +346,12 @@ export const KeyboardHeatmap: React.FC<KeyboardHeatmapProps> = ({
               type="button"
               onClick={handlePracticeWeak}
               style={{
-                background: 'linear-gradient(135deg, #0284c7 0%, #0369a1 100%)',
+                background: 'linear-gradient(135deg, var(--tw-sky-600) 0%, var(--tw-sky-700) 100%)',
                 color: '#fff',
                 border: 'none',
                 borderRadius: '6px',
                 padding: '4px 10px',
-                fontSize: '0.74rem',
+                fontSize: '0.75rem',
                 fontWeight: 800,
                 cursor: 'pointer'
               }}
@@ -362,7 +362,7 @@ export const KeyboardHeatmap: React.FC<KeyboardHeatmapProps> = ({
         </div>
 
         {weakCharsList.length === 0 ? (
-          <div style={{ textAlign: 'center', padding: '16px', color: '#64748b', fontSize: '0.82rem' }}>
+          <div style={{ textAlign: 'center', padding: '16px', color: 'var(--fg-slate-500)', fontSize: '0.8rem' }}>
             No character mistakes recorded yet. Keep taking mock tests!
           </div>
         ) : (
@@ -377,8 +377,8 @@ export const KeyboardHeatmap: React.FC<KeyboardHeatmapProps> = ({
               <div
                 key={idx}
                 style={{
-                  background: '#f8fafc',
-                  border: '1px solid #e2e8f0',
+                  background: 'var(--bg-slate-50)',
+                  border: '1px solid var(--bd-slate-200)',
                   borderRadius: '6px',
                   padding: '8px 10px',
                   display: 'flex',
@@ -391,8 +391,8 @@ export const KeyboardHeatmap: React.FC<KeyboardHeatmapProps> = ({
                     width: '32px',
                     height: '32px',
                     borderRadius: '6px',
-                    background: idx < 3 ? '#fee2e2' : '#f1f5f9',
-                    color: idx < 3 ? '#dc2626' : '#0f172a',
+                    background: idx < 3 ? 'var(--bg-red-100)' : 'var(--bg-slate-100)',
+                    color: idx < 3 ? 'var(--fg-red-600)' : 'var(--fg-slate-900)',
                     fontWeight: 900,
                     fontSize: '1rem',
                     display: 'flex',
@@ -404,10 +404,10 @@ export const KeyboardHeatmap: React.FC<KeyboardHeatmapProps> = ({
                   {item.character}
                 </div>
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontSize: '0.78rem', fontWeight: 800, color: '#0f172a' }}>
+                  <div style={{ fontSize: '0.8rem', fontWeight: 800, color: 'var(--fg-slate-900)' }}>
                     {item.mistakeCount} error{item.mistakeCount === 1 ? '' : 's'}
                   </div>
-                  <div style={{ fontSize: '0.68rem', color: '#64748b', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                  <div style={{ fontSize: '0.75rem', color: 'var(--fg-slate-500)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                     {item.fingerHint || item.keyCombo || 'Character'}
                   </div>
                 </div>

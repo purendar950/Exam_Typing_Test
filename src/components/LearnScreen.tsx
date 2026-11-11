@@ -100,7 +100,7 @@ export const LearnScreen: React.FC<LearnScreenProps> = ({ onBackToTests }) => {
       <div
         className="card"
         style={{
-          background: 'linear-gradient(135deg, #0284c7 0%, #0369a1 100%)',
+          background: 'linear-gradient(135deg, var(--tw-sky-600) 0%, var(--tw-sky-700) 100%)',
           color: 'white',
           marginBottom: '24px'
         }}
@@ -110,11 +110,11 @@ export const LearnScreen: React.FC<LearnScreenProps> = ({ onBackToTests }) => {
             <h1 style={{ fontSize: '1.6rem', fontWeight: 800, marginBottom: '6px' }}>
               Guided Finger & Muscle Memory Trainer
             </h1>
-            <p style={{ opacity: 0.9, fontSize: '0.9rem' }}>
+            <p style={{ opacity: 0.9, fontSize: '0.875rem' }}>
               Master touch-typing on Hindi Mangal Inscript and English QWERTY without looking down at the keyboard.
             </p>
           </div>
-          <button onClick={onBackToTests} className="btn btn-secondary btn-sm" style={{ background: 'white' }}>
+          <button onClick={onBackToTests} className="btn btn-secondary btn-sm" style={{ background: 'var(--surface)' }}>
             ← Back to Mock Tests
           </button>
         </div>
@@ -145,7 +145,7 @@ export const LearnScreen: React.FC<LearnScreenProps> = ({ onBackToTests }) => {
         <button
           onClick={() => setIsHindiHelperOpen(true)}
           className="btn"
-          style={{ background: '#fef3c7', color: '#b45309', border: '1px solid #fde68a', fontWeight: 700 }}
+          style={{ background: 'var(--bg-amber-100)', color: 'var(--fg-amber-700)', border: '1px solid var(--bd-amber-200)', fontWeight: 700 }}
           title="Open Hindi Character & Conjuncts Helper"
         >
           ⌨️ संयुक्ताक्षर गाइड (Hindi Conjuncts)
@@ -178,17 +178,17 @@ export const LearnScreen: React.FC<LearnScreenProps> = ({ onBackToTests }) => {
         {/* Drill Practice Workspace */}
         <div className="card" style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <h2 style={{ fontSize: '1.2rem', fontWeight: 700 }}>{currentLesson.title}</h2>
-            <div style={{ display: 'flex', gap: '12px', fontSize: '0.9rem' }}>
+            <h2 style={{ fontSize: '1.25rem', fontWeight: 700 }}>{currentLesson.title}</h2>
+            <div style={{ display: 'flex', gap: '12px', fontSize: '0.875rem' }}>
               <span>Progress: <strong>{typedInput.length}/{totalTargetLength}</strong></span>
-              <span>Accuracy: <strong style={{ color: accuracy >= 90 ? '#16a34a' : '#dc2626' }}>{accuracy}%</strong></span>
+              <span>Accuracy: <strong style={{ color: accuracy >= 90 ? 'var(--fg-green-600)' : 'var(--fg-red-600)' }}>{accuracy}%</strong></span>
             </div>
           </div>
 
           {/* Drill Display Box */}
           <div
             style={{
-              background: '#f8fafc',
+              background: 'var(--bg-slate-50)',
               border: '2px solid var(--border-color)',
               borderRadius: 'var(--radius-md)',
               padding: '24px',
@@ -209,8 +209,8 @@ export const LearnScreen: React.FC<LearnScreenProps> = ({ onBackToTests }) => {
                 <span
                   key={index}
                   style={{
-                    backgroundColor: isCurrent ? '#bae6fd' : isWrong ? '#fee2e2' : 'transparent',
-                    color: isCorrect ? '#16a34a' : isWrong ? '#dc2626' : isCurrent ? '#0369a1' : '#64748b',
+                    backgroundColor: isCurrent ? 'var(--bg-sky-200)' : isWrong ? 'var(--bg-red-100)' : 'transparent',
+                    color: isCorrect ? 'var(--fg-green-600)' : isWrong ? 'var(--fg-red-600)' : isCurrent ? 'var(--fg-sky-700)' : 'var(--fg-slate-500)',
                     borderRadius: '3px',
                     padding: '2px 3px',
                     fontWeight: isCurrent ? 800 : 500,
@@ -252,17 +252,17 @@ export const LearnScreen: React.FC<LearnScreenProps> = ({ onBackToTests }) => {
           {isLessonComplete && (
             <div
               style={{
-                background: '#f0fdf4',
-                border: '1px solid #86efac',
+                background: 'var(--bg-green-50)',
+                border: '1px solid var(--bd-green-300)',
                 padding: '16px',
                 borderRadius: 'var(--radius-md)',
                 textAlign: 'center'
               }}
             >
-              <h4 style={{ color: '#15803d', fontWeight: 800, fontSize: '1.2rem', marginBottom: '4px' }}>
+              <h4 style={{ color: 'var(--fg-green-700)', fontWeight: 800, fontSize: '1.25rem', marginBottom: '4px' }}>
                 Drill Completed! 🎉
               </h4>
-              <p style={{ color: '#166534', fontSize: '0.9rem', marginBottom: '12px' }}>
+              <p style={{ color: 'var(--fg-green-800)', fontSize: '0.875rem', marginBottom: '12px' }}>
                 Final Accuracy: {accuracy}%. Practice makes perfection.
               </p>
               <div style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>
@@ -288,9 +288,9 @@ export const LearnScreen: React.FC<LearnScreenProps> = ({ onBackToTests }) => {
           <div
             style={{
               padding: '12px 16px',
-              background: '#f1f5f9',
+              background: 'var(--bg-slate-100)',
               borderRadius: 'var(--radius-sm)',
-              fontSize: '0.85rem',
+              fontSize: '0.875rem',
               color: 'var(--text-muted)'
             }}
           >

@@ -54,8 +54,8 @@ export class ErrorBoundary extends Component<Props, State> {
             style={{
               maxWidth: '560px',
               width: '100%',
-              background: '#ffffff',
-              border: '1.5px solid #fee2e2',
+              background: 'var(--surface)',
+              border: '1.5px solid var(--bd-red-100)',
               borderRadius: '16px',
               padding: '32px 24px',
               boxShadow: '0 10px 25px -5px rgba(220, 38, 38, 0.12)',
@@ -63,23 +63,23 @@ export class ErrorBoundary extends Component<Props, State> {
             }}
           >
             <div style={{ fontSize: '3rem', marginBottom: '12px' }}>⚠️</div>
-            <h2 style={{ fontSize: '1.25rem', fontWeight: 800, color: '#991b1b', marginBottom: '8px' }}>
+            <h2 style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--fg-red-800)', marginBottom: '8px' }}>
               {this.props.fallbackTitle || 'Something went wrong (तकनीकी समस्या हुई)'}
             </h2>
-            <p style={{ fontSize: '0.88rem', color: '#64748b', lineHeight: 1.6, marginBottom: '20px' }}>
+            <p style={{ fontSize: '0.875rem', color: 'var(--fg-slate-500)', lineHeight: 1.6, marginBottom: '20px' }}>
               We encountered an unexpected error while rendering this page. Your saved test history and profile are safe in local storage.
             </p>
 
             {this.state.error && (
               <div
                 style={{
-                  background: '#fef2f2',
-                  border: '1px solid #fecaca',
+                  background: 'var(--bg-red-50)',
+                  border: '1px solid var(--bd-red-200)',
                   borderRadius: '8px',
                   padding: '10px 14px',
-                  fontSize: '0.78rem',
+                  fontSize: '0.8rem',
                   fontFamily: 'monospace',
-                  color: '#b91c1c',
+                  color: 'var(--fg-red-700)',
                   textAlign: 'left',
                   maxHeight: '120px',
                   overflowY: 'auto',
@@ -94,13 +94,13 @@ export class ErrorBoundary extends Component<Props, State> {
               <button
                 onClick={this.handleReload}
                 style={{
-                  background: 'linear-gradient(135deg, #0284c7 0%, #0369a1 100%)',
+                  background: 'linear-gradient(135deg, var(--tw-sky-600) 0%, var(--tw-sky-700) 100%)',
                   color: '#ffffff',
                   border: 'none',
                   padding: '10px 20px',
                   borderRadius: '8px',
                   fontWeight: 700,
-                  fontSize: '0.88rem',
+                  fontSize: '0.875rem',
                   cursor: 'pointer',
                   display: 'inline-flex',
                   alignItems: 'center',
@@ -114,13 +114,13 @@ export class ErrorBoundary extends Component<Props, State> {
               <button
                 onClick={this.handleReturnHome}
                 style={{
-                  background: '#f8fafc',
-                  color: '#334155',
-                  border: '1px solid #cbd5e1',
+                  background: 'var(--bg-slate-50)',
+                  color: 'var(--fg-slate-700)',
+                  border: '1px solid var(--bd-slate-300)',
                   padding: '10px 18px',
                   borderRadius: '8px',
                   fontWeight: 700,
-                  fontSize: '0.88rem',
+                  fontSize: '0.875rem',
                   cursor: 'pointer',
                   display: 'inline-flex',
                   alignItems: 'center',

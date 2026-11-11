@@ -51,7 +51,7 @@ export const BookLibraryModal: React.FC<BookLibraryModalProps> = ({
         {/* Header */}
         <div
           style={{
-            background: 'linear-gradient(135deg, #1e3a8a, #0369a1)',
+            background: 'linear-gradient(135deg, var(--tw-blue-900), var(--tw-sky-700))',
             color: '#ffffff',
             padding: '16px 24px',
             display: 'flex',
@@ -65,7 +65,7 @@ export const BookLibraryModal: React.FC<BookLibraryModalProps> = ({
               <h2 style={{ margin: 0, fontSize: '1.25rem', fontWeight: 800 }}>
                 Classic Book Library & Type-Along (पुस्तकालय एवं टाइपिंग अभ्यास)
               </h2>
-              <p style={{ margin: 0, fontSize: '0.85rem', opacity: 0.9 }}>
+              <p style={{ margin: 0, fontSize: '0.875rem', opacity: 0.9 }}>
                 Practice typing complete chapters of famous Hindi & English literature
               </p>
             </div>
@@ -80,7 +80,7 @@ export const BookLibraryModal: React.FC<BookLibraryModalProps> = ({
               height: '32px',
               borderRadius: '50%',
               cursor: 'pointer',
-              fontSize: '1.2rem',
+              fontSize: '1.25rem',
               fontWeight: 700
             }}
           >
@@ -92,8 +92,8 @@ export const BookLibraryModal: React.FC<BookLibraryModalProps> = ({
         <div
           style={{
             padding: '12px 24px',
-            background: '#f8fafc',
-            borderBottom: '1px solid #e2e8f0',
+            background: 'var(--bg-slate-50)',
+            borderBottom: '1px solid var(--bd-slate-200)',
             display: 'flex',
             flexWrap: 'wrap',
             gap: '12px',
@@ -107,11 +107,11 @@ export const BookLibraryModal: React.FC<BookLibraryModalProps> = ({
               style={{
                 padding: '6px 14px',
                 borderRadius: '20px',
-                border: selectedLanguage === 'all' ? '1px solid #0284c7' : '1px solid #cbd5e1',
-                background: selectedLanguage === 'all' ? '#e0f2fe' : '#ffffff',
-                color: selectedLanguage === 'all' ? '#0369a1' : '#475569',
+                border: selectedLanguage === 'all' ? '1px solid var(--tw-sky-600)' : '1px solid var(--bd-slate-300)',
+                background: selectedLanguage === 'all' ? 'var(--bg-sky-100)' : 'var(--surface)',
+                color: selectedLanguage === 'all' ? 'var(--fg-sky-700)' : 'var(--fg-slate-600)',
                 fontWeight: 700,
-                fontSize: '0.85rem',
+                fontSize: '0.875rem',
                 cursor: 'pointer'
               }}
             >
@@ -122,11 +122,11 @@ export const BookLibraryModal: React.FC<BookLibraryModalProps> = ({
               style={{
                 padding: '6px 14px',
                 borderRadius: '20px',
-                border: selectedLanguage === 'hindi' ? '1px solid #0284c7' : '1px solid #cbd5e1',
-                background: selectedLanguage === 'hindi' ? '#e0f2fe' : '#ffffff',
-                color: selectedLanguage === 'hindi' ? '#0369a1' : '#475569',
+                border: selectedLanguage === 'hindi' ? '1px solid var(--tw-sky-600)' : '1px solid var(--bd-slate-300)',
+                background: selectedLanguage === 'hindi' ? 'var(--bg-sky-100)' : 'var(--surface)',
+                color: selectedLanguage === 'hindi' ? 'var(--fg-sky-700)' : 'var(--fg-slate-600)',
                 fontWeight: 700,
-                fontSize: '0.85rem',
+                fontSize: '0.875rem',
                 cursor: 'pointer'
               }}
             >
@@ -137,11 +137,11 @@ export const BookLibraryModal: React.FC<BookLibraryModalProps> = ({
               style={{
                 padding: '6px 14px',
                 borderRadius: '20px',
-                border: selectedLanguage === 'english' ? '1px solid #0284c7' : '1px solid #cbd5e1',
-                background: selectedLanguage === 'english' ? '#e0f2fe' : '#ffffff',
-                color: selectedLanguage === 'english' ? '#0369a1' : '#475569',
+                border: selectedLanguage === 'english' ? '1px solid var(--tw-sky-600)' : '1px solid var(--bd-slate-300)',
+                background: selectedLanguage === 'english' ? 'var(--bg-sky-100)' : 'var(--surface)',
+                color: selectedLanguage === 'english' ? 'var(--fg-sky-700)' : 'var(--fg-slate-600)',
                 fontWeight: 700,
-                fontSize: '0.85rem',
+                fontSize: '0.875rem',
                 cursor: 'pointer'
               }}
             >
@@ -159,11 +159,11 @@ export const BookLibraryModal: React.FC<BookLibraryModalProps> = ({
                 width: '100%',
                 padding: '6px 12px 6px 30px',
                 borderRadius: '8px',
-                border: '1px solid #cbd5e1',
-                fontSize: '0.88rem'
+                border: '1px solid var(--bd-slate-300)',
+                fontSize: '0.875rem'
               }}
             />
-            <span style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }}>
+            <span style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: 'var(--tw-slate-400)' }}>
               🔍
             </span>
           </div>
@@ -175,13 +175,13 @@ export const BookLibraryModal: React.FC<BookLibraryModalProps> = ({
           <div
             style={{
               width: '42%',
-              borderRight: '1px solid #e2e8f0',
+              borderRight: '1px solid var(--bd-slate-200)',
               overflowY: 'auto',
               padding: '16px',
-              background: '#f8fafc'
+              background: 'var(--bg-slate-50)'
             }}
           >
-            <div style={{ fontSize: '0.78rem', fontWeight: 800, color: '#64748b', textTransform: 'uppercase', marginBottom: '12px' }}>
+            <div style={{ fontSize: '0.8rem', fontWeight: 800, color: 'var(--fg-slate-500)', textTransform: 'uppercase', marginBottom: '12px' }}>
               Select a Book
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
@@ -192,8 +192,8 @@ export const BookLibraryModal: React.FC<BookLibraryModalProps> = ({
                     key={book.id}
                     onClick={() => setSelectedBook(book)}
                     style={{
-                      background: isSelected ? '#ffffff' : '#ffffff',
-                      border: isSelected ? '2px solid #0284c7' : '1px solid #e2e8f0',
+                      background: isSelected ? 'var(--surface)' : 'var(--surface)',
+                      border: isSelected ? '2px solid var(--tw-sky-600)' : '1px solid var(--bd-slate-200)',
                       borderRadius: '10px',
                       padding: '12px',
                       cursor: 'pointer',
@@ -223,17 +223,17 @@ export const BookLibraryModal: React.FC<BookLibraryModalProps> = ({
                     </div>
                     {/* Book text */}
                     <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ fontWeight: 800, fontSize: '0.95rem', color: '#1e293b', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                      <div style={{ fontWeight: 800, fontSize: '0.95rem', color: 'var(--fg-slate-800)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                         {book.title}
                       </div>
-                      <div style={{ fontSize: '0.8rem', color: '#64748b', marginTop: '2px' }}>
+                      <div style={{ fontSize: '0.8rem', color: 'var(--fg-slate-500)', marginTop: '2px' }}>
                         {book.author}
                       </div>
                       <div style={{ display: 'flex', gap: '6px', marginTop: '6px' }}>
-                        <span style={{ fontSize: '0.72rem', background: '#f1f5f9', padding: '1px 6px', borderRadius: '4px', color: '#475569' }}>
+                        <span style={{ fontSize: '0.75rem', background: 'var(--bg-slate-100)', padding: '1px 6px', borderRadius: '4px', color: 'var(--fg-slate-600)' }}>
                           {book.language === 'hindi' ? 'हिंदी' : 'English'}
                         </span>
-                        <span style={{ fontSize: '0.72rem', background: '#f1f5f9', padding: '1px 6px', borderRadius: '4px', color: '#475569' }}>
+                        <span style={{ fontSize: '0.75rem', background: 'var(--bg-slate-100)', padding: '1px 6px', borderRadius: '4px', color: 'var(--fg-slate-600)' }}>
                           {book.chapters.length} Chapters
                         </span>
                       </div>
@@ -245,32 +245,32 @@ export const BookLibraryModal: React.FC<BookLibraryModalProps> = ({
           </div>
 
           {/* Right: Selected Book Chapters & Actions */}
-          <div style={{ width: '58%', overflowY: 'auto', padding: '20px 24px', background: '#ffffff' }}>
+          <div style={{ width: '58%', overflowY: 'auto', padding: '20px 24px', background: 'var(--surface)' }}>
             {selectedBook ? (
               <div>
                 {/* Book Header Card */}
                 <div
                   style={{
-                    background: '#f8fafc',
+                    background: 'var(--bg-slate-50)',
                     borderRadius: '10px',
                     padding: '16px',
-                    border: '1px solid #e2e8f0',
+                    border: '1px solid var(--bd-slate-200)',
                     marginBottom: '20px'
                   }}
                 >
                   <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '12px' }}>
                     <div>
-                      <h3 style={{ margin: 0, fontSize: '1.2rem', fontWeight: 800, color: '#0f172a' }}>
+                      <h3 style={{ margin: 0, fontSize: '1.25rem', fontWeight: 800, color: 'var(--fg-slate-900)' }}>
                         {selectedBook.title}
                       </h3>
-                      <div style={{ fontSize: '0.88rem', color: '#475569', marginTop: '2px', fontWeight: 600 }}>
+                      <div style={{ fontSize: '0.875rem', color: 'var(--fg-slate-600)', marginTop: '2px', fontWeight: 600 }}>
                         By {selectedBook.author} &bull; {selectedBook.genre}
                       </div>
                     </div>
                     <span
                       style={{
-                        background: selectedBook.language === 'hindi' ? '#fef3c7' : '#e0e7ff',
-                        color: selectedBook.language === 'hindi' ? '#b45309' : '#4338ca',
+                        background: selectedBook.language === 'hindi' ? 'var(--bg-amber-100)' : 'var(--bg-indigo-100)',
+                        color: selectedBook.language === 'hindi' ? 'var(--fg-amber-700)' : 'var(--fg-indigo-700)',
                         fontSize: '0.75rem',
                         fontWeight: 700,
                         padding: '3px 8px',
@@ -280,13 +280,13 @@ export const BookLibraryModal: React.FC<BookLibraryModalProps> = ({
                       {selectedBook.language === 'hindi' ? 'Hindi Manuscript' : 'English Literature'}
                     </span>
                   </div>
-                  <p style={{ margin: '10px 0 0 0', fontSize: '0.85rem', color: '#64748b', lineHeight: 1.5 }}>
+                  <p style={{ margin: '10px 0 0 0', fontSize: '0.875rem', color: 'var(--fg-slate-500)', lineHeight: 1.5 }}>
                     {selectedBook.description}
                   </p>
                 </div>
 
                 {/* Chapters List */}
-                <div style={{ fontSize: '0.85rem', fontWeight: 800, color: '#334155', textTransform: 'uppercase', marginBottom: '12px' }}>
+                <div style={{ fontSize: '0.875rem', fontWeight: 800, color: 'var(--fg-slate-700)', textTransform: 'uppercase', marginBottom: '12px' }}>
                   Available Chapters
                 </div>
 
@@ -295,18 +295,18 @@ export const BookLibraryModal: React.FC<BookLibraryModalProps> = ({
                     <div
                       key={chapter.id}
                       style={{
-                        border: '1px solid #e2e8f0',
+                        border: '1px solid var(--bd-slate-200)',
                         borderRadius: '8px',
                         padding: '14px',
-                        background: '#ffffff',
+                        background: 'var(--surface)',
                         boxShadow: '0 1px 2px rgba(0,0,0,0.03)'
                       }}
                     >
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                        <div style={{ fontWeight: 700, fontSize: '0.95rem', color: '#1e293b' }}>
+                        <div style={{ fontWeight: 700, fontSize: '0.95rem', color: 'var(--fg-slate-800)' }}>
                           {chapter.title}
                         </div>
-                        <span style={{ fontSize: '0.78rem', color: '#64748b', fontWeight: 600 }}>
+                        <span style={{ fontSize: '0.8rem', color: 'var(--fg-slate-500)', fontWeight: 600 }}>
                           {chapter.wordCount} words
                         </span>
                       </div>
@@ -315,8 +315,8 @@ export const BookLibraryModal: React.FC<BookLibraryModalProps> = ({
                       <p
                         style={{
                           margin: '0 0 12px 0',
-                          fontSize: '0.82rem',
-                          color: '#64748b',
+                          fontSize: '0.8rem',
+                          color: 'var(--fg-slate-500)',
                           lineHeight: 1.4,
                           display: '-webkit-box',
                           WebkitLineClamp: 2,
@@ -335,12 +335,12 @@ export const BookLibraryModal: React.FC<BookLibraryModalProps> = ({
                             onClose();
                           }}
                           style={{
-                            background: '#f1f5f9',
-                            color: '#334155',
-                            border: '1px solid #cbd5e1',
+                            background: 'var(--bg-slate-100)',
+                            color: 'var(--fg-slate-700)',
+                            border: '1px solid var(--bd-slate-300)',
                             borderRadius: '6px',
                             padding: '6px 12px',
-                            fontSize: '0.82rem',
+                            fontSize: '0.8rem',
                             fontWeight: 600,
                             cursor: 'pointer'
                           }}
@@ -355,12 +355,12 @@ export const BookLibraryModal: React.FC<BookLibraryModalProps> = ({
                             onClose();
                           }}
                           style={{
-                            background: '#0284c7',
+                            background: 'var(--tw-sky-600)',
                             color: '#ffffff',
                             border: 'none',
                             borderRadius: '6px',
                             padding: '6px 14px',
-                            fontSize: '0.82rem',
+                            fontSize: '0.8rem',
                             fontWeight: 700,
                             cursor: 'pointer',
                             display: 'flex',

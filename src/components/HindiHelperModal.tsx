@@ -68,7 +68,7 @@ export const HindiHelperModal: React.FC<HindiHelperModalProps> = ({
         {/* Header */}
         <div
           style={{
-            background: 'linear-gradient(135deg, #1e3a8a, #2563eb)',
+            background: 'linear-gradient(135deg, var(--tw-blue-900), var(--tw-blue-600))',
             color: '#ffffff',
             padding: '16px 24px',
             display: 'flex',
@@ -82,7 +82,7 @@ export const HindiHelperModal: React.FC<HindiHelperModalProps> = ({
               <h2 style={{ margin: 0, fontSize: '1.25rem', fontWeight: 800 }}>
                 Hindi Character & Conjuncts Helper (संयुक्ताक्षर गाइड)
               </h2>
-              <p style={{ margin: 0, fontSize: '0.85rem', opacity: 0.9 }}>
+              <p style={{ margin: 0, fontSize: '0.875rem', opacity: 0.9 }}>
                 Quick reference for difficult Hindi keystrokes (Mangal Inscript & Kruti Dev 010)
               </p>
             </div>
@@ -97,7 +97,7 @@ export const HindiHelperModal: React.FC<HindiHelperModalProps> = ({
               height: '32px',
               borderRadius: '50%',
               cursor: 'pointer',
-              fontSize: '1.2rem',
+              fontSize: '1.25rem',
               fontWeight: 700
             }}
           >
@@ -109,8 +109,8 @@ export const HindiHelperModal: React.FC<HindiHelperModalProps> = ({
         <div
           style={{
             padding: '14px 24px',
-            background: '#f8fafc',
-            borderBottom: '1px solid #e2e8f0',
+            background: 'var(--bg-slate-50)',
+            borderBottom: '1px solid var(--bd-slate-200)',
             display: 'flex',
             flexWrap: 'wrap',
             gap: '12px',
@@ -119,7 +119,7 @@ export const HindiHelperModal: React.FC<HindiHelperModalProps> = ({
           }}
         >
           {/* Layout Switcher */}
-          <div style={{ display: 'flex', background: '#e2e8f0', borderRadius: '8px', padding: '3px' }}>
+          <div style={{ display: 'flex', background: 'var(--bg-slate-200)', borderRadius: '8px', padding: '3px' }}>
             <button
               onClick={() => setActiveLayout('mangal')}
               style={{
@@ -128,9 +128,9 @@ export const HindiHelperModal: React.FC<HindiHelperModalProps> = ({
                 borderRadius: '6px',
                 cursor: 'pointer',
                 fontWeight: 700,
-                fontSize: '0.88rem',
-                background: activeLayout === 'mangal' ? '#ffffff' : 'transparent',
-                color: activeLayout === 'mangal' ? '#1e3a8a' : '#64748b',
+                fontSize: '0.875rem',
+                background: activeLayout === 'mangal' ? 'var(--surface)' : 'transparent',
+                color: activeLayout === 'mangal' ? 'var(--fg-blue-900)' : 'var(--fg-slate-500)',
                 boxShadow: activeLayout === 'mangal' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none'
               }}
             >
@@ -144,9 +144,9 @@ export const HindiHelperModal: React.FC<HindiHelperModalProps> = ({
                 borderRadius: '6px',
                 cursor: 'pointer',
                 fontWeight: 700,
-                fontSize: '0.88rem',
-                background: activeLayout === 'kruti' ? '#ffffff' : 'transparent',
-                color: activeLayout === 'kruti' ? '#1e3a8a' : '#64748b',
+                fontSize: '0.875rem',
+                background: activeLayout === 'kruti' ? 'var(--surface)' : 'transparent',
+                color: activeLayout === 'kruti' ? 'var(--fg-blue-900)' : 'var(--fg-slate-500)',
                 boxShadow: activeLayout === 'kruti' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none'
               }}
             >
@@ -165,8 +165,8 @@ export const HindiHelperModal: React.FC<HindiHelperModalProps> = ({
                 width: '100%',
                 padding: '8px 12px 8px 34px',
                 borderRadius: '8px',
-                border: '1px solid #cbd5e1',
-                fontSize: '0.9rem',
+                border: '1px solid var(--bd-slate-300)',
+                fontSize: '0.875rem',
                 outline: 'none'
               }}
             />
@@ -176,7 +176,7 @@ export const HindiHelperModal: React.FC<HindiHelperModalProps> = ({
                 left: '10px',
                 top: '50%',
                 transform: 'translateY(-50%)',
-                color: '#94a3b8'
+                color: 'var(--tw-slate-400)'
               }}
             >
               🔍
@@ -188,8 +188,8 @@ export const HindiHelperModal: React.FC<HindiHelperModalProps> = ({
         <div
           style={{
             padding: '10px 24px',
-            background: '#ffffff',
-            borderBottom: '1px solid #f1f5f9',
+            background: 'var(--surface)',
+            borderBottom: '1px solid var(--bd-slate-100)',
             display: 'flex',
             gap: '8px',
             overflowX: 'auto'
@@ -209,9 +209,9 @@ export const HindiHelperModal: React.FC<HindiHelperModalProps> = ({
               style={{
                 padding: '4px 12px',
                 borderRadius: '16px',
-                border: selectedCategory === cat.id ? '1px solid #2563eb' : '1px solid #e2e8f0',
-                background: selectedCategory === cat.id ? '#eff6ff' : '#f8fafc',
-                color: selectedCategory === cat.id ? '#1d4ed8' : '#475569',
+                border: selectedCategory === cat.id ? '1px solid var(--tw-blue-600)' : '1px solid var(--bd-slate-200)',
+                background: selectedCategory === cat.id ? 'var(--bg-blue-50)' : 'var(--bg-slate-50)',
+                color: selectedCategory === cat.id ? 'var(--fg-blue-700)' : 'var(--fg-slate-600)',
                 fontSize: '0.8rem',
                 fontWeight: selectedCategory === cat.id ? 700 : 500,
                 cursor: 'pointer',
@@ -229,13 +229,13 @@ export const HindiHelperModal: React.FC<HindiHelperModalProps> = ({
             flex: 1,
             overflowY: 'auto',
             padding: '20px 24px',
-            background: '#f8fafc'
+            background: 'var(--bg-slate-50)'
           }}
         >
           {filteredCharacters.length === 0 ? (
-            <div style={{ textAlign: 'center', padding: '40px 0', color: '#64748b' }}>
+            <div style={{ textAlign: 'center', padding: '40px 0', color: 'var(--fg-slate-500)' }}>
               <p style={{ fontSize: '1.1rem', fontWeight: 600 }}>कोई अक्षर नहीं मिला</p>
-              <p style={{ fontSize: '0.85rem' }}>कृपया दूसरा खोज शब्द आज़माएँ।</p>
+              <p style={{ fontSize: '0.875rem' }}>कृपया दूसरा खोज शब्द आज़माएँ।</p>
             </div>
           ) : (
             <div
@@ -249,9 +249,9 @@ export const HindiHelperModal: React.FC<HindiHelperModalProps> = ({
                 <div
                   key={item.id}
                   style={{
-                    background: '#ffffff',
+                    background: 'var(--surface)',
                     borderRadius: '10px',
-                    border: '1px solid #e2e8f0',
+                    border: '1px solid var(--bd-slate-200)',
                     padding: '16px',
                     boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
                     display: 'flex',
@@ -268,13 +268,13 @@ export const HindiHelperModal: React.FC<HindiHelperModalProps> = ({
                           style={{
                             fontSize: '1.8rem',
                             fontWeight: 800,
-                            color: '#1e293b',
+                            color: 'var(--fg-slate-800)',
                             lineHeight: 1
                           }}
                         >
                           {item.character}
                         </span>
-                        <span style={{ fontSize: '0.85rem', fontWeight: 700, color: '#334155' }}>
+                        <span style={{ fontSize: '0.875rem', fontWeight: 700, color: 'var(--fg-slate-700)' }}>
                           {item.name}
                         </span>
                       </div>
@@ -282,8 +282,8 @@ export const HindiHelperModal: React.FC<HindiHelperModalProps> = ({
                         onClick={() => handleCopy(item.character, item.id)}
                         title="Copy character"
                         style={{
-                          background: copiedId === item.id ? '#10b981' : '#f1f5f9',
-                          color: copiedId === item.id ? '#ffffff' : '#64748b',
+                          background: copiedId === item.id ? 'var(--tw-emerald-500)' : 'var(--bg-slate-100)',
+                          color: copiedId === item.id ? '#ffffff' : 'var(--fg-slate-500)',
                           border: 'none',
                           padding: '4px 8px',
                           borderRadius: '6px',
@@ -302,7 +302,7 @@ export const HindiHelperModal: React.FC<HindiHelperModalProps> = ({
                         style={{
                           fontSize: '0.75rem',
                           fontWeight: 700,
-                          color: '#64748b',
+                          color: 'var(--fg-slate-500)',
                           textTransform: 'uppercase',
                           marginBottom: '3px'
                         }}
@@ -311,13 +311,13 @@ export const HindiHelperModal: React.FC<HindiHelperModalProps> = ({
                       </div>
                       <div
                         style={{
-                          background: '#eff6ff',
-                          color: '#1d4ed8',
+                          background: 'var(--bg-blue-50)',
+                          color: 'var(--fg-blue-700)',
                           padding: '6px 10px',
                           borderRadius: '6px',
-                          fontSize: '0.88rem',
+                          fontSize: '0.875rem',
                           fontWeight: 800,
-                          border: '1px solid #bfdbfe',
+                          border: '1px solid var(--bd-blue-200)',
                           fontFamily: 'monospace'
                         }}
                       >
@@ -326,14 +326,14 @@ export const HindiHelperModal: React.FC<HindiHelperModalProps> = ({
                     </div>
 
                     {/* Explanation */}
-                    <p style={{ fontSize: '0.82rem', color: '#475569', margin: '6px 0 10px 0', lineHeight: 1.4 }}>
+                    <p style={{ fontSize: '0.8rem', color: 'var(--fg-slate-600)', margin: '6px 0 10px 0', lineHeight: 1.4 }}>
                       {activeLayout === 'mangal' ? item.mangalExplanation : item.krutiDevExplanation}
                     </p>
                   </div>
 
                   {/* Examples */}
                   <div>
-                    <div style={{ fontSize: '0.75rem', color: '#94a3b8', fontWeight: 600, marginBottom: '4px' }}>
+                    <div style={{ fontSize: '0.75rem', color: 'var(--tw-slate-400)', fontWeight: 600, marginBottom: '4px' }}>
                       उदाहरण (Examples):
                     </div>
                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
@@ -343,11 +343,11 @@ export const HindiHelperModal: React.FC<HindiHelperModalProps> = ({
                           onClick={() => setScratchpadText((prev) => (prev ? prev + ' ' + word : word))}
                           title="Click to add to test scratchpad"
                           style={{
-                            background: '#f1f5f9',
-                            color: '#334155',
+                            background: 'var(--bg-slate-100)',
+                            color: 'var(--fg-slate-700)',
                             padding: '2px 8px',
                             borderRadius: '4px',
-                            fontSize: '0.78rem',
+                            fontSize: '0.8rem',
                             cursor: 'pointer'
                           }}
                         >
@@ -366,15 +366,15 @@ export const HindiHelperModal: React.FC<HindiHelperModalProps> = ({
         <div
           style={{
             padding: '12px 24px',
-            background: '#ffffff',
-            borderTop: '1px solid #e2e8f0',
+            background: 'var(--surface)',
+            borderTop: '1px solid var(--bd-slate-200)',
             display: 'flex',
             alignItems: 'center',
             gap: '12px'
           }}
         >
           <div style={{ flex: 1 }}>
-            <div style={{ fontSize: '0.8rem', fontWeight: 700, color: '#334155', marginBottom: '4px' }}>
+            <div style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--fg-slate-700)', marginBottom: '4px' }}>
               📝 Quick Practice Scratchpad (टाइपिंग टेस्ट यहाँ करके देखें):
             </div>
             <input
@@ -386,7 +386,7 @@ export const HindiHelperModal: React.FC<HindiHelperModalProps> = ({
                 width: '100%',
                 padding: '8px 12px',
                 borderRadius: '6px',
-                border: '1px solid #cbd5e1',
+                border: '1px solid var(--bd-slate-300)',
                 fontSize: '0.95rem',
                 outline: 'none'
               }}
@@ -397,8 +397,8 @@ export const HindiHelperModal: React.FC<HindiHelperModalProps> = ({
               onClick={() => setScratchpadText('')}
               style={{
                 marginTop: '18px',
-                background: '#f1f5f9',
-                border: '1px solid #cbd5e1',
+                background: 'var(--bg-slate-100)',
+                border: '1px solid var(--bd-slate-300)',
                 padding: '8px 12px',
                 borderRadius: '6px',
                 cursor: 'pointer',

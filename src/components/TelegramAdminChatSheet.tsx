@@ -290,21 +290,21 @@ export const TelegramAdminChatSheet: React.FC<TelegramAdminChatSheetProps> = ({
         position: 'fixed',
         inset: 0,
         zIndex: 999999,
-        background: '#090d16',
+        background: 'var(--tw-gray-950)',
         display: 'flex',
         flexDirection: 'column',
         height: '100dvh',
         maxHeight: '100dvh',
         overflow: 'hidden',
         fontFamily: "'Inter', system-ui, -apple-system, sans-serif",
-        color: '#f8fafc'
+        color: 'var(--tw-slate-50)'
       }}
     >
       {/* Optimized Compact Header */}
       <header
         style={{
-          background: '#0f172a',
-          borderBottom: '1px solid #1e293b',
+          background: 'var(--tw-slate-900)',
+          borderBottom: '1px solid var(--tw-slate-800)',
           padding: '10px 14px',
           display: 'flex',
           alignItems: 'center',
@@ -319,7 +319,7 @@ export const TelegramAdminChatSheet: React.FC<TelegramAdminChatSheetProps> = ({
               width: '36px',
               height: '36px',
               borderRadius: '9px',
-              background: 'linear-gradient(135deg, #0284c7 0%, #2563eb 100%)',
+              background: 'linear-gradient(135deg, var(--tw-sky-600) 0%, var(--tw-blue-600) 100%)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
@@ -334,7 +334,7 @@ export const TelegramAdminChatSheet: React.FC<TelegramAdminChatSheetProps> = ({
             <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
               <span
                 style={{
-                  fontSize: '0.9rem',
+                  fontSize: '0.875rem',
                   fontWeight: 800,
                   color: '#ffffff',
                   whiteSpace: 'nowrap'
@@ -344,10 +344,10 @@ export const TelegramAdminChatSheet: React.FC<TelegramAdminChatSheetProps> = ({
               </span>
               <span
                 style={{
-                  fontSize: '0.6rem',
+                  fontSize: '0.75rem',
                   fontWeight: 800,
-                  background: '#064e3b',
-                  color: '#34d399',
+                  background: 'var(--tw-emerald-900)',
+                  color: 'var(--tw-emerald-400)',
                   padding: '2px 6px',
                   borderRadius: '4px',
                   letterSpacing: '0.3px',
@@ -359,16 +359,16 @@ export const TelegramAdminChatSheet: React.FC<TelegramAdminChatSheetProps> = ({
             </div>
             <div
               style={{
-                fontSize: '0.74rem',
-                color: '#94a3b8',
+                fontSize: '0.75rem',
+                color: 'var(--tw-slate-400)',
                 whiteSpace: 'nowrap',
                 overflow: 'hidden',
                 textOverflow: 'ellipsis',
                 marginTop: '1px'
               }}
             >
-              <b style={{ color: '#38bdf8' }}>{session?.userName || 'Candidate'}</b>{' '}
-              <span style={{ opacity: 0.5 }}>•</span> <span style={{ color: '#cbd5e1' }}>{ticketId}</span>
+              <b style={{ color: 'var(--tw-sky-400)' }}>{session?.userName || 'Candidate'}</b>{' '}
+              <span style={{ opacity: 0.5 }}>•</span> <span style={{ color: 'var(--tw-slate-300)' }}>{ticketId}</span>
             </div>
           </div>
         </div>
@@ -377,12 +377,12 @@ export const TelegramAdminChatSheet: React.FC<TelegramAdminChatSheetProps> = ({
           onClick={handleClose}
           aria-label="Close sheet"
           style={{
-            background: '#1e293b',
-            border: '1px solid #334155',
-            color: '#e2e8f0',
+            background: 'var(--tw-slate-800)',
+            border: '1px solid var(--tw-slate-700)',
+            color: 'var(--tw-slate-200)',
             borderRadius: '7px',
             padding: '6px 10px',
-            fontSize: '0.78rem',
+            fontSize: '0.8rem',
             fontWeight: 700,
             cursor: 'pointer',
             display: 'flex',
@@ -400,19 +400,19 @@ export const TelegramAdminChatSheet: React.FC<TelegramAdminChatSheetProps> = ({
       {session?.userEmail && (
         <div
           style={{
-            background: '#0b1329',
+            background: 'var(--tw-slate-900)',
             padding: '4px 14px',
-            borderBottom: '1px solid #1e293b',
+            borderBottom: '1px solid var(--tw-slate-800)',
             display: 'flex',
             alignItems: 'center',
             gap: '6px',
-            fontSize: '0.72rem',
-            color: '#94a3b8',
+            fontSize: '0.75rem',
+            color: 'var(--tw-slate-400)',
             flexShrink: 0
           }}
         >
           <span>📧</span>
-          <span style={{ color: '#cbd5e1', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+          <span style={{ color: 'var(--tw-slate-300)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
             {session.userEmail}
           </span>
         </div>
@@ -435,17 +435,17 @@ export const TelegramAdminChatSheet: React.FC<TelegramAdminChatSheetProps> = ({
             style={{
               maxWidth: '360px',
               width: '100%',
-              background: '#131d31',
+              background: 'var(--tw-slate-900)',
               borderRadius: '14px',
               padding: '24px 20px',
-              border: '1px solid #1e293b'
+              border: '1px solid var(--tw-slate-800)'
             }}
           >
-            <div style={{ fontSize: '2.2rem', marginBottom: '10px' }}>🔒</div>
-            <h3 style={{ fontSize: '1.05rem', fontWeight: 800, margin: '0 0 6px 0', color: '#f8fafc' }}>
+            <div style={{ fontSize: '2.1rem', marginBottom: '10px' }}>🔒</div>
+            <h3 style={{ fontSize: '1rem', fontWeight: 800, margin: '0 0 6px 0', color: 'var(--tw-slate-50)' }}>
               Admin Verification
             </h3>
-            <p style={{ fontSize: '0.8rem', color: '#94a3b8', margin: '0 0 16px 0', lineHeight: 1.4 }}>
+            <p style={{ fontSize: '0.8rem', color: 'var(--tw-slate-400)', margin: '0 0 16px 0', lineHeight: 1.4 }}>
               Enter your Admin Secret Token or use the one-tap link in your Telegram bot message.
             </p>
 
@@ -459,8 +459,8 @@ export const TelegramAdminChatSheet: React.FC<TelegramAdminChatSheetProps> = ({
                   width: '100%',
                   padding: '10px 12px',
                   borderRadius: '8px',
-                  border: authError ? '1px solid #ef4444' : '1px solid #334155',
-                  background: '#090d16',
+                  border: authError ? '1px solid var(--tw-red-500)' : '1px solid var(--tw-slate-700)',
+                  background: 'var(--tw-gray-950)',
                   color: '#ffffff',
                   fontSize: '16px',
                   outline: 'none',
@@ -468,18 +468,18 @@ export const TelegramAdminChatSheet: React.FC<TelegramAdminChatSheetProps> = ({
                 }}
               />
               {authError && (
-                <div style={{ fontSize: '0.75rem', color: '#f87171', textAlign: 'left' }}>{authError}</div>
+                <div style={{ fontSize: '0.75rem', color: 'var(--tw-red-400)', textAlign: 'left' }}>{authError}</div>
               )}
               <button
                 type="submit"
                 style={{
-                  background: 'linear-gradient(135deg, #0284c7 0%, #2563eb 100%)',
+                  background: 'linear-gradient(135deg, var(--tw-sky-600) 0%, var(--tw-blue-600) 100%)',
                   color: '#ffffff',
                   border: 'none',
                   borderRadius: '8px',
                   padding: '10px 16px',
                   fontWeight: 700,
-                  fontSize: '0.86rem',
+                  fontSize: '0.875rem',
                   cursor: 'pointer'
                 }}
               >
@@ -509,7 +509,7 @@ export const TelegramAdminChatSheet: React.FC<TelegramAdminChatSheetProps> = ({
               display: 'flex',
               flexDirection: 'column',
               gap: '12px',
-              background: '#070b14'
+              background: 'var(--tw-gray-950)'
             }}
           >
             {/* Ticket Info Card */}
@@ -520,14 +520,14 @@ export const TelegramAdminChatSheet: React.FC<TelegramAdminChatSheetProps> = ({
                 border: '1px solid rgba(255, 255, 255, 0.08)',
                 borderRadius: '8px',
                 padding: '6px 12px',
-                fontSize: '0.72rem',
-                color: '#94a3b8',
+                fontSize: '0.75rem',
+                color: 'var(--tw-slate-400)',
                 textAlign: 'center',
                 margin: '2px 0 6px 0'
               }}
             >
               <span>Ticket </span>
-              <b style={{ color: '#38bdf8' }}>{ticketId}</b>
+              <b style={{ color: 'var(--tw-sky-400)' }}>{ticketId}</b>
               <span> • Direct 1-on-1 Admin Session</span>
             </div>
 
@@ -557,9 +557,9 @@ export const TelegramAdminChatSheet: React.FC<TelegramAdminChatSheetProps> = ({
                     {/* Sender Name */}
                     <span
                       style={{
-                        fontSize: '0.68rem',
+                        fontSize: '0.75rem',
                         fontWeight: 700,
-                        color: isAdmin ? '#38bdf8' : '#94a3b8',
+                        color: isAdmin ? 'var(--tw-sky-400)' : 'var(--tw-slate-400)',
                         marginBottom: '3px',
                         padding: '0 4px'
                       }}
@@ -573,10 +573,10 @@ export const TelegramAdminChatSheet: React.FC<TelegramAdminChatSheetProps> = ({
                         padding: '9px 13px',
                         borderRadius: isAdmin ? '14px 14px 2px 14px' : '14px 14px 14px 2px',
                         background: isAdmin
-                          ? 'linear-gradient(135deg, #0284c7 0%, #1d4ed8 100%)'
-                          : '#1e293b',
+                          ? 'linear-gradient(135deg, var(--tw-sky-600) 0%, var(--tw-blue-700) 100%)'
+                          : 'var(--tw-slate-800)',
                         color: '#ffffff',
-                        fontSize: '0.86rem',
+                        fontSize: '0.875rem',
                         lineHeight: 1.45,
                         wordBreak: 'break-word',
                         boxShadow: isAdmin
@@ -600,9 +600,9 @@ export const TelegramAdminChatSheet: React.FC<TelegramAdminChatSheetProps> = ({
                         padding: '0 4px'
                       }}
                     >
-                      <span style={{ fontSize: '0.64rem', color: '#64748b' }}>{timeStr}</span>
+                      <span style={{ fontSize: '0.75rem', color: 'var(--fg-slate-500)' }}>{timeStr}</span>
                       {isAdmin && (
-                        <span style={{ fontSize: '0.68rem', color: '#38bdf8', fontWeight: 800 }}>✓✓</span>
+                        <span style={{ fontSize: '0.75rem', color: 'var(--tw-sky-400)', fontWeight: 800 }}>✓✓</span>
                       )}
                     </div>
                   </div>
@@ -615,8 +615,8 @@ export const TelegramAdminChatSheet: React.FC<TelegramAdminChatSheetProps> = ({
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  color: '#64748b',
-                  fontSize: '0.82rem',
+                  color: 'var(--fg-slate-500)',
+                  fontSize: '0.8rem',
                   textAlign: 'center',
                   padding: '20px'
                 }}
@@ -630,8 +630,8 @@ export const TelegramAdminChatSheet: React.FC<TelegramAdminChatSheetProps> = ({
           {/* Quick-Reply Smart Action Chips (Compact horizontal scroll) */}
           <div
             style={{
-              background: '#0c1220',
-              borderTop: '1px solid #1e293b',
+              background: 'var(--tw-gray-900)',
+              borderTop: '1px solid var(--tw-slate-800)',
               padding: '7px 10px',
               display: 'flex',
               gap: '6px',
@@ -656,10 +656,10 @@ export const TelegramAdminChatSheet: React.FC<TelegramAdminChatSheetProps> = ({
                   whiteSpace: 'nowrap',
                   background: 'rgba(255, 255, 255, 0.06)',
                   border: '1px solid rgba(255, 255, 255, 0.12)',
-                  color: '#e2e8f0',
+                  color: 'var(--tw-slate-200)',
                   borderRadius: '14px',
                   padding: '5px 10px',
-                  fontSize: '0.72rem',
+                  fontSize: '0.75rem',
                   fontWeight: 600,
                   cursor: 'pointer',
                   flexShrink: 0,
@@ -676,8 +676,8 @@ export const TelegramAdminChatSheet: React.FC<TelegramAdminChatSheetProps> = ({
           {/* Message Input & Send Bar */}
           <div
             style={{
-              background: '#0f172a',
-              borderTop: '1px solid #1e293b',
+              background: 'var(--tw-slate-900)',
+              borderTop: '1px solid var(--tw-slate-800)',
               padding: '8px 12px',
               paddingBottom: 'max(10px, env(safe-area-inset-bottom, 10px))',
               display: 'flex',
@@ -700,8 +700,8 @@ export const TelegramAdminChatSheet: React.FC<TelegramAdminChatSheetProps> = ({
               }}
               style={{
                 flex: 1,
-                background: '#070b14',
-                border: '1px solid #334155',
+                background: 'var(--tw-gray-950)',
+                border: '1px solid var(--tw-slate-700)',
                 borderRadius: '8px',
                 padding: '9px 12px',
                 color: '#ffffff',
@@ -718,13 +718,13 @@ export const TelegramAdminChatSheet: React.FC<TelegramAdminChatSheetProps> = ({
                 background:
                   !replyText.trim() || isSending
                     ? 'rgba(255, 255, 255, 0.1)'
-                    : 'linear-gradient(135deg, #0284c7 0%, #2563eb 100%)',
+                    : 'linear-gradient(135deg, var(--tw-sky-600) 0%, var(--tw-blue-600) 100%)',
                 color: '#ffffff',
                 border: 'none',
                 borderRadius: '8px',
                 padding: '9px 14px',
                 fontWeight: 700,
-                fontSize: '0.84rem',
+                fontSize: '0.875rem',
                 cursor: !replyText.trim() || isSending ? 'not-allowed' : 'pointer',
                 display: 'flex',
                 alignItems: 'center',

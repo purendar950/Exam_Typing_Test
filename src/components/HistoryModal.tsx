@@ -20,7 +20,7 @@ export const HistoryModal: React.FC<HistoryModalProps> = ({
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal-content" onClick={(e) => e.stopPropagation()}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-          <h2 style={{ fontSize: '1.35rem', fontWeight: 800, color: 'var(--primary-dark)' }}>
+          <h2 style={{ fontSize: '1.4rem', fontWeight: 800, color: 'var(--primary-dark)' }}>
             Your Test History & Performance Record
           </h2>
           <button
@@ -28,7 +28,7 @@ export const HistoryModal: React.FC<HistoryModalProps> = ({
             style={{
               background: 'none',
               border: 'none',
-              fontSize: '1.5rem',
+              fontSize: '1.4rem',
               cursor: 'pointer',
               color: 'var(--text-muted)'
             }}
@@ -39,15 +39,15 @@ export const HistoryModal: React.FC<HistoryModalProps> = ({
 
         {history.length === 0 ? (
           <div style={{ textAlign: 'center', padding: '36px 0', color: 'var(--text-muted)' }}>
-            <p style={{ fontSize: '1.05rem', marginBottom: '8px' }}>No previous typing test attempts recorded yet.</p>
-            <p style={{ fontSize: '0.85rem' }}>Take your first mock test to begin tracking your speed and accuracy trajectory.</p>
+            <p style={{ fontSize: '1rem', marginBottom: '8px' }}>No previous typing test attempts recorded yet.</p>
+            <p style={{ fontSize: '0.875rem' }}>Take your first mock test to begin tracking your speed and accuracy trajectory.</p>
           </div>
         ) : (
           <div>
             <div style={{ overflowX: 'auto', marginBottom: '20px' }}>
               <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.875rem', textAlign: 'left' }}>
                 <thead>
-                  <tr style={{ background: '#f8fafc', borderBottom: '2px solid var(--border-color)' }}>
+                  <tr style={{ background: 'var(--bg-slate-50)', borderBottom: '2px solid var(--border-color)' }}>
                     <th style={{ padding: '10px 12px' }}>Date</th>
                     <th style={{ padding: '10px 12px' }}>Test Title</th>
                     <th style={{ padding: '10px 12px' }}>Net Speed</th>
@@ -67,7 +67,7 @@ export const HistoryModal: React.FC<HistoryModalProps> = ({
                       <td style={{ padding: '10px 12px', fontWeight: 700, color: 'var(--primary)' }}>
                         {h.netWpm} WPM
                       </td>
-                      <td style={{ padding: '10px 12px', fontWeight: 700, color: h.accuracy >= 85 ? '#16a34a' : '#dc2626' }}>
+                      <td style={{ padding: '10px 12px', fontWeight: 700, color: h.accuracy >= 85 ? 'var(--fg-green-600)' : 'var(--fg-red-600)' }}>
                         {h.accuracy}%
                       </td>
                       <td style={{ padding: '10px 12px' }}>
@@ -82,7 +82,7 @@ export const HistoryModal: React.FC<HistoryModalProps> = ({
             </div>
 
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <button onClick={onClearHistory} className="btn btn-secondary btn-sm" style={{ color: '#dc2626' }}>
+              <button onClick={onClearHistory} className="btn btn-secondary btn-sm" style={{ color: 'var(--fg-red-600)' }}>
                 Clear All Records
               </button>
               <button onClick={onClose} className="btn btn-primary btn-sm">

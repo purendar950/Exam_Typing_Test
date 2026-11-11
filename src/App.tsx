@@ -1,4 +1,4 @@
-import React, { useState, useEffect, lazy, Suspense } from 'react';
+import React, { useState, useEffect, lazy, Suspense, useRef } from 'react';
 import { Passage, TestSettings, EvaluationResult, ExamProfile } from './types';
 import { PASSAGES } from './data/passages';
 import { ALL_EXAMS } from './data/allExams';
@@ -74,7 +74,7 @@ const LazyMount: React.FC<{ when: boolean; children: React.ReactNode }> = ({ whe
 };
 
 const ScreenLoader: React.FC = () => (
-  <div role="status" style={{ padding: '80px 20px', textAlign: 'center', color: '#64748b', fontWeight: 600 }}>
+  <div role="status" style={{ padding: '80px 20px', textAlign: 'center', color: 'var(--fg-slate-500)', fontWeight: 600 }}>
     Loading…
   </div>
 );
@@ -321,6 +321,12 @@ export const App: React.FC = () => {
   const [customPassages, setCustomPassages] = useState<Passage[]>([]);
   const [telegramConfig, setTelegramConfig] = useState<TelegramConfig | null>(null);
   const [telegramToast, setTelegramToast] = useState<{ success: boolean; message: string } | null>(null);
+  const noticeTimer = useRef<number | undefined>(undefined);
+  const showNotice = (message: string, success = false) => {
+    window.clearTimeout(noticeTimer.current);
+    setTelegramToast({ success, message });
+    noticeTimer.current = window.setTimeout(() => setTelegramToast(null), 6000);
+  };
   const [adminInitialTab, setAdminInitialTab] = useState<'overview' | 'live_chat' | 'ai_engine' | 'passages' | 'candidates' | 'payments' | 'pricing' | 'settings' | undefined>(undefined);
   const [adminInitialChatId, setAdminInitialChatId] = useState<string | undefined>(undefined);
   const [telegramAdminChatSessionId, setTelegramAdminChatSessionId] = useState<string | null>(() => {
@@ -538,6 +544,7 @@ export const App: React.FC = () => {
     const access = isTestLocked(passage.testNumber, 0, currentUser, examId, catGroup);
 
     if (access.isLocked) {
+      showNotice(`Test #${access.testNumber} is a Pro test. Pick a plan to unlock it.`, true);
       handleOpenPayment(examId);
       return;
     }
@@ -554,19 +561,19 @@ export const App: React.FC = () => {
           finalPassage = { ...passage, text: fetchRes.text };
         } else if (fetchRes.isPermissionDenied) {
           setIsLoadingPassage(false);
-          alert('🔒 Server Security Verification: Active Pro subscription required for Test #' + (passage.testNumber || '') + '. Please upgrade or renew.');
+          showNotice(`Test #${passage.testNumber || ''} needs an active Pro plan. Pick or renew a plan to unlock it.`, true);
           handleOpenPayment(examId);
           return;
         } else {
           // Hard security failure — NEVER proceed without verified server content
           setIsLoadingPassage(false);
-          alert('⚠️ ' + (fetchRes.error || 'Access Denied: Unable to load secure test passage from server. Active Pro subscription required.'));
+          showNotice(fetchRes.error || 'Could not load this test. Please try again.');
           return;
         }
       } catch (err) {
         console.error('Paid passage security fetch error:', err);
         setIsLoadingPassage(false);
-        alert('⚠️ Security Verification Failed: Unable to verify access to this Pro test. Please check internet connection.');
+        showNotice('Could not load this test. Check your internet connection and try again.');
         return;
       } finally {
         setIsLoadingPassage(false);
@@ -809,11 +816,11 @@ export const App: React.FC = () => {
       {currentView !== 'book' && currentView !== 'test' && (
         <footer
           style={{
-            background: 'linear-gradient(180deg, #ffffff 0%, #f8fafc 100%)',
-            borderTop: '1px solid #e2e8f0',
+            background: 'linear-gradient(180deg, var(--surface) 0%, var(--bg-slate-50) 100%)',
+            borderTop: '1px solid var(--bd-slate-200)',
             padding: '40px 0 24px 0',
-            color: '#475569',
-            fontSize: '0.88rem',
+            color: 'var(--fg-slate-600)',
+            fontSize: '0.875rem',
             marginTop: 'auto'
           }}
         >
@@ -837,32 +844,32 @@ export const App: React.FC = () => {
                     onError={(e) => { (e.currentTarget as HTMLElement).style.display = 'none'; }}
                   />
                   <div>
-                    <h3 style={{ margin: 0, fontSize: '1.08rem', fontWeight: 800, color: '#0f172a' }}>
+                    <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 800, color: 'var(--fg-slate-900)' }}>
                       Exam Typing Mentor
                     </h3>
-                    <span style={{ fontSize: '0.74rem', fontWeight: 700, color: '#0284c7' }}>
+                    <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--fg-sky-600)' }}>
                       Official Exam Speed & Accuracy Simulator
                     </span>
                   </div>
                 </div>
-                <p style={{ fontSize: '0.82rem', color: '#64748b', lineHeight: 1.6, margin: '0 0 12px 0' }}>
+                <p style={{ fontSize: '0.8rem', color: 'var(--fg-slate-500)', lineHeight: 1.6, margin: '0 0 12px 0' }}>
                   Crafted strictly per official recruitment benchmarks: <strong>UP Police Computer Operator</strong> (Hindi 25 WPM, English 30 WPM, 85% Accuracy), <strong>UP Police ASI</strong>, <strong>UPSSSC Junior Assistant</strong>, <strong>Allahabad High Court</strong>, and <strong>SSC CGL/CHSL</strong>.
                 </p>
-                <div style={{ fontSize: '0.74rem', color: '#94a3b8', lineHeight: 1.45, background: '#f1f5f9', padding: '8px 12px', borderRadius: '6px', borderLeft: '3px solid #cbd5e1' }}>
+                <div style={{ fontSize: '0.75rem', color: 'var(--tw-slate-400)', lineHeight: 1.45, background: 'var(--bg-slate-100)', padding: '8px 12px', borderRadius: '6px', borderLeft: '3px solid var(--bd-slate-300)' }}>
                   <strong>Disclaimer:</strong> Independent educational preparation tool. Not affiliated with UPPRPB, UPSSSC, SSC, or any government recruiting board.
                 </div>
               </div>
 
               {/* Col 2: Legal, Trust & Policies */}
               <div>
-                <h4 style={{ fontSize: '0.92rem', fontWeight: 800, color: '#0f172a', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '14px' }}>
+                <h4 style={{ fontSize: '0.95rem', fontWeight: 800, color: 'var(--fg-slate-900)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '14px' }}>
                   ⚖️ Trust & Policies
                 </h4>
                 <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '8px' }}>
                   <li>
                     <button
                       onClick={() => openLegalModal('terms')}
-                      style={{ background: 'none', border: 'none', padding: 0, color: '#334155', cursor: 'pointer', fontSize: '0.84rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '6px' }}
+                      style={{ background: 'none', border: 'none', padding: 0, color: 'var(--fg-slate-700)', cursor: 'pointer', fontSize: '0.875rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '6px' }}
                     >
                       <span>📜</span>
                       <span style={{ textDecoration: 'underline' }}>Terms & Conditions</span>
@@ -871,7 +878,7 @@ export const App: React.FC = () => {
                   <li>
                     <button
                       onClick={() => openLegalModal('privacy')}
-                      style={{ background: 'none', border: 'none', padding: 0, color: '#334155', cursor: 'pointer', fontSize: '0.84rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '6px' }}
+                      style={{ background: 'none', border: 'none', padding: 0, color: 'var(--fg-slate-700)', cursor: 'pointer', fontSize: '0.875rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '6px' }}
                     >
                       <span>🔒</span>
                       <span style={{ textDecoration: 'underline' }}>Privacy Policy</span>
@@ -880,7 +887,7 @@ export const App: React.FC = () => {
                   <li>
                     <button
                       onClick={() => openLegalModal('refund')}
-                      style={{ background: 'none', border: 'none', padding: 0, color: '#334155', cursor: 'pointer', fontSize: '0.84rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '6px' }}
+                      style={{ background: 'none', border: 'none', padding: 0, color: 'var(--fg-slate-700)', cursor: 'pointer', fontSize: '0.875rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '6px' }}
                     >
                       <span>🚫</span>
                       <span style={{ textDecoration: 'underline' }}>Strict No-Refund Policy</span>
@@ -889,7 +896,7 @@ export const App: React.FC = () => {
                   <li>
                     <button
                       onClick={() => openLegalModal('copyright')}
-                      style={{ background: 'none', border: 'none', padding: 0, color: '#334155', cursor: 'pointer', fontSize: '0.84rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '6px' }}
+                      style={{ background: 'none', border: 'none', padding: 0, color: 'var(--fg-slate-700)', cursor: 'pointer', fontSize: '0.875rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '6px' }}
                     >
                       <span>©️</span>
                       <span style={{ textDecoration: 'underline' }}>Copyright & IP Notice</span>
@@ -898,7 +905,7 @@ export const App: React.FC = () => {
                   <li>
                     <button
                       onClick={() => openLegalModal('disclaimer')}
-                      style={{ background: 'none', border: 'none', padding: 0, color: '#334155', cursor: 'pointer', fontSize: '0.84rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '6px' }}
+                      style={{ background: 'none', border: 'none', padding: 0, color: 'var(--fg-slate-700)', cursor: 'pointer', fontSize: '0.875rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '6px' }}
                     >
                       <span>🛡️</span>
                       <span style={{ textDecoration: 'underline' }}>Non-Affiliation Disclaimer</span>
@@ -909,7 +916,7 @@ export const App: React.FC = () => {
 
               {/* Col 3: Community & Support */}
               <div>
-                <h4 style={{ fontSize: '0.92rem', fontWeight: 800, color: '#0f172a', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '14px' }}>
+                <h4 style={{ fontSize: '0.95rem', fontWeight: 800, color: 'var(--fg-slate-900)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '14px' }}>
                   💬 Community & Support
                 </h4>
                 <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '10px' }}>
@@ -918,7 +925,7 @@ export const App: React.FC = () => {
                       href="https://t.me/Exam_Typing_Mentor"
                       target="_blank"
                       rel="noopener noreferrer"
-                      style={{ color: '#0284c7', textDecoration: 'none', fontSize: '0.84rem', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+                      style={{ color: 'var(--fg-sky-600)', textDecoration: 'none', fontSize: '0.875rem', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '6px' }}
                     >
                       <span>📢</span>
                       <span>Official Telegram Channel ↗</span>
@@ -929,7 +936,7 @@ export const App: React.FC = () => {
                       href="https://t.me/+Lw-tPbRqOOc2ZTA1"
                       target="_blank"
                       rel="noopener noreferrer"
-                      style={{ color: '#0284c7', textDecoration: 'none', fontSize: '0.84rem', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+                      style={{ color: 'var(--fg-sky-600)', textDecoration: 'none', fontSize: '0.875rem', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '6px' }}
                     >
                       <span>👥</span>
                       <span>Aspirants Discussion Group ↗</span>
@@ -940,7 +947,7 @@ export const App: React.FC = () => {
                       href="https://t.me/purendare"
                       target="_blank"
                       rel="noopener noreferrer"
-                      style={{ color: '#0284c7', textDecoration: 'none', fontSize: '0.84rem', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+                      style={{ color: 'var(--fg-sky-600)', textDecoration: 'none', fontSize: '0.875rem', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '6px' }}
                     >
                       <span>💬</span>
                       <span>1-on-1 Admin Support (@purendare) ↗</span>
@@ -949,7 +956,7 @@ export const App: React.FC = () => {
                   <li>
                     <button
                       onClick={() => openLegalModal('contact')}
-                      style={{ background: 'none', border: 'none', padding: 0, color: '#334155', cursor: 'pointer', fontSize: '0.84rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '6px' }}
+                      style={{ background: 'none', border: 'none', padding: 0, color: 'var(--fg-slate-700)', cursor: 'pointer', fontSize: '0.875rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '6px' }}
                     >
                       <span>📞</span>
                       <span style={{ textDecoration: 'underline' }}>Contact & Grievance Redressal</span>
@@ -960,12 +967,12 @@ export const App: React.FC = () => {
                       <button
                         onClick={() => setIsAdminOpen(true)}
                         style={{
-                          background: '#0284c7',
+                          background: 'var(--tw-sky-600)',
                           color: '#ffffff',
                           border: 'none',
                           padding: '6px 12px',
                           borderRadius: '6px',
-                          fontSize: '0.78rem',
+                          fontSize: '0.8rem',
                           fontWeight: 700,
                           cursor: 'pointer',
                           display: 'inline-flex',
@@ -985,15 +992,15 @@ export const App: React.FC = () => {
             {/* Bottom Row: Copyright Bar */}
             <div
               style={{
-                borderTop: '1px solid #e2e8f0',
+                borderTop: '1px solid var(--bd-slate-200)',
                 paddingTop: '18px',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'space-between',
                 flexWrap: 'wrap',
                 gap: '12px',
-                fontSize: '0.78rem',
-                color: '#94a3b8'
+                fontSize: '0.8rem',
+                color: 'var(--tw-slate-400)'
               }}
             >
               <div>
@@ -1194,7 +1201,8 @@ export const App: React.FC = () => {
             left: '50%',
             transform: 'translateX(-50%)',
             zIndex: 100001,
-            background: telegramToast.success ? '#0f172a' : '#991b1b',
+            maxWidth: 'calc(100vw - 24px)',
+            background: telegramToast.success ? 'var(--tw-slate-900)' : 'var(--tw-red-800)',
             color: '#ffffff',
             padding: '12px 22px',
             borderRadius: '12px',
@@ -1202,14 +1210,15 @@ export const App: React.FC = () => {
             display: 'flex',
             alignItems: 'center',
             gap: '12px',
-            fontSize: '0.88rem',
+            fontSize: '0.875rem',
             fontWeight: 700,
-            border: telegramToast.success ? '1.5px solid #38bdf8' : '1.5px solid #f87171'
+            border: telegramToast.success ? '1.5px solid var(--tw-sky-400)' : '1.5px solid var(--tw-red-400)'
           }}
         >
           <span>{telegramToast.success ? '⚡' : '⚠️'}</span>
           <span>{telegramToast.message}</span>
           <button
+            aria-label="Dismiss"
             onClick={() => setTelegramToast(null)}
             style={{
               background: 'transparent',
@@ -1277,15 +1286,15 @@ export const App: React.FC = () => {
               width: '46px',
               height: '46px',
               border: '4px solid rgba(255, 255, 255, 0.2)',
-              borderTopColor: '#38bdf8',
+              borderTopColor: 'var(--tw-sky-400)',
               borderRadius: '50%',
               animation: 'spin 0.8s linear infinite'
             }}
           />
-          <h3 style={{ margin: '18px 0 6px 0', fontSize: '1.15rem', fontWeight: 700, color: '#f8fafc' }}>
+          <h3 style={{ margin: '18px 0 6px 0', fontSize: '1.1rem', fontWeight: 700, color: 'var(--tw-slate-50)' }}>
             🔒 Verifying Security & Loading Test...
           </h3>
-          <p style={{ margin: 0, fontSize: '0.88rem', color: '#94a3b8' }}>
+          <p style={{ margin: 0, fontSize: '0.875rem', color: 'var(--tw-slate-400)' }}>
             क्लाउड सर्वर से सुरक्षित टेस्ट डेटा लोड किया जा रहा है...
           </p>
         </div>

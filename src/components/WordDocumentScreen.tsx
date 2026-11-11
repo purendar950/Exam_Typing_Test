@@ -481,7 +481,7 @@ export const WordDocumentScreen: React.FC<WordDocumentScreenProps> = ({ onBackTo
                 border: 'none',
                 borderRadius: '4px',
                 padding: '2px 8px',
-                fontSize: '0.85rem',
+                fontSize: '0.875rem',
                 fontWeight: 600,
                 outline: 'none'
               }}
@@ -570,7 +570,7 @@ export const WordDocumentScreen: React.FC<WordDocumentScreenProps> = ({ onBackTo
                 border: 'none',
                 background: 'transparent',
                 fontWeight: 600,
-                fontSize: '0.85rem',
+                fontSize: '0.875rem',
                 outline: 'none',
                 cursor: 'pointer',
                 color: '#1f2937'
@@ -593,7 +593,7 @@ export const WordDocumentScreen: React.FC<WordDocumentScreenProps> = ({ onBackTo
                 border: 'none',
                 background: 'transparent',
                 fontWeight: 600,
-                fontSize: '0.85rem',
+                fontSize: '0.875rem',
                 outline: 'none',
                 cursor: 'pointer',
                 color: '#1f2937',
@@ -678,7 +678,7 @@ export const WordDocumentScreen: React.FC<WordDocumentScreenProps> = ({ onBackTo
                 border: 'none',
                 background: 'transparent',
                 fontWeight: 700,
-                fontSize: '0.85rem',
+                fontSize: '0.875rem',
                 outline: 'none',
                 cursor: 'pointer',
                 color: '#2563eb'
@@ -692,7 +692,7 @@ export const WordDocumentScreen: React.FC<WordDocumentScreenProps> = ({ onBackTo
 
           {/* MS Word Spell-Check (Red Wavy Underline) Toggle */}
           <div className="ms-word-toolgroup">
-            <label style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '0.85rem', fontWeight: 700, cursor: 'pointer', color: checkSpelling ? '#dc2626' : '#64748b' }}>
+            <label style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '0.875rem', fontWeight: 700, cursor: 'pointer', color: checkSpelling ? '#dc2626' : '#64748b' }}>
               <input
                 type="checkbox"
                 checked={checkSpelling}
@@ -791,7 +791,7 @@ export const WordDocumentScreen: React.FC<WordDocumentScreenProps> = ({ onBackTo
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'space-between',
-                fontSize: '0.88rem'
+                fontSize: '0.875rem'
               }}
             >
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -799,7 +799,7 @@ export const WordDocumentScreen: React.FC<WordDocumentScreenProps> = ({ onBackTo
                 <strong>{activeTypeAlong.bookTitle}</strong> &bull; <span>{activeTypeAlong.chapterTitle}</span>
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                <span style={{ fontSize: '0.78rem', background: 'rgba(255,255,255,0.2)', padding: '2px 8px', borderRadius: '4px' }}>
+                <span style={{ fontSize: '0.8rem', background: 'rgba(255,255,255,0.2)', padding: '2px 8px', borderRadius: '4px' }}>
                   Words: {wordCount} typed
                 </span>
                 <button
@@ -841,7 +841,7 @@ export const WordDocumentScreen: React.FC<WordDocumentScreenProps> = ({ onBackTo
                 padding: '14px 20px',
                 maxHeight: '160px',
                 overflowY: 'auto',
-                fontSize: '0.98rem',
+                fontSize: '1rem',
                 lineHeight: 1.7,
                 color: '#0f172a',
                 fontFamily: language === 'hindi_kruti'
@@ -989,7 +989,7 @@ export const WordDocumentScreen: React.FC<WordDocumentScreenProps> = ({ onBackTo
             zIndex: 100,
             padding: '8px 0',
             minWidth: '200px',
-            fontSize: '0.85rem'
+            fontSize: '0.875rem'
           }}
         >
           <div style={{ padding: '4px 12px', color: '#dc2626', fontWeight: 800, borderBottom: '1px solid #f1f5f9', display: 'flex', alignItems: 'center', gap: '6px' }}>

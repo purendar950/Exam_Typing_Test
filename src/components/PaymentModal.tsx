@@ -182,7 +182,8 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
     if (!file) return;
 
     if (file.size > 5 * 1024 * 1024) {
-      alert('File size exceeds 5MB limit. Please upload a smaller image.');
+      setErrorMessage('That image is larger than 5 MB. Please upload a smaller screenshot.');
+      e.target.value = '';
       return;
     }
 
@@ -293,7 +294,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
     >
       <div
         style={{
-          background: '#ffffff',
+          background: 'var(--surface)',
           borderRadius: '20px',
           width: '100%',
           maxWidth: '960px',
@@ -312,7 +313,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
         <div
           style={{
             padding: '18px 24px',
-            background: 'linear-gradient(135deg, #090d16 0%, #0f172a 45%, #1e1b4b 100%)',
+            background: 'linear-gradient(135deg, var(--tw-gray-950) 0%, var(--tw-slate-900) 45%, var(--tw-indigo-950) 100%)',
             color: '#ffffff',
             display: 'flex',
             alignItems: 'center',
@@ -328,7 +329,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
                 width: '42px',
                 height: '42px',
                 borderRadius: '12px',
-                background: 'linear-gradient(135deg, #38bdf8 0%, #2563eb 100%)',
+                background: 'linear-gradient(135deg, var(--tw-sky-400) 0%, var(--tw-blue-600) 100%)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
@@ -343,9 +344,9 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
                 <span
                   style={{
-                    fontSize: '0.68rem',
+                    fontSize: '0.75rem',
                     fontWeight: 900,
-                    color: '#38bdf8',
+                    color: 'var(--tw-sky-400)',
                     letterSpacing: '1.2px',
                     textTransform: 'uppercase'
                   }}
@@ -354,9 +355,9 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
                 </span>
                 <span
                   style={{
-                    fontSize: '0.65rem',
+                    fontSize: '0.75rem',
                     fontWeight: 800,
-                    color: '#4ade80',
+                    color: 'var(--tw-green-400)',
                     background: 'rgba(34, 197, 94, 0.15)',
                     border: '1px solid rgba(74, 222, 128, 0.3)',
                     padding: '2px 8px',
@@ -366,7 +367,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
                     gap: '4px'
                   }}
                 >
-                  <span style={{ fontSize: '0.6rem' }}>●</span> VERIFIED UPI MERCHANT
+                  <span style={{ fontSize: '0.75rem' }}>●</span> VERIFIED UPI MERCHANT
                 </span>
               </div>
 
@@ -381,7 +382,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
               >
                 Fintech Pro Checkout
               </h2>
-              <p style={{ fontSize: '0.78rem', color: '#94a3b8', margin: '2px 0 0 0' }}>
+              <p style={{ fontSize: '0.8rem', color: 'var(--tw-slate-400)', margin: '2px 0 0 0' }}>
                 Practice smarter. Improve faster. Get exam-ready.
               </p>
             </div>
@@ -399,13 +400,13 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
                 padding: '6px 12px',
                 borderRadius: '20px',
                 fontSize: '0.75rem',
-                color: '#e2e8f0',
+                color: 'var(--tw-slate-200)',
                 fontWeight: 700
               }}
             >
               <span>⏱️</span>
               <span>Price locked:</span>
-              <strong style={{ color: '#fbbf24', fontFamily: 'monospace', fontSize: '0.85rem' }}>
+              <strong style={{ color: 'var(--tw-amber-400)', fontFamily: 'monospace', fontSize: '0.875rem' }}>
                 {formattedTimer}
               </strong>
             </div>
@@ -419,7 +420,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
                 borderRadius: '50%',
                 width: '32px',
                 height: '32px',
-                color: '#cbd5e1',
+                color: 'var(--tw-slate-300)',
                 fontSize: '1.1rem',
                 cursor: 'pointer',
                 display: 'flex',
@@ -439,8 +440,8 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
         <div
           style={{
             display: 'flex',
-            background: '#f8fafc',
-            borderBottom: '1px solid #e2e8f0',
+            background: 'var(--bg-slate-50)',
+            borderBottom: '1px solid var(--bd-slate-200)',
             padding: '8px 20px',
             gap: '8px',
             overflowX: 'auto'
@@ -457,12 +458,12 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
                 key={s.step}
                 onClick={() => setMobileStep(s.step as any)}
                 style={{
-                  background: isActive ? '#0f172a' : 'transparent',
-                  color: isActive ? '#ffffff' : '#64748b',
+                  background: isActive ? 'var(--tw-slate-900)' : 'transparent',
+                  color: isActive ? '#ffffff' : 'var(--fg-slate-500)',
                   border: 'none',
                   borderRadius: '20px',
                   padding: '6px 14px',
-                  fontSize: '0.78rem',
+                  fontSize: '0.8rem',
                   fontWeight: 700,
                   cursor: 'pointer',
                   display: 'flex',
@@ -482,7 +483,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
         {/* ============================================================
             MODAL BODY: 2-COLUMN FINTECH SPLIT
             ============================================================ */}
-        <div style={{ padding: '20px 24px', overflowY: 'auto', flex: 1, background: '#f8fafc' }}>
+        <div style={{ padding: '20px 24px', overflowY: 'auto', flex: 1, background: 'var(--bg-slate-50)' }}>
           {submitSuccess ? (
             /* ============================================================
                SUCCESS / INVOICE RECEIPT SCREEN
@@ -493,8 +494,8 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
                   width: '80px',
                   height: '80px',
                   borderRadius: '50%',
-                  background: 'linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%)',
-                  color: '#15803d',
+                  background: 'linear-gradient(135deg, var(--bg-green-100) 0%, var(--bg-green-200) 100%)',
+                  color: 'var(--fg-green-700)',
                   fontSize: '2.5rem',
                   display: 'flex',
                   alignItems: 'center',
@@ -508,9 +509,9 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
 
               <span
                 style={{
-                  background: '#dcfce7',
-                  color: '#15803d',
-                  fontSize: '0.72rem',
+                  background: 'var(--bg-green-100)',
+                  color: 'var(--fg-green-700)',
+                  fontSize: '0.75rem',
                   fontWeight: 800,
                   padding: '4px 12px',
                   borderRadius: '20px',
@@ -521,18 +522,18 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
                 PAYMENT PROOF SUBMITTED SUCCESSFULLY
               </span>
 
-              <h3 style={{ fontSize: '1.45rem', fontWeight: 900, color: '#0f172a', margin: '12px 0 6px 0' }}>
+              <h3 style={{ fontSize: '1.4rem', fontWeight: 900, color: 'var(--fg-slate-900)', margin: '12px 0 6px 0' }}>
                 Thank you, {candidateName}!
               </h3>
-              <p style={{ fontSize: '0.88rem', color: '#475569', maxWidth: '540px', margin: '0 auto 20px auto', lineHeight: 1.5 }}>
+              <p style={{ fontSize: '0.875rem', color: 'var(--fg-slate-600)', maxWidth: '540px', margin: '0 auto 20px auto', lineHeight: 1.5 }}>
                 Your UTR reference <strong>{utrNumber}</strong> and payment screenshot for <strong>{selectedPlan.name} (₹{finalPayable})</strong> have been queued for priority admin verification.
               </p>
 
               {/* Digital Slip */}
               <div
                 style={{
-                  background: '#ffffff',
-                  border: '1.5px solid #cbd5e1',
+                  background: 'var(--surface)',
+                  border: '1.5px solid var(--bd-slate-300)',
                   borderRadius: '14px',
                   padding: '20px',
                   maxWidth: '480px',
@@ -541,41 +542,41 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
                   boxShadow: '0 4px 15px rgba(0,0,0,0.05)'
                 }}
               >
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px dashed #cbd5e1', paddingBottom: '12px', marginBottom: '12px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px dashed var(--bd-slate-300)', paddingBottom: '12px', marginBottom: '12px' }}>
                   <div>
-                    <div style={{ fontSize: '0.72rem', color: '#64748b', textTransform: 'uppercase', fontWeight: 700 }}>
+                    <div style={{ fontSize: '0.75rem', color: 'var(--fg-slate-500)', textTransform: 'uppercase', fontWeight: 700 }}>
                       DIGITAL RECEIPT
                     </div>
-                    <div style={{ fontSize: '0.95rem', fontWeight: 900, color: '#0f172a' }}>
+                    <div style={{ fontSize: '0.95rem', fontWeight: 900, color: 'var(--fg-slate-900)' }}>
                       #ET-PAY-{Date.now().toString().slice(-6)}
                     </div>
                   </div>
-                  <span style={{ fontSize: '0.72rem', color: '#16a34a', fontWeight: 800, background: '#f0fdf4', padding: '4px 10px', borderRadius: '12px' }}>
+                  <span style={{ fontSize: '0.75rem', color: 'var(--fg-green-600)', fontWeight: 800, background: 'var(--bg-green-50)', padding: '4px 10px', borderRadius: '12px' }}>
                     ● VERIFICATION QUEUED
                   </span>
                 </div>
 
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px', fontSize: '0.85rem' }}>
-                  <span style={{ color: '#64748b' }}>Plan Tier:</span>
-                  <span style={{ fontWeight: 800, color: '#0f172a' }}>{selectedPlan.name} ({selectedPlan.durationLabel})</span>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px', fontSize: '0.875rem' }}>
+                  <span style={{ color: 'var(--fg-slate-500)' }}>Plan Tier:</span>
+                  <span style={{ fontWeight: 800, color: 'var(--fg-slate-900)' }}>{selectedPlan.name} ({selectedPlan.durationLabel})</span>
                 </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px', fontSize: '0.85rem' }}>
-                  <span style={{ color: '#64748b' }}>Scope:</span>
-                  <span style={{ fontWeight: 700, color: '#0f172a' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px', fontSize: '0.875rem' }}>
+                  <span style={{ color: 'var(--fg-slate-500)' }}>Scope:</span>
+                  <span style={{ fontWeight: 700, color: 'var(--fg-slate-900)' }}>
                     {selectedPlan.type === 'all_exams_pass' ? '⭐ All 129 Examinations' : selectedExam.title}
                   </span>
                 </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px', fontSize: '0.85rem' }}>
-                  <span style={{ color: '#64748b' }}>Amount Paid:</span>
-                  <span style={{ fontWeight: 900, color: '#16a34a', fontSize: '1.1rem' }}>₹{finalPayable}</span>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px', fontSize: '0.875rem' }}>
+                  <span style={{ color: 'var(--fg-slate-500)' }}>Amount Paid:</span>
+                  <span style={{ fontWeight: 900, color: 'var(--fg-green-600)', fontSize: '1.1rem' }}>₹{finalPayable}</span>
                 </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px', fontSize: '0.85rem' }}>
-                  <span style={{ color: '#64748b' }}>UTR / Reference:</span>
-                  <span style={{ fontWeight: 800, fontFamily: 'monospace', color: '#0f172a' }}>{utrNumber}</span>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px', fontSize: '0.875rem' }}>
+                  <span style={{ color: 'var(--fg-slate-500)' }}>UTR / Reference:</span>
+                  <span style={{ fontWeight: 800, fontFamily: 'monospace', color: 'var(--fg-slate-900)' }}>{utrNumber}</span>
                 </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', paddingTop: '8px', borderTop: '1px solid #f1f5f9' }}>
-                  <span style={{ color: '#64748b' }}>Activation Time:</span>
-                  <span style={{ fontWeight: 700, color: '#2563eb' }}>Within 15–30 Minutes</span>
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.875rem', paddingTop: '8px', borderTop: '1px solid var(--bd-slate-100)' }}>
+                  <span style={{ color: 'var(--fg-slate-500)' }}>Activation Time:</span>
+                  <span style={{ fontWeight: 700, color: 'var(--fg-blue-600)' }}>Within 15–30 Minutes</span>
                 </div>
               </div>
 
@@ -586,11 +587,11 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
                     padding: '12px 28px',
                     fontWeight: 800,
                     borderRadius: '10px',
-                    background: '#0f172a',
+                    background: 'var(--tw-slate-900)',
                     color: '#ffffff',
                     border: 'none',
                     cursor: 'pointer',
-                    fontSize: '0.88rem'
+                    fontSize: '0.875rem'
                   }}
                 >
                   Continue Practicing Free Demo Tests →
@@ -609,7 +610,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
                     display: 'inline-flex',
                     alignItems: 'center',
                     gap: '6px',
-                    fontSize: '0.88rem'
+                    fontSize: '0.875rem'
                   }}
                 >
                   <span>✈️</span>
@@ -634,7 +635,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
                   ============================================================ */}
               <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                 {/* Section 1: Choose Plan Tier */}
-                <div style={{ background: '#ffffff', borderRadius: '14px', padding: '18px', border: '1px solid #e2e8f0', boxShadow: '0 2px 8px rgba(0,0,0,0.03)' }}>
+                <div style={{ background: 'var(--surface)', borderRadius: '14px', padding: '18px', border: '1px solid var(--bd-slate-200)', boxShadow: '0 2px 8px rgba(0,0,0,0.03)' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                       <span
@@ -642,22 +643,22 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
                           width: '22px',
                           height: '22px',
                           borderRadius: '50%',
-                          background: '#0284c7',
+                          background: 'var(--tw-sky-600)',
                           color: '#ffffff',
                           display: 'flex',
                           alignItems: 'center',
                           justifyContent: 'center',
-                          fontSize: '0.72rem',
+                          fontSize: '0.75rem',
                           fontWeight: 800
                         }}
                       >
                         1
                       </span>
-                      <h3 style={{ margin: 0, fontSize: '0.98rem', fontWeight: 800, color: '#0f172a' }}>
+                      <h3 style={{ margin: 0, fontSize: '1rem', fontWeight: 800, color: 'var(--fg-slate-900)' }}>
                         Select Subscription Tier
                       </h3>
                     </div>
-                    <span style={{ fontSize: '0.72rem', color: '#64748b' }}>5 Official Plans</span>
+                    <span style={{ fontSize: '0.75rem', color: 'var(--fg-slate-500)' }}>5 Official Plans</span>
                   </div>
 
                   {/* Plan Cards Stack */}
@@ -678,8 +679,8 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
                             padding: '12px 14px',
                             borderRadius: '10px',
                             cursor: 'pointer',
-                            border: isSelected ? '2px solid #0284c7' : '1px solid #e2e8f0',
-                            background: isSelected ? '#f0f9ff' : '#ffffff',
+                            border: isSelected ? '2px solid var(--tw-sky-600)' : '1px solid var(--bd-slate-200)',
+                            background: isSelected ? 'var(--bg-sky-50)' : 'var(--surface)',
                             boxShadow: isSelected ? '0 2px 8px rgba(2, 132, 199, 0.12)' : 'none',
                             transition: 'all 0.15s ease'
                           }}
@@ -691,44 +692,44 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
                                 width: '18px',
                                 height: '18px',
                                 borderRadius: '50%',
-                                border: isSelected ? '5px solid #0284c7' : '2px solid #cbd5e1',
-                                background: '#ffffff',
+                                border: isSelected ? '5px solid var(--tw-sky-600)' : '2px solid var(--bd-slate-300)',
+                                background: 'var(--surface)',
                                 flexShrink: 0
                               }}
                             />
                             <div>
                               <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                <span style={{ fontWeight: 800, fontSize: '0.92rem', color: '#0f172a' }}>
+                                <span style={{ fontWeight: 800, fontSize: '0.95rem', color: 'var(--fg-slate-900)' }}>
                                   {p.name}
                                 </span>
                                 {p.badge && (
                                   <span
                                     style={{
-                                      fontSize: '0.62rem',
+                                      fontSize: '0.75rem',
                                       fontWeight: 800,
                                       padding: '1px 6px',
                                       borderRadius: '6px',
                                       background: p.isExclusiveOffer
-                                        ? '#fef3c7'
+                                        ? 'var(--bg-amber-100)'
                                         : p.isPopular
-                                        ? '#dbeafe'
+                                        ? 'var(--bg-blue-100)'
                                         : p.isBestValue
-                                        ? '#f3e8ff'
-                                        : '#f1f5f9',
+                                        ? 'var(--bg-purple-100)'
+                                        : 'var(--bg-slate-100)',
                                       color: p.isExclusiveOffer
-                                        ? '#b45309'
+                                        ? 'var(--fg-amber-700)'
                                         : p.isPopular
-                                        ? '#1d4ed8'
+                                        ? 'var(--fg-blue-700)'
                                         : p.isBestValue
-                                        ? '#7e22ce'
-                                        : '#475569'
+                                        ? 'var(--fg-purple-700)'
+                                        : 'var(--fg-slate-600)'
                                     }}
                                   >
                                     {p.badge}
                                   </span>
                                 )}
                               </div>
-                              <div style={{ fontSize: '0.74rem', color: '#64748b' }}>
+                              <div style={{ fontSize: '0.75rem', color: 'var(--fg-slate-500)' }}>
                                 {p.type === 'all_exams_pass' ? '⭐ All 129 Exams' : '1 Target Exam'} &bull; {p.durationLabel}
                               </div>
                             </div>
@@ -736,15 +737,15 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
 
                           <div style={{ textAlign: 'right' }}>
                             <div style={{ display: 'flex', alignItems: 'baseline', gap: '6px', justifyContent: 'flex-end' }}>
-                              <span style={{ fontSize: '1.15rem', fontWeight: 900, color: isSelected ? '#0284c7' : '#0f172a' }}>
+                              <span style={{ fontSize: '1.1rem', fontWeight: 900, color: isSelected ? 'var(--fg-sky-600)' : 'var(--fg-slate-900)' }}>
                                 ₹{p.discountedPrice}
                               </span>
-                              <span style={{ fontSize: '0.75rem', color: '#94a3b8', textDecoration: 'line-through' }}>
+                              <span style={{ fontSize: '0.75rem', color: 'var(--tw-slate-400)', textDecoration: 'line-through' }}>
                                 ₹{p.originalPrice}
                               </span>
                             </div>
                             {planSavings > 0 && (
-                              <span style={{ fontSize: '0.68rem', fontWeight: 800, color: '#16a34a' }}>
+                              <span style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--fg-green-600)' }}>
                                 {planSavings}% SAVED
                               </span>
                             )}
@@ -759,13 +760,13 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
                     <div
                       style={{
                         marginTop: '12px',
-                        background: '#f8fafc',
+                        background: 'var(--bg-slate-50)',
                         padding: '12px',
                         borderRadius: '8px',
-                        border: '1px solid #e2e8f0'
+                        border: '1px solid var(--bd-slate-200)'
                       }}
                     >
-                      <label style={{ fontSize: '0.76rem', fontWeight: 700, color: '#334155', display: 'block', marginBottom: '4px' }}>
+                      <label style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--fg-slate-700)', display: 'block', marginBottom: '4px' }}>
                         🎯 Choose Exam to Unlock (out of 129 exams):
                       </label>
                       <select
@@ -775,10 +776,10 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
                           width: '100%',
                           padding: '7px 10px',
                           borderRadius: '6px',
-                          border: '1px solid #cbd5e1',
-                          fontSize: '0.82rem',
+                          border: '1px solid var(--bd-slate-300)',
+                          fontSize: '0.8rem',
                           fontWeight: 700,
-                          backgroundColor: '#ffffff'
+                          backgroundColor: 'var(--surface)'
                         }}
                       >
                         {ALL_EXAMS.map((ex) => (
@@ -792,25 +793,25 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
                 </div>
 
                 {/* Section 2: Promo Code / Coupon */}
-                <div style={{ background: '#ffffff', borderRadius: '14px', padding: '16px', border: '1px solid #e2e8f0' }}>
+                <div style={{ background: 'var(--surface)', borderRadius: '14px', padding: '16px', border: '1px solid var(--bd-slate-200)' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px' }}>
                     <span
                       style={{
                         width: '22px',
                         height: '22px',
                         borderRadius: '50%',
-                        background: '#0284c7',
+                        background: 'var(--tw-sky-600)',
                         color: '#ffffff',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
-                        fontSize: '0.72rem',
+                        fontSize: '0.75rem',
                         fontWeight: 800
                       }}
                     >
                       2
                     </span>
-                    <h3 style={{ margin: 0, fontSize: '0.92rem', fontWeight: 800, color: '#0f172a' }}>
+                    <h3 style={{ margin: 0, fontSize: '0.95rem', fontWeight: 800, color: 'var(--fg-slate-900)' }}>
                       Apply Discount Coupon
                     </h3>
                   </div>
@@ -825,9 +826,9 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
                         flex: 1,
                         padding: '8px 12px',
                         borderRadius: '6px',
-                        border: '1px solid #cbd5e1',
+                        border: '1px solid var(--bd-slate-300)',
                         fontWeight: 800,
-                        fontSize: '0.85rem',
+                        fontSize: '0.875rem',
                         fontFamily: 'monospace',
                         textTransform: 'uppercase'
                       }}
@@ -836,13 +837,13 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
                       type="button"
                       onClick={() => handleApplyPromo()}
                       style={{
-                        background: 'linear-gradient(135deg, #0284c7 0%, #0369a1 100%)',
+                        background: 'linear-gradient(135deg, var(--tw-sky-600) 0%, var(--tw-sky-700) 100%)',
                         color: '#ffffff',
                         border: 'none',
                         borderRadius: '6px',
                         fontWeight: 800,
                         padding: '0 16px',
-                        fontSize: '0.82rem',
+                        fontSize: '0.8rem',
                         cursor: 'pointer'
                       }}
                     >
@@ -851,7 +852,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
                   </div>
 
                   {promoError && (
-                    <div style={{ fontSize: '0.78rem', color: '#dc2626', fontWeight: 600, marginTop: '6px' }}>
+                    <div style={{ fontSize: '0.8rem', color: 'var(--fg-red-600)', fontWeight: 600, marginTop: '6px' }}>
                       ⚠️ {promoError}
                     </div>
                   )}
@@ -859,10 +860,10 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
                   {appliedPromo && (
                     <div
                       style={{
-                        fontSize: '0.78rem',
-                        color: '#15803d',
-                        background: '#f0fdf4',
-                        border: '1px solid #bbf7d0',
+                        fontSize: '0.8rem',
+                        color: 'var(--fg-green-700)',
+                        background: 'var(--bg-green-50)',
+                        border: '1px solid var(--bd-green-200)',
                         padding: '6px 10px',
                         borderRadius: '6px',
                         display: 'flex',
@@ -875,7 +876,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
                       <button
                         type="button"
                         onClick={() => setAppliedPromo(null)}
-                        style={{ background: 'none', border: 'none', color: '#dc2626', cursor: 'pointer', fontWeight: 800 }}
+                        style={{ background: 'none', border: 'none', color: 'var(--fg-red-600)', cursor: 'pointer', fontWeight: 800 }}
                       >
                         ✕
                       </button>
@@ -893,13 +894,13 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
                           handleApplyPromo(c.code);
                         }}
                         style={{
-                          background: '#f8fafc',
-                          border: '1px dashed #94a3b8',
+                          background: 'var(--bg-slate-50)',
+                          border: '1px dashed var(--bd-slate-400)',
                           borderRadius: '4px',
                           padding: '2px 8px',
-                          fontSize: '0.7rem',
+                          fontSize: '0.75rem',
                           fontWeight: 700,
-                          color: '#0284c7',
+                          color: 'var(--fg-sky-600)',
                           cursor: 'pointer'
                         }}
                       >
@@ -912,52 +913,52 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
                 {/* Section 3: Official Fintech Invoice Summary Receipt */}
                 <div
                   style={{
-                    background: 'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)',
+                    background: 'linear-gradient(135deg, var(--surface) 0%, var(--bg-slate-50) 100%)',
                     borderRadius: '14px',
                     padding: '18px',
-                    border: '1.5px solid #cbd5e1',
+                    border: '1.5px solid var(--bd-slate-300)',
                     boxShadow: '0 4px 14px rgba(0,0,0,0.04)'
                   }}
                 >
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #e2e8f0', paddingBottom: '8px', marginBottom: '10px' }}>
-                    <span style={{ fontSize: '0.72rem', fontWeight: 800, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--bd-slate-200)', paddingBottom: '8px', marginBottom: '10px' }}>
+                    <span style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--fg-slate-500)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
                       ORDER SUMMARY & INVOICE
                     </span>
-                    <span style={{ fontSize: '0.7rem', fontWeight: 700, fontFamily: 'monospace', color: '#94a3b8' }}>
+                    <span style={{ fontSize: '0.75rem', fontWeight: 700, fontFamily: 'monospace', color: 'var(--tw-slate-400)' }}>
                       #ET-{selectedPlan.durationDays}D
                     </span>
                   </div>
 
-                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.82rem', color: '#475569', marginBottom: '6px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', color: 'var(--fg-slate-600)', marginBottom: '6px' }}>
                     <span>Plan Item:</span>
-                    <span style={{ fontWeight: 700, color: '#0f172a' }}>{selectedPlan.name} ({selectedPlan.durationLabel})</span>
+                    <span style={{ fontWeight: 700, color: 'var(--fg-slate-900)' }}>{selectedPlan.name} ({selectedPlan.durationLabel})</span>
                   </div>
 
-                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.82rem', color: '#475569', marginBottom: '6px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', color: 'var(--fg-slate-600)', marginBottom: '6px' }}>
                     <span>Base MRP:</span>
-                    <span style={{ textDecoration: 'line-through', color: '#94a3b8' }}>₹{selectedPlan.originalPrice}</span>
+                    <span style={{ textDecoration: 'line-through', color: 'var(--tw-slate-400)' }}>₹{selectedPlan.originalPrice}</span>
                   </div>
 
-                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.82rem', color: '#16a34a', fontWeight: 700, marginBottom: '6px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', color: 'var(--fg-green-600)', fontWeight: 700, marginBottom: '6px' }}>
                     <span>Plan Discount:</span>
                     <span>- ₹{selectedPlan.originalPrice - selectedPlan.discountedPrice}</span>
                   </div>
 
                   {currentDiscountAmount > 0 && (
-                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.82rem', color: '#16a34a', fontWeight: 700, marginBottom: '6px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', color: 'var(--fg-green-600)', fontWeight: 700, marginBottom: '6px' }}>
                       <span>Coupon ({appliedPromo?.code}):</span>
                       <span>- ₹{currentDiscountAmount}</span>
                     </div>
                   )}
 
-                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.82rem', color: '#475569', marginBottom: '8px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', color: 'var(--fg-slate-600)', marginBottom: '8px' }}>
                     <span>Payment Gateway Fee:</span>
-                    <span style={{ color: '#16a34a', fontWeight: 700 }}>FREE (₹0.00)</span>
+                    <span style={{ color: 'var(--fg-green-600)', fontWeight: 700 }}>FREE (₹0.00)</span>
                   </div>
 
                   <div
                     style={{
-                      borderTop: '2px solid #0f172a',
+                      borderTop: '2px solid var(--tw-slate-900)',
                       paddingTop: '10px',
                       display: 'flex',
                       justifyContent: 'space-between',
@@ -965,14 +966,14 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
                     }}
                   >
                     <div>
-                      <div style={{ fontSize: '0.72rem', fontWeight: 800, color: '#64748b', textTransform: 'uppercase' }}>
+                      <div style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--fg-slate-500)', textTransform: 'uppercase' }}>
                         TOTAL PAYABLE
                       </div>
-                      <div style={{ fontSize: '0.72rem', color: '#16a34a', fontWeight: 700 }}>
+                      <div style={{ fontSize: '0.75rem', color: 'var(--fg-green-600)', fontWeight: 700 }}>
                         🎉 You Save ₹{totalSavings} ({savingsPct}%)
                       </div>
                     </div>
-                    <div style={{ fontSize: '1.6rem', fontWeight: 900, color: '#0284c7' }}>
+                    <div style={{ fontSize: '1.6rem', fontWeight: 900, color: 'var(--fg-sky-600)' }}>
                       ₹{finalPayable}
                     </div>
                   </div>
@@ -986,19 +987,19 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
                 {/* 1-Click Mobile UPI App Launchers */}
                 <div
                   style={{
-                    background: '#ffffff',
+                    background: 'var(--surface)',
                     borderRadius: '14px',
                     padding: '16px',
-                    border: '1px solid #e2e8f0',
+                    border: '1px solid var(--bd-slate-200)',
                     boxShadow: '0 2px 8px rgba(0,0,0,0.03)'
                   }}
                 >
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
-                    <div style={{ fontSize: '0.85rem', fontWeight: 800, color: '#0f172a', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <div style={{ fontSize: '0.875rem', fontWeight: 800, color: 'var(--fg-slate-900)', display: 'flex', alignItems: 'center', gap: '6px' }}>
                       <span>⚡</span>
                       <span>1-Click Pay on Mobile (Instant UPI)</span>
                     </div>
-                    <span style={{ fontSize: '0.68rem', color: '#16a34a', fontWeight: 800, background: '#dcfce7', padding: '2px 6px', borderRadius: '4px' }}>
+                    <span style={{ fontSize: '0.75rem', color: 'var(--fg-green-600)', fontWeight: 800, background: 'var(--bg-green-100)', padding: '2px 6px', borderRadius: '4px' }}>
                       ZERO FEE
                     </span>
                   </div>
@@ -1014,7 +1015,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
                         borderRadius: '8px',
                         padding: '10px',
                         fontWeight: 800,
-                        fontSize: '0.82rem',
+                        fontSize: '0.8rem',
                         cursor: 'pointer',
                         display: 'flex',
                         alignItems: 'center',
@@ -1037,7 +1038,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
                         borderRadius: '8px',
                         padding: '10px',
                         fontWeight: 800,
-                        fontSize: '0.82rem',
+                        fontSize: '0.8rem',
                         cursor: 'pointer',
                         display: 'flex',
                         alignItems: 'center',
@@ -1060,7 +1061,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
                         borderRadius: '8px',
                         padding: '10px',
                         fontWeight: 800,
-                        fontSize: '0.82rem',
+                        fontSize: '0.8rem',
                         cursor: 'pointer',
                         display: 'flex',
                         alignItems: 'center',
@@ -1077,13 +1078,13 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
                       type="button"
                       onClick={() => handleLaunchUpi('generic')}
                       style={{
-                        background: '#0f172a',
+                        background: 'var(--tw-slate-900)',
                         color: '#ffffff',
                         border: 'none',
                         borderRadius: '8px',
                         padding: '10px',
                         fontWeight: 800,
-                        fontSize: '0.82rem',
+                        fontSize: '0.8rem',
                         cursor: 'pointer',
                         display: 'flex',
                         alignItems: 'center',
@@ -1095,7 +1096,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
                       <span>Any UPI App</span>
                     </button>
                   </div>
-                  <div style={{ fontSize: '0.7rem', color: '#64748b', textAlign: 'center', marginTop: '6px' }}>
+                  <div style={{ fontSize: '0.75rem', color: 'var(--fg-slate-500)', textAlign: 'center', marginTop: '6px' }}>
                     Tapping opens your installed UPI app with ₹{finalPayable} pre-filled.
                   </div>
                 </div>
@@ -1103,18 +1104,18 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
                 {/* PhonePe QR Scanner & Copy UPI Card */}
                 <div
                   style={{
-                    background: '#ffffff',
+                    background: 'var(--surface)',
                     borderRadius: '14px',
                     padding: '18px',
-                    border: '1.5px solid #e2e8f0',
+                    border: '1.5px solid var(--bd-slate-200)',
                     textAlign: 'center',
                     boxShadow: '0 2px 10px rgba(0,0,0,0.03)'
                   }}
                 >
-                  <div style={{ fontSize: '0.84rem', fontWeight: 800, color: '#0f172a', marginBottom: '4px' }}>
+                  <div style={{ fontSize: '0.875rem', fontWeight: 800, color: 'var(--fg-slate-900)', marginBottom: '4px' }}>
                     Or Scan Official Merchant QR Code
                   </div>
-                  <div style={{ fontSize: '0.74rem', color: '#64748b', marginBottom: '12px' }}>
+                  <div style={{ fontSize: '0.75rem', color: 'var(--fg-slate-500)', marginBottom: '12px' }}>
                     Scan using PhonePe, GPay, Paytm, BHIM, CRED or any bank app
                   </div>
 
@@ -1127,7 +1128,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
                       display: 'inline-block',
                       boxShadow: '0 8px 24px rgba(0,0,0,0.2)',
                       maxWidth: '210px',
-                      border: '3px solid #38bdf8'
+                      border: '3px solid var(--tw-sky-400)'
                     }}
                   >
                     <img
@@ -1155,13 +1156,13 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
                   >
                     <div
                       style={{
-                        background: '#f1f5f9',
+                        background: 'var(--bg-slate-100)',
                         padding: '6px 12px',
                         borderRadius: '6px',
                         fontFamily: 'monospace',
                         fontWeight: 800,
-                        fontSize: '0.82rem',
-                        color: '#0f172a'
+                        fontSize: '0.8rem',
+                        color: 'var(--fg-slate-900)'
                       }}
                     >
                       {upiConfig.upiId}
@@ -1170,8 +1171,8 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
                       type="button"
                       onClick={handleCopyUpi}
                       style={{
-                        background: copiedUpi ? '#dcfce7' : '#0284c7',
-                        color: copiedUpi ? '#15803d' : '#ffffff',
+                        background: copiedUpi ? 'var(--bg-green-100)' : 'var(--tw-sky-600)',
+                        color: copiedUpi ? 'var(--fg-green-700)' : '#ffffff',
                         border: 'none',
                         borderRadius: '6px',
                         padding: '6px 12px',
@@ -1185,38 +1186,38 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
                     </button>
                   </div>
 
-                  <div style={{ fontSize: '0.74rem', color: '#64748b', marginTop: '6px' }}>
+                  <div style={{ fontSize: '0.75rem', color: 'var(--fg-slate-500)', marginTop: '6px' }}>
                     Payee: <strong>{upiConfig.merchantName}</strong> &bull; Amount: <strong>₹{finalPayable}</strong>
                   </div>
                 </div>
 
                 {/* Step 3: Verification & Activation Form */}
-                <div style={{ background: '#ffffff', borderRadius: '14px', padding: '18px', border: '1.5px solid #0284c7', boxShadow: '0 4px 14px rgba(2, 132, 199, 0.08)' }}>
+                <div style={{ background: 'var(--surface)', borderRadius: '14px', padding: '18px', border: '1.5px solid var(--tw-sky-600)', boxShadow: '0 4px 14px rgba(2, 132, 199, 0.08)' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '14px' }}>
                     <span
                       style={{
                         width: '22px',
                         height: '22px',
                         borderRadius: '50%',
-                        background: '#0284c7',
+                        background: 'var(--tw-sky-600)',
                         color: '#ffffff',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
-                        fontSize: '0.72rem',
+                        fontSize: '0.75rem',
                         fontWeight: 800
                       }}
                     >
                       3
                     </span>
-                    <h3 style={{ margin: 0, fontSize: '0.98rem', fontWeight: 800, color: '#0f172a' }}>
+                    <h3 style={{ margin: 0, fontSize: '1rem', fontWeight: 800, color: 'var(--fg-slate-900)' }}>
                       Submit UTR & Activate Membership
                     </h3>
                   </div>
 
                   <form onSubmit={handleSubmitPayment} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                     <div>
-                      <label style={{ fontSize: '0.76rem', fontWeight: 700, color: '#334155', display: 'block', marginBottom: '3px' }}>
+                      <label style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--fg-slate-700)', display: 'block', marginBottom: '3px' }}>
                         Candidate Full Name *
                       </label>
                       <input
@@ -1229,15 +1230,15 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
                           width: '100%',
                           padding: '8px 10px',
                           borderRadius: '6px',
-                          border: '1px solid #cbd5e1',
-                          fontSize: '0.85rem'
+                          border: '1px solid var(--bd-slate-300)',
+                          fontSize: '0.875rem'
                         }}
                       />
                     </div>
 
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
                       <div>
-                        <label style={{ fontSize: '0.76rem', fontWeight: 700, color: '#334155', display: 'block', marginBottom: '3px' }}>
+                        <label style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--fg-slate-700)', display: 'block', marginBottom: '3px' }}>
                           Email Address *
                         </label>
                         <input
@@ -1250,13 +1251,13 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
                             width: '100%',
                             padding: '8px 10px',
                             borderRadius: '6px',
-                            border: '1px solid #cbd5e1',
-                            fontSize: '0.85rem'
+                            border: '1px solid var(--bd-slate-300)',
+                            fontSize: '0.875rem'
                           }}
                         />
                       </div>
                       <div>
-                        <label style={{ fontSize: '0.76rem', fontWeight: 700, color: '#334155', display: 'block', marginBottom: '3px' }}>
+                        <label style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--fg-slate-700)', display: 'block', marginBottom: '3px' }}>
                           WhatsApp Mobile
                         </label>
                         <input
@@ -1268,8 +1269,8 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
                             width: '100%',
                             padding: '8px 10px',
                             borderRadius: '6px',
-                            border: '1px solid #cbd5e1',
-                            fontSize: '0.85rem'
+                            border: '1px solid var(--bd-slate-300)',
+                            fontSize: '0.875rem'
                           }}
                         />
                       </div>
@@ -1278,14 +1279,14 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
                     {/* UTR Input with Smart Counter */}
                     <div>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '3px' }}>
-                        <label style={{ fontSize: '0.76rem', fontWeight: 800, color: '#0f172a' }}>
+                        <label style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--fg-slate-900)' }}>
                           12-Digit UPI / UTR Transaction ID *
                         </label>
                         <span
                           style={{
-                            fontSize: '0.7rem',
+                            fontSize: '0.75rem',
                             fontWeight: 800,
-                            color: utrNumber.trim().length === 12 ? '#16a34a' : '#64748b'
+                            color: utrNumber.trim().length === 12 ? 'var(--fg-green-600)' : 'var(--fg-slate-500)'
                           }}
                         >
                           {utrNumber.trim().length === 12 ? '✓ 12 Digits Verified' : `${utrNumber.trim().length}/12 Digits`}
@@ -1301,22 +1302,22 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
                           width: '100%',
                           padding: '8px 12px',
                           borderRadius: '6px',
-                          border: utrNumber.trim().length === 12 ? '2px solid #16a34a' : '1.5px solid #0284c7',
+                          border: utrNumber.trim().length === 12 ? '2px solid var(--tw-green-600)' : '1.5px solid var(--tw-sky-600)',
                           fontSize: '0.95rem',
                           fontWeight: 800,
                           fontFamily: 'monospace',
                           letterSpacing: '0.08em',
-                          background: utrNumber.trim().length === 12 ? '#f0fdf4' : '#ffffff'
+                          background: utrNumber.trim().length === 12 ? 'var(--bg-green-50)' : 'var(--surface)'
                         }}
                       />
-                      <div style={{ fontSize: '0.7rem', color: '#64748b', marginTop: '2px' }}>
+                      <div style={{ fontSize: '0.75rem', color: 'var(--fg-slate-500)', marginTop: '2px' }}>
                         Found in your PhonePe / GPay / Paytm payment receipt details.
                       </div>
                     </div>
 
                     {/* Payment Screenshot Upload */}
                     <div>
-                      <label style={{ fontSize: '0.76rem', fontWeight: 700, color: '#334155', display: 'block', marginBottom: '3px' }}>
+                      <label style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--fg-slate-700)', display: 'block', marginBottom: '3px' }}>
                         Payment Screenshot *
                       </label>
                       <input
@@ -1325,8 +1326,8 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
                         required
                         onChange={handleImageChange}
                         style={{
-                          fontSize: '0.78rem',
-                          color: '#475569'
+                          fontSize: '0.8rem',
+                          color: 'var(--fg-slate-600)'
                         }}
                       />
                       {screenshotPreview && (
@@ -1337,19 +1338,19 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
                             style={{
                               maxHeight: '75px',
                               borderRadius: '6px',
-                              border: '1px solid #cbd5e1'
+                              border: '1px solid var(--bd-slate-300)'
                             }}
                           />
                           <button
                             type="button"
                             onClick={() => setScreenshotPreview('')}
                             style={{
-                              background: '#fee2e2',
-                              color: '#dc2626',
+                              background: 'var(--bg-red-100)',
+                              color: 'var(--fg-red-600)',
                               border: 'none',
                               borderRadius: '4px',
                               padding: '4px 8px',
-                              fontSize: '0.72rem',
+                              fontSize: '0.75rem',
                               fontWeight: 700,
                               cursor: 'pointer'
                             }}
@@ -1361,7 +1362,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
                     </div>
 
                     {errorMessage && (
-                      <div style={{ fontSize: '0.8rem', color: '#dc2626', fontWeight: 700, background: '#fef2f2', padding: '6px 10px', borderRadius: '6px' }}>
+                      <div style={{ fontSize: '0.8rem', color: 'var(--fg-red-600)', fontWeight: 700, background: 'var(--bg-red-50)', padding: '6px 10px', borderRadius: '6px' }}>
                         ⚠️ {errorMessage}
                       </div>
                     )}
@@ -1371,13 +1372,13 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
                       type="submit"
                       disabled={isSubmitting}
                       style={{
-                        background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                        background: 'linear-gradient(135deg, var(--tw-emerald-500) 0%, var(--tw-emerald-600) 100%)',
                         color: '#ffffff',
                         border: 'none',
                         borderRadius: '10px',
                         padding: '13px',
                         fontWeight: 900,
-                        fontSize: '0.98rem',
+                        fontSize: '1rem',
                         cursor: isSubmitting ? 'wait' : 'pointer',
                         boxShadow: '0 4px 14px rgba(16, 185, 129, 0.4)',
                         display: 'flex',
@@ -1396,19 +1397,19 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
                     {/* Refund & Security Badges */}
                     <div
                       style={{
-                        background: '#fff1f2',
-                        border: '1px solid #fecdd3',
+                        background: 'var(--bg-rose-50)',
+                        border: '1px solid var(--bd-rose-200)',
                         borderRadius: '8px',
                         padding: '8px 10px',
-                        fontSize: '0.72rem',
-                        color: '#9f1239',
+                        fontSize: '0.75rem',
+                        color: 'var(--fg-rose-800)',
                         lineHeight: 1.35
                       }}
                     >
                       🚫 <strong>Strict No-Refund Policy:</strong> All subscription payments are <strong>strictly non-refundable</strong> once processed. Please verify your typing device using our <strong>7 Free Demo Tests</strong> before paying.
                     </div>
 
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', fontSize: '0.7rem', color: '#64748b' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', fontSize: '0.75rem', color: 'var(--fg-slate-500)' }}>
                       <span>🔒 256-Bit SSL</span>
                       <span>&bull;</span>
                       <span>⏱️ 15–30 Min Activation</span>
@@ -1419,8 +1420,8 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
                     {/* Admin Telegram Direct Assistance */}
                     <div
                       style={{
-                        background: '#f0f9ff',
-                        border: '1px solid #bae6fd',
+                        background: 'var(--bg-sky-50)',
+                        border: '1px solid var(--bd-sky-200)',
                         borderRadius: '8px',
                         padding: '6px 10px',
                         display: 'flex',
@@ -1429,7 +1430,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
                         gap: '8px'
                       }}
                     >
-                      <span style={{ fontSize: '0.72rem', color: '#0369a1' }}>
+                      <span style={{ fontSize: '0.75rem', color: 'var(--fg-sky-700)' }}>
                         Facing UPI issues or need instant activation?
                       </span>
                       <a
@@ -1437,9 +1438,9 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
                         target="_blank"
                         rel="noopener noreferrer"
                         style={{
-                          fontSize: '0.72rem',
+                          fontSize: '0.75rem',
                           fontWeight: 800,
-                          color: '#0284c7',
+                          color: 'var(--fg-sky-600)',
                           textDecoration: 'none',
                           whiteSpace: 'nowrap'
                         }}

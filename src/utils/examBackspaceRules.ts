@@ -36,9 +36,9 @@ export function getExamBackspaceRule(exam?: {
     return {
       status: 'error_penalty',
       badgeLabel: '⌫ Backspace: 3% Error Limit',
-      badgeBg: '#fef3c7',
-      badgeText: '#b45309',
-      badgeBorder: '#fde68a',
+      badgeBg: 'var(--bg-amber-100)',
+      badgeText: 'var(--fg-amber-700)',
+      badgeBorder: 'var(--bd-amber-200)',
       title: 'High Court / Judiciary 3% Error Limit Rule',
       shortDesc: 'Allowed with strict 3.0% maximum error tolerance',
       fullRule:
@@ -62,9 +62,9 @@ export function getExamBackspaceRule(exam?: {
     return {
       status: 'strict_accuracy',
       badgeLabel: '⌫ Backspace: 95% Cutoff',
-      badgeBg: '#fee2e2',
-      badgeText: '#b91c1c',
-      badgeBorder: '#fca5a5',
+      badgeBg: 'var(--bg-red-100)',
+      badgeText: 'var(--fg-red-700)',
+      badgeBorder: 'var(--bd-red-300)',
       title: 'Paramilitary HCM Strict 95% Accuracy Rule',
       shortDesc: 'Allowed, but requires min. 95% accuracy cutoff',
       fullRule:
@@ -85,9 +85,9 @@ export function getExamBackspaceRule(exam?: {
     return {
       status: 'allowed',
       badgeLabel: '⌫ Backspace: Allowed (SSC DEST)',
-      badgeBg: '#dcfce7',
-      badgeText: '#15803d',
-      badgeBorder: '#86efac',
+      badgeBg: 'var(--bg-green-100)',
+      badgeText: 'var(--fg-green-700)',
+      badgeBorder: 'var(--bd-green-300)',
       title: 'Official SSC DEST Backspace Guidelines',
       shortDesc: 'Fully enabled throughout the test duration',
       fullRule:
@@ -107,9 +107,9 @@ export function getExamBackspaceRule(exam?: {
     return {
       status: 'allowed',
       badgeLabel: '⌫ Backspace: Allowed (UPPRPB Rule)',
-      badgeBg: '#dcfce7',
-      badgeText: '#15803d',
-      badgeBorder: '#86efac',
+      badgeBg: 'var(--bg-green-100)',
+      badgeText: 'var(--fg-green-700)',
+      badgeBorder: 'var(--bd-green-300)',
       title: 'Official UP Police / UPPRPB Backspace Standard',
       shortDesc: 'Allowed freely; 85% accuracy benchmark enforced',
       fullRule:
@@ -121,9 +121,9 @@ export function getExamBackspaceRule(exam?: {
   return {
     status: 'standard',
     badgeLabel: '⌫ Backspace: Allowed',
-    badgeBg: '#f1f5f9',
-    badgeText: '#334155',
-    badgeBorder: '#cbd5e1',
+    badgeBg: 'var(--bg-slate-100)',
+    badgeText: 'var(--fg-slate-700)',
+    badgeBorder: 'var(--bd-slate-300)',
     title: 'Standard Examination Backspace Rule',
     shortDesc: 'Backspace is enabled for practice and corrections',
     fullRule:

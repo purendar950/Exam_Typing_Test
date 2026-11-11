@@ -147,13 +147,13 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onLoginSu
           borderRadius: '16px',
           overflow: 'hidden',
           boxShadow: '0 20px 40px rgba(0, 0, 0, 0.25)',
-          border: '1px solid #e2e8f0'
+          border: '1px solid var(--bd-slate-200)'
         }}
       >
         {/* Portal Header Banner */}
         <div
           style={{
-            background: 'linear-gradient(135deg, #1e3a8a 0%, #0369a1 100%)',
+            background: 'linear-gradient(135deg, var(--tw-blue-900) 0%, var(--tw-sky-700) 100%)',
             color: '#ffffff',
             padding: '20px 24px',
             position: 'relative'
@@ -172,7 +172,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onLoginSu
               width: '30px',
               height: '30px',
               color: '#ffffff',
-              fontSize: '1.2rem',
+              fontSize: '1.25rem',
               cursor: 'pointer',
               display: 'flex',
               alignItems: 'center',
@@ -193,18 +193,18 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onLoginSu
                 borderRadius: '50%',
                 objectFit: 'cover',
                 boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
-                border: '2px solid #93c5fd',
+                border: '2px solid var(--bd-blue-300)',
                 flexShrink: 0
               }}
             />
             <div>
-              <div style={{ fontSize: '0.72rem', letterSpacing: '0.8px', textTransform: 'uppercase', opacity: 0.85, fontWeight: 700 }}>
+              <div style={{ fontSize: '0.75rem', letterSpacing: '0.8px', textTransform: 'uppercase', opacity: 0.85, fontWeight: 700 }}>
                 Exam Typing • UP Police & Competitive Exams
               </div>
               <h3 style={{ margin: '2px 0 0', fontSize: '1.25rem', fontWeight: 800 }}>
                 Candidate Portal
               </h3>
-              <div style={{ fontSize: '0.78rem', opacity: 0.9 }}>
+              <div style={{ fontSize: '0.8rem', opacity: 0.9 }}>
                 1-Click Google Sign-In & Cross-Device Sync
               </div>
             </div>
@@ -221,11 +221,11 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onLoginSu
               width: '100%',
               padding: '12px 16px',
               borderRadius: '8px',
-              border: '1.5px solid #cbd5e1',
-              background: '#ffffff',
-              color: '#1e293b',
+              border: '1.5px solid var(--bd-slate-300)',
+              background: 'var(--surface)',
+              color: 'var(--fg-slate-800)',
               fontWeight: 700,
-              fontSize: '0.94rem',
+              fontSize: '0.95rem',
               cursor: loading ? 'wait' : 'pointer',
               display: 'flex',
               alignItems: 'center',
@@ -258,18 +258,18 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onLoginSu
           </button>
 
           <div style={{ display: 'flex', alignItems: 'center', margin: '14px 0', gap: '10px' }}>
-            <div style={{ flex: 1, height: '1px', background: '#e2e8f0' }} />
-            <span style={{ fontSize: '0.72rem', color: '#94a3b8', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+            <div style={{ flex: 1, height: '1px', background: 'var(--bg-slate-200)' }} />
+            <span style={{ fontSize: '0.75rem', color: 'var(--tw-slate-400)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
               Or use Roll Number / Email
             </span>
-            <div style={{ flex: 1, height: '1px', background: '#e2e8f0' }} />
+            <div style={{ flex: 1, height: '1px', background: 'var(--bg-slate-200)' }} />
           </div>
 
           {/* 2 Clean Tabs */}
           <div
             style={{
               display: 'flex',
-              background: '#f1f5f9',
+              background: 'var(--bg-slate-100)',
               borderRadius: '8px',
               padding: '3px',
               marginBottom: '16px'
@@ -285,9 +285,9 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onLoginSu
                 borderRadius: '6px',
                 cursor: 'pointer',
                 fontWeight: 700,
-                fontSize: '0.88rem',
-                background: activeTab === 'login' ? '#ffffff' : 'transparent',
-                color: activeTab === 'login' ? '#1e3a8a' : '#64748b',
+                fontSize: '0.875rem',
+                background: activeTab === 'login' ? 'var(--surface)' : 'transparent',
+                color: activeTab === 'login' ? 'var(--fg-blue-900)' : 'var(--fg-slate-500)',
                 boxShadow: activeTab === 'login' ? '0 2px 4px rgba(0,0,0,0.08)' : 'none',
                 transition: 'all 0.15s ease'
               }}
@@ -304,9 +304,9 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onLoginSu
                 borderRadius: '6px',
                 cursor: 'pointer',
                 fontWeight: 700,
-                fontSize: '0.88rem',
-                background: activeTab === 'signup' ? '#ffffff' : 'transparent',
-                color: activeTab === 'signup' ? '#1e3a8a' : '#64748b',
+                fontSize: '0.875rem',
+                background: activeTab === 'signup' ? 'var(--surface)' : 'transparent',
+                color: activeTab === 'signup' ? 'var(--fg-blue-900)' : 'var(--fg-slate-500)',
                 boxShadow: activeTab === 'signup' ? '0 2px 4px rgba(0,0,0,0.08)' : 'none',
                 transition: 'all 0.15s ease'
               }}
@@ -318,12 +318,12 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onLoginSu
           {errorMsg && (
             <div
               style={{
-                background: '#fef2f2',
-                border: '1px solid #fecaca',
-                color: '#b91c1c',
+                background: 'var(--bg-red-50)',
+                border: '1px solid var(--bd-red-200)',
+                color: 'var(--fg-red-700)',
                 padding: '10px 14px',
                 borderRadius: '8px',
-                fontSize: '0.85rem',
+                fontSize: '0.875rem',
                 marginBottom: '14px',
                 fontWeight: 600,
                 lineHeight: 1.4
@@ -336,12 +336,12 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onLoginSu
           {successMsg && (
             <div
               style={{
-                background: '#f0fdf4',
-                border: '1px solid #bbf7d0',
-                color: '#15803d',
+                background: 'var(--bg-green-50)',
+                border: '1px solid var(--bd-green-200)',
+                color: 'var(--fg-green-700)',
                 padding: '10px 14px',
                 borderRadius: '8px',
-                fontSize: '0.85rem',
+                fontSize: '0.875rem',
                 marginBottom: '14px',
                 fontWeight: 600,
                 lineHeight: 1.4
@@ -355,7 +355,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onLoginSu
           {activeTab === 'login' && (
             <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
               <div>
-                <label style={{ fontSize: '0.82rem', fontWeight: 700, color: '#1e293b', display: 'block', marginBottom: '4px' }}>
+                <label style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--fg-slate-800)', display: 'block', marginBottom: '4px' }}>
                   Roll Number or Email *
                 </label>
                 <input
@@ -367,7 +367,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onLoginSu
                     width: '100%',
                     padding: '10px 14px',
                     borderRadius: '8px',
-                    border: '1px solid #cbd5e1',
+                    border: '1px solid var(--bd-slate-300)',
                     fontSize: '0.95rem',
                     outline: 'none',
                     boxSizing: 'border-box'
@@ -378,7 +378,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onLoginSu
 
               <div>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '4px' }}>
-                  <label style={{ fontSize: '0.82rem', fontWeight: 700, color: '#1e293b' }}>
+                  <label style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--fg-slate-800)' }}>
                     Password *
                   </label>
                   <button
@@ -388,8 +388,8 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onLoginSu
                     style={{
                       background: 'none',
                       border: 'none',
-                      color: '#0284c7',
-                      fontSize: '0.78rem',
+                      color: 'var(--fg-sky-600)',
+                      fontSize: '0.8rem',
                       fontWeight: 600,
                       cursor: resetLoading ? 'wait' : 'pointer',
                       padding: '0',
@@ -409,7 +409,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onLoginSu
                       width: '100%',
                       padding: '10px 42px 10px 14px',
                       borderRadius: '8px',
-                      border: '1px solid #cbd5e1',
+                      border: '1px solid var(--bd-slate-300)',
                       fontSize: '0.95rem',
                       outline: 'none',
                       boxSizing: 'border-box'
@@ -428,7 +428,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onLoginSu
                       border: 'none',
                       cursor: 'pointer',
                       padding: '4px',
-                      color: '#64748b',
+                      color: 'var(--fg-slate-500)',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center'
@@ -457,7 +457,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onLoginSu
                 style={{
                   width: '100%',
                   padding: '12px',
-                  background: 'linear-gradient(135deg, #1e3a8a 0%, #0284c7 100%)',
+                  background: 'linear-gradient(135deg, var(--tw-blue-900) 0%, var(--tw-sky-600) 100%)',
                   fontWeight: 800,
                   fontSize: '0.95rem',
                   border: 'none',
@@ -476,7 +476,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onLoginSu
           {activeTab === 'signup' && (
             <form onSubmit={handleSignup} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
               <div>
-                <label style={{ fontSize: '0.82rem', fontWeight: 700, color: '#1e293b', display: 'block', marginBottom: '4px' }}>
+                <label style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--fg-slate-800)', display: 'block', marginBottom: '4px' }}>
                   Candidate Full Name *
                 </label>
                 <input
@@ -488,7 +488,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onLoginSu
                     width: '100%',
                     padding: '10px 14px',
                     borderRadius: '8px',
-                    border: '1px solid #cbd5e1',
+                    border: '1px solid var(--bd-slate-300)',
                     fontSize: '0.95rem',
                     outline: 'none',
                     boxSizing: 'border-box'
@@ -498,7 +498,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onLoginSu
               </div>
 
               <div>
-                <label style={{ fontSize: '0.82rem', fontWeight: 700, color: '#1e293b', display: 'block', marginBottom: '4px' }}>
+                <label style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--fg-slate-800)', display: 'block', marginBottom: '4px' }}>
                   Roll Number / Reg No *
                 </label>
                 <input
@@ -510,7 +510,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onLoginSu
                     width: '100%',
                     padding: '10px 14px',
                     borderRadius: '8px',
-                    border: '1px solid #cbd5e1',
+                    border: '1px solid var(--bd-slate-300)',
                     fontSize: '0.95rem',
                     outline: 'none',
                     boxSizing: 'border-box'
@@ -519,7 +519,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onLoginSu
               </div>
 
               <div>
-                <label style={{ fontSize: '0.82rem', fontWeight: 700, color: '#1e293b', display: 'block', marginBottom: '4px' }}>
+                <label style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--fg-slate-800)', display: 'block', marginBottom: '4px' }}>
                   Target Examination Post
                 </label>
                 <select
@@ -529,9 +529,9 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onLoginSu
                     width: '100%',
                     padding: '10px 14px',
                     borderRadius: '8px',
-                    border: '1px solid #cbd5e1',
-                    fontSize: '0.88rem',
-                    background: '#ffffff',
+                    border: '1px solid var(--bd-slate-300)',
+                    fontSize: '0.875rem',
+                    background: 'var(--surface)',
                     outline: 'none',
                     fontWeight: 600,
                     boxSizing: 'border-box'
@@ -543,7 +543,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onLoginSu
               </div>
 
               <div>
-                <label style={{ fontSize: '0.82rem', fontWeight: 700, color: '#1e293b', display: 'block', marginBottom: '4px' }}>
+                <label style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--fg-slate-800)', display: 'block', marginBottom: '4px' }}>
                   Password (min 6 characters) *
                 </label>
                 <div style={{ position: 'relative' }}>
@@ -556,7 +556,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onLoginSu
                       width: '100%',
                       padding: '10px 42px 10px 14px',
                       borderRadius: '8px',
-                      border: '1px solid #cbd5e1',
+                      border: '1px solid var(--bd-slate-300)',
                       fontSize: '0.95rem',
                       outline: 'none',
                       boxSizing: 'border-box'
@@ -575,7 +575,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onLoginSu
                       border: 'none',
                       cursor: 'pointer',
                       padding: '4px',
-                      color: '#64748b',
+                      color: 'var(--fg-slate-500)',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center'
@@ -602,7 +602,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onLoginSu
                 style={{
                   width: '100%',
                   padding: '12px',
-                  background: 'linear-gradient(135deg, #16a34a 0%, #15803d 100%)',
+                  background: 'linear-gradient(135deg, var(--tw-green-600) 0%, var(--tw-green-700) 100%)',
                   fontWeight: 800,
                   fontSize: '0.95rem',
                   border: 'none',
@@ -618,14 +618,14 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onLoginSu
           )}
 
           {/* Guest Practice Footer */}
-          <div style={{ textAlign: 'center', marginTop: '16px', paddingTop: '12px', borderTop: '1px solid #f1f5f9' }}>
+          <div style={{ textAlign: 'center', marginTop: '16px', paddingTop: '12px', borderTop: '1px solid var(--bd-slate-100)' }}>
             <button
               onClick={handleGuestLogin}
               style={{
                 background: 'none',
                 border: 'none',
-                color: '#64748b',
-                fontSize: '0.82rem',
+                color: 'var(--fg-slate-500)',
+                fontSize: '0.8rem',
                 cursor: 'pointer',
                 fontWeight: 600,
                 textDecoration: 'underline'
