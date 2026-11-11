@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
   signInWithGoogle,
   registerCandidate,
@@ -30,6 +30,24 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onLoginSu
   const [resetLoading, setResetLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
+  // Login throttle: after 5 failed attempts, wait 60 seconds before trying again.
+  const failCountRef = useRef(0);
+  const [lockUntil, setLockUntil] = useState(0);
+  const [nowTick, setNowTick] = useState(Date.now());
+
+  useEffect(() => {
+    if (!lockUntil) return;
+    const t = window.setInterval(() => {
+      setNowTick(Date.now());
+      if (Date.now() >= lockUntil) {
+        setLockUntil(0);
+        failCountRef.current = 0;
+      }
+    }, 500);
+    return () => window.clearInterval(t);
+  }, [lockUntil]);
+
+  const secondsLeft = lockUntil ? Math.max(1, Math.ceil((lockUntil - nowTick) / 1000)) : 0;
 
   if (!isOpen) return null;
 
@@ -64,21 +82,31 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onLoginSu
       setErrorMsg('Please enter your Roll Number or Email.');
       return;
     }
+    if (lockUntil && Date.now() < lockUntil) {
+      setErrorMsg(`Too many failed attempts. Please wait ${secondsLeft}s and try again.`);
+      return;
+    }
     setLoading(true);
     setErrorMsg('');
     setSuccessMsg('');
     try {
       const user = await loginCandidate(identifier.trim(), password);
+      failCountRef.current = 0;
       onLoginSuccess(user);
       onClose();
     } catch (err: unknown) {
       let msg = err instanceof Error ? err.message : 'Login failed. Please check credentials.';
       msg = msg.replace('Firebase:', '').trim();
-      if (msg.includes('auth/invalid-credential')) {
-        setErrorMsg('Wrong password or roll number. New users: log in with the email you registered with. Old roll-number accounts: use the same password you chose at registration.');
-      } else {
-        setErrorMsg(msg);
+      if (msg.includes('auth/invalid-credential') || msg.includes('auth/wrong-password') || msg.includes('auth/user-not-found')) {
+        failCountRef.current += 1;
+        if (failCountRef.current >= 5) {
+          setLockUntil(Date.now() + 60000);
+          msg = 'Too many failed attempts. Please wait 60 seconds before trying again.';
+        } else {
+          msg = `Wrong password or roll number (${failCountRef.current}/5). New users: log in with the email you registered with. Old roll-number accounts: use the same password you chose at registration.`;
+        }
       }
+      setErrorMsg(msg);
     } finally {
       setLoading(false);
     }
@@ -461,7 +489,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onLoginSu
 
               <button
                 type="submit"
-                disabled={loading}
+                disabled={loading || (!!lockUntil && Date.now() < lockUntil)}
                 className="btn btn-primary"
                 style={{
                   width: '100%',
@@ -472,11 +500,11 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onLoginSu
                   border: 'none',
                   borderRadius: 'var(--radius-md)',
                   boxShadow: 'var(--shadow-md)',
-                  cursor: loading ? 'wait' : 'pointer',
+                  cursor: loading || (!!lockUntil && Date.now() < lockUntil) ? 'wait' : 'pointer',
                   marginTop: '4px'
                 }}
               >
-                {loading ? 'Logging In...' : 'Log in (लॉगिन करें)'}
+                {loading ? 'Logging In...' : secondsLeft ? `Please wait ${secondsLeft}s` : 'Log in (लॉगिन करें)'}
               </button>
             </form>
           )}

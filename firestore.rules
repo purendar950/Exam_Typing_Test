@@ -122,10 +122,18 @@ service cloud.firestore {
     }
 
     // ── Payments ─────────────────────────────────────────────
+    // Abuse protection: a UTR number can only be claimed once across ALL
+    // accounts (utr_claims), and a candidate can have only one payment
+    // awaiting review at a time (payment_pending). Both marker documents are
+    // created in the same atomic batch as the submission.
     match /payment_submissions/{submissionId} {
       allow create: if signedIn()
         && request.resource.data.userId == request.auth.uid
-        && request.resource.data.status == 'pending';
+        && request.resource.data.status == 'pending'
+        && request.resource.data.utrNumber is string
+        && request.resource.data.utrNumber.trim().size() >= 6
+        && !exists(/databases/$(database)/documents/utr_claims/$(request.resource.data.utrNumber.trim().toUpperCase()))
+        && !exists(/databases/$(database)/documents/payment_pending/$(request.auth.uid));
       allow get: if isAdmin() || isPaymentNotifier()
         || (signedIn() && resource.data.userId == request.auth.uid);
       allow list: if isAdmin()
@@ -136,6 +144,35 @@ service cloud.firestore {
       allow update: if isAdmin()
         || (isPaymentNotifier()
             && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['alertedAt']));
+      allow delete: if isAdmin();
+    }
+
+    // One claim per UTR number. The document id IS the normalized UTR, so a
+    // second claim for the same number can never be created.
+    match /utr_claims/{claimId} {
+      allow get: if isAdmin()
+        || (signedIn() && resource.data.userId == request.auth.uid);
+      allow list: if isAdmin();
+      allow create: if signedIn()
+        && claimId == request.resource.data.utrNormalized
+        && request.resource.data.userId == request.auth.uid
+        && request.resource.data.keys().hasOnly(['userId', 'submissionId', 'utrNormalized', 'createdAt']);
+      allow update: if false;
+      // Admins delete the claim when rejecting a payment so the student can
+      // correct a mistake and submit the same UTR again.
+      allow delete: if isAdmin();
+    }
+
+    // Rate limit: only one pending payment per candidate. The document id is
+    // the candidate's uid; admins delete it when approving or rejecting.
+    match /payment_pending/{userId} {
+      allow get: if isAdmin() || isOwner(userId);
+      allow list: if isAdmin();
+      allow create: if isOwner(userId)
+        && request.resource.data.keys().hasOnly(['userId', 'submissionId', 'createdAt'])
+        && request.resource.data.userId == userId
+        && request.resource.data.submissionId is string;
+      allow update: if false;
       allow delete: if isAdmin();
     }
 

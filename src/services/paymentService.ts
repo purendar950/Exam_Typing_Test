@@ -8,7 +8,7 @@
  * 5. Syncs across Firebase Firestore and localStorage
  */
 
-import { collection, doc, getDocs, getDoc, setDoc, updateDoc, query, where, orderBy, limit } from 'firebase/firestore';
+import { collection, doc, getDocs, getDoc, setDoc, updateDoc, deleteDoc, writeBatch, query, where, orderBy, limit } from 'firebase/firestore';
 import { db, UserProfile } from './firebase';
 import { ALL_EXAMS } from '../data/allExams';
 
@@ -381,38 +381,81 @@ export async function submitPaymentRequest(
     submittedAt: new Date().toISOString()
   };
 
-  // 1. Save locally
-  let localSaved = false;
+  // ── Server-side rate limit + duplicate guard ────────────────────────────
+  // payment_pending/{uid}  -> one payment awaiting review per candidate
+  // utr_claims/{UTR}       -> one claim per UTR across ALL accounts
+  // Both are created in the same atomic batch as the submission, and the
+  // security rules refuse the whole batch if either already exists. This
+  // cannot be bypassed from the browser the way the local checks can.
+  if (newSubmission.userId && !String(newSubmission.userId).startsWith('guest')) {
+    try {
+      const pendingMark = await getDoc(doc(db, 'payment_pending', newSubmission.userId));
+      if (pendingMark.exists()) {
+        throw new Error(
+          'You already have a payment request awaiting review. Please wait until it is approved or rejected before submitting again. Check the Payments section or contact support on Telegram.'
+        );
+      }
+
+      const submissionRef = doc(db, 'payment_submissions', newSubmission.id);
+      const includeScreenshot = compressedScreenshot && compressedScreenshot.length < 350000;
+      const firestorePayload = includeScreenshot
+        ? { ...newSubmission, hasScreenshot: true }
+        : (() => {
+            const { screenshotUrl: _ss, ...rest } = newSubmission;
+            void _ss;
+            return { ...rest, hasScreenshot: Boolean(compressedScreenshot) };
+          })();
+
+      const batch = writeBatch(db);
+      batch.set(submissionRef, firestorePayload);
+      batch.set(doc(db, 'utr_claims', utrNorm), {
+        userId: newSubmission.userId,
+        submissionId: newSubmission.id,
+        utrNormalized: utrNorm,
+        createdAt: newSubmission.submittedAt
+      });
+      batch.set(doc(db, 'payment_pending', newSubmission.userId), {
+        userId: newSubmission.userId,
+        submissionId: newSubmission.id,
+        createdAt: newSubmission.submittedAt
+      });
+      await batch.commit();
+    } catch (err: any) {
+      if (err instanceof Error && /already have a payment request/.test(err.message)) {
+        throw err;
+      }
+      if (err?.code === 'permission-denied') {
+        throw new Error(
+          'This UTR number is already registered (submitted by you or another account), or you already have a pending payment request. Please check your payment history or contact support on Telegram.'
+        );
+      }
+      console.warn('Could not sync payment submission to Firestore:', err);
+    }
+  } else if (newSubmission.userId) {
+    // Guest users are blocked in the UI, but never create server markers for them.
+    console.warn('Payment submission attempted for a guest user; only saved locally.');
+  }
+
+  // 1. Save locally (mirror of what the server accepted, or fallback when offline)
   try {
     const existing = getAllLocalSubmissions();
     existing.unshift(newSubmission);
     localStorage.setItem(STORAGE_KEY_SUBMISSIONS, JSON.stringify(existing));
-    localSaved = true;
   } catch {
     // Ignore
   }
 
-  // 2. Sync to Firebase Firestore (compressed screenshot fits easily in Firestore <100KB)
+  // The UI checks this to tell the student clearly whether the request reached the server.
   let synced = false;
   try {
-    const docRef = doc(db, 'payment_submissions', newSubmission.id);
-    const includeScreenshot = compressedScreenshot && compressedScreenshot.length < 350000;
-    const firestorePayload = includeScreenshot
-      ? { ...newSubmission, hasScreenshot: true }
-      : (() => {
-          const { screenshotUrl: _ss, ...rest } = newSubmission;
-          void _ss;
-          return { ...rest, hasScreenshot: Boolean(compressedScreenshot) };
-        })();
-    await setDoc(docRef, firestorePayload);
-    synced = true;
-  } catch (err) {
-    console.warn('Could not sync payment submission to Firestore:', err);
+    const check = await getDoc(doc(db, 'payment_submissions', newSubmission.id));
+    synced = check.exists();
+  } catch {
+    synced = false;
   }
 
   return {
     ...newSubmission,
-    // Lets the UI tell the student clearly whether the request reached the server.
     firestoreSynced: synced
   };
 }
@@ -592,6 +635,16 @@ export async function approvePaymentSubmission(
   const localList = getAllLocalSubmissions().map((s) => (s.id === submissionId ? target : s));
   localStorage.setItem(STORAGE_KEY_SUBMISSIONS, JSON.stringify(localList));
 
+  // 3. Release the one-pending-payment lock so the candidate can pay again later.
+  //    The UTR claim is kept: an approved UTR is permanently consumed.
+  let unlockWarning = '';
+  try {
+    await deleteDoc(doc(db, 'payment_pending', target.userId));
+  } catch (err: any) {
+    console.warn('Could not delete payment_pending marker:', err);
+    unlockWarning = ' (Warning: the one-pending-payment lock could not be released; the candidate may be blocked from their next payment until an admin deletes payment_pending/' + target.userId + '.)';
+  }
+
   // If user is logged in locally, update active user profile
   try {
     const activeUserRaw = localStorage.getItem('up_typing_active_user');
@@ -614,7 +667,7 @@ export async function approvePaymentSubmission(
     // Ignore
   }
 
-  return { success: true, submission: target };
+  return { success: true, submission: target, message: unlockWarning || undefined };
 }
 
 export async function rejectPaymentSubmission(
@@ -647,7 +700,27 @@ export async function rejectPaymentSubmission(
   const localList = getAllLocalSubmissions().map((s) => (s.id === submissionId ? target : s));
   localStorage.setItem(STORAGE_KEY_SUBMISSIONS, JSON.stringify(localList));
 
-  return { success: true, submission: target };
+  // 3. Release both locks: the candidate can submit again, and — because the
+  //    UTR was not verified — the UTR claim is freed so a corrected resubmission
+  //    with the same number is possible.
+  let unlockWarning = '';
+  try {
+    await deleteDoc(doc(db, 'payment_pending', target.userId));
+  } catch (err: any) {
+    console.warn('Could not delete payment_pending marker:', err);
+    unlockWarning = ' (Warning: the one-pending-payment lock could not be released; the candidate may stay blocked until an admin deletes payment_pending/' + target.userId + '.)';
+  }
+  try {
+    const utrNorm = (target.utrNumber || '').trim().toUpperCase();
+    if (utrNorm) {
+      await deleteDoc(doc(db, 'utr_claims', utrNorm));
+    }
+  } catch (err: any) {
+    console.warn('Could not delete utr_claims marker:', err);
+    unlockWarning += ' (Warning: the UTR claim could not be released; the student cannot resubmit this UTR until an admin deletes utr_claims/' + (target.utrNumber || '').trim().toUpperCase() + '.)';
+  }
+
+  return { success: true, submission: target, message: unlockWarning || undefined };
 }
 
 /**
