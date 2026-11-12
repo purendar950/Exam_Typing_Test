@@ -5,7 +5,8 @@
  * cannot send the Telegram alert itself because the bot token is admin-only in
  * Firestore (and must stay that way). This job signs in with a dedicated
  * notifier account, finds pending submissions that have not been alerted yet,
- * and forwards them to the admin's Telegram chat.
+ * and forwards them to the admin's Telegram chat. It does the same for
+ * live-chat messages the admin has not read yet.
  */
 
 const PROJECT_ID = 'upp-typing';
@@ -182,6 +183,71 @@ async function main() {
       console.log(`Alerted ${id} (patch ${patchRes.ok ? 'ok' : patchRes.status}).`);
     } else {
       console.error(`Could not alert ${id}: ${detail}`);
+    }
+  }
+
+  // ── 4. Live-chat messages waiting for the admin ─────────────────────
+  const chatRes = await fetch(`${BASE}/documents:runQuery`, {
+    method: 'POST',
+    headers: authHeaders,
+    body: JSON.stringify({
+      structuredQuery: {
+        from: [{ collectionId: 'support_chats' }],
+        where: {
+          fieldFilter: { field: { fieldPath: 'unreadByAdmin' }, op: 'EQUAL', value: { booleanValue: true } }
+        },
+        limit: 25
+      }
+    })
+  });
+  if (!chatRes.ok) {
+    console.error('Reading unread support chats failed: ' + chatRes.status);
+    process.exit(1);
+  }
+  const chats = (await chatRes.json())
+    .filter((r) => r.document)
+    .map((r) => r.document)
+    .filter((d) => (d.fields.alertedMessageAt?.stringValue || '') !== (d.fields.lastMessageAt?.stringValue || ''));
+  console.log(`Found ${chats.length} unalerted support chat(s).`);
+
+  for (const d of chats) {
+    const f = d.fields;
+    const id = d.name.split('/').pop();
+    const lastAt = f.lastMessageAt?.stringValue || '';
+    const text =
+      `💬 <b>NEW SUPPORT MESSAGE</b>\n` +
+      `━━━━━━━━━━━━━━━━━━━━\n` +
+      `👤 <b>Candidate:</b> ${esc(f.userName?.stringValue || 'Candidate')}\n` +
+      (f.userEmail?.stringValue ? `📧 <b>Email:</b> <code>${esc(f.userEmail.stringValue)}</code>\n` : '') +
+      `🆔 <b>Ticket:</b> <code>#TK-${esc(id.slice(-8).toUpperCase())}</code>\n` +
+      `━━━━━━━━━━━━━━━━━━━━\n` +
+      `<blockquote>${esc((f.lastMessage?.stringValue || '').slice(0, 1500))}</blockquote>`;
+
+    const res = await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        chat_id: chatId,
+        text,
+        parse_mode: 'HTML',
+        reply_markup: {
+          inline_keyboard: [[{ text: '💬 Reply in admin panel', url: `${appBaseUrl}?admin_portal=1` }]]
+        }
+      })
+    });
+    const data = await res.json();
+    if (data.ok) {
+      const patchRes = await fetch(
+        `${BASE}/documents/support_chats/${id}?updateMask.fieldPaths=alertedMessageAt`,
+        {
+          method: 'PATCH',
+          headers: authHeaders,
+          body: JSON.stringify({ fields: { alertedMessageAt: { stringValue: lastAt } } })
+        }
+      );
+      console.log(`Alerted chat ${id} (patch ${patchRes.ok ? 'ok' : patchRes.status}).`);
+    } else {
+      console.error(`Could not alert chat ${id}: ${data.description || 'sendMessage failed'}`);
     }
   }
 

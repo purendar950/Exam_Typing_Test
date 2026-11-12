@@ -15,7 +15,8 @@ service cloud.firestore {
 
     // Dedicated machine account (notifier@upp-typing.web.app) used by the GitHub
     // Actions payment-alert job. It can ONLY list pending payment submissions,
-    // stamp them as alerted, and read the Telegram bot settings. No admin rights.
+    // stamp them as alerted, read the Telegram bot settings, and list support
+    // chats with an unread message (stamping those as alerted). No admin rights.
     function isPaymentNotifier() {
       return signedIn() && request.auth.uid == 'ywDOc6gPKAOzxPE4dsLgABLngpH3';
     }
@@ -182,7 +183,8 @@ service cloud.firestore {
     match /support_chats/{chatId} {
       allow get: if isAdmin() ||
         (signedIn() && resource.data.userId == request.auth.uid);
-      allow list: if isAdmin();
+      allow list: if isAdmin()
+        || (isPaymentNotifier() && resource.data.unreadByAdmin == true);
       allow create: if signedIn()
         && request.resource.data.userId == request.auth.uid
         && request.resource.data.id == chatId
@@ -195,6 +197,8 @@ service cloud.firestore {
       // Candidates may append one message at a time. They cannot alter the owner,
       // identity, status, creation time, or existing chat history.
       allow update: if isAdmin() ||
+        (isPaymentNotifier()
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['alertedMessageAt'])) ||
         (signedIn()
           && resource.data.userId == request.auth.uid
           && request.resource.data.userId == resource.data.userId
