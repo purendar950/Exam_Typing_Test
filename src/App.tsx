@@ -29,7 +29,8 @@ import {
   fetchUserTestAttempts,
   logoutUser,
   UserProfile,
-  isUserAdmin
+  isUserAdmin,
+  needsAccountUpgrade
 } from './services/firebase';
 
 // After a new deploy the old chunk files no longer exist on the server. If a chunk fails
@@ -54,6 +55,7 @@ const WordDocumentScreen = lazy(() => loadChunk(() => import('./components/WordD
 const RulesModal = lazy(() => loadChunk(() => import('./components/RulesModal')).then((m) => ({ default: m.RulesModal })));
 const HistoryModal = lazy(() => loadChunk(() => import('./components/HistoryModal')).then((m) => ({ default: m.HistoryModal })));
 const AuthModal = lazy(() => loadChunk(() => import('./components/AuthModal')).then((m) => ({ default: m.AuthModal })));
+const AccountUpgradeModal = lazy(() => loadChunk(() => import('./components/AccountUpgradeModal')).then((m) => ({ default: m.AccountUpgradeModal })));
 const UserDashboardModal = lazy(() => loadChunk(() => import('./components/UserDashboardModal')).then((m) => ({ default: m.UserDashboardModal })));
 const LeaderboardModal = lazy(() => loadChunk(() => import('./components/LeaderboardModal')).then((m) => ({ default: m.LeaderboardModal })));
 const MyCoursesModal = lazy(() => loadChunk(() => import('./components/MyCoursesModal')).then((m) => ({ default: m.MyCoursesModal })));
@@ -919,6 +921,19 @@ export const App: React.FC = () => {
           }}
         />
       </LazyMount>
+
+      {currentUser && needsAccountUpgrade(currentUser) && (
+        <Suspense fallback={null}>
+          <AccountUpgradeModal
+            user={currentUser}
+            onUpgraded={(user) => setCurrentUser({ ...currentUser, ...user })}
+            onLogout={async () => {
+              await logoutUser();
+              setCurrentUser(null);
+            }}
+          />
+        </Suspense>
+      )}
 
       {currentUser && (
         <LazyMount when={isDashboardOpen}>

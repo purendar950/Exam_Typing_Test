@@ -12,6 +12,11 @@ import {
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
   sendPasswordResetEmail,
+  updatePassword,
+  updateEmail,
+  verifyBeforeUpdateEmail,
+  reauthenticateWithCredential,
+  EmailAuthProvider,
   signOut,
   onAuthStateChanged,
   updateProfile,
@@ -57,6 +62,8 @@ export interface UserProfile {
   subscriptionExamTitle?: string;
   subscriptionExamSlug?: string;
   subscriptionCategoryGroup?: string;
+  passwordUpgradedAt?: string;
+  contactEmail?: string;
   createdAt: string;
 }
 
@@ -227,6 +234,100 @@ export async function signInWithEmail(emailOrRoll: string, pass: string): Promis
   await setDoc(doc(db, 'users', cred.user.uid), fallback, { merge: true });
   localStorage.setItem(STORAGE_KEY_ACTIVE_USER, JSON.stringify(fallback));
   return fallback;
+}
+
+// Accounts created before real emails were required use <roll>@upprpb.gov.in.
+// Many of them share the old default password, so they must set a real email
+// and their own password before they can keep using the site.
+const LEGACY_EMAIL_DOMAIN = '@upprpb.gov.in';
+const LEGACY_DEFAULT_PASSWORD = 'pass1234';
+
+export function needsAccountUpgrade(user: UserProfile | null): boolean {
+  if (!user || !user.uid || user.uid.startsWith('guest-') || user.isAnonymous) return false;
+  if (user.isAdmin || user.role === 'admin') return false;
+  if (user.passwordUpgradedAt) return false;
+  const email = (auth.currentUser?.uid === user.uid ? auth.currentUser.email : user.email) || '';
+  return email.toLowerCase().endsWith(LEGACY_EMAIL_DOMAIN);
+}
+
+export async function upgradeLegacyAccount(
+  newEmail: string,
+  newPassword: string,
+  currentPassword: string
+): Promise<{ profile: UserProfile; emailPending: boolean }> {
+  const fbUser = auth.currentUser;
+  if (!fbUser || !fbUser.email) {
+    throw new Error('Your session has expired. Please log out and log in again.');
+  }
+  const cleanEmail = newEmail.trim().toLowerCase();
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cleanEmail) || cleanEmail.endsWith(LEGACY_EMAIL_DOMAIN)) {
+    throw new Error('Please enter your own working email address (for example your Gmail).');
+  }
+  if (!newPassword || newPassword.length < 8) {
+    throw new Error('Please choose a new password with at least 8 characters.');
+  }
+  if (newPassword === LEGACY_DEFAULT_PASSWORD || newPassword === currentPassword) {
+    throw new Error('Please choose a new password that is different from your old one.');
+  }
+
+  // Firebase only allows email / password changes right after a sign-in.
+  // Candidates who never typed a password were given the old default one.
+  try {
+    await reauthenticateWithCredential(
+      fbUser,
+      EmailAuthProvider.credential(fbUser.email, currentPassword || LEGACY_DEFAULT_PASSWORD)
+    );
+  } catch (err: any) {
+    const code = err?.code || '';
+    if (code === 'auth/too-many-requests') {
+      throw new Error('Too many attempts. Please wait a few minutes and try again.');
+    }
+    if (code === 'auth/network-request-failed') {
+      throw new Error('No internet connection. Please try again.');
+    }
+    throw new Error(
+      currentPassword
+        ? 'The current password is not correct.'
+        : 'Please enter the password you currently log in with.'
+    );
+  }
+
+  let emailPending = false;
+  try {
+    await updateEmail(fbUser, cleanEmail);
+  } catch (err: any) {
+    const code = err?.code || '';
+    if (code === 'auth/email-already-in-use') {
+      throw new Error('This email is already used by another account. Enter a different email, or log out and log in with that email.');
+    }
+    if (code === 'auth/invalid-email') {
+      throw new Error('Please enter a valid email address.');
+    }
+    if (code !== 'auth/operation-not-allowed') throw err;
+    // The project requires the new address to be verified before it replaces the old one.
+    await verifyBeforeUpdateEmail(fbUser, cleanEmail);
+    emailPending = true;
+  }
+
+  await updatePassword(fbUser, newPassword);
+
+  const now = new Date().toISOString();
+  const patch: Partial<UserProfile> = { passwordUpgradedAt: now, contactEmail: cleanEmail };
+  if (!emailPending) patch.email = cleanEmail;
+
+  let profile: UserProfile;
+  try {
+    profile = { ...(JSON.parse(localStorage.getItem(STORAGE_KEY_ACTIVE_USER) || '{}') as UserProfile), ...patch };
+  } catch {
+    profile = { uid: fbUser.uid, ...patch } as UserProfile;
+  }
+  localStorage.setItem(STORAGE_KEY_ACTIVE_USER, JSON.stringify(profile));
+  try {
+    await setDoc(doc(db, 'users', fbUser.uid), patch, { merge: true });
+  } catch (err) {
+    console.warn('Could not save account upgrade marker:', err);
+  }
+  return { profile, emailPending };
 }
 
 // 4. Guest Practice Account
