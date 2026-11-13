@@ -13,6 +13,7 @@ export default defineConfig({
     rollupOptions: {
       output: {
         manualChunks(id) {
+          if (id.includes('/src/data/passagesFreeText')) return 'data-free-text';
           if (id.includes('/src/data/passages')) return 'data-passages';
           if (id.includes('/src/data/allExams')) return 'data-exams';
           if (id.includes('node_modules')) {

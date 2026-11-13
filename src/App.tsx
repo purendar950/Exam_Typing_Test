@@ -306,6 +306,9 @@ export const App: React.FC = () => {
     return true;
   });
   const [dailyLivePassages, setDailyLivePassages] = useState<Passage[]>([]);
+  // Full text of the free demo tests lives in a lazy chunk (data-free-text) so the
+  // site paints before it downloads. Hydrated after first paint, on demand at start.
+  const [freePassageText, setFreePassageText] = useState<Record<string, string>>({});
 
   const handleOpenPayment = (examId?: string, planId?: string) => {
     setPaymentInitialExamId(examId);
@@ -391,16 +394,43 @@ export const App: React.FC = () => {
     getTelegramConfig().then((cfg) => setTelegramConfig(cfg));
   }, []);
 
+  // Load the free-demo texts after the site has painted (idle), so the boot
+  // bundle stays small while content search keeps working.
+  useEffect(() => {
+    const idle = (window as typeof window & { requestIdleCallback?: (cb: () => void) => void }).requestIdleCallback;
+    const later = (cb: () => void) => (idle ? idle(cb) : window.setTimeout(cb, 2000));
+    later(() => {
+      import('./data/passagesFreeText')
+        .then((m) => setFreePassageText(m.FREE_PASSAGE_TEXT))
+        .catch(() => {});
+    });
+  }, []);
+
+  // Plan expiry countdown for the renewal banner
+  const planExpiry = React.useMemo(() => {
+    const u = currentUser;
+    if (!u || !u.is_subscribed || u.isAdmin || !u.subscriptionExpiresAt) return null;
+    const raw = u.subscriptionExpiresAt;
+    // Firestore stores UTC times sometimes without a trailing 'Z'
+    const iso = /Z$|[+-]\d\d:?\d\d$/.test(raw) ? raw : raw + 'Z';
+    const ms = new Date(iso).getTime() - Date.now();
+    if (isNaN(ms)) return null;
+    return { days: Math.ceil(ms / 86400000) };
+  }, [currentUser]);
+
   // Combined Passages (Custom Passages + Live Tests + Bank)
   const allPassages = React.useMemo(() => {
-    const basePool = [...customPassages, ...PASSAGES];
+    const bank = freePassageText && Object.keys(freePassageText).length > 0
+      ? PASSAGES.map((p) => (p.text ? p : { ...p, text: freePassageText[p.id] || p.text }))
+      : PASSAGES;
+    const basePool = [...customPassages, ...bank];
     if (dailyLivePassages.length > 0) {
       const liveIds = new Set(dailyLivePassages.map((p) => p.id));
       const remaining = basePool.filter((p) => !liveIds.has(p.id));
       return [...dailyLivePassages, ...remaining];
     }
     return basePool;
-  }, [customPassages, dailyLivePassages]);
+  }, [customPassages, dailyLivePassages, freePassageText]);
 
   // Subscribe to Firebase Auth and Local User session
   useEffect(() => {
@@ -539,6 +569,24 @@ export const App: React.FC = () => {
 
     let finalPassage = passage;
     const isPaidTest = (passage.testNumber ?? 0) > 7;
+
+    // Free demo: the text may not have arrived with the pool yet (slow device) —
+    // fetch it from the lazy text chunk right here.
+    if (!isPaidTest && !passage.text?.trim()) {
+      let text = freePassageText[passage.id];
+      if (!text) {
+        try {
+          const m = await import('./data/passagesFreeText');
+          text = m.FREE_PASSAGE_TEXT[passage.id];
+          if (text) setFreePassageText((prev) => ({ ...prev, [passage.id]: text as string }));
+        } catch {}
+      }
+      if (!text || !text.trim()) {
+        showNotice('Could not load this test. Please check your internet connection and try again.');
+        return;
+      }
+      finalPassage = { ...passage, text };
+    }
 
     // Server-Side Verification & Content Delivery for Paid Tests (#8+)
     if (isPaidTest) {
@@ -755,6 +803,58 @@ export const App: React.FC = () => {
             sessionStorage.setItem('up_offer_banner_dismissed', 'true');
           }}
         />
+      )}
+
+      {/* ⏳ PLAN EXPIRY REMINDER (7 days before expiry, and after it expires) */}
+      {planExpiry && planExpiry.days <= 7 && currentView !== 'test' &&
+        sessionStorage.getItem('up_expiry_banner_dismissed') !== new Date().toISOString().split('T')[0] && (
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '10px',
+            margin: '8px 16px 0',
+            padding: '10px 14px',
+            borderRadius: 'var(--radius-md)',
+            background: planExpiry.days < 0 ? 'var(--bg-red-50)' : 'var(--bg-amber-50)',
+            border: `1px solid ${planExpiry.days < 0 ? 'var(--bd-red-200)' : 'var(--bd-amber-200)'}`,
+            color: planExpiry.days < 0 ? 'var(--fg-red-700)' : 'var(--fg-amber-800)',
+            fontSize: '0.875rem',
+            fontWeight: 500,
+            flexWrap: 'wrap'
+          }}
+          role="status"
+        >
+          <span style={{ flex: 1, minWidth: '200px' }}>
+            {planExpiry.days < 0
+              ? '⏳ Your plan has expired. Renew now to keep full access to all Pro tests.'
+              : planExpiry.days === 0
+                ? '⏳ Your plan expires today. Renew now to keep full access to all Pro tests.'
+                : `⏳ Your plan expires in ${planExpiry.days} day${planExpiry.days === 1 ? '' : 's'}. Renew now to keep full access to all Pro tests.`}
+          </span>
+          <button
+            onClick={() => handleOpenPayment(currentUser?.subscriptionExamId !== 'all' ? currentUser?.subscriptionExamId : undefined)}
+            style={{
+              background: 'linear-gradient(135deg, var(--tw-blue-900), var(--tw-sky-600))',
+              color: '#ffffff',
+              border: 'none',
+              borderRadius: 'var(--radius-md)',
+              padding: '8px 16px',
+              fontWeight: 600,
+              fontSize: '0.85rem',
+              cursor: 'pointer'
+            }}
+          >
+            Renew now
+          </button>
+          <button
+            aria-label="Dismiss expiry reminder"
+            onClick={() => sessionStorage.setItem('up_expiry_banner_dismissed', new Date().toISOString().split('T')[0])}
+            style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'inherit', fontSize: '1.1rem', padding: '2px 6px' }}
+          >
+            ×
+          </button>
+        </div>
       )}
 
       <main style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>

@@ -293,7 +293,7 @@ export const UserDashboardModal: React.FC<UserDashboardModalProps> = ({
               position: 'relative'
             }}
           >
-            🎓 My Courses
+            🎓 My Courses &amp; Payments
             {courses.some(c => c.status === 'pending') && (
               <span style={{
                 position: 'absolute', top: '8px', right: '6px',
@@ -648,9 +648,9 @@ export const UserDashboardModal: React.FC<UserDashboardModalProps> = ({
                 <div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', flexWrap: 'wrap', gap: '8px' }}>
                     <div>
-                      <h3 style={{ margin: 0, fontSize: '1rem', fontWeight: 600, color: 'var(--fg-slate-900)' }}>🎓 My Purchased Courses</h3>
+                      <h3 style={{ margin: 0, fontSize: '1rem', fontWeight: 600, color: 'var(--fg-slate-900)' }}>🎓 My Payments &amp; Courses</h3>
                       <p style={{ margin: '2px 0 0', fontSize: '0.8rem', color: 'var(--fg-slate-500)' }}>
-                        All exam plans you have submitted for activation
+                        Every payment request with its status: Pending, Approved or Rejected, including your UTR
                       </p>
                     </div>
                     {onOpenPayment && (
